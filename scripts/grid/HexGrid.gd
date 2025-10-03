@@ -97,6 +97,8 @@ func move_cursor(delta: Vector2i) -> void:
     var target := _cursor_axial + delta
     if not is_within_grid(target):
         return
+    if not _is_cursor_target_allowed(target):
+        return
     _cursor_axial = target
     _update_cursor_position()
 
@@ -122,6 +124,22 @@ func is_within_grid(axial: Vector2i) -> bool:
     if not _ensure_grid_config():
         return false
     return Coord.axial_distance(Vector2i.ZERO, axial) <= grid_config.radius
+
+func _is_cursor_target_allowed(axial: Vector2i) -> bool:
+    if not _ensure_grid_config():
+        return false
+
+    if not _cell_states.has(axial):
+        return false
+
+    var data: CellData = _cell_states[axial]
+    if data.cell_type != CellType.Type.EMPTY:
+        return true
+
+    if grid_config.allow_isolated_builds:
+        return true
+
+    return is_build_adjacent_to_existing(axial.x, axial.y)
 
 func axial_to_world(axial: Vector2i) -> Vector2:
     if not _ensure_grid_config():
