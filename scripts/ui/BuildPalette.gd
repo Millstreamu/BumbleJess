@@ -9,7 +9,7 @@ const PaletteState := preload("res://scripts/input/PaletteState.gd")
 @export var header: String = "Build Palette"
 
 @onready var _title_label: Label = $Panel/Margin/VBox/Title
-@onready var _items_container: HBoxContainer = $Panel/Margin/VBox/Items
+@onready var _items_container: GridContainer = $Panel/Margin/VBox/Items
 
 var _palette_state: PaletteState
 var _labels: Dictionary = {}
@@ -40,6 +40,7 @@ func _create_labels() -> void:
         label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
         label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
         label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+        label.size_flags_vertical = Control.SIZE_EXPAND_FILL
         _items_container.add_child(label)
         _labels[cell_type] = label
     _refresh_selection_visuals(_palette_state.get_selected_type())

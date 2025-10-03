@@ -16,12 +16,12 @@ enum Type {
 
 static func buildable_types() -> Array[int]:
     return [
+        Type.GATHERING,
         Type.WAX,
         Type.VAT,
-        Type.STORAGE,
-        Type.GATHERING,
         Type.GUARD,
         Type.HALL,
+        Type.STORAGE,
     ]
 
 static func to_display_name(cell_type: int) -> String:
