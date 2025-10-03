@@ -12,7 +12,9 @@ signal in_hand_changed(in_hand_type)
 var buildable_types: Array[int] = CellType.buildable_types()
 var is_open: bool = false
 var selected_index: int = 0
-var in_hand_type = null
+const NO_IN_HAND := -1
+
+var in_hand_type: int = NO_IN_HAND
 
 func toggle_open() -> void:
     if is_open:
@@ -24,7 +26,7 @@ func open() -> void:
     if is_open:
         return
     is_open = true
-    if in_hand_type != null:
+    if has_in_hand():
         var idx := buildable_types.find(in_hand_type)
         if idx != -1:
             selected_index = idx
@@ -48,20 +50,22 @@ func confirm_selection() -> int:
         return CellType.Type.EMPTY
     var selected_type := get_selected_type()
     in_hand_type = selected_type
-    emit_signal("in_hand_changed", in_hand_type)
+    emit_signal("in_hand_changed", selected_type)
     close()
     return selected_type
 
 func clear_in_hand() -> void:
-    if in_hand_type == null:
+    if not has_in_hand():
         return
-    in_hand_type = null
-    emit_signal("in_hand_changed", in_hand_type)
+    in_hand_type = NO_IN_HAND
+    emit_signal("in_hand_changed", null)
 
 func has_in_hand() -> bool:
-    return in_hand_type != null
+    return in_hand_type != NO_IN_HAND
 
 func get_in_hand_type():
+    if not has_in_hand():
+        return null
     return in_hand_type
 
 func get_selected_type() -> int:
