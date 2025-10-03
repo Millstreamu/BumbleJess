@@ -34,13 +34,13 @@ static func world_to_axial(position: Vector2, cell_size: float) -> Vector2i:
     return cube_round(Vector3(q, -q - r, r))
 
 static func cube_round(cube: Vector3) -> Vector2i:
-    var rx := round(cube.x)
-    var ry := round(cube.y)
-    var rz := round(cube.z)
+    var rx: float = round(cube.x)
+    var ry: float = round(cube.y)
+    var rz: float = round(cube.z)
 
-    var x_diff := abs(rx - cube.x)
-    var y_diff := abs(ry - cube.y)
-    var z_diff := abs(rz - cube.z)
+    var x_diff: float = abs(rx - cube.x)
+    var y_diff: float = abs(ry - cube.y)
+    var z_diff: float = abs(rz - cube.z)
 
     if x_diff > y_diff and x_diff > z_diff:
         rx = -ry - rz
