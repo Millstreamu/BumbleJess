@@ -10,7 +10,8 @@ const PaletteState := preload("res://scripts/input/PaletteState.gd")
 
 var _hex_grid: HexGrid
 var _palette_state: PaletteState
-var _pending_build_axial = null
+var _pending_build_axial: Vector2i = Vector2i.ZERO
+var _has_pending_build: bool = false
 
 const MOVE_VECTORS := {
     "ui_left": Vector2i(-1, 0),
@@ -40,7 +41,8 @@ func _unhandled_input(event: InputEvent) -> void:
             if _palette_state:
                 if _palette_state.is_open:
                     _palette_state.close()
-                _pending_build_axial = null
+                _has_pending_build = false
+                _pending_build_axial = Vector2i.ZERO
                 if _palette_state.has_in_hand():
                     _palette_state.clear_in_hand()
             get_viewport().set_input_as_handled()
@@ -57,13 +59,14 @@ func _unhandled_input(event: InputEvent) -> void:
             return
         if event.is_action_pressed("ui_accept"):
             var selected_type := _palette_state.confirm_selection()
-            if _pending_build_axial != null and selected_type != CellType.Type.EMPTY:
+            if _has_pending_build and selected_type != CellType.Type.EMPTY:
                 var placed := _hex_grid.try_place_cell(_pending_build_axial, selected_type)
                 if placed:
                     _hex_grid.clear_selection()
             if _palette_state.has_in_hand():
                 _palette_state.clear_in_hand()
-            _pending_build_axial = null
+            _has_pending_build = false
+            _pending_build_axial = Vector2i.ZERO
             get_viewport().set_input_as_handled()
             return
         return
@@ -71,6 +74,7 @@ func _unhandled_input(event: InputEvent) -> void:
     if event.is_action_pressed("ui_accept"):
         if _palette_state:
             _pending_build_axial = _hex_grid.get_cursor_axial()
+            _has_pending_build = true
             _palette_state.open()
         get_viewport().set_input_as_handled()
         return
