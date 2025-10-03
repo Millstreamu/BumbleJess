@@ -13,7 +13,7 @@ Chill, not idle: Real-time flow, no hard APM or fail-by-micro—decisions compou
 
 Readable systems: Everything is data-driven, with small, visible cause→effect.
 
-One input model: Arrows to move focus, Space confirm, Z back, Tab/Start open panels.
+One input model: Arrows to move focus, Space open/confirm context actions, Z back.
 
 2) How it plays (the loop)
 
@@ -200,7 +200,7 @@ UI: Bottom panel slides up on resolve, shows result + next threat countdown, sli
 
 11) UI & controls
 
-Controls: Arrows move selection focus; Space confirm/context; Z back; Tab/Start open slide-out panels (Resources, Inventory, Abilities, Offers).
+Controls: Arrows move selection focus; Space opens the specialization palette for the focused cell (confirm with Space); Z back/cancel.
 
 Selection: Hex cursor outlines cells; panels are fully keyboard-navigable.
 
