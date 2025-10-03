@@ -22,15 +22,15 @@ static func axial_to_world(axial: Vector2i, cell_size: float) -> Vector2:
     ## flat-topped hex layout and positions the hex at the returned Vector2.
     var q := float(axial.x)
     var r := float(axial.y)
-    var x := cell_size * (SQRT3 * (q + r / 2.0))
-    var y := cell_size * (1.5 * r)
+    var x := cell_size * (1.5 * q)
+    var y := cell_size * (SQRT3 * (r + q / 2.0))
     return Vector2(x, y)
 
 static func world_to_axial(position: Vector2, cell_size: float) -> Vector2i:
     ## Converts a world position to the nearest axial coordinate using cube
     ## rounding. Suitable for hit detection or positioning the cursor.
-    var q := ((SQRT3 / 3.0) * position.x - (1.0 / 3.0) * position.y) / cell_size
-    var r := ((2.0 / 3.0) * position.y) / cell_size
+    var q := ((2.0 / 3.0) * position.x) / cell_size
+    var r := ((-1.0 / 3.0) * position.x + (SQRT3 / 3.0) * position.y) / cell_size
     return cube_round(Vector3(q, -q - r, r))
 
 static func cube_round(cube: Vector3) -> Vector2i:
