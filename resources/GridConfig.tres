@@ -6,11 +6,12 @@
 script = ExtResource("1_lm42f")
 radius = 3
 cell_size = 52.0
-cell_color = Color(0.956863, 0.913725, 0.776471, 1)
+cell_color = Color(0, 0, 0, 0)
 queen_color = Color(0.94902, 0.756863, 0.305882, 1)
 cursor_color = Color(0.976471, 0.976471, 1, 0.6)
 selection_color = Color(0.941176, 0.541176, 0.294118, 1)
 background_color = Color(0.141176, 0.141176, 0.141176, 1)
+buildable_highlight_color = Color(0.8, 0.8, 0.8, 0.35)
 allow_isolated_builds = false
 brood_hatch_seconds = 10.0
 type_colors = {
@@ -22,5 +23,5 @@ type_colors = {
 5: Color(0.945098, 0.356863, 0.709804, 1),
 6: Color(0.0, 0.733333, 0.976471, 1),
 7: Color(1.0, 0.623529, 0.109804, 1),
-8: Color(0.956863, 0.913725, 0.776471, 1)
+8: Color(0, 0, 0, 0)
 }
