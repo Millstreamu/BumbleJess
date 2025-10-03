@@ -11,6 +11,7 @@ queen_color = Color(0.94902, 0.756863, 0.305882, 1)
 cursor_color = Color(0.976471, 0.976471, 1, 0.6)
 selection_color = Color(0.941176, 0.541176, 0.294118, 1)
 background_color = Color(0.141176, 0.141176, 0.141176, 1)
+brood_hatch_seconds = 10.0
 type_colors = {
 0: Color(0.94902, 0.756863, 0.305882, 1),
 1: Color(0.964706, 0.827451, 0.396078, 1),

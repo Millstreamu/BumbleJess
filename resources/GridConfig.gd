@@ -14,6 +14,7 @@ const CellType := preload("res://scripts/core/CellType.gd")
 @export var selection_color: Color = Color("#f08a4b")
 @export var background_color: Color = Color("#2a2a2a")
 @export var type_colors: Dictionary = {}
+@export var brood_hatch_seconds: float = 10.0
 
 func _init() -> void:
     if type_colors.is_empty():

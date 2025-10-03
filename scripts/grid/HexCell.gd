@@ -5,6 +5,7 @@ extends Node2D
 class_name HexCell
 
 @onready var polygon: Polygon2D = $Polygon2D
+@onready var ready_badge: Polygon2D = $ReadyBadge
 
 var axial: Vector2i = Vector2i.ZERO
 var _cell_size: float = 52.0
@@ -20,6 +21,8 @@ func configure(axial_coord: Vector2i, cell_size: float, selection_color: Color, 
     _cell_color = initial_color
     polygon.polygon = _build_polygon_points(cell_size)
     polygon.modulate = Color.WHITE
+    ready_badge.polygon = _build_polygon_points(cell_size * 0.35)
+    ready_badge.visible = false
     _apply_color()
 
 func set_selected(selected: bool) -> void:
@@ -42,6 +45,9 @@ func flash(duration: float = 0.2) -> void:
     polygon.modulate = Color(1.4, 1.4, 1.4, 1.0)
     _flash_tween = create_tween()
     _flash_tween.tween_property(polygon, "modulate", Color.WHITE, duration)
+
+func set_ready_state(is_ready: bool) -> void:
+    ready_badge.visible = is_ready
 
 func _apply_color() -> void:
     if _is_selected:
