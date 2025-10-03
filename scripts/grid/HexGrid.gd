@@ -80,6 +80,7 @@ func _generate_grid() -> void:
             _cell_states[axial] = data
 
     _recompute_complexes([CellType.Type.QUEEN_SEAT])
+    _update_buildable_highlights()
 
 func _spawn_cursor() -> void:
     if _cursor_node:
@@ -180,6 +181,7 @@ func try_place_cell(axial: Vector2i, cell_type: int) -> bool:
         changed_types.append(CellType.Type.BROOD)
         _last_brood_created.clear()
     _recompute_complexes(changed_types)
+    _update_buildable_highlights()
     return true
 
 func get_cell_type(q: int, r: int) -> int:
@@ -419,6 +421,8 @@ func _convert_empty_to_brood(axial: Vector2i, data: CellData) -> void:
         cell.set_ready_state(false)
         cell.flash()
 
+    _update_buildable_highlights()
+
 func _is_boundary(axial: Vector2i) -> bool:
     if not _ensure_grid_config():
         return false
@@ -427,3 +431,26 @@ func _is_boundary(axial: Vector2i) -> bool:
     var r := axial.y
     var s := -q - r
     return max(abs(q), max(abs(r), abs(s))) >= radius
+
+func _update_buildable_highlights() -> void:
+    if not _ensure_grid_config():
+        return
+
+    var highlight_color := grid_config.buildable_highlight_color
+    var empty_color := grid_config.get_color(CellType.Type.EMPTY)
+    var allow_isolated := grid_config.allow_isolated_builds
+
+    for axial in _cell_states.keys():
+        var data: CellData = _cell_states[axial]
+        var cell: HexCell = cells.get(axial)
+        if not cell:
+            continue
+
+        if data.cell_type == CellType.Type.EMPTY:
+            var highlight := allow_isolated or is_build_adjacent_to_existing(axial.x, axial.y)
+            if highlight:
+                cell.set_cell_color(highlight_color)
+            else:
+                cell.set_cell_color(empty_color)
+        else:
+            cell.set_cell_color(data.color)

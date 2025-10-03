@@ -8,7 +8,8 @@ const CellType := preload("res://scripts/core/CellType.gd")
 ## code.
 @export var radius: int = 3
 @export var cell_size: float = 48.0
-@export var cell_color: Color = Color("#f5e9c6")
+@export var cell_color: Color = Color.TRANSPARENT
+@export var buildable_highlight_color: Color = Color(0.8, 0.8, 0.8, 0.35)
 @export var queen_color: Color = Color("#f2c14e")
 @export var cursor_color: Color = Color("#f7f7ff")
 @export var selection_color: Color = Color("#f08a4b")
