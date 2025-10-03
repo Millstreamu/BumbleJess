@@ -18,12 +18,15 @@ var _cursor_node: HexCursor
 var _selected_cells: Dictionary = {}
 
 func _ready() -> void:
-    if not grid_config:
-        grid_config = load("res://resources/GridConfig.tres")
+    if not _ensure_grid_config():
+        push_error("HexGrid could not load a GridConfig resource")
+        return
     _generate_grid()
     _spawn_cursor()
 
 func _generate_grid() -> void:
+    if not _ensure_grid_config():
+        return
     for child in get_children():
         if child is HexCell:
             remove_child(child)
@@ -74,15 +77,27 @@ func select_current_hex() -> void:
         _selected_cells.erase(_cursor_axial)
 
 func is_within_grid(axial: Vector2i) -> bool:
+    if not _ensure_grid_config():
+        return false
     return Coord.axial_distance(Vector2i.ZERO, axial) <= grid_config.radius
 
 func axial_to_world(axial: Vector2i) -> Vector2:
+    if not _ensure_grid_config():
+        return Vector2.ZERO
     return Coord.axial_to_world(axial, grid_config.cell_size)
 
 func world_to_axial(position: Vector2) -> Vector2i:
+    if not _ensure_grid_config():
+        return Vector2i.ZERO
     return Coord.world_to_axial(position, grid_config.cell_size)
 
 func _update_cursor_position() -> void:
     if not _cursor_node:
         return
     _cursor_node.global_position = axial_to_world(_cursor_axial)
+
+func _ensure_grid_config() -> bool:
+    if grid_config:
+        return true
+    grid_config = load("res://resources/GridConfig.tres")
+    return grid_config != null
