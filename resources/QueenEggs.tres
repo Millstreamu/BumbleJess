@@ -1,0 +1,7 @@
+[gd_resource type="Resource" load_steps=2 format=3 uid="uid://queeneggs"]
+
+[ext_resource type="Script" path="res://scripts/core/QueenEggs.gd" id="1_1h0t7"]
+
+[resource]
+script = ExtResource("1_1h0t7")
+eggs = 0

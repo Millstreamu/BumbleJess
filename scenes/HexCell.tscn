@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://hexcell"]
+[gd_scene load_steps=3 format=3 uid="uid://hexcell"]
 
 [ext_resource type="Script" path="res://scripts/grid/HexCell.gd" id="1_9ocxy"]
 
@@ -7,4 +7,10 @@ script = ExtResource("1_9ocxy")
 
 [node name="Polygon2D" type="Polygon2D" parent="."]
 color = Color(0.952941, 0.905882, 0.780392, 1)
+texture = null
+
+[node name="ReadyBadge" type="Polygon2D" parent="."]
+visible = false
+color = Color(1, 0.972549, 0.454902, 1)
+z_index = 1
 texture = null

@@ -10,11 +10,11 @@ const SQRT3 := sqrt(3.0)
 ## clockwise starting at the eastern neighbor.
 const DIRECTIONS := [
     Vector2i(1, 0),
-    Vector2i(1, -1),
-    Vector2i(0, -1),
-    Vector2i(-1, 0),
-    Vector2i(-1, 1),
     Vector2i(0, 1),
+    Vector2i(-1, 1),
+    Vector2i(-1, 0),
+    Vector2i(0, -1),
+    Vector2i(1, -1),
 ]
 
 static func axial_to_world(axial: Vector2i, cell_size: float) -> Vector2:
