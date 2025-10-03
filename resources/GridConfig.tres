@@ -1,6 +1,9 @@
-[gd_resource type="GridConfig" load_steps=2 format=3 uid="uid://gridconfig"]
+[gd_resource type="Resource" load_steps=2 format=3 uid="uid://gridconfig"]
+
+[ext_resource type="Script" path="res://resources/GridConfig.gd" id="1_lm42f"]
 
 [resource]
+script = ExtResource("1_lm42f")
 radius = 3
 cell_size = 52.0
 cell_color = Color(0.956863, 0.913725, 0.776471, 1)
