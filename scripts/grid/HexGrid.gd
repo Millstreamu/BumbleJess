@@ -94,7 +94,7 @@ func world_to_axial(position: Vector2) -> Vector2i:
 func _update_cursor_position() -> void:
     if not _cursor_node:
         return
-    _cursor_node.global_position = axial_to_world(_cursor_axial)
+    _cursor_node.position = axial_to_world(_cursor_axial)
 
 func _ensure_grid_config() -> bool:
     if grid_config:
