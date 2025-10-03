@@ -1,18 +1,24 @@
 extends Node2D
 
 ## Primary controller for the hex grid. Responsible for generating cells,
-## managing the cursor, and offering helper conversion functions.
+## managing the cursor, cell data, and complex bookkeeping.
 class_name HexGrid
 
 const Coord := preload("res://scripts/core/Coord.gd")
 const HexCell := preload("res://scripts/grid/HexCell.gd")
 const HexCursor := preload("res://scripts/grid/HexCursor.gd")
+const CellType := preload("res://scripts/core/CellType.gd")
+const CellData := preload("res://scripts/core/CellData.gd")
+
+signal complexes_updated(changed_types: Array)
 
 @export var grid_config: GridConfig
 @export var cell_scene: PackedScene = preload("res://scenes/HexCell.tscn")
 @export var cursor_scene: PackedScene = preload("res://scenes/HexCursor.tscn")
 
 var cells: Dictionary = {}
+var _cell_states: Dictionary = {}
+var _complex_sizes: Dictionary = {}
 var _cursor_axial: Vector2i = Vector2i.ZERO
 var _cursor_node: HexCursor
 var _selected_cells: Dictionary = {}
@@ -32,6 +38,8 @@ func _generate_grid() -> void:
             remove_child(child)
             child.queue_free()
     cells.clear()
+    _cell_states.clear()
+    _selected_cells.clear()
 
     var radius := grid_config.radius
     for q in range(-radius, radius + 1):
@@ -44,9 +52,19 @@ func _generate_grid() -> void:
             var cell: HexCell = cell_scene.instantiate()
             add_child(cell)
             cell.position = Coord.axial_to_world(axial, grid_config.cell_size)
-            var is_queen := axial == Vector2i.ZERO
-            cell.configure(axial, grid_config.cell_size, grid_config.cell_color, grid_config.selection_color, grid_config.queen_color, is_queen)
+            var cell_type := CellType.Type.EMPTY
+            if axial == Vector2i.ZERO:
+                cell_type = CellType.Type.QUEEN_SEAT
+            var color := grid_config.get_color(cell_type)
+            cell.configure(axial, grid_config.cell_size, grid_config.selection_color, color)
             cells[axial] = cell
+
+            var data := CellData.new()
+            data.set_type(cell_type, color)
+            data.complex_id = 0
+            _cell_states[axial] = data
+
+    _recompute_complexes([CellType.Type.QUEEN_SEAT])
 
 func _spawn_cursor() -> void:
     if _cursor_node:
@@ -66,6 +84,9 @@ func move_cursor(delta: Vector2i) -> void:
     _cursor_axial = target
     _update_cursor_position()
 
+func get_cursor_axial() -> Vector2i:
+    return _cursor_axial
+
 func select_current_hex() -> void:
     if not cells.has(_cursor_axial):
         return
@@ -75,6 +96,11 @@ func select_current_hex() -> void:
         _selected_cells[_cursor_axial] = cell
     else:
         _selected_cells.erase(_cursor_axial)
+
+func clear_selection() -> void:
+    for cell in _selected_cells.values():
+        cell.set_selected(false)
+    _selected_cells.clear()
 
 func is_within_grid(axial: Vector2i) -> bool:
     if not _ensure_grid_config():
@@ -91,10 +117,113 @@ func world_to_axial(position: Vector2) -> Vector2i:
         return Vector2i.ZERO
     return Coord.world_to_axial(position, grid_config.cell_size)
 
+func try_place_cell(axial: Vector2i, cell_type: int) -> bool:
+    if not _cell_states.has(axial):
+        _log_build_failure("Cannot build outside the grid.")
+        return false
+    if CellType.buildable_types().find(cell_type) == -1:
+        _log_build_failure("That cell type cannot be constructed.")
+        return false
+    var data: CellData = _cell_states[axial]
+    if data.cell_type == CellType.Type.QUEEN_SEAT:
+        _log_build_failure("The queen's seat cannot be replaced.")
+        return false
+    if data.cell_type != CellType.Type.EMPTY:
+        _log_build_failure("This cell already holds a specialized structure.")
+        return false
+
+    var color := grid_config.get_color(cell_type)
+    data.set_type(cell_type, color)
+
+    var cell: HexCell = cells.get(axial)
+    if cell:
+        cell.set_cell_color(color)
+        cell.flash()
+
+    _recompute_complexes([cell_type])
+    return true
+
+func get_cell_type(q: int, r: int) -> int:
+    var axial := Vector2i(q, r)
+    if not _cell_states.has(axial):
+        return CellType.Type.EMPTY
+    var data: CellData = _cell_states[axial]
+    return data.cell_type
+
+func get_complex_id(q: int, r: int) -> int:
+    var axial := Vector2i(q, r)
+    if not _cell_states.has(axial):
+        return 0
+    var data: CellData = _cell_states[axial]
+    return data.complex_id
+
+func get_complex_size(complex_id: int) -> int:
+    return _complex_sizes.get(complex_id, 0)
+
+func export_cell_types() -> Dictionary:
+    var export_data := {}
+    for axial in _cell_states.keys():
+        var data: CellData = _cell_states[axial]
+        export_data[axial] = data.cell_type
+    return export_data
+
+func _recompute_complexes(changed_types: Array[int] = []) -> void:
+    _complex_sizes.clear()
+    for data in _cell_states.values():
+        data.complex_id = 0
+
+    var next_complex_id := 1
+    for axial in _cell_states.keys():
+        var data: CellData = _cell_states[axial]
+        if not CellType.is_specialized(data.cell_type):
+            continue
+        if data.complex_id != 0:
+            continue
+        var size := _flood_assign_complex(axial, data.cell_type, next_complex_id)
+        _complex_sizes[next_complex_id] = size
+        next_complex_id += 1
+
+    var unique_types := {}
+    for cell_type in changed_types:
+        unique_types[cell_type] = true
+    if unique_types.is_empty():
+        for data in _cell_states.values():
+            if CellType.is_specialized(data.cell_type):
+                unique_types[data.cell_type] = true
+    emit_signal("complexes_updated", unique_types.keys())
+
+func _flood_assign_complex(start_axial: Vector2i, cell_type: int, complex_id: int) -> int:
+    var pending: Array[Vector2i] = [start_axial]
+    var size := 0
+    while pending:
+        var current: Vector2i = pending.pop_back()
+        if not _cell_states.has(current):
+            continue
+        var data: CellData = _cell_states[current]
+        if data.cell_type != cell_type:
+            continue
+        if data.complex_id == complex_id:
+            continue
+        if data.complex_id != 0:
+            continue
+        data.complex_id = complex_id
+        size += 1
+        for direction in Coord.DIRECTIONS:
+            var neighbor := current + direction
+            if not _cell_states.has(neighbor):
+                continue
+            var neighbor_data: CellData = _cell_states[neighbor]
+            if neighbor_data.cell_type == cell_type and neighbor_data.complex_id == 0:
+                pending.append(neighbor)
+    return size
+
 func _update_cursor_position() -> void:
     if not _cursor_node:
         return
     _cursor_node.position = axial_to_world(_cursor_axial)
+
+func _log_build_failure(message: String) -> void:
+    print("[Build] %s" % message)
 
 func _ensure_grid_config() -> bool:
     if grid_config:
