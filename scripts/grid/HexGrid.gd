@@ -208,8 +208,8 @@ func _flood_assign_complex(start_axial: Vector2i, cell_type: int, complex_id: in
             continue
         data.complex_id = complex_id
         size += 1
-        for direction in Coord.DIRECTIONS:
-            var neighbor := current + direction
+        for direction: Vector2i in Coord.DIRECTIONS:
+            var neighbor: Vector2i = current + direction
             if not _cell_states.has(neighbor):
                 continue
             var neighbor_data: CellData = _cell_states[neighbor]
