@@ -4,8 +4,8 @@
 
 [resource]
 script = ExtResource("1_lm42f")
-radius = 3
-cell_size = 52.0
+radius = 6
+cell_size = 41.6
 cell_color = Color(0, 0, 0, 0)
 queen_color = Color(0.94902, 0.756863, 0.305882, 1)
 cursor_color = Color(0.976471, 0.976471, 1, 0.6)
