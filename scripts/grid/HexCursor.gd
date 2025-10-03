@@ -20,6 +20,6 @@ func set_cell_size(cell_size: float) -> void:
 func _build_outline_points(cell_size: float) -> PackedVector2Array:
     var points := PackedVector2Array()
     for i in range(7):
-        var angle := PI / 180.0 * (60.0 * i + 30.0)
+        var angle := PI / 180.0 * (60.0 * i)
         points.append(Vector2(cos(angle), sin(angle)) * cell_size * 1.02)
     return points

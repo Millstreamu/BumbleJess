@@ -45,6 +45,6 @@ func _apply_color() -> void:
 func _build_polygon_points(cell_size: float) -> PackedVector2Array:
     var points := PackedVector2Array()
     for i in range(6):
-        var angle := PI / 180.0 * (60.0 * i + 30.0)
+        var angle := PI / 180.0 * (60.0 * i)
         points.append(Vector2(cos(angle), sin(angle)) * cell_size)
     return points
