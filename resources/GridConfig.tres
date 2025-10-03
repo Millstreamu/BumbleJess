@@ -13,6 +13,7 @@ selection_color = Color(0.941176, 0.541176, 0.294118, 1)
 background_color = Color(0.141176, 0.141176, 0.141176, 1)
 buildable_highlight_color = Color(0.8, 0.8, 0.8, 0.35)
 allow_isolated_builds = false
+allow_free_builds = false
 brood_hatch_seconds = 10.0
 type_colors = {
 0: Color(0.94902, 0.756863, 0.305882, 1),

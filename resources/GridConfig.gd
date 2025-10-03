@@ -17,6 +17,7 @@ const CellType := preload("res://scripts/core/CellType.gd")
 @export var type_colors: Dictionary = {}
 @export var brood_hatch_seconds: float = 10.0
 @export var allow_isolated_builds: bool = false
+@export var allow_free_builds: bool = false
 
 func _init() -> void:
     if type_colors.is_empty():
