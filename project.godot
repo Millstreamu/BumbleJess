@@ -1,0 +1,23 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+config/name="Bee Hive"
+run/main_scene="res://scenes/Main.tscn"
+
+[input]
+ui_accept={"deadzone":0.5,"events":[{"type":"key","keycode":32,"physical_keycode":32}]}
+ui_left={"deadzone":0.5,"events":[{"type":"key","keycode":4194319,"physical_keycode":80}]}
+ui_right={"deadzone":0.5,"events":[{"type":"key","keycode":4194321,"physical_keycode":79}]}
+ui_up={"deadzone":0.5,"events":[{"type":"key","keycode":4194320,"physical_keycode":82}]}
+ui_down={"deadzone":0.5,"events":[{"type":"key","keycode":4194322,"physical_keycode":81}]}
+
+[rendering]
+renderer/rendering_method="mobile"

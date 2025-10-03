@@ -1,0 +1,25 @@
+[gd_scene load_steps=4 format=3 uid="uid://main"]
+
+[ext_resource type="PackedScene" path="res://scenes/HexGrid.tscn" id="1_kg8yr"]
+[ext_resource type="Script" path="res://scripts/input/InputController.gd" id="2_buqfh"]
+[ext_resource type="Script" path="res://scripts/Main.gd" id="3_p3b4o"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("3_p3b4o")
+
+[node name="Background" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -640.0
+offset_top = -360.0
+offset_right = 640.0
+offset_bottom = 360.0
+color = Color(0.141176, 0.141176, 0.141176, 1)
+z_index = -10
+
+[node name="HexGrid" parent="." instance=ExtResource("1_kg8yr")]
+
+[node name="InputController" type="Node" parent="."]
+script = ExtResource("2_buqfh")
+hex_grid_path = NodePath("../HexGrid")
