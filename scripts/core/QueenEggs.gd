@@ -9,6 +9,6 @@ func take(amount: int) -> int:
     ## actually assigned.
     if amount <= 0:
         return 0
-    var taken := min(amount, eggs)
+    var taken: int = min(amount, eggs)
     eggs -= taken
     return taken
