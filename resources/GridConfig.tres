@@ -1,0 +1,10 @@
+[gd_resource type="GridConfig" load_steps=2 format=3 uid="uid://gridconfig"]
+
+[resource]
+radius = 3
+cell_size = 52.0
+cell_color = Color(0.956863, 0.913725, 0.776471, 1)
+queen_color = Color(0.94902, 0.756863, 0.305882, 1)
+cursor_color = Color(0.976471, 0.976471, 1, 0.6)
+selection_color = Color(0.941176, 0.541176, 0.294118, 1)
+background_color = Color(0.141176, 0.141176, 0.141176, 1)
