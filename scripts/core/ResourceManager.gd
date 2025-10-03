@@ -1,6 +1,5 @@
 extends Node
 ## Tracks resource balances and build costs for specialized cells.
-class_name ResourceManager
 
 const CellType := preload("res://scripts/core/CellType.gd")
 
@@ -118,9 +117,10 @@ func _read_json(path: String, fallback: Dictionary) -> Dictionary:
     if error != OK:
         push_warning("Failed to parse %s; using defaults" % path)
         return fallback.duplicate(true)
-    var data := json.data
-    if typeof(data) != TYPE_DICTIONARY:
+    var raw_data: Variant = json.data
+    if typeof(raw_data) != TYPE_DICTIONARY:
         return fallback.duplicate(true)
+    var data: Dictionary = raw_data as Dictionary
     return data
 
 func _write_json(path: String, data: Dictionary) -> void:
