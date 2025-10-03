@@ -10,6 +10,7 @@ const PaletteState := preload("res://scripts/input/PaletteState.gd")
 
 @onready var _title_label: Label = $Panel/Margin/VBox/Title
 @onready var _items_container: GridContainer = $Panel/Margin/VBox/Items
+@onready var _viewport: Viewport = get_viewport()
 
 var _palette_state: PaletteState
 var _labels: Dictionary = {}
@@ -24,6 +25,10 @@ func _ready() -> void:
     _title_label.text = header
     _create_labels()
     visible = false
+
+    if _viewport:
+        _viewport.connect("size_changed", Callable(self, "_center_on_screen"))
+    call_deferred("_center_on_screen")
 
     _palette_state.connect("palette_opened", Callable(self, "_on_palette_opened"))
     _palette_state.connect("palette_closed", Callable(self, "_on_palette_closed"))
@@ -78,3 +83,9 @@ func _refresh_in_hand_visuals(in_hand_type) -> void:
             label.text = "%s *" % base_name
         else:
             label.text = base_name
+
+func _center_on_screen() -> void:
+    if not _viewport:
+        return
+    var viewport_size := _viewport.get_visible_rect().size
+    position = viewport_size * 0.5 - size * 0.5
