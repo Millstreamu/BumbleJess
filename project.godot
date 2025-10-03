@@ -12,6 +12,9 @@ config_version=5
 config/name="Bee Hive"
 run/main_scene="res://scenes/Main.tscn"
 
+[autoload]
+ResourceManager="*res://scripts/core/ResourceManager.gd"
+
 [input]
 ui_accept={"deadzone":0.5,"events":[{"type":"key","keycode":32,"physical_keycode":32}]}
 ui_left={"deadzone":0.5,"events":[{"type":"key","keycode":4194319,"physical_keycode":80}]}

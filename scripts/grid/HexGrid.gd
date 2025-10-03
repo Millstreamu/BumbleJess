@@ -180,6 +180,18 @@ func try_place_cell(axial: Vector2i, cell_type: int) -> bool:
         _log_build_failure("Placement blocked: must touch an existing cell")
         return false
 
+    if not grid_config.allow_free_builds:
+        var cost := ResourceManager.get_build_cost(cell_type)
+        if not ResourceManager.can_pay(cost):
+            var type_keys := CellType.Type.keys()
+            var type_key := str(cell_type)
+            if cell_type >= 0 and cell_type < type_keys.size():
+                type_key = String(type_keys[cell_type])
+            var balances := ResourceManager.get_balances()
+            _log_build_failure("Blocked: need %s to build %s, have %s." % [cost, type_key, balances])
+            return false
+        ResourceManager.spend(cost)
+
     var color := grid_config.get_color(cell_type)
     data.set_type(cell_type, color)
     data.brood_has_egg = false
