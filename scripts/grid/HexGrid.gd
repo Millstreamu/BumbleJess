@@ -132,6 +132,17 @@ func world_to_axial(position: Vector2) -> Vector2i:
         return Vector2i.ZERO
     return Coord.world_to_axial(position, grid_config.cell_size)
 
+func is_build_adjacent_to_existing(q: int, r: int) -> bool:
+    var axial := Vector2i(q, r)
+    for direction: Vector2i in Coord.DIRECTIONS:
+        var neighbor := axial + direction
+        if not _cell_states.has(neighbor):
+            continue
+        var neighbor_data: CellData = _cell_states[neighbor]
+        if neighbor_data.cell_type != CellType.Type.EMPTY:
+            return true
+    return false
+
 func try_place_cell(axial: Vector2i, cell_type: int) -> bool:
     if not _cell_states.has(axial):
         _log_build_failure("Cannot build outside the grid.")
@@ -145,6 +156,9 @@ func try_place_cell(axial: Vector2i, cell_type: int) -> bool:
         return false
     if data.cell_type != CellType.Type.EMPTY:
         _log_build_failure("This cell already holds a specialized structure.")
+        return false
+    if not grid_config.allow_isolated_builds and not is_build_adjacent_to_existing(axial.x, axial.y):
+        _log_build_failure("Placement blocked: must touch an existing cell")
         return false
 
     var color := grid_config.get_color(cell_type)
