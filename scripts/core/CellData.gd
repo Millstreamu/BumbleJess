@@ -7,7 +7,7 @@ var complex_id: int = 0
 var color: Color = Color.WHITE
 var brood_has_egg: bool = false
 var brood_hatch_remaining: float = 0.0
-var brood_ready: bool = false
+var brood_state: int = 0
 
 func set_type(new_type: int, new_color: Color) -> void:
     cell_type = new_type
