@@ -278,6 +278,9 @@ func try_place_cell(axial: Vector2i, cell_type: int) -> bool:
             cell.clear_brood_state()
         cell.flash()
 
+    if cell_type == CellType.Type.BROOD:
+        _request_egg_for_brood(axial, data)
+
     recompute_brood_enclosures()
     var changed_types: Array[int] = [cell_type]
     if not _last_brood_created.is_empty():
