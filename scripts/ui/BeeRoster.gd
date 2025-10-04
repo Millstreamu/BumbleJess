@@ -17,6 +17,7 @@ const SPECIALISATIONS := [
 @onready var _bee_list: ItemList = $Panel/Margin/VBox/BeeList
 @onready var _spec_label: Label = $Panel/Margin/VBox/SpecLabel
 @onready var _status_label: Label = $Panel/Margin/VBox/Status
+@onready var _viewport: Viewport = get_viewport()
 
 var _hex_grid: Node = null
 var _is_open := false
@@ -35,6 +36,10 @@ func _ready() -> void:
     _bee_list.item_selected.connect(_on_item_selected)
     _bee_list.multi_selected.connect(_on_item_selected)
     _connect_bee_signals()
+
+    if _viewport:
+        _viewport.connect("size_changed", Callable(self, "_center_on_screen"))
+    call_deferred("_center_on_screen")
 
 func open() -> void:
     _is_open = true
@@ -151,6 +156,12 @@ func get_selected_bee_id() -> int:
 
 func is_assignment_armed() -> bool:
     return _assignment_armed and _selected_bee_id != -1
+
+func _center_on_screen() -> void:
+    if not _viewport:
+        return
+    var viewport_size := _viewport.get_visible_rect().size
+    position = viewport_size * 0.5 - size * 0.5
 
 func _connect_bee_signals() -> void:
     if not Engine.has_singleton("BeeManager"):
