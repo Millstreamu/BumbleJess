@@ -117,13 +117,14 @@ func _draw() -> void:
     if hatch_duration <= 0.0:
         return
 
-    var progress := clamp(1.0 - (hatch_remaining / hatch_duration), 0.0, 1.0)
-    var radius := _cell_size * 0.7
-    var ring_width := max(1.0, progress_ring_width)
-    var backdrop_color := progress_ring_color.with_alpha(progress_ring_color.a * 0.25)
+    var progress: float = clamp(1.0 - (hatch_remaining / hatch_duration), 0.0, 1.0)
+    var radius: float = _cell_size * 0.7
+    var ring_width: float = max(1.0, progress_ring_width)
+    var backdrop_color: Color = progress_ring_color
+    backdrop_color.a = progress_ring_color.a * 0.25
     draw_circle(Vector2.ZERO, radius + ring_width * 0.5, backdrop_color)
     if progress <= 0.0:
         return
-    var start_angle := -PI / 2.0
-    var end_angle := start_angle + TAU * progress
+    var start_angle: float = -PI / 2.0
+    var end_angle: float = start_angle + TAU * progress
     draw_arc(Vector2.ZERO, radius, start_angle, end_angle, 64, progress_ring_color, ring_width, true)
