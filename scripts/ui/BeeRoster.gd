@@ -349,4 +349,3 @@ func _format_spec(spec: String) -> String:
 
 func _set_status(message: String) -> void:
     _status_label.text = message
-*** End Patch
