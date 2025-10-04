@@ -61,7 +61,7 @@ func handle_input(event: InputEvent) -> bool:
         return false
     if not (event is InputEventKey and event.pressed and not event.echo):
         return false
-    var key := event.physical_keycode
+    var key: Key = event.physical_keycode
     if _spec_picker_active:
         if key == KEY_LEFT:
             _cycle_spec(-1)
@@ -119,8 +119,8 @@ func try_assign_to_cell(axial: Vector2i) -> bool:
         _update_assignment_highlight()
         return false
     if _hex_grid:
-        var cell_type := _hex_grid.get_cell_type(axial.x, axial.y)
-        var cap := _hex_grid.get_bee_cap(axial.x, axial.y)
+        var cell_type: int = _hex_grid.get_cell_type(axial.x, axial.y)
+        var cap: int = _hex_grid.get_bee_cap(axial.x, axial.y)
         if cap <= 0:
             _set_status("%s cannot house bees." % CellType.to_display_name(cell_type))
             _assignment_armed = false
@@ -253,7 +253,7 @@ func _confirm_spec() -> void:
         return
     if not Engine.has_singleton("BeeManager"):
         return
-    var spec := SPECIALISATIONS[_spec_picker_index]
+    var spec: String = SPECIALISATIONS[_spec_picker_index]
     BeeManager.set_specialisation(_selected_bee_id, spec)
     _spec_picker_active = false
     _update_selected_bee_info()
@@ -318,7 +318,7 @@ func _update_assignment_highlight() -> void:
     if not _is_open:
         return
     if _spec_picker_active:
-        var preview_spec := SPECIALISATIONS[_spec_picker_index]
+        var preview_spec: String = SPECIALISATIONS[_spec_picker_index]
         _hex_grid.set_assignment_highlights_for_spec(preview_spec)
         return
     if _selected_bee_id == -1:
@@ -338,7 +338,7 @@ func _update_assignment_highlight() -> void:
     _hex_grid.set_assignment_highlights_for_spec(spec)
 
 func _update_spec_picker_label() -> void:
-    var spec := SPECIALISATIONS[_spec_picker_index]
+    var spec: String = SPECIALISATIONS[_spec_picker_index]
     _spec_label.text = "Specialisation: ‹ %s ›" % _format_spec(spec)
     _update_assignment_highlight()
 
