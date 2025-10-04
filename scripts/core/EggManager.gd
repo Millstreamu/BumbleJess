@@ -1,11 +1,14 @@
 extends Node
 
+const Coord := preload("res://scripts/core/Coord.gd")
+
 signal eggs_changed(current: int)
 signal egg_assigned(q: int, r: int)
 signal egg_needed(q: int, r: int)
 
 @export var eggs: int = 0
 var waiting_brood: Array[Vector2i] = []
+var queen_position: Vector2i = Vector2i.ZERO
 
 func _ready() -> void:
     waiting_brood = []
@@ -31,7 +34,7 @@ func request_egg(cell_q: int, cell_r: int) -> bool:
 
     var coord := Vector2i(cell_q, cell_r)
     if waiting_brood.find(coord) == -1:
-        waiting_brood.append(coord)
+        _enqueue_waiting(coord)
         emit_signal("egg_needed", cell_q, cell_r)
         print("[EggManager] Brood (%d,%d) queued for egg; %d waiting." % [cell_q, cell_r, waiting_brood.size()])
     return false
@@ -55,3 +58,28 @@ func _dispatch_waiting() -> void:
         print("[EggManager] Dispatch complete -> %d eggs remaining." % eggs)
     else:
         print("[EggManager] Dispatch paused -> %d eggs remaining, %d broods still waiting." % [eggs, waiting_brood.size()])
+
+func set_queen_position(q: int, r: int) -> void:
+    queen_position = Vector2i(q, r)
+    _sort_waiting()
+    _dispatch_waiting()
+
+func _enqueue_waiting(coord: Vector2i) -> void:
+    waiting_brood.append(coord)
+    _sort_waiting()
+
+func _sort_waiting() -> void:
+    if waiting_brood.size() <= 1:
+        return
+    waiting_brood.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+        var dist_a := _distance_to_queen(a)
+        var dist_b := _distance_to_queen(b)
+        if dist_a == dist_b:
+            if a.x == b.x:
+                return a.y < b.y
+            return a.x < b.x
+        return dist_a < dist_b
+    )
+
+func _distance_to_queen(coord: Vector2i) -> int:
+    return Coord.axial_distance(coord, queen_position)
