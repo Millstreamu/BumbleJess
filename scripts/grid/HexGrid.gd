@@ -652,6 +652,7 @@ func _request_egg_for_brood(axial: Vector2i, data: CellData) -> void:
     if not Engine.has_singleton("EggManager"):
         _set_brood_idle(axial, data)
         return
+    print("[Brood] Requesting egg for (%d,%d); brood state %s, has_egg=%s." % [axial.x, axial.y, str(data.brood_state), str(data.brood_has_egg)])
     if EggManager.request_egg(axial.x, axial.y):
         _begin_brood_incubation(axial, data)
     else:
@@ -660,15 +661,20 @@ func _request_egg_for_brood(axial: Vector2i, data: CellData) -> void:
 
 func _on_egg_assigned(q: int, r: int) -> void:
     var axial := Vector2i(q, r)
+    print("[Brood] Egg assignment signal received for (%d,%d)." % [q, r])
     if not _cell_states.has(axial):
+        print("[Brood] No cell data for (%d,%d); refunding egg." % [q, r])
         EggManager.refund_egg()
         return
     var data: CellData = _cell_states[axial]
     if data.cell_type != CellType.Type.BROOD:
+        print("[Brood] Cell (%d,%d) not brood (type=%s); refunding egg." % [q, r, str(data.cell_type)])
         EggManager.refund_egg()
         return
     if data.brood_state != HexCell.BroodState.IDLE:
+        print("[Brood] Cell (%d,%d) not idle (state=%s); ignoring assignment." % [q, r, str(data.brood_state)])
         return
+    print("[Brood] Accepting egg assignment at (%d,%d)." % [q, r])
     _begin_brood_incubation(axial, data)
 
 func _convert_empty_to_brood(axial: Vector2i, data: CellData) -> void:
