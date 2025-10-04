@@ -11,12 +11,14 @@ func _ready() -> void:
     waiting_brood = []
     eggs = max(0, eggs)
     emit_signal("eggs_changed", eggs)
+    print("[EggManager] Initial egg count: %d." % eggs)
 
 func add_eggs(amount: int) -> void:
     if amount <= 0:
         return
     eggs += amount
     emit_signal("eggs_changed", eggs)
+    print("[EggManager] Eggs added -> %d available." % eggs)
     _dispatch_waiting()
 
 func request_egg(cell_q: int, cell_r: int) -> bool:
@@ -31,6 +33,7 @@ func request_egg(cell_q: int, cell_r: int) -> bool:
     if waiting_brood.find(coord) == -1:
         waiting_brood.append(coord)
         emit_signal("egg_needed", cell_q, cell_r)
+        print("[EggManager] Brood (%d,%d) queued for egg; %d waiting." % [cell_q, cell_r, waiting_brood.size()])
     return false
 
 func refund_egg(count: int = 1) -> void:
@@ -38,6 +41,7 @@ func refund_egg(count: int = 1) -> void:
         return
     eggs += count
     emit_signal("eggs_changed", eggs)
+    print("[EggManager] Egg refund -> %d available." % eggs)
     _dispatch_waiting()
 
 func _dispatch_waiting() -> void:
@@ -47,3 +51,7 @@ func _dispatch_waiting() -> void:
         emit_signal("eggs_changed", eggs)
         emit_signal("egg_assigned", coord.x, coord.y)
         print("[EggManager] Assigned egg to brood (%d,%d)." % [coord.x, coord.y])
+    if waiting_brood.is_empty():
+        print("[EggManager] Dispatch complete -> %d eggs remaining." % eggs)
+    else:
+        print("[EggManager] Dispatch paused -> %d eggs remaining, %d broods still waiting." % [eggs, waiting_brood.size()])

@@ -627,6 +627,7 @@ func _begin_brood_incubation(axial: Vector2i, data: CellData, emit_event: bool =
     data.brood_hatch_remaining = grid_config.brood_hatch_seconds
     _active_brood_timers[axial] = true
     set_process(true)
+    print("[Brood] Egg secured at (%d,%d); incubation started (%.1fs)." % [axial.x, axial.y, data.brood_hatch_remaining])
     var cell: HexCell = cells.get(axial)
     if cell:
         cell.set_brood_state(HexCell.BroodState.INCUBATING, true, data.brood_hatch_remaining, grid_config.brood_hatch_seconds)
@@ -641,6 +642,7 @@ func _request_egg_for_brood(axial: Vector2i, data: CellData) -> void:
     if EggManager.request_egg(axial.x, axial.y):
         _begin_brood_incubation(axial, data)
     else:
+        print("[Brood] Brood at (%d,%d) waiting for egg." % [axial.x, axial.y])
         _set_brood_idle(axial, data)
 
 func _on_egg_assigned(q: int, r: int) -> void:
@@ -663,6 +665,7 @@ func _convert_empty_to_brood(axial: Vector2i, data: CellData) -> void:
     data.brood_has_egg = false
     data.brood_hatch_remaining = 0.0
     data.brood_state = HexCell.BroodState.IDLE
+    print("[Brood] New brood cell established at (%d,%d)." % [axial.x, axial.y])
 
     var cell: HexCell = cells.get(axial)
     if cell:
