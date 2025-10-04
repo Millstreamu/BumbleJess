@@ -1,5 +1,4 @@
 extends Node
-class_name EggManager
 
 signal eggs_changed(current: int)
 signal egg_assigned(q: int, r: int)
