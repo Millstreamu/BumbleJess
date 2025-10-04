@@ -143,7 +143,7 @@ func _connect_bee_manager() -> void:
     if not _bee_manager.bee_spawned.is_connected(_on_bee_spawned):
         _bee_manager.bee_spawned.connect(_on_bee_spawned)
     _bee_positions.clear()
-    var bees := _bee_manager.list_bees()
+    var bees: Array = _bee_manager.list_bees()
     for bee in bees:
         if bee.get("state", "") != BeeManager.STATE_ASSIGNED:
             continue
@@ -500,7 +500,7 @@ func _finalize_brood_hatch(axial: Vector2i) -> void:
     emit_signal("brood_state_changed", axial.x, axial.y, HexCell.BroodState.SPENT)
 
     if _bee_manager:
-        var bee_id := _bee_manager.spawn_bee(axial)
+        var bee_id: int = _bee_manager.spawn_bee(axial)
         print("[Brood] Brood at (%d,%d) hatched -> Bee #%d ready for duty." % [axial.x, axial.y, bee_id])
 
 func _on_bee_spawned(_bee_id: int) -> void:
@@ -586,10 +586,10 @@ func get_bee_count(q: int, r: int) -> int:
     return _bee_manager.get_bee_count_for_cell(Vector2i(q, r))
 
 func get_cell_types_for_specialisation(spec: String) -> Array:
-    return SPECIALISATION_COMPATIBILITY.get(spec.upper(), [])
+    return SPECIALISATION_COMPATIBILITY.get(spec.to_upper(), [])
 
 func can_accept_bee(spec: String, q: int, r: int) -> bool:
-    if spec.upper() == "GATHER":
+    if spec.to_upper() == "GATHER":
         return false
     var cap := get_bee_cap(q, r)
     if cap <= 0:
