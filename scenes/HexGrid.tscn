@@ -2,9 +2,6 @@
 
 [ext_resource type="Script" path="res://scripts/grid/HexGrid.gd" id="1_m45n4"]
 [ext_resource type="Resource" path="res://resources/GridConfig.tres" id="2_dcgwp"]
-[ext_resource type="Resource" path="res://resources/QueenEggs.tres" id="3_0jvtc"]
-
 [node name="HexGrid" type="Node2D"]
 script = ExtResource("1_m45n4")
 grid_config = ExtResource("2_dcgwp")
-queen_eggs = ExtResource("3_0jvtc")

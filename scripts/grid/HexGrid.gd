@@ -9,16 +9,14 @@ const HexCell := preload("res://scripts/grid/HexCell.gd")
 const HexCursor := preload("res://scripts/grid/HexCursor.gd")
 const CellType := preload("res://scripts/core/CellType.gd")
 const CellData := preload("res://scripts/core/CellData.gd")
-const QueenEggs := preload("res://scripts/core/QueenEggs.gd")
-
 signal complexes_updated(changed_types: Array)
 signal brood_created(cells: Array[Vector2i])
-signal brood_ready(cells: Array[Vector2i])
+signal brood_hatched(cells: Array[Vector2i])
+signal brood_state_changed(q: int, r: int, state: int)
 
 @export var grid_config: GridConfig
 @export var cell_scene: PackedScene = preload("res://scenes/HexCell.tscn")
 @export var cursor_scene: PackedScene = preload("res://scenes/HexCursor.tscn")
-@export var queen_eggs: QueenEggs
 
 var cells: Dictionary = {}
 var _cell_states: Dictionary = {}
@@ -33,8 +31,7 @@ func _ready() -> void:
     if not _ensure_grid_config():
         push_error("HexGrid could not load a GridConfig resource")
         return
-    if not queen_eggs:
-        queen_eggs = QueenEggs.new()
+    _connect_egg_manager()
     _generate_grid()
     _spawn_cursor()
     set_process(false)
@@ -68,7 +65,15 @@ func _generate_grid() -> void:
             if axial == Vector2i.ZERO:
                 cell_type = CellType.Type.QUEEN_SEAT
             var color := grid_config.get_color(cell_type)
-            cell.configure(axial, grid_config.cell_size, grid_config.selection_color, color)
+            cell.configure(
+                axial,
+                grid_config.cell_size,
+                grid_config.selection_color,
+                color,
+                grid_config.brood_progress_ring_width,
+                grid_config.brood_progress_ring_color,
+                grid_config.brood_damaged_tint
+            )
             cells[axial] = cell
 
             var data := CellData.new()
@@ -76,7 +81,7 @@ func _generate_grid() -> void:
             data.complex_id = 0
             data.brood_has_egg = false
             data.brood_hatch_remaining = 0.0
-            data.brood_ready = false
+            data.brood_state = HexCell.BroodState.IDLE
             _cell_states[axial] = data
 
     _recompute_complexes([CellType.Type.QUEEN_SEAT])
@@ -92,6 +97,13 @@ func _spawn_cursor() -> void:
     _cursor_node.z_index = 10
     _cursor_axial = Vector2i.ZERO
     _update_cursor_position()
+
+func _connect_egg_manager() -> void:
+    if not Engine.has_singleton("EggManager"):
+        return
+    if EggManager.egg_assigned.is_connected(_on_egg_assigned):
+        return
+    EggManager.egg_assigned.connect(_on_egg_assigned)
 
 func move_cursor(delta: Vector2i) -> void:
     var target := _cursor_axial + delta
@@ -196,13 +208,16 @@ func try_place_cell(axial: Vector2i, cell_type: int) -> bool:
     data.set_type(cell_type, color)
     data.brood_has_egg = false
     data.brood_hatch_remaining = 0.0
-    data.brood_ready = false
+    data.brood_state = HexCell.BroodState.IDLE
     _active_brood_timers.erase(axial)
 
     var cell: HexCell = cells.get(axial)
     if cell:
         cell.set_cell_color(color)
-        cell.set_ready_state(false)
+        if cell_type == CellType.Type.BROOD:
+            cell.set_brood_state(HexCell.BroodState.IDLE, false, 0.0, grid_config.brood_hatch_seconds)
+        else:
+            cell.clear_brood_state()
         cell.flash()
 
     recompute_brood_enclosures()
@@ -226,7 +241,7 @@ func is_brood(q: int, r: int) -> bool:
 
 func get_brood_info(q: int, r: int) -> Dictionary:
     var axial := Vector2i(q, r)
-    var result := {"has_egg": false, "hatch_remaining": 0.0, "ready": false}
+    var result := {"has_egg": false, "hatch_remaining": 0.0, "state": HexCell.BroodState.IDLE}
     if not _cell_states.has(axial):
         return result
     var data: CellData = _cell_states[axial]
@@ -234,7 +249,7 @@ func get_brood_info(q: int, r: int) -> Dictionary:
         return result
     result["has_egg"] = data.brood_has_egg
     result["hatch_remaining"] = data.brood_hatch_remaining
-    result["ready"] = data.brood_ready
+    result["state"] = data.brood_state
     return result
 
 func is_enclosed_empty(q: int, r: int) -> bool:
@@ -393,7 +408,7 @@ func _process(delta: float) -> void:
         set_process(false)
         return
 
-    var ready_cells: Array[Vector2i] = []
+    var hatched_cells: Array[Vector2i] = []
     var active_keys: Array = _active_brood_timers.keys()
     for axial_value in active_keys:
         var axial: Vector2i = axial_value
@@ -401,22 +416,39 @@ func _process(delta: float) -> void:
             _active_brood_timers.erase(axial)
             continue
         var data: CellData = _cell_states[axial]
-        data.brood_hatch_remaining = max(0.0, data.brood_hatch_remaining - delta)
-        if data.brood_hatch_remaining <= 0.0:
-            data.brood_ready = true
-            data.brood_hatch_remaining = 0.0
-            ready_cells.append(axial)
-
-    if not ready_cells.is_empty():
-        for axial in ready_cells:
+        if data.cell_type != CellType.Type.BROOD or data.brood_state != HexCell.BroodState.INCUBATING:
             _active_brood_timers.erase(axial)
-            var cell: HexCell = cells.get(axial)
-            if cell:
-                cell.set_ready_state(true)
-        emit_signal("brood_ready", ready_cells.duplicate())
+            continue
+        data.brood_hatch_remaining = max(0.0, data.brood_hatch_remaining - delta)
+        var cell: HexCell = cells.get(axial)
+        if cell:
+            cell.update_brood_progress(data.brood_hatch_remaining)
+        if data.brood_hatch_remaining <= 0.0:
+            hatched_cells.append(axial)
+
+    if not hatched_cells.is_empty():
+        for axial in hatched_cells:
+            _finalize_brood_hatch(axial)
+        emit_signal("brood_hatched", hatched_cells.duplicate())
 
     if _active_brood_timers.is_empty():
         set_process(false)
+
+func _finalize_brood_hatch(axial: Vector2i) -> void:
+    if not _cell_states.has(axial):
+        return
+    var data: CellData = _cell_states[axial]
+    data.brood_has_egg = false
+    data.brood_hatch_remaining = 0.0
+    data.brood_state = HexCell.BroodState.DAMAGED
+    _active_brood_timers.erase(axial)
+
+    var cell: HexCell = cells.get(axial)
+    if cell:
+        cell.set_brood_state(HexCell.BroodState.DAMAGED, false, 0.0, grid_config.brood_hatch_seconds)
+        cell.flash()
+    print("[Brood] Brood at (%d,%d) hatched -> DAMAGED." % [axial.x, axial.y])
+    emit_signal("brood_state_changed", axial.x, axial.y, HexCell.BroodState.DAMAGED)
 
 func _log_build_failure(message: String) -> void:
     print("[Build] %s" % message)
@@ -427,30 +459,68 @@ func _ensure_grid_config() -> bool:
     grid_config = load("res://resources/GridConfig.tres")
     return grid_config != null
 
+func _set_brood_idle(axial: Vector2i, data: CellData, emit_event: bool = true) -> void:
+    data.brood_state = HexCell.BroodState.IDLE
+    data.brood_has_egg = false
+    data.brood_hatch_remaining = 0.0
+    _active_brood_timers.erase(axial)
+    var cell: HexCell = cells.get(axial)
+    if cell:
+        cell.set_brood_state(HexCell.BroodState.IDLE, false, 0.0, grid_config.brood_hatch_seconds)
+    if emit_event:
+        emit_signal("brood_state_changed", axial.x, axial.y, HexCell.BroodState.IDLE)
+
+func _begin_brood_incubation(axial: Vector2i, data: CellData, emit_event: bool = true) -> void:
+    data.brood_state = HexCell.BroodState.INCUBATING
+    data.brood_has_egg = true
+    data.brood_hatch_remaining = grid_config.brood_hatch_seconds
+    _active_brood_timers[axial] = true
+    set_process(true)
+    var cell: HexCell = cells.get(axial)
+    if cell:
+        cell.set_brood_state(HexCell.BroodState.INCUBATING, true, data.brood_hatch_remaining, grid_config.brood_hatch_seconds)
+        cell.flash()
+    if emit_event:
+        emit_signal("brood_state_changed", axial.x, axial.y, HexCell.BroodState.INCUBATING)
+
+func _request_egg_for_brood(axial: Vector2i, data: CellData) -> void:
+    if not Engine.has_singleton("EggManager"):
+        _set_brood_idle(axial, data)
+        return
+    if EggManager.request_egg(axial.x, axial.y):
+        _begin_brood_incubation(axial, data)
+    else:
+        _set_brood_idle(axial, data)
+
+func _on_egg_assigned(q: int, r: int) -> void:
+    var axial := Vector2i(q, r)
+    if not _cell_states.has(axial):
+        EggManager.refund_egg()
+        return
+    var data: CellData = _cell_states[axial]
+    if data.cell_type != CellType.Type.BROOD:
+        EggManager.refund_egg()
+        return
+    if data.brood_state != HexCell.BroodState.IDLE:
+        return
+    _begin_brood_incubation(axial, data)
+
 func _convert_empty_to_brood(axial: Vector2i, data: CellData) -> void:
     var brood_color := grid_config.get_color(CellType.Type.BROOD)
     data.set_type(CellType.Type.BROOD, brood_color)
     data.complex_id = 0
-    data.brood_ready = false
-    var eggs_assigned := 0
-    if queen_eggs:
-        eggs_assigned = queen_eggs.take(1)
-    if eggs_assigned > 0:
-        data.brood_has_egg = true
-        data.brood_hatch_remaining = grid_config.brood_hatch_seconds
-        _active_brood_timers[axial] = true
-        set_process(true)
-    else:
-        data.brood_has_egg = false
-        data.brood_hatch_remaining = 0.0
-        data.brood_ready = false
+    data.brood_has_egg = false
+    data.brood_hatch_remaining = 0.0
+    data.brood_state = HexCell.BroodState.IDLE
 
     var cell: HexCell = cells.get(axial)
     if cell:
         cell.set_cell_color(brood_color)
-        cell.set_ready_state(false)
+    _set_brood_idle(axial, data, false)
+    if cell:
         cell.flash()
 
+    _request_egg_for_brood(axial, data)
     _update_buildable_highlights()
 
 func _is_boundary(axial: Vector2i) -> bool:

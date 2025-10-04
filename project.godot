@@ -14,6 +14,7 @@ run/main_scene="res://scenes/Main.tscn"
 
 [autoload]
 ResourceManager="*res://scripts/core/ResourceManager.gd"
+EggManager="*res://scripts/core/EggManager.gd"
 
 [input]
 ui_accept={"deadzone":0.5,"events":[{"type":"key","keycode":32,"physical_keycode":32}]}

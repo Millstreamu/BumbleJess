@@ -16,6 +16,9 @@ const CellType := preload("res://scripts/core/CellType.gd")
 @export var background_color: Color = Color("#2a2a2a")
 @export var type_colors: Dictionary = {}
 @export var brood_hatch_seconds: float = 10.0
+@export var brood_progress_ring_width: float = 2.0
+@export var brood_progress_ring_color: Color = Color(1, 1, 1, 0.9)
+@export var brood_damaged_tint: Color = Color(1.0, 0.7, 0.4, 1.0)
 @export var allow_isolated_builds: bool = false
 @export var allow_free_builds: bool = false
 

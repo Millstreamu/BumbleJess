@@ -15,6 +15,9 @@ buildable_highlight_color = Color(0.8, 0.8, 0.8, 0.35)
 allow_isolated_builds = false
 allow_free_builds = false
 brood_hatch_seconds = 10.0
+brood_progress_ring_width = 2.0
+brood_progress_ring_color = Color(1, 1, 1, 0.9)
+brood_damaged_tint = Color(1, 0.7, 0.4, 1)
 type_colors = {
 0: Color(0.94902, 0.756863, 0.305882, 1),
 1: Color(0.964706, 0.827451, 0.396078, 1),
