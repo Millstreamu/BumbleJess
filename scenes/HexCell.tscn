@@ -9,8 +9,20 @@ script = ExtResource("1_9ocxy")
 color = Color(0.952941, 0.905882, 0.780392, 1)
 texture = null
 
+[node name="AssignmentHighlight" type="Polygon2D" parent="."]
+visible = false
+color = Color(1, 1, 1, 0.25)
+z_index = -1
+texture = null
+
 [node name="ReadyBadge" type="Polygon2D" parent="."]
 visible = false
 color = Color(1, 0.972549, 0.454902, 1)
 z_index = 1
+texture = null
+
+[node name="BeeBadge" type="Polygon2D" parent="."]
+visible = false
+color = Color(0.968627, 0.866667, 0.203922, 1)
+z_index = 2
 texture = null

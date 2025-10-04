@@ -6,8 +6,10 @@ class_name HexCell
 
 @onready var polygon: Polygon2D = $Polygon2D
 @onready var ready_badge: Polygon2D = $ReadyBadge
+@onready var assignment_highlight: Polygon2D = $AssignmentHighlight
+@onready var bee_badge: Polygon2D = $BeeBadge
 
-enum BroodState { IDLE, INCUBATING, READY, DAMAGED }
+enum BroodState { IDLE, INCUBATING, READY, SPENT, DAMAGED }
 
 var axial: Vector2i = Vector2i.ZERO
 var _cell_size: float = 52.0
@@ -25,8 +27,12 @@ var has_egg: bool = false
 var progress_ring_width: float = 2.0
 var progress_ring_color: Color = Color(1, 1, 1, 0.9)
 var damaged_tint: Color = Color.WHITE
+var spent_tint: Color = Color.WHITE
+var assignment_highlight_color: Color = Color(1, 1, 1, 0.25)
+var _assignment_highlight_active: bool = false
+var _has_bee_present: bool = false
 
-func configure(axial_coord: Vector2i, cell_size: float, selection_color: Color, initial_color: Color, ring_width: float = 2.0, ring_color: Color = Color(1, 1, 1, 0.9), damaged_color: Color = Color.WHITE) -> void:
+func configure(axial_coord: Vector2i, cell_size: float, selection_color: Color, initial_color: Color, ring_width: float = 2.0, ring_color: Color = Color(1, 1, 1, 0.9), damaged_color: Color = Color.WHITE, spent_color: Color = Color.WHITE, assignment_color: Color = Color(1, 1, 1, 0.25)) -> void:
     axial = axial_coord
     _cell_size = cell_size
     _selection_color = selection_color
@@ -34,10 +40,19 @@ func configure(axial_coord: Vector2i, cell_size: float, selection_color: Color, 
     progress_ring_width = ring_width
     progress_ring_color = ring_color
     damaged_tint = damaged_color
+    spent_tint = spent_color
+    assignment_highlight_color = assignment_color
     _base_modulate = Color.WHITE
     polygon.polygon = _build_polygon_points(cell_size)
     polygon.modulate = _base_modulate
+    assignment_highlight.polygon = _build_polygon_points(cell_size * 0.92)
+    assignment_highlight.color = assignment_highlight_color
+    assignment_highlight.visible = false
     ready_badge.polygon = _build_polygon_points(cell_size * 0.35)
+    bee_badge.polygon = _build_polygon_points(cell_size * 0.18)
+    bee_badge.visible = false
+    _assignment_highlight_active = false
+    _has_bee_present = false
     clear_brood_state()
     _apply_color()
 
@@ -73,6 +88,7 @@ func clear_brood_state() -> void:
     hatch_duration = 0.0
     ready_badge.visible = false
     _set_base_modulate(Color.WHITE)
+    set_assignment_highlight(false)
     queue_redraw()
 
 func set_brood_state(state: int, has_egg_value: bool, remaining: float, duration: float) -> void:
@@ -84,9 +100,25 @@ func set_brood_state(state: int, has_egg_value: bool, remaining: float, duration
     ready_badge.visible = state == BroodState.READY
     if state == BroodState.DAMAGED:
         _set_base_modulate(damaged_tint)
+    elif state == BroodState.SPENT:
+        _set_base_modulate(spent_tint)
     else:
         _set_base_modulate(Color.WHITE)
     queue_redraw()
+
+func set_assignment_highlight(active: bool) -> void:
+    _assignment_highlight_active = active
+    assignment_highlight.visible = active
+
+func has_assignment_highlight() -> bool:
+    return _assignment_highlight_active
+
+func set_bee_present(is_present: bool) -> void:
+    _has_bee_present = is_present
+    bee_badge.visible = is_present
+
+func has_bee() -> bool:
+    return _has_bee_present
 
 func update_brood_progress(remaining: float) -> void:
     hatch_remaining = max(remaining, 0.0)
