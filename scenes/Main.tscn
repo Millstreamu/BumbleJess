@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://main"]
+[gd_scene load_steps=7 format=3 uid="uid://main"]
 
 [ext_resource type="PackedScene" path="res://scenes/HexGrid.tscn" id="1_kg8yr"]
 [ext_resource type="Script" path="res://scripts/input/InputController.gd" id="2_buqfh"]
 [ext_resource type="Script" path="res://scripts/Main.gd" id="3_p3b4o"]
 [ext_resource type="Script" path="res://scripts/input/PaletteState.gd" id="4_k4cvo"]
 [ext_resource type="PackedScene" path="res://scenes/BuildPalette.tscn" id="5_sef0j"]
+[ext_resource type="PackedScene" path="res://scenes/BeeRoster.tscn" id="6_m6edk"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("3_p3b4o")
@@ -30,3 +31,5 @@ hex_grid_path = NodePath("../HexGrid")
 script = ExtResource("4_k4cvo")
 
 [node name="BuildPalette" parent="." instance=ExtResource("5_sef0j")]
+
+[node name="BeeRoster" parent="." instance=ExtResource("6_m6edk")]
