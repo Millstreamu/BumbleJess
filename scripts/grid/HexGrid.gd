@@ -111,6 +111,7 @@ func _generate_grid() -> void:
     _recompute_complexes([CellType.Type.QUEEN_SEAT])
     _update_buildable_highlights()
     _refresh_assignment_highlights()
+    _sync_egg_manager_queen_position()
 
 func _spawn_cursor() -> void:
     if _cursor_node:
@@ -129,6 +130,15 @@ func _connect_egg_manager() -> void:
     if EggManager.egg_assigned.is_connected(_on_egg_assigned):
         return
     EggManager.egg_assigned.connect(_on_egg_assigned)
+
+func _sync_egg_manager_queen_position() -> void:
+    if not Engine.has_singleton("EggManager"):
+        return
+    for axial in _cell_states.keys():
+        var data: CellData = _cell_states[axial]
+        if data.cell_type == CellType.Type.QUEEN_SEAT:
+            EggManager.set_queen_position(axial.x, axial.y)
+            return
 
 func _connect_bee_manager() -> void:
     if not Engine.has_singleton("BeeManager"):
