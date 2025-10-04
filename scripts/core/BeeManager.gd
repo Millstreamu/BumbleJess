@@ -1,7 +1,6 @@
 extends Node
 ## Central manager for all bee entities. Responsible for tracking their
 ## state, specialisations, and assignments to cells.
-class_name BeeManager
 
 signal bee_spawned(bee_id: int)
 signal bee_assigned(bee_id: int, q: int, r: int)
@@ -47,10 +46,10 @@ func spawn_bee(origin: Vector2i) -> int:
 func set_specialisation(bee_id: int, spec: String) -> void:
     if not _bees.has(bee_id):
         return
-    var normalised := spec.upper()
+    var normalised: String = spec.to_upper()
     if not SPECIALISATIONS.has(normalised):
         return
-    var bee := _bees[bee_id]
+    var bee: Dictionary = _bees[bee_id]
     if bee["specialisation"] == normalised:
         return
     bee["specialisation"] = normalised
@@ -63,7 +62,7 @@ func assign_to_cell(bee_id: int, q: int, r: int) -> bool:
     if _hex_grid == null:
         push_warning("BeeManager has no HexGrid registered; cannot assign bees.")
         return false
-    var bee := _bees[bee_id]
+    var bee: Dictionary = _bees[bee_id]
     var spec: String = bee["specialisation"]
     var axial := Vector2i(q, r)
 
@@ -71,9 +70,9 @@ func assign_to_cell(bee_id: int, q: int, r: int) -> bool:
         print("[Bees] Bee #%d cannot be assigned yet: Gathering roles are virtual." % bee_id)
         return false
 
-    var cap := _hex_grid.get_bee_cap(q, r)
+    var cap: int = _hex_grid.get_bee_cap(q, r)
     if cap <= 0:
-        var cell_type := _hex_grid.get_cell_type(q, r)
+        var cell_type: int = _hex_grid.get_cell_type(q, r)
         print("[Bees] Bee #%d cannot enter %s at (%d,%d): no capacity." % [
             bee_id,
             CellType.to_display_name(cell_type),
@@ -119,7 +118,7 @@ func assign_to_cell(bee_id: int, q: int, r: int) -> bool:
 func unassign(bee_id: int) -> void:
     if not _bees.has(bee_id):
         return
-    var bee := _bees[bee_id]
+    var bee: Dictionary = _bees[bee_id]
     if bee["state"] != STATE_ASSIGNED:
         return
     var previous: Vector2i = bee["assigned_cell"]
@@ -130,11 +129,11 @@ func unassign(bee_id: int) -> void:
     emit_signal("bee_unassigned", bee_id)
 
 func list_bees(filter: String = "ALL") -> Array:
-    var ids := _bees.keys()
+    var ids: Array = _bees.keys()
     ids.sort_custom(Callable(self, "_sort_ids"))
     var result: Array = []
     for id_value in ids:
-        var bee := _bees[id_value]
+        var bee: Dictionary = _bees[id_value]
         if filter == STATE_UNASSIGNED and bee["state"] != STATE_UNASSIGNED:
             continue
         if filter == STATE_ASSIGNED and bee["state"] != STATE_ASSIGNED:
