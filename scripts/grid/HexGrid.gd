@@ -45,6 +45,18 @@ var _assignment_highlighted: Array[Vector2i] = []
 var _bee_positions: Dictionary = {}
 var _bee_manager: Node = null
 var _current_assignment_spec: String = ""
+var _egg_manager: Node = null
+
+func _get_egg_manager() -> Node:
+        if is_instance_valid(_egg_manager):
+                return _egg_manager
+        if Engine.has_singleton("EggManager"):
+                _egg_manager = EggManager
+                return _egg_manager
+        var tree := get_tree()
+        if tree and tree.root:
+                _egg_manager = tree.root.get_node_or_null("EggManager")
+        return _egg_manager
 
 func _ready() -> void:
 	if not _ensure_grid_config():
@@ -125,20 +137,22 @@ func _spawn_cursor() -> void:
 	_update_cursor_position()
 
 func _connect_egg_manager() -> void:
-	if not Engine.has_singleton("EggManager"):
-		return
-	if EggManager.egg_assigned.is_connected(_on_egg_assigned):
-		return
-	EggManager.egg_assigned.connect(_on_egg_assigned)
+        var egg_manager := _get_egg_manager()
+        if not is_instance_valid(egg_manager):
+                return
+        if egg_manager.egg_assigned.is_connected(_on_egg_assigned):
+                return
+        egg_manager.egg_assigned.connect(_on_egg_assigned)
 
 func _sync_egg_manager_queen_position() -> void:
-	if not Engine.has_singleton("EggManager"):
-		return
-	for axial in _cell_states.keys():
-		var data: CellData = _cell_states[axial]
-		if data.cell_type == CellType.Type.QUEEN_SEAT:
-			EggManager.set_queen_position(axial.x, axial.y)
-			return
+        var egg_manager := _get_egg_manager()
+        if not is_instance_valid(egg_manager):
+                return
+        for axial in _cell_states.keys():
+                var data: CellData = _cell_states[axial]
+                if data.cell_type == CellType.Type.QUEEN_SEAT:
+                        egg_manager.set_queen_position(axial.x, axial.y)
+                        return
 
 func _connect_bee_manager() -> void:
 	if not Engine.has_singleton("BeeManager"):
@@ -649,31 +663,35 @@ func _begin_brood_incubation(axial: Vector2i, data: CellData, emit_event: bool =
 		emit_signal("brood_state_changed", axial.x, axial.y, HexCell.BroodState.INCUBATING)
 
 func _request_egg_for_brood(axial: Vector2i, data: CellData) -> void:
-	if not Engine.has_singleton("EggManager"):
-		_set_brood_idle(axial, data)
-		return
-	print("[Brood] Requesting egg for (%d,%d); brood state %s, has_egg=%s." % [axial.x, axial.y, str(data.brood_state), str(data.brood_has_egg)])
-	if EggManager.request_egg(axial.x, axial.y):
-		_begin_brood_incubation(axial, data)
-	else:
-		print("[Brood] Brood at (%d,%d) waiting for egg." % [axial.x, axial.y])
-		_set_brood_idle(axial, data)
+        var egg_manager := _get_egg_manager()
+        if not is_instance_valid(egg_manager):
+                _set_brood_idle(axial, data)
+                return
+        print("[Brood] Requesting egg for (%d,%d); brood state %s, has_egg=%s." % [axial.x, axial.y, str(data.brood_state), str(data.brood_has_egg)])
+        if egg_manager.request_egg(axial.x, axial.y):
+                _begin_brood_incubation(axial, data)
+        else:
+                print("[Brood] Brood at (%d,%d) waiting for egg." % [axial.x, axial.y])
+                _set_brood_idle(axial, data)
 
 func _on_egg_assigned(q: int, r: int) -> void:
-	var axial := Vector2i(q, r)
-	print("[Brood] Egg assignment signal received for (%d,%d)." % [q, r])
-	if not _cell_states.has(axial):
-		print("[Brood] No cell data for (%d,%d); refunding egg." % [q, r])
-		EggManager.refund_egg()
-		return
-	var data: CellData = _cell_states[axial]
-	if data.cell_type != CellType.Type.BROOD:
-		print("[Brood] Cell (%d,%d) not brood (type=%s); refunding egg." % [q, r, str(data.cell_type)])
-		EggManager.refund_egg()
-		return
-	if data.brood_state != HexCell.BroodState.IDLE:
-		print("[Brood] Cell (%d,%d) not idle (state=%s); ignoring assignment." % [q, r, str(data.brood_state)])
-		return
+        var axial := Vector2i(q, r)
+        print("[Brood] Egg assignment signal received for (%d,%d)." % [q, r])
+        var egg_manager := _get_egg_manager()
+        if not _cell_states.has(axial):
+                print("[Brood] No cell data for (%d,%d); refunding egg." % [q, r])
+                if is_instance_valid(egg_manager):
+                        egg_manager.refund_egg()
+                return
+        var data: CellData = _cell_states[axial]
+        if data.cell_type != CellType.Type.BROOD:
+                print("[Brood] Cell (%d,%d) not brood (type=%s); refunding egg." % [q, r, str(data.cell_type)])
+                if is_instance_valid(egg_manager):
+                        egg_manager.refund_egg()
+                return
+        if data.brood_state != HexCell.BroodState.IDLE:
+                print("[Brood] Cell (%d,%d) not idle (state=%s); ignoring assignment." % [q, r, str(data.brood_state)])
+                return
 	print("[Brood] Accepting egg assignment at (%d,%d)." % [q, r])
 	_begin_brood_incubation(axial, data)
 
