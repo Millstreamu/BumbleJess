@@ -17,105 +17,105 @@ var _pending_build_axial: Vector2i = Vector2i.ZERO
 var _has_pending_build: bool = false
 
 const MOVE_VECTORS := {
-    "ui_left": Vector2i(-1, 0),
-    "ui_right": Vector2i(1, 0),
-    "ui_up": Vector2i(0, -1),
-    "ui_down": Vector2i(0, 1),
+	"ui_left": Vector2i(-1, 0),
+	"ui_right": Vector2i(1, 0),
+	"ui_up": Vector2i(0, -1),
+	"ui_down": Vector2i(0, 1),
 }
 
 func _ready() -> void:
-    if hex_grid_path.is_empty():
-        hex_grid_path = NodePath("../HexGrid")
-    if palette_state_path.is_empty():
-        palette_state_path = NodePath("../PaletteState")
-    _hex_grid = get_node_or_null(hex_grid_path)
-    if not _hex_grid:
-        push_warning("InputController could not find HexGrid node at %s" % hex_grid_path)
-    _palette_state = get_node_or_null(palette_state_path)
-    if not _palette_state:
-        push_warning("InputController could not find PaletteState node at %s" % palette_state_path)
-    if bee_roster_path.is_empty():
-        bee_roster_path = NodePath("../BeeRoster")
-    _bee_roster = get_node_or_null(bee_roster_path)
-    if not _bee_roster:
-        push_warning("InputController could not find BeeRoster node at %s" % bee_roster_path)
+	if hex_grid_path.is_empty():
+		hex_grid_path = NodePath("../HexGrid")
+	if palette_state_path.is_empty():
+		palette_state_path = NodePath("../PaletteState")
+	_hex_grid = get_node_or_null(hex_grid_path)
+	if not _hex_grid:
+		push_warning("InputController could not find HexGrid node at %s" % hex_grid_path)
+	_palette_state = get_node_or_null(palette_state_path)
+	if not _palette_state:
+		push_warning("InputController could not find PaletteState node at %s" % palette_state_path)
+	if bee_roster_path.is_empty():
+		bee_roster_path = NodePath("../BeeRoster")
+	_bee_roster = get_node_or_null(bee_roster_path)
+	if not _bee_roster:
+		push_warning("InputController could not find BeeRoster node at %s" % bee_roster_path)
 
 func _unhandled_input(event: InputEvent) -> void:
-    if not _hex_grid:
-        return
+	if not _hex_grid:
+		return
 
-    if event is InputEventKey and event.pressed and not event.echo:
-        if event.physical_keycode == KEY_TAB:
-            if _bee_roster:
-                if _bee_roster.is_open():
-                    _bee_roster.close()
-                else:
-                    if _palette_state and _palette_state.is_open:
-                        _palette_state.close()
-                    _bee_roster.open()
-            get_viewport().set_input_as_handled()
-            return
-        if event.physical_keycode == KEY_Z:
-            if not (_bee_roster and _bee_roster.is_open()):
-                if _palette_state:
-                    if _palette_state.is_open:
-                        _palette_state.close()
-                    _has_pending_build = false
-                    _pending_build_axial = Vector2i.ZERO
-                    if _palette_state.has_in_hand():
-                        _palette_state.clear_in_hand()
-                get_viewport().set_input_as_handled()
-                return
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.physical_keycode == KEY_TAB:
+			if _bee_roster:
+				if _bee_roster.is_open():
+					_bee_roster.close()
+				else:
+					if _palette_state and _palette_state.is_open:
+						_palette_state.close()
+					_bee_roster.open()
+			get_viewport().set_input_as_handled()
+			return
+		if event.physical_keycode == KEY_Z:
+			if not (_bee_roster and _bee_roster.is_open()):
+				if _palette_state:
+					if _palette_state.is_open:
+						_palette_state.close()
+					_has_pending_build = false
+					_pending_build_axial = Vector2i.ZERO
+					if _palette_state.has_in_hand():
+						_palette_state.clear_in_hand()
+				get_viewport().set_input_as_handled()
+				return
 
-    if _bee_roster and _bee_roster.is_open():
-        var roster_handled := _bee_roster.handle_input(event)
-        if _bee_roster.consume_assignment_request():
-            var axial := _hex_grid.get_cursor_axial()
-            _bee_roster.try_assign_to_cell(axial)
-            get_viewport().set_input_as_handled()
-            return
-        if roster_handled:
-            get_viewport().set_input_as_handled()
-            return
+	if _bee_roster and _bee_roster.is_open():
+		var roster_handled := _bee_roster.handle_input(event)
+		if _bee_roster.consume_assignment_request():
+			var axial := _hex_grid.get_cursor_axial()
+			_bee_roster.try_assign_to_cell(axial)
+			get_viewport().set_input_as_handled()
+			return
+		if roster_handled:
+			get_viewport().set_input_as_handled()
+			return
 
-    if _palette_state and _palette_state.is_open:
-        if event.is_action_pressed("ui_left") or event.is_action_pressed("ui_up"):
-            _palette_state.move_selection(-1)
-            get_viewport().set_input_as_handled()
-            return
-        if event.is_action_pressed("ui_right") or event.is_action_pressed("ui_down"):
-            _palette_state.move_selection(1)
-            get_viewport().set_input_as_handled()
-            return
-        if event.is_action_pressed("ui_accept"):
-            var selected_type := _palette_state.confirm_selection()
-            if _has_pending_build and selected_type != CellType.Type.EMPTY:
-                var placed := _hex_grid.try_place_cell(_pending_build_axial, selected_type)
-                if placed:
-                    _hex_grid.clear_selection()
-            if _palette_state.has_in_hand():
-                _palette_state.clear_in_hand()
-            _has_pending_build = false
-            _pending_build_axial = Vector2i.ZERO
-            get_viewport().set_input_as_handled()
-            return
-        return
+	if _palette_state and _palette_state.is_open:
+		if event.is_action_pressed("ui_left") or event.is_action_pressed("ui_up"):
+			_palette_state.move_selection(-1)
+			get_viewport().set_input_as_handled()
+			return
+		if event.is_action_pressed("ui_right") or event.is_action_pressed("ui_down"):
+			_palette_state.move_selection(1)
+			get_viewport().set_input_as_handled()
+			return
+		if event.is_action_pressed("ui_accept"):
+			var selected_type := _palette_state.confirm_selection()
+			if _has_pending_build and selected_type != CellType.Type.EMPTY:
+				var placed := _hex_grid.try_place_cell(_pending_build_axial, selected_type)
+				if placed:
+					_hex_grid.clear_selection()
+			if _palette_state.has_in_hand():
+				_palette_state.clear_in_hand()
+			_has_pending_build = false
+			_pending_build_axial = Vector2i.ZERO
+			get_viewport().set_input_as_handled()
+			return
+		return
 
-    if event.is_action_pressed("ui_accept"):
-        if _bee_roster and _bee_roster.is_assignment_armed():
-            var target := _hex_grid.get_cursor_axial()
-            _bee_roster.try_assign_to_cell(target)
-            get_viewport().set_input_as_handled()
-            return
-        if _palette_state:
-            _pending_build_axial = _hex_grid.get_cursor_axial()
-            _has_pending_build = true
-            _palette_state.open()
-        get_viewport().set_input_as_handled()
-        return
+	if event.is_action_pressed("ui_accept"):
+		if _bee_roster and _bee_roster.is_assignment_armed():
+			var target := _hex_grid.get_cursor_axial()
+			_bee_roster.try_assign_to_cell(target)
+			get_viewport().set_input_as_handled()
+			return
+		if _palette_state:
+			_pending_build_axial = _hex_grid.get_cursor_axial()
+			_has_pending_build = true
+			_palette_state.open()
+		get_viewport().set_input_as_handled()
+		return
 
-    for action in MOVE_VECTORS.keys():
-        if event.is_action_pressed(action):
-            _hex_grid.move_cursor(MOVE_VECTORS[action])
-            get_viewport().set_input_as_handled()
-            return
+	for action in MOVE_VECTORS.keys():
+		if event.is_action_pressed(action):
+			_hex_grid.move_cursor(MOVE_VECTORS[action])
+			get_viewport().set_input_as_handled()
+			return
