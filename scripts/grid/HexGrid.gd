@@ -655,49 +655,49 @@ func cell_bee_count(q: int, r: int) -> int:
 func _set_brood_idle(axial: Vector2i, data: CellData, emit_event: bool = true) -> void:
         data.brood_state = HexCell.BroodState.IDLE
         data.brood_has_egg = false
-	data.brood_hatch_remaining = 0.0
-	_active_brood_timers.erase(axial)
-	var cell: HexCell = cells.get(axial)
-	if cell:
-		cell.set_brood_state(HexCell.BroodState.IDLE, false, 0.0, grid_config.brood_hatch_seconds)
-	if emit_event:
-		emit_signal("brood_state_changed", axial.x, axial.y, HexCell.BroodState.IDLE)
+        data.brood_hatch_remaining = 0.0
+        _active_brood_timers.erase(axial)
+        var cell: HexCell = cells.get(axial)
+        if cell:
+                cell.set_brood_state(HexCell.BroodState.IDLE, false, 0.0, grid_config.brood_hatch_seconds)
+        if emit_event:
+                emit_signal("brood_state_changed", axial.x, axial.y, HexCell.BroodState.IDLE)
 
 func _begin_brood_incubation(axial: Vector2i, data: CellData, emit_event: bool = true) -> void:
-	data.brood_state = HexCell.BroodState.INCUBATING
-	data.brood_has_egg = true
-	data.brood_hatch_remaining = grid_config.brood_hatch_seconds
-	_active_brood_timers[axial] = true
-	set_process(true)
-	var cell: HexCell = cells.get(axial)
-	if cell:
-		cell.set_brood_state(HexCell.BroodState.INCUBATING, true, data.brood_hatch_remaining, grid_config.brood_hatch_seconds)
-		cell.flash()
-	if emit_event:
-		emit_signal("brood_state_changed", axial.x, axial.y, HexCell.BroodState.INCUBATING)
+        data.brood_state = HexCell.BroodState.INCUBATING
+        data.brood_has_egg = true
+        data.brood_hatch_remaining = grid_config.brood_hatch_seconds
+        _active_brood_timers[axial] = true
+        set_process(true)
+        var cell: HexCell = cells.get(axial)
+        if cell:
+                cell.set_brood_state(HexCell.BroodState.INCUBATING, true, data.brood_hatch_remaining, grid_config.brood_hatch_seconds)
+                cell.flash()
+        if emit_event:
+                emit_signal("brood_state_changed", axial.x, axial.y, HexCell.BroodState.INCUBATING)
 
 func _request_egg_for_brood(axial: Vector2i, data: CellData) -> void:
-	var egg_manager := _get_egg_manager()
-	if not is_instance_valid(egg_manager):
-		_set_brood_idle(axial, data)
-		return
-	if egg_manager.request_egg(axial.x, axial.y):
-		_begin_brood_incubation(axial, data)
-	else:
-		_set_brood_idle(axial, data)
+        var egg_manager := _get_egg_manager()
+        if not is_instance_valid(egg_manager):
+                _set_brood_idle(axial, data)
+                return
+        if egg_manager.request_egg(axial.x, axial.y):
+                _begin_brood_incubation(axial, data)
+        else:
+                _set_brood_idle(axial, data)
 
 func _on_egg_assigned(q: int, r: int) -> void:
-	var axial := Vector2i(q, r)
-	var egg_manager := _get_egg_manager()
-	if not _cell_states.has(axial):
-		if is_instance_valid(egg_manager):
-			egg_manager.refund_egg()
-		return
-	var data: CellData = _cell_states[axial]
-	if data.cell_type != CellType.Type.BROOD:
-		if is_instance_valid(egg_manager):
-			egg_manager.refund_egg()
-		return
+        var axial := Vector2i(q, r)
+        var egg_manager := _get_egg_manager()
+        if not _cell_states.has(axial):
+                if is_instance_valid(egg_manager):
+                        egg_manager.refund_egg()
+                return
+        var data: CellData = _cell_states[axial]
+        if data.cell_type != CellType.Type.BROOD:
+                if is_instance_valid(egg_manager):
+                        egg_manager.refund_egg()
+                return
 	if data.brood_state != HexCell.BroodState.IDLE:
 		return
 	_begin_brood_incubation(axial, data)
