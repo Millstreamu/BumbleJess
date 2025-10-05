@@ -698,9 +698,9 @@ func _on_egg_assigned(q: int, r: int) -> void:
                 if is_instance_valid(egg_manager):
                         egg_manager.refund_egg()
                 return
-	if data.brood_state != HexCell.BroodState.IDLE:
-		return
-	_begin_brood_incubation(axial, data)
+        if data.brood_state != HexCell.BroodState.IDLE:
+                return
+        _begin_brood_incubation(axial, data)
 
 func _convert_empty_to_brood(axial: Vector2i, data: CellData) -> void:
 	var brood_color := grid_config.get_color(CellType.Type.BROOD)
