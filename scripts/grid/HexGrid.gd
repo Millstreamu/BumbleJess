@@ -527,8 +527,7 @@ func _finalize_brood_hatch(axial: Vector2i) -> void:
 	emit_signal("brood_state_changed", axial.x, axial.y, HexCell.BroodState.SPENT)
 
 	if _bee_manager:
-		var bee_id: int = _bee_manager.spawn_bee(axial)
-		print("[Brood] Brood at (%d,%d) hatched -> Bee #%d ready for duty." % [axial.x, axial.y, bee_id])
+		_bee_manager.spawn_bee(axial)
 
 func _on_bee_spawned(_bee_id: int) -> void:
 	_refresh_assignment_highlights()
@@ -654,7 +653,6 @@ func _begin_brood_incubation(axial: Vector2i, data: CellData, emit_event: bool =
 	data.brood_hatch_remaining = grid_config.brood_hatch_seconds
 	_active_brood_timers[axial] = true
 	set_process(true)
-	print("[Brood] Egg secured at (%d,%d); incubation started (%.1fs)." % [axial.x, axial.y, data.brood_hatch_remaining])
 	var cell: HexCell = cells.get(axial)
 	if cell:
 		cell.set_brood_state(HexCell.BroodState.INCUBATING, true, data.brood_hatch_remaining, grid_config.brood_hatch_seconds)
@@ -667,32 +665,25 @@ func _request_egg_for_brood(axial: Vector2i, data: CellData) -> void:
 	if not is_instance_valid(egg_manager):
 		_set_brood_idle(axial, data)
 		return
-	print("[Brood] Requesting egg for (%d,%d); brood state %s, has_egg=%s." % [axial.x, axial.y, str(data.brood_state), str(data.brood_has_egg)])
 	if egg_manager.request_egg(axial.x, axial.y):
 		_begin_brood_incubation(axial, data)
 	else:
-		print("[Brood] Brood at (%d,%d) waiting for egg." % [axial.x, axial.y])
 		_set_brood_idle(axial, data)
 
 func _on_egg_assigned(q: int, r: int) -> void:
 	var axial := Vector2i(q, r)
-	print("[Brood] Egg assignment signal received for (%d,%d)." % [q, r])
 	var egg_manager := _get_egg_manager()
 	if not _cell_states.has(axial):
-		print("[Brood] No cell data for (%d,%d); refunding egg." % [q, r])
 		if is_instance_valid(egg_manager):
 			egg_manager.refund_egg()
 		return
 	var data: CellData = _cell_states[axial]
 	if data.cell_type != CellType.Type.BROOD:
-		print("[Brood] Cell (%d,%d) not brood (type=%s); refunding egg." % [q, r, str(data.cell_type)])
 		if is_instance_valid(egg_manager):
 			egg_manager.refund_egg()
 		return
 	if data.brood_state != HexCell.BroodState.IDLE:
-		print("[Brood] Cell (%d,%d) not idle (state=%s); ignoring assignment." % [q, r, str(data.brood_state)])
 		return
-	print("[Brood] Accepting egg assignment at (%d,%d)." % [q, r])
 	_begin_brood_incubation(axial, data)
 
 func _convert_empty_to_brood(axial: Vector2i, data: CellData) -> void:
@@ -702,7 +693,6 @@ func _convert_empty_to_brood(axial: Vector2i, data: CellData) -> void:
 	data.brood_has_egg = false
 	data.brood_hatch_remaining = 0.0
 	data.brood_state = HexCell.BroodState.IDLE
-	print("[Brood] New brood cell established at (%d,%d)." % [axial.x, axial.y])
 
 	var cell: HexCell = cells.get(axial)
 	if cell:
