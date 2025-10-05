@@ -20,6 +20,8 @@ brood_progress_ring_color = Color(1, 1, 1, 0.9)
 brood_damaged_tint = Color(1, 0.7, 0.4, 1)
 brood_spent_tint = Color(1, 0.933333, 0.8, 1)
 assignment_highlight_color = Color(1, 1, 1, 0.25)
+default_bee_cap_per_cell = 1
+disallowed_bee_cells = []
 type_colors = {
 0: Color(0.94902, 0.756863, 0.305882, 1),
 1: Color(0.964706, 0.827451, 0.396078, 1),

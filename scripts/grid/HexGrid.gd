@@ -15,20 +15,6 @@ signal brood_hatched(cells: Array[Vector2i])
 signal brood_state_changed(q: int, r: int, state: int)
 signal bee_slots_changed(q: int, r: int, used: int, cap: int)
 
-const CELL_BEE_CAPS := {
-	CellType.Type.WAX: 1,
-	CellType.Type.VAT: 1,
-	CellType.Type.GUARD: 1,
-	CellType.Type.HALL: 1,
-}
-
-const SPECIALISATION_COMPATIBILITY := {
-	"CONSTRUCTION": [CellType.Type.WAX],
-	"BREWER": [CellType.Type.VAT],
-	"GUARD": [CellType.Type.GUARD],
-	"ARCANIST": [CellType.Type.HALL],
-}
-
 @export var grid_config: GridConfig
 @export var cell_scene: PackedScene = preload("res://scenes/HexCell.tscn")
 @export var cursor_scene: PackedScene = preload("res://scenes/HexCursor.tscn")
@@ -512,22 +498,26 @@ func _process(delta: float) -> void:
 		set_process(false)
 
 func _finalize_brood_hatch(axial: Vector2i) -> void:
-	if not _cell_states.has(axial):
-		return
-	var data: CellData = _cell_states[axial]
-	data.brood_has_egg = false
-	data.brood_hatch_remaining = 0.0
-	data.brood_state = HexCell.BroodState.SPENT
-	_active_brood_timers.erase(axial)
+        if not _cell_states.has(axial):
+                return
+        var data: CellData = _cell_states[axial]
+        data.brood_has_egg = false
+        data.brood_hatch_remaining = 0.0
+        data.brood_state = HexCell.BroodState.DAMAGED
+        _active_brood_timers.erase(axial)
 
-	var cell: HexCell = cells.get(axial)
-	if cell:
-		cell.set_brood_state(HexCell.BroodState.SPENT, false, 0.0, grid_config.brood_hatch_seconds)
-		cell.flash()
-	emit_signal("brood_state_changed", axial.x, axial.y, HexCell.BroodState.SPENT)
+        var cell: HexCell = cells.get(axial)
+        if cell:
+                cell.set_brood_state(HexCell.BroodState.DAMAGED, false, 0.0, grid_config.brood_hatch_seconds)
+                cell.flash()
+        emit_signal("brood_state_changed", axial.x, axial.y, HexCell.BroodState.DAMAGED)
 
-	if _bee_manager:
-		_bee_manager.spawn_bee(axial)
+        var spawned_id := -1
+        if _bee_manager:
+                spawned_id = _bee_manager.spawn_bee(axial)
+        _emit_bee_slots(axial)
+        if spawned_id != -1:
+                print("[Bees] Bee #%d spawned from (%d,%d); brood -> Damaged." % [spawned_id, axial.x, axial.y])
 
 func _on_bee_spawned(_bee_id: int) -> void:
 	_refresh_assignment_highlights()
@@ -567,11 +557,11 @@ func _update_cell_bee_state(axial: Vector2i) -> void:
 	_emit_bee_slots(axial)
 
 func _emit_bee_slots(axial: Vector2i) -> void:
-	if not _cell_states.has(axial):
-		return
-	var cap := get_bee_cap(axial.x, axial.y)
-	var used := get_bee_count(axial.x, axial.y)
-	emit_signal("bee_slots_changed", axial.x, axial.y, used, cap)
+        if not _cell_states.has(axial):
+                return
+        var cap := cell_bee_cap(axial.x, axial.y)
+        var used := cell_bee_count(axial.x, axial.y)
+        emit_signal("bee_slots_changed", axial.x, axial.y, used, cap)
 
 func set_assignment_highlights_for_spec(spec: String) -> void:
 	_current_assignment_spec = spec
@@ -600,45 +590,71 @@ func _clear_assignment_highlights() -> void:
 	_assignment_highlighted.clear()
 
 func get_bee_cap(q: int, r: int) -> int:
-	var axial := Vector2i(q, r)
-	if not _cell_states.has(axial):
-		return 0
-	var data: CellData = _cell_states[axial]
-	return CELL_BEE_CAPS.get(data.cell_type, 0)
+        return cell_bee_cap(q, r)
 
 func get_bee_count(q: int, r: int) -> int:
-	if _bee_manager == null:
-		return 0
-	return _bee_manager.get_bee_count_for_cell(Vector2i(q, r))
+        return cell_bee_count(q, r)
 
-func get_cell_types_for_specialisation(spec: String) -> Array:
-	return SPECIALISATION_COMPATIBILITY.get(spec.to_upper(), [])
+func get_cell_types_for_specialisation(_spec: String) -> Array:
+        ## All non-empty cells are considered eligible in the simplified system.
+        var result: Array = []
+        for axial in _cell_states.keys():
+                var coords: Vector2i = axial
+                if cell_is_eligible_for_bee(coords.x, coords.y):
+                        var cell_type := get_cell_type(coords.x, coords.y)
+                        if not result.has(cell_type):
+                                result.append(cell_type)
+        return result
 
-func can_accept_bee(spec: String, q: int, r: int) -> bool:
-	if spec.to_upper() == "GATHER":
-		return false
-	var cap := get_bee_cap(q, r)
-	if cap <= 0:
-		return false
-	var allowed: Array = get_cell_types_for_specialisation(spec)
-	if allowed.is_empty():
-		return false
-	var cell_type := get_cell_type(q, r)
-	if not allowed.has(cell_type):
-		return false
-	return get_bee_count(q, r) < cap
+func can_accept_bee(_spec: String, q: int, r: int) -> bool:
+        if not cell_is_eligible_for_bee(q, r):
+                return false
+        var cap := cell_bee_cap(q, r)
+        if cap <= 0:
+                return false
+        return cell_bee_count(q, r) < cap
 
-func get_cells_accepting(spec: String) -> Array[Vector2i]:
-	var result: Array[Vector2i] = []
-	for axial in _cell_states.keys():
-		var coords: Vector2i = axial
-		if can_accept_bee(spec, coords.x, coords.y):
-			result.append(coords)
-	return result
+func get_cells_accepting(_spec: String) -> Array[Vector2i]:
+        var result: Array[Vector2i] = []
+        for axial in _cell_states.keys():
+                var coords: Vector2i = axial
+                if can_accept_bee("", coords.x, coords.y):
+                        result.append(coords)
+        return result
+
+func cell_is_eligible_for_bee(q: int, r: int) -> bool:
+        var axial := Vector2i(q, r)
+        if not _cell_states.has(axial):
+                return false
+        var data: CellData = _cell_states[axial]
+        if data.cell_type == CellType.Type.EMPTY:
+                return false
+        if not _ensure_grid_config():
+                return false
+        var disallowed := grid_config.disallowed_bee_cells
+        if disallowed.is_empty():
+                return true
+        var type_keys := CellType.Type.keys()
+        var key := str(data.cell_type)
+        if data.cell_type >= 0 and data.cell_type < type_keys.size():
+                key = String(type_keys[data.cell_type])
+        return not disallowed.has(key)
+
+func cell_bee_cap(q: int, r: int) -> int:
+        if not cell_is_eligible_for_bee(q, r):
+                return 0
+        if not _ensure_grid_config():
+                return 0
+        return max(0, grid_config.default_bee_cap_per_cell)
+
+func cell_bee_count(q: int, r: int) -> int:
+        if _bee_manager == null:
+                return 0
+        return _bee_manager.get_bee_count_for_cell(Vector2i(q, r))
 
 func _set_brood_idle(axial: Vector2i, data: CellData, emit_event: bool = true) -> void:
-	data.brood_state = HexCell.BroodState.IDLE
-	data.brood_has_egg = false
+        data.brood_state = HexCell.BroodState.IDLE
+        data.brood_has_egg = false
 	data.brood_hatch_remaining = 0.0
 	_active_brood_timers.erase(axial)
 	var cell: HexCell = cells.get(axial)

@@ -23,6 +23,8 @@ const CellType := preload("res://scripts/core/CellType.gd")
 @export var assignment_highlight_color: Color = Color(1, 1, 1, 0.25)
 @export var allow_isolated_builds: bool = false
 @export var allow_free_builds: bool = false
+@export var default_bee_cap_per_cell: int = 1
+@export var disallowed_bee_cells: PackedStringArray = PackedStringArray()
 
 func _init() -> void:
     if type_colors.is_empty():
