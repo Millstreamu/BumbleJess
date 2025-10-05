@@ -174,4 +174,3 @@ func _on_bee_list_changed(_a = 0, _b = 0, _c = 0) -> void:
                 new_index = 0
         _selected_index = new_index
         _apply_selection()
-*** End of File
