@@ -91,16 +91,16 @@ func _unhandled_input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 				return
 
-	if _bee_roster and _bee_roster.is_open():
-		var roster_handled := _bee_roster.handle_input(event)
-		if _bee_roster.consume_assignment_request():
-			var axial := _hex_grid.get_cursor_axial()
-			_bee_roster.try_assign_to_cell(axial)
-			get_viewport().set_input_as_handled()
-			return
-		if roster_handled:
-			get_viewport().set_input_as_handled()
-			return
+        if _bee_roster and _bee_roster.is_open():
+                var roster_handled: bool = _bee_roster.handle_input(event)
+                if _bee_roster.consume_assignment_request():
+                        var axial: Vector2i = _hex_grid.get_cursor_axial()
+                        _bee_roster.try_assign_to_cell(axial)
+                        get_viewport().set_input_as_handled()
+                        return
+                if roster_handled:
+                        get_viewport().set_input_as_handled()
+                        return
 
 	if _palette_state and _palette_state.is_open:
 		if event.is_action_pressed("ui_left") or event.is_action_pressed("ui_up"):
@@ -112,11 +112,11 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			return
 		if event.is_action_pressed("ui_accept"):
-			var selected_type := _palette_state.confirm_selection()
-			if _has_pending_build and selected_type != CellType.Type.EMPTY:
-				var placed := _hex_grid.try_place_cell(_pending_build_axial, selected_type)
-				if placed:
-					_hex_grid.clear_selection()
+                        var selected_type: int = _palette_state.confirm_selection()
+                        if _has_pending_build and selected_type != CellType.Type.EMPTY:
+                                var placed: bool = _hex_grid.try_place_cell(_pending_build_axial, selected_type)
+                                if placed:
+                                        _hex_grid.clear_selection()
 			if _palette_state.has_in_hand():
 				_palette_state.clear_in_hand()
 			_has_pending_build = false
@@ -131,11 +131,11 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 
 	if event.is_action_pressed("ui_accept"):
-		if _bee_roster and _bee_roster.is_assignment_armed():
-			var target := _hex_grid.get_cursor_axial()
-			_bee_roster.try_assign_to_cell(target)
-			get_viewport().set_input_as_handled()
-			return
+                if _bee_roster and _bee_roster.is_assignment_armed():
+                        var target: Vector2i = _hex_grid.get_cursor_axial()
+                        _bee_roster.try_assign_to_cell(target)
+                        get_viewport().set_input_as_handled()
+                        return
 		if _palette_state:
 			_pending_build_axial = _hex_grid.get_cursor_axial()
 			_has_pending_build = true
@@ -150,26 +150,26 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 
 func _try_open_assign_picker() -> bool:
-	if not _hex_grid or not _assign_picker:
-		return false
-	var axial := _hex_grid.get_cursor_axial()
-	if not _hex_grid.cell_is_eligible_for_bee(axial.x, axial.y):
-		print("[Bees] No slot available at (%d,%d)." % [axial.x, axial.y])
-		return true
-	var cap := _hex_grid.cell_bee_cap(axial.x, axial.y)
-	var used := _hex_grid.cell_bee_count(axial.x, axial.y)
-	if used >= cap:
-		print("[Bees] No slot available at (%d,%d)." % [axial.x, axial.y])
-		return true
+        if not _hex_grid or not _assign_picker:
+                return false
+        var axial: Vector2i = _hex_grid.get_cursor_axial()
+        if not _hex_grid.cell_is_eligible_for_bee(axial.x, axial.y):
+                print("[Bees] No slot available at (%d,%d)." % [axial.x, axial.y])
+                return true
+        var cap: int = _hex_grid.cell_bee_cap(axial.x, axial.y)
+        var used: int = _hex_grid.cell_bee_count(axial.x, axial.y)
+        if used >= cap:
+                print("[Bees] No slot available at (%d,%d)." % [axial.x, axial.y])
+                return true
 	_assign_picker.open_for_cell(axial)
 	return true
 
 func _try_unassign_current_cell() -> bool:
-	if not _hex_grid:
-		return false
-	var axial := _hex_grid.get_cursor_axial()
-	if _hex_grid.cell_bee_count(axial.x, axial.y) <= 0:
-		return false
+        if not _hex_grid:
+                return false
+        var axial: Vector2i = _hex_grid.get_cursor_axial()
+        if _hex_grid.cell_bee_count(axial.x, axial.y) <= 0:
+                return false
 	if not Engine.has_singleton("BeeManager"):
 		return false
 	var bee_id := BeeManager.get_last_assigned_bee_for_cell(axial)
