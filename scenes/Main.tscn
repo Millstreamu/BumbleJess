@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://main"]
+[gd_scene load_steps=8 format=3 uid="uid://main"]
 
 [ext_resource type="PackedScene" uid="uid://hexgrid" path="res://scenes/HexGrid.tscn" id="1_kg8yr"]
 [ext_resource type="Script" uid="uid://bb7bx1ydmjot5" path="res://scripts/input/InputController.gd" id="2_buqfh"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://dnikp3jekemme" path="res://scripts/input/PaletteState.gd" id="4_k4cvo"]
 [ext_resource type="PackedScene" uid="uid://buildpalette" path="res://scenes/BuildPalette.tscn" id="5_sef0j"]
 [ext_resource type="PackedScene" uid="uid://beeroster" path="res://scenes/BeeRoster.tscn" id="6_m6edk"]
+[ext_resource type="PackedScene" path="res://scenes/ui/AssignBeePicker.tscn" id="7_9g0d0"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("3_p3b4o")
@@ -34,4 +35,7 @@ script = ExtResource("4_k4cvo")
 layout_mode = 3
 
 [node name="BeeRoster" parent="." instance=ExtResource("6_m6edk")]
+layout_mode = 3
+
+[node name="AssignBeePicker" parent="." instance=ExtResource("7_9g0d0")]
 layout_mode = 3

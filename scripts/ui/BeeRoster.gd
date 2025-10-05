@@ -117,31 +117,24 @@ func try_assign_to_cell(axial: Vector2i) -> bool:
 		_set_status("Bee data unavailable.")
 		_assignment_armed = false
 		return false
-	var spec: String = bee.get("specialisation", "GATHER")
-	if spec == "GATHER":
-		_set_status("Gatherers await future field jobs; pick another specialisation.")
-		_assignment_armed = false
-		_update_assignment_highlight()
-		return false
-	if _hex_grid:
-		var cell_type: int = _hex_grid.get_cell_type(axial.x, axial.y)
-		var cap: int = _hex_grid.get_bee_cap(axial.x, axial.y)
-		if cap <= 0:
-			_set_status("%s cannot house bees." % CellType.to_display_name(cell_type))
-			_assignment_armed = false
-			_update_assignment_highlight()
-			return false
-		var allowed: Array = _hex_grid.get_cell_types_for_specialisation(spec)
-		if allowed.is_empty() or not allowed.has(cell_type):
-			_set_status("%s bees cannot work in %s." % [_format_spec(spec), CellType.to_display_name(cell_type)])
-			_assignment_armed = false
-			_update_assignment_highlight()
-			return false
-		if _hex_grid.get_bee_count(axial.x, axial.y) >= cap:
-			_set_status("%s at (%d,%d) is already full." % [CellType.to_display_name(cell_type), axial.x, axial.y])
-			_assignment_armed = false
-			_update_assignment_highlight()
-			return false
+        if _hex_grid:
+                var cell_type: int = _hex_grid.get_cell_type(axial.x, axial.y)
+                if not _hex_grid.cell_is_eligible_for_bee(axial.x, axial.y):
+                        _set_status("%s cannot house bees." % CellType.to_display_name(cell_type))
+                        _assignment_armed = false
+                        _update_assignment_highlight()
+                        return false
+                var cap: int = _hex_grid.cell_bee_cap(axial.x, axial.y)
+                if cap <= 0:
+                        _set_status("%s cannot house bees." % CellType.to_display_name(cell_type))
+                        _assignment_armed = false
+                        _update_assignment_highlight()
+                        return false
+                if _hex_grid.cell_bee_count(axial.x, axial.y) >= cap:
+                        _set_status("%s at (%d,%d) is already full." % [CellType.to_display_name(cell_type), axial.x, axial.y])
+                        _assignment_armed = false
+                        _update_assignment_highlight()
+                        return false
 	var success := BeeManager.assign_to_cell(_selected_bee_id, axial.x, axial.y)
 	if success:
 		_set_status("Bee #%d assigned to (%d,%d)." % [_selected_bee_id, axial.x, axial.y])
