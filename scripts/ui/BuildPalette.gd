@@ -8,8 +8,8 @@ const PaletteState := preload("res://scripts/input/PaletteState.gd")
 @export var palette_state_path: NodePath
 @export var header: String = "Tile Palette"
 
-@onready var _title_label: Label = $Panel/Margin/VBox/Title
-@onready var _items_container: GridContainer = $Panel/Margin/VBox/Items
+@onready var _title_label: Label = get_node_or_null("Panel/Margin/VBox/Title")
+@onready var _items_container: GridContainer = get_node_or_null("Panel/Margin/VBox/Items")
 @onready var _viewport: Viewport = get_viewport()
 
 var _palette_state: PaletteState
@@ -23,7 +23,10 @@ func _ready() -> void:
     if not _palette_state:
         push_warning("BuildPalette requires a PaletteState node")
         return
-    _title_label.text = header
+    if _title_label:
+        _title_label.text = header
+    else:
+        push_warning("BuildPalette missing Title label; skipping header setup")
     visible = false
 
     if _viewport:
@@ -43,6 +46,9 @@ func set_tile_descriptions(descriptions: Dictionary) -> void:
     _refresh_label_tooltips()
 
 func _create_labels() -> void:
+    if not _items_container:
+        push_warning("BuildPalette missing Items container; cannot create labels")
+        return
     for child in _items_container.get_children():
         child.queue_free()
     _labels.clear()
@@ -62,6 +68,8 @@ func _create_labels() -> void:
 func _refresh_counts() -> void:
     for cell_type in _labels.keys():
         var label: Label = _labels[cell_type]
+        if not label:
+            continue
         var base_name := CellType.to_display_name(cell_type)
         var count := _palette_state.get_count(cell_type)
         if count > 0:
@@ -72,6 +80,8 @@ func _refresh_counts() -> void:
 func _refresh_label_tooltips() -> void:
     for cell_type in _labels.keys():
         var label: Label = _labels[cell_type]
+        if not label:
+            continue
         label.tooltip_text = String(_descriptions.get(cell_type, ""))
 
 func _on_palette_opened() -> void:
@@ -95,6 +105,8 @@ func _on_options_changed() -> void:
 func _refresh_selection_visuals(selected_type: int) -> void:
     for cell_type in _labels.keys():
         var label: Label = _labels[cell_type]
+        if not label:
+            continue
         if cell_type == selected_type:
             label.add_theme_color_override("font_color", Color.WHITE)
             label.self_modulate = Color(1, 1, 1, 1)
@@ -106,6 +118,8 @@ func _refresh_selection_visuals(selected_type: int) -> void:
 func _refresh_in_hand_visuals(in_hand_type) -> void:
     for cell_type in _labels.keys():
         var label: Label = _labels[cell_type]
+        if not label:
+            continue
         var base_name := label.text
         if in_hand_type != null and cell_type == in_hand_type:
             if not base_name.ends_with(" *"):
