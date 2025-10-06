@@ -61,7 +61,7 @@ func _generate_grid() -> void:
 			cell.configure(axial, grid_config.cell_size, grid_config.selection_color, color)
 			cells[axial] = cell
 
-                        var data: CellData = CellData.new()
+			var data: CellData = CellData.new()
 			data.set_type(cell_type, color)
 			if cell_type == CellType.Type.TOTEM:
 				data.variant_id = "totem_default"
