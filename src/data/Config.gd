@@ -1,5 +1,4 @@
 extends Node
-class_name Config
 
 var _tiles := {}
 var _deck := {}
@@ -36,14 +35,20 @@ func decay() -> Dictionary:
 func get_variant(category:String, id:String) -> Dictionary:
     if not _tiles.has("variants"):
         return {}
-    var variants := _tiles["variants"]
-    if typeof(variants) != TYPE_DICTIONARY:
+    var variants_data: Variant = _tiles.get("variants")
+    if typeof(variants_data) != TYPE_DICTIONARY:
         return {}
+    var variants: Dictionary = variants_data
     if not variants.has(category):
         return {}
-    for v in variants[category]:
-        if typeof(v) == TYPE_DICTIONARY and v.get("id", "") == id:
-            return v
+    var category_variants_data: Variant = variants.get(category)
+    if typeof(category_variants_data) != TYPE_ARRAY:
+        return {}
+    for v_variant in category_variants_data:
+        if typeof(v_variant) == TYPE_DICTIONARY:
+            var v: Dictionary = v_variant
+            if v.get("id", "") == id:
+                return v
     return {}
 
 func _load_json(path:String) -> Dictionary:
@@ -55,7 +60,7 @@ func _load_json(path:String) -> Dictionary:
         push_error("Unable to open JSON: %s" % path)
         return {}
     var text := f.get_as_text()
-    var data = JSON.parse_string(text)
+    var data: Variant = JSON.parse_string(text)
     if typeof(data) != TYPE_DICTIONARY:
         push_error("Invalid JSON: %s" % path)
         return {}
@@ -68,32 +73,40 @@ func _validate_tiles(t:Dictionary) -> bool:
     if not t.has("categories") or not t.has("variants"):
         _fatal_config("tiles.json missing keys")
         return false
-    var categories = t["categories"]
-    if typeof(categories) != TYPE_ARRAY:
+    var categories_data: Variant = t.get("categories")
+    if typeof(categories_data) != TYPE_ARRAY:
         _fatal_config("tiles.json categories must be an array")
         return false
+    var categories: Array = categories_data
     for c in categories:
         if typeof(c) != TYPE_STRING:
             _fatal_config("tiles.json categories must be strings")
             return false
-    var variants = t["variants"]
-    if typeof(variants) != TYPE_DICTIONARY:
+    var variants_data: Variant = t.get("variants")
+    if typeof(variants_data) != TYPE_DICTIONARY:
         _fatal_config("tiles.json variants must be a dictionary")
         return false
+    var variants: Dictionary = variants_data
     for category in categories:
         if not variants.has(category):
             _fatal_config("tiles.json missing variants for %s" % category)
             return false
-        var entries = variants[category]
-        if typeof(entries) != TYPE_ARRAY:
+        var entries_data: Variant = variants.get(category)
+        if typeof(entries_data) != TYPE_ARRAY:
             _fatal_config("tiles.json variants for %s must be an array" % category)
             return false
-        for entry in entries:
-            if typeof(entry) != TYPE_DICTIONARY:
+        var entries: Array = entries_data
+        for entry_variant in entries:
+            if typeof(entry_variant) != TYPE_DICTIONARY:
                 _fatal_config("tiles.json variant entries must be dictionaries")
                 return false
-            var vid = entry.get("id", "")
-            if typeof(vid) != TYPE_STRING or vid.is_empty():
+            var entry: Dictionary = entry_variant
+            var vid_variant: Variant = entry.get("id", "")
+            if typeof(vid_variant) != TYPE_STRING:
+                _fatal_config("tiles.json variant id missing for %s" % category)
+                return false
+            var vid: String = vid_variant
+            if vid.is_empty():
                 _fatal_config("tiles.json variant id missing for %s" % category)
                 return false
             if not entry.has("effects") or typeof(entry["effects"]) != TYPE_DICTIONARY:
@@ -108,25 +121,29 @@ func _validate_deck(d:Dictionary) -> bool:
     if not d.has("distribution"):
         _fatal_config("deck.json missing distribution")
         return false
-    var distribution = d["distribution"]
-    if typeof(distribution) != TYPE_DICTIONARY:
+    var distribution_data: Variant = d.get("distribution")
+    if typeof(distribution_data) != TYPE_DICTIONARY:
         _fatal_config("deck.json distribution must be a dictionary")
         return false
+    var distribution: Dictionary = distribution_data
     for k in distribution.keys():
-        if typeof(distribution[k]) != TYPE_INT:
+        var count_variant: Variant = distribution.get(k)
+        if typeof(count_variant) != TYPE_INT:
             _fatal_config("deck.json distribution values must be int")
             return false
     return true
 
 func _fatal_config(msg:String) -> void:
     push_error(msg)
-    var tree := get_tree()
+    var tree: SceneTree = get_tree()
     if tree == null:
         return
     var error_scene := "res://scenes/ui/ErrorPanel.tscn"
     if ResourceLoader.exists(error_scene):
         tree.change_scene_to_file(error_scene)
         return
-    var main_scene := ProjectSettings.get_setting("application/run/main_scene", "")
-    if typeof(main_scene) == TYPE_STRING and main_scene != "":
-        tree.change_scene_to_file(main_scene)
+    var main_scene_variant: Variant = ProjectSettings.get_setting("application/run/main_scene", "")
+    if typeof(main_scene_variant) == TYPE_STRING:
+        var main_scene: String = main_scene_variant
+        if main_scene != "":
+            tree.change_scene_to_file(main_scene)

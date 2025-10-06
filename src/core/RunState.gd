@@ -1,5 +1,4 @@
 extends Node
-class_name RunState
 
 const Deck := preload("res://src/systems/Deck.gd")
 
