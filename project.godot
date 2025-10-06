@@ -14,8 +14,6 @@ config/name="Sprouts"
 run/main_scene="res://scenes/Main.tscn"
 config/features=PackedStringArray("4.4")
 
-[autoload]
-
 [input]
 
 ui_accept={
