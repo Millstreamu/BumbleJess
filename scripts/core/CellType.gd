@@ -1,51 +1,77 @@
 extends RefCounted
-## Enumerates the specialized cell types that can appear on the hex grid.
+## Enumerates the tile roles used throughout the forest regrowth prototype.
 class_name CellType
 
 enum Type {
-    QUEEN_SEAT,
-    WAX,
-    VAT,
+    TOTEM,
+    HARVEST,
+    BUILD,
+    REFINE,
     STORAGE,
-    GATHERING,
     GUARD,
-    HALL,
-    BROOD,
+    UPGRADE,
+    CHANTING,
+    GROVE,
+    OVERGROWTH,
+    DECAY,
     EMPTY,
 }
 
 static func buildable_types() -> Array[int]:
     return [
-        Type.GATHERING,
-        Type.WAX,
-        Type.VAT,
-        Type.GUARD,
-        Type.HALL,
+        Type.HARVEST,
+        Type.BUILD,
+        Type.REFINE,
         Type.STORAGE,
+        Type.GUARD,
+        Type.UPGRADE,
+        Type.CHANTING,
     ]
 
 static func to_display_name(cell_type: int) -> String:
     match cell_type:
-        Type.QUEEN_SEAT:
-            return "Queen Seat"
-        Type.WAX:
-            return "Wax"
-        Type.VAT:
-            return "Vat"
+        Type.TOTEM:
+            return "Totem"
+        Type.HARVEST:
+            return "Harvest"
+        Type.BUILD:
+            return "Build"
+        Type.REFINE:
+            return "Refine"
         Type.STORAGE:
             return "Storage"
-        Type.GATHERING:
-            return "Gathering"
         Type.GUARD:
             return "Guard"
-        Type.HALL:
-            return "Hall"
-        Type.BROOD:
-            return "Brood"
+        Type.UPGRADE:
+            return "Upgrade"
+        Type.CHANTING:
+            return "Chanting"
+        Type.GROVE:
+            return "Grove"
+        Type.OVERGROWTH:
+            return "Overgrowth"
+        Type.DECAY:
+            return "Decay"
         Type.EMPTY:
             return "Empty"
         _:
             return "Unknown"
 
-static func is_specialized(cell_type: int) -> bool:
-    return cell_type != Type.EMPTY
+static func is_placeable(cell_type: int) -> bool:
+    return buildable_types().has(cell_type)
+
+static func is_network_member(cell_type: int) -> bool:
+    return cell_type != Type.EMPTY and cell_type != Type.DECAY
+
+static func to_key(cell_type: int) -> String:
+    var keys := Type.keys()
+    if cell_type >= 0 and cell_type < keys.size():
+        return String(keys[cell_type])
+    return str(cell_type)
+
+static func from_key(key: String) -> int:
+    var keys := Type.keys()
+    for i in range(keys.size()):
+        if String(keys[i]) == key:
+            return i
+    return Type.EMPTY

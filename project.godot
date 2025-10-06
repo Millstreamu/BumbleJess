@@ -10,15 +10,11 @@ config_version=5
 
 [application]
 
-config/name="Bee Hive"
+config/name="Sprouts"
 run/main_scene="res://scenes/Main.tscn"
 config/features=PackedStringArray("4.4")
 
 [autoload]
-
-ResourceManager="*res://scripts/core/ResourceManager.gd"
-EggManager="*res://scripts/core/EggManager.gd"
-BeeManager="*res://scripts/core/BeeManager.gd"
 
 [input]
 

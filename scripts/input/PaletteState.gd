@@ -1,5 +1,5 @@
 extends Node
-## Tracks the currently selected build option and the in-hand cell type.
+## Tracks the currently selected tile option and the in-hand tile type.
 class_name PaletteState
 
 const CellType := preload("res://scripts/core/CellType.gd")
@@ -8,13 +8,36 @@ signal palette_opened()
 signal palette_closed()
 signal selection_changed(selected_type: int)
 signal in_hand_changed(in_hand_type)
+signal options_changed()
 
-var buildable_types: Array[int] = CellType.buildable_types()
+var buildable_types: Array[int] = []
+var type_counts: Dictionary = {}
 var is_open: bool = false
 var selected_index: int = 0
 const NO_IN_HAND := -1
 
 var in_hand_type: int = NO_IN_HAND
+
+func set_options(types: Array[int], counts: Dictionary = {}) -> void:
+    buildable_types = types.duplicate()
+    type_counts = {}
+    for key in counts.keys():
+        type_counts[key] = int(counts[key])
+    if buildable_types.is_empty():
+        selected_index = 0
+    else:
+        selected_index = clamp(selected_index, 0, buildable_types.size() - 1)
+    emit_signal("options_changed")
+    if not buildable_types.is_empty():
+        emit_signal("selection_changed", get_selected_type())
+
+func update_counts(counts: Dictionary) -> void:
+    for key in counts.keys():
+        type_counts[key] = int(counts[key])
+    emit_signal("options_changed")
+
+func get_count(cell_type: int) -> int:
+    return int(type_counts.get(cell_type, 0))
 
 func toggle_open() -> void:
     if is_open:
@@ -24,6 +47,8 @@ func toggle_open() -> void:
 
 func open() -> void:
     if is_open:
+        return
+    if buildable_types.is_empty():
         return
     is_open = true
     if has_in_hand():
@@ -49,6 +74,8 @@ func confirm_selection() -> int:
     if buildable_types.is_empty():
         return CellType.Type.EMPTY
     var selected_type := get_selected_type()
+    if get_count(selected_type) <= 0:
+        return CellType.Type.EMPTY
     in_hand_type = selected_type
     emit_signal("in_hand_changed", selected_type)
     close()
