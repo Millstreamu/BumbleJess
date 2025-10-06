@@ -194,8 +194,8 @@ func get_total_sprouts() -> int:
 		total += data.sprout_count
 	return total
 
-func collect_clusters(cell_type: int) -> Array[Array[Vector2i]]:
-	var clusters: Array[Array[Vector2i]] = []
+func collect_clusters(cell_type: int) -> Array:
+        var clusters: Array = []
 	var visited: Dictionary = {}
 	for axial in _cell_states.keys():
 		var data: CellData = _cell_states[axial]
@@ -203,8 +203,8 @@ func collect_clusters(cell_type: int) -> Array[Array[Vector2i]]:
 			continue
 		if visited.has(axial):
 			continue
-		var cluster: Array[Vector2i] = []
-		var pending: Array[Vector2i] = [axial]
+                var cluster: Array[Vector2i] = []
+                var pending: Array[Vector2i] = [axial]
 		while not pending.is_empty():
 			var current := pending.pop_back()
 			if visited.has(current):
