@@ -113,12 +113,12 @@ func get_cell_data(axial: Vector2i) -> CellData:
 	return _cell_states.get(axial)
 
 func get_neighbors(axial: Vector2i) -> Array[Vector2i]:
-	var result: Array[Vector2i] = []
-	for direction in Coord.DIRECTIONS:
-		var neighbor := axial + direction
-		if _cell_states.has(neighbor):
-			result.append(neighbor)
-	return result
+        var result: Array[Vector2i] = []
+        for direction in Coord.DIRECTIONS:
+                var neighbor: Vector2i = axial + direction
+                if _cell_states.has(neighbor):
+                        result.append(neighbor)
+        return result
 
 func get_cells_of_type(cell_type: int) -> Array[Vector2i]:
 	var positions: Array[Vector2i] = []
@@ -203,13 +203,13 @@ func collect_clusters(cell_type: int) -> Array:
 			continue
 		if visited.has(axial):
 			continue
-		var cluster: Array[Vector2i] = []
-		var pending: Array[Vector2i] = [axial]
-		while not pending.is_empty():
-			var current := pending.pop_back()
-			if visited.has(current):
-				continue
-			visited[current] = true
+                var cluster: Array[Vector2i] = []
+                var pending: Array[Vector2i] = [axial]
+                while not pending.is_empty():
+                        var current: Vector2i = pending.pop_back()
+                        if visited.has(current):
+                                continue
+                        visited[current] = true
 			cluster.append(current)
 			for neighbor in get_neighbors(current):
 				if visited.has(neighbor):
@@ -258,10 +258,10 @@ func _recompute_overgrowth() -> void:
 		if outside.has(current):
 			continue
 		outside[current] = true
-		for direction in Coord.DIRECTIONS:
-			var neighbor := current + direction
-			if not _cell_states.has(neighbor):
-				continue
+                for direction in Coord.DIRECTIONS:
+                        var neighbor: Vector2i = current + direction
+                        if not _cell_states.has(neighbor):
+                                continue
 			var neighbor_data: CellData = _cell_states[neighbor]
 			if neighbor_data.cell_type != CellType.Type.EMPTY:
 				continue
