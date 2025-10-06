@@ -195,7 +195,7 @@ func get_total_sprouts() -> int:
 	return total
 
 func collect_clusters(cell_type: int) -> Array:
-        var clusters: Array = []
+	var clusters: Array = []
 	var visited: Dictionary = {}
 	for axial in _cell_states.keys():
 		var data: CellData = _cell_states[axial]
