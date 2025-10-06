@@ -9,9 +9,9 @@ const SQRT3 := sqrt(3.0)
 ## Direction vectors for the six neighboring axial coordinates. The order is
 ## clockwise starting at the eastern neighbor.
 const DIRECTIONS: Array[Vector2i] = [
-        Vector2i(1, 0),
-        Vector2i(0, 1),
-        Vector2i(-1, 1),
+		Vector2i(1, 0),
+		Vector2i(0, 1),
+		Vector2i(-1, 1),
 	Vector2i(-1, 0),
 	Vector2i(0, -1),
 	Vector2i(1, -1),
