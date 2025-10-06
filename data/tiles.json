@@ -1,66 +1,77 @@
 {
-  "Harvest": {
-    "id": "harvest_default",
-    "name": "Harvest Tile",
-    "summary": "Generates Nature Essence per adjacent Grove; expands Nature capacity.",
-    "details": [
-      "Nature Essence: +1 per adjacent Grove each turn.",
-      "Nature Capacity: +5 per Harvest tile.",
-      "Harvest clusters grant +10 Nature capacity per tile."
-    ]
-  },
-  "Build": {
-    "id": "build_default",
-    "name": "Build Tile",
-    "summary": "Produces Earth Essence and provides structure for adjacent systems.",
-    "details": [
-      "Earth Essence: +1 each turn.",
-      "Earth Capacity: +5 per Build tile.",
-      "Supports Refine and Guard tiles that are adjacent."
-    ]
-  },
-  "Refine": {
-    "id": "refine_default",
-    "name": "Refine Tile",
-    "summary": "Condenses Nature and Earth Essence into Water Essence when linked.",
-    "details": [
-      "Water Essence: +1 each turn if adjacent to Nature and Earth producers.",
-      "Water Capacity: +5 per Refine tile.",
-      "Refine clusters double Water Essence output."
-    ]
-  },
-  "Storage": {
-    "id": "storage_default",
-    "name": "Storage Tile",
-    "summary": "Expands capacity for nearby producers.",
-    "details": [
-      "Adds +5 capacity to each adjacent Harvest, Build, or Refine tile.",
-      "Storage tiles do not generate Essence on their own."
-    ]
-  },
-  "Guard": {
-    "id": "guard_default",
-    "name": "Guard Tile",
-    "summary": "Hosts Sprouts who defend nearby hexes.",
-    "details": [
-      "Base Sprout capacity: 5 Sprouts per Guard tile.",
-      "Battles trigger within a 3-hex radius (not yet implemented)."
-    ]
-  },
-  "Upgrade": {
-    "id": "upgrade_default",
-    "name": "Upgrade Tile",
-    "summary": "Forges items for Sprouts over time.",
-    "details": [
-      "Creates combat items on a timer (systems stubbed in the prototype)."
-    ]
-  },
-  "Chanting": {
-    "id": "chanting_default",
-    "name": "Chanting Tile",
-    "summary": "Builds rituals that unleash powerful one-time spells.",
-    "details": [
-      "Generates ritual progress toward a spell (effects stubbed in the prototype)."
+  "categories": ["Harvest","Build","Refine","Storage","Guard","Upgrade","Chanting","Grove"],
+  "variants": {
+    "Harvest": [
+      {
+        "id": "harvest_default",
+        "name": "Harvest — Default",
+        "effects": {
+          "nature_per_adjacent_grove": 1,
+          "cluster_global_cap_bonus": 10
+        }
+      }
+    ],
+    "Build": [
+      {
+        "id": "build_default",
+        "effects": {
+          "earth_per_turn": 1
+        }
+      }
+    ],
+    "Refine": [
+      {
+        "id": "refine_default",
+        "effects": {
+          "cooldown_turns": 2,
+          "convert": {
+            "nature": 1,
+            "earth": 1,
+            "water": 1
+          }
+        }
+      }
+    ],
+    "Storage": [
+      {
+        "id": "storage_default",
+        "effects": {
+          "adjacent_capacity_bonus": 5
+        }
+      }
+    ],
+    "Guard": [
+      {
+        "id": "guard_default",
+        "effects": {
+          "sprout_slots": 5,
+          "battle_range": 3
+        }
+      }
+    ],
+    "Upgrade": [
+      {
+        "id": "upgrade_default",
+        "effects": {
+          "item_timer": 3
+        }
+      }
+    ],
+    "Chanting": [
+      {
+        "id": "chant_default",
+        "effects": {
+          "ritual_pool": ["cleanse_adjacent"]
+        }
+      }
+    ],
+    "Grove": [
+      {
+        "id": "grove_base",
+        "effects": {
+          "spawns_sprout": true
+        }
+      }
     ]
   }
 }

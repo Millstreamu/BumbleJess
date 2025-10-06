@@ -1,0 +1,41 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/ui/Draft.gd" id="1"]
+
+[node name="Draft" type="Control"]
+script = ExtResource("1")
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -640.0
+offset_top = -360.0
+offset_right = 640.0
+offset_bottom = 360.0
+
+[node name="Root" type="VBoxContainer" parent="."]
+layout_mode = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = 40.0
+offset_right = -40.0
+offset_bottom = -40.0
+alignment = BoxContainer.ALIGNMENT_CENTER
+
+[node name="CategoryLabel" type="Label" parent="Root"]
+layout_mode = 2
+text = ""
+horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+
+[node name="CardContainer" type="HBoxContainer" parent="Root"]
+layout_mode = 2
+size_flags_vertical = Control.SIZE_EXPAND_FILL
+alignment = BoxContainer.ALIGNMENT_CENTER
+separation = 24
+
+[node name="InstructionsLabel" type="Label" parent="Root"]
+layout_mode = 2
+text = "Use ←/→ to choose, Space to confirm, Z to go back"
+horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
