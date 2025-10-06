@@ -10,39 +10,35 @@ const CellType := preload("res://scripts/core/CellType.gd")
 @export var cell_size: float = 41.6
 @export var cell_color: Color = Color.TRANSPARENT
 @export var buildable_highlight_color: Color = Color(0.8, 0.8, 0.8, 0.35)
-@export var queen_color: Color = Color("#f2c14e")
+@export var totem_color: Color = Color("#d0f4a7")
 @export var cursor_color: Color = Color("#f7f7ff")
-@export var selection_color: Color = Color("#f08a4b")
-@export var background_color: Color = Color("#2a2a2a")
+@export var selection_color: Color = Color("#a0e3b2")
+@export var background_color: Color = Color("#1e2a22")
 @export var type_colors: Dictionary = {}
-@export var brood_hatch_seconds: float = 10.0
-@export var brood_progress_ring_width: float = 2.0
-@export var brood_progress_ring_color: Color = Color(1, 1, 1, 0.9)
-@export var brood_damaged_tint: Color = Color(1.0, 0.7, 0.4, 1.0)
-@export var brood_spent_tint: Color = Color(1.0, 0.9, 0.7, 1.0)
-@export var assignment_highlight_color: Color = Color(1, 1, 1, 0.25)
+@export var overgrowth_maturation_turns: int = 3
+@export var grove_spawn_count: int = 1
 @export var allow_isolated_builds: bool = false
-@export var allow_free_builds: bool = false
-@export var default_bee_cap_per_cell: int = 1
-@export var disallowed_bee_cells: PackedStringArray = PackedStringArray()
 
 func _init() -> void:
     if type_colors.is_empty():
         _assign_default_colors()
 
 func get_color(cell_type: int) -> Color:
-    if cell_type == CellType.Type.QUEEN_SEAT:
-        return queen_color
+    if cell_type == CellType.Type.TOTEM:
+        return totem_color
     return type_colors.get(cell_type, cell_color)
 
 func _assign_default_colors() -> void:
     type_colors = {
         CellType.Type.EMPTY: cell_color,
-        CellType.Type.WAX: Color("#f6d365"),
-        CellType.Type.VAT: Color("#9b5de5"),
-        CellType.Type.STORAGE: Color("#6c584c"),
-        CellType.Type.GATHERING: Color("#4caf50"),
-        CellType.Type.GUARD: Color("#f15bb5"),
-        CellType.Type.HALL: Color("#00bbf9"),
-        CellType.Type.BROOD: Color("#ff9f1c"),
+        CellType.Type.HARVEST: Color("#7bc96f"),
+        CellType.Type.BUILD: Color("#a26a42"),
+        CellType.Type.REFINE: Color("#6ec6ff"),
+        CellType.Type.STORAGE: Color("#7c6f64"),
+        CellType.Type.GUARD: Color("#ef798a"),
+        CellType.Type.UPGRADE: Color("#f9a03f"),
+        CellType.Type.CHANTING: Color("#b497d6"),
+        CellType.Type.GROVE: Color("#4caf50"),
+        CellType.Type.OVERGROWTH: Color("#2e7d32"),
+        CellType.Type.DECAY: Color("#46364a"),
     }

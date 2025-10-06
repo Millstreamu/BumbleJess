@@ -1,0 +1,66 @@
+{
+  "Harvest": {
+    "id": "harvest_default",
+    "name": "Harvest Tile",
+    "summary": "Generates Nature Essence per adjacent Grove; expands Nature capacity.",
+    "details": [
+      "Nature Essence: +1 per adjacent Grove each turn.",
+      "Nature Capacity: +5 per Harvest tile.",
+      "Harvest clusters grant +10 Nature capacity per tile."
+    ]
+  },
+  "Build": {
+    "id": "build_default",
+    "name": "Build Tile",
+    "summary": "Produces Earth Essence and provides structure for adjacent systems.",
+    "details": [
+      "Earth Essence: +1 each turn.",
+      "Earth Capacity: +5 per Build tile.",
+      "Supports Refine and Guard tiles that are adjacent."
+    ]
+  },
+  "Refine": {
+    "id": "refine_default",
+    "name": "Refine Tile",
+    "summary": "Condenses Nature and Earth Essence into Water Essence when linked.",
+    "details": [
+      "Water Essence: +1 each turn if adjacent to Nature and Earth producers.",
+      "Water Capacity: +5 per Refine tile.",
+      "Refine clusters double Water Essence output."
+    ]
+  },
+  "Storage": {
+    "id": "storage_default",
+    "name": "Storage Tile",
+    "summary": "Expands capacity for nearby producers.",
+    "details": [
+      "Adds +5 capacity to each adjacent Harvest, Build, or Refine tile.",
+      "Storage tiles do not generate Essence on their own."
+    ]
+  },
+  "Guard": {
+    "id": "guard_default",
+    "name": "Guard Tile",
+    "summary": "Hosts Sprouts who defend nearby hexes.",
+    "details": [
+      "Base Sprout capacity: 5 Sprouts per Guard tile.",
+      "Battles trigger within a 3-hex radius (not yet implemented)."
+    ]
+  },
+  "Upgrade": {
+    "id": "upgrade_default",
+    "name": "Upgrade Tile",
+    "summary": "Forges items for Sprouts over time.",
+    "details": [
+      "Creates combat items on a timer (systems stubbed in the prototype)."
+    ]
+  },
+  "Chanting": {
+    "id": "chanting_default",
+    "name": "Chanting Tile",
+    "summary": "Builds rituals that unleash powerful one-time spells.",
+    "details": [
+      "Generates ritual progress toward a spell (effects stubbed in the prototype)."
+    ]
+  }
+}
