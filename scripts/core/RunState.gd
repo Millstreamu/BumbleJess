@@ -322,7 +322,8 @@ func _recalculate_resources() -> void:
         if not _resources.has(key):
             continue
         var cap := int(_resources[key]["capacity"])
-        var new_total := _resources[key]["current"] + int(generation[key])
+        var current_amount: int = int(_resources[key]["current"])
+        var new_total: int = current_amount + int(generation[key])
         if cap > 0 and key != "life":
             new_total = min(new_total, cap)
         _resources[key]["current"] = new_total
