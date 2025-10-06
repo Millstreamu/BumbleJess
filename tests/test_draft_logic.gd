@@ -1,13 +1,17 @@
 extends RefCounted
 
-const DraftScene := preload("res://scenes/Draft.tscn")
+const DraftScene: PackedScene = preload("res://scenes/Draft.tscn")
 
 func _instantiate_draft() -> Control:
-    var tree := Engine.get_main_loop()
+    var tree: MainLoop = Engine.get_main_loop()
     if not (tree is SceneTree):
         return null
-    var draft := DraftScene.instantiate()
-    tree.root.add_child(draft)
+    var scene_tree: SceneTree = tree
+    var draft_instance: Node = DraftScene.instantiate()
+    if not (draft_instance is Control):
+        return null
+    var draft: Control = draft_instance
+    scene_tree.root.add_child(draft)
     return draft
 
 func _cleanup_draft(draft:Control) -> void:
@@ -27,10 +31,11 @@ func test_draft_selects_all_categories() -> bool:
     draft.draft_completed.connect(func(): completed = true)
     for i in range(7):
         draft._confirm_pick()
-    var expected := ["Harvest","Build","Refine","Storage","Guard","Upgrade","Chanting"]
-    var chosen := RunState.chosen_variants
+    var expected: Array = ["Harvest","Build","Refine","Storage","Guard","Upgrade","Chanting"]
+    var chosen: Dictionary = RunState.chosen_variants
     var success := completed and chosen.size() == expected.size()
-    for cat in expected:
+    for category_variant in expected:
+        var cat: String = str(category_variant)
         success = success and chosen.has(cat)
     _cleanup_draft(draft)
     return success
@@ -42,8 +47,8 @@ func test_go_back_resets_previous_choice() -> bool:
     if draft == null:
         return false
     draft._confirm_pick()
-    var progressed := draft._index == 1
+    var progressed: bool = draft._index == 1
     draft._go_back()
-    var reset := draft._index == 0 and not draft._picked.has("Harvest")
+    var reset: bool = draft._index == 0 and not draft._picked.has("Harvest")
     _cleanup_draft(draft)
     return progressed and reset
