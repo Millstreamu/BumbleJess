@@ -195,27 +195,27 @@ func get_total_sprouts() -> int:
         return total
 
 func collect_clusters(cell_type: int) -> Array:
-        var clusters: Array = []
-        var visited: Dictionary[Vector2i, bool] = {}
+	var clusters: Array = []
+	var visited: Dictionary[Vector2i, bool] = {}
 	for axial in _cell_states.keys():
 		var data: CellData = _cell_states[axial]
 		if data.cell_type != cell_type:
 			continue
 		if visited.has(axial):
 			continue
-                var cluster: Array[Vector2i] = []
-                var pending: Array[Vector2i] = [axial]
-                while not pending.is_empty():
-                        var current: Vector2i = pending.pop_back()
-                        if visited.has(current):
-                                continue
-                        visited[current] = true
-                        cluster.append(current)
-                        for neighbor: Vector2i in get_neighbors(current):
-                                if visited.has(neighbor):
-                                        continue
-                                if get_cell_type_at(neighbor) == cell_type:
-                                        pending.append(neighbor)
+		var cluster: Array[Vector2i] = []
+		var pending: Array[Vector2i] = [axial]
+		while not pending.is_empty():
+			var current: Vector2i = pending.pop_back()
+			if visited.has(current):
+				continue
+			visited[current] = true
+			cluster.append(current)
+			for neighbor: Vector2i in get_neighbors(current):
+				if visited.has(neighbor):
+					continue
+				if get_cell_type_at(neighbor) == cell_type:
+					pending.append(neighbor)
 		if not cluster.is_empty():
 			clusters.append(cluster)
 	return clusters
