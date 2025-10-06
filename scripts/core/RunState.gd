@@ -1,6 +1,5 @@
 extends Node
 ## Coordinates deck management, turn resolution, and resource tracking for a run.
-class_name RunState
 
 const CellType := preload("res://scripts/core/CellType.gd")
 const HexGrid := preload("res://scripts/grid/HexGrid.gd")

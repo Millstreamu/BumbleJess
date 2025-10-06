@@ -3,6 +3,10 @@ extends SceneTree
 const TEST_SCRIPTS := [
         preload("res://tests/grid_test.gd"),
         preload("res://tests/placement_rules_test.gd"),
+        preload("res://tests/test_config_load.gd"),
+        preload("res://tests/test_tiletypes.gd"),
+        preload("res://tests/test_draft_logic.gd"),
+        preload("res://tests/test_deck_build.gd"),
 ]
 
 func _init() -> void:
