@@ -67,9 +67,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 		if event.is_action_pressed("ui_accept"):
 			var selected_type: int = _palette_state.confirm_selection()
-						if selected_type != CellType.Type.EMPTY and _has_pending_build and _run_state:
-								var placed: bool = _run_state.try_place_tile(_pending_build_axial, selected_type)
-								if placed:
+			if selected_type != CellType.Type.EMPTY and _has_pending_build and _run_state:
+				var placed: bool = _run_state.try_place_tile(_pending_build_axial, selected_type)
+				if placed:
 					_has_pending_build = false
 					if _palette_state and _palette_state.has_in_hand():
 						_palette_state.clear_in_hand()

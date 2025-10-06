@@ -6,9 +6,12 @@ func _basic_chosen() -> Dictionary:
     if typeof(variants) != TYPE_DICTIONARY:
         return chosen
     for cat in Config.tiles().get("categories", []):
-        var pool := variants.get(cat, [])
-        if typeof(pool) == TYPE_ARRAY and pool.size() > 0:
-            chosen[cat] = pool[0].get("id", "")
+        var maybe_pool = variants.get(cat, [])
+        if typeof(maybe_pool) == TYPE_ARRAY:
+            var pool_array := maybe_pool as Array
+            if pool_array.size() > 0:
+                var first_variant := pool_array[0] as Dictionary
+                chosen[cat] = first_variant.get("id", "")
     return chosen
 
 func _distribution_total(dist:Dictionary) -> int:
