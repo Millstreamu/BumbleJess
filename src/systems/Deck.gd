@@ -10,9 +10,12 @@ static func build_deck(chosen:Dictionary, distribution:Dictionary, seed:int) -> 
         var vid := str(chosen.get(cat, ""))
         if vid.is_empty():
             if typeof(tile_variants) == TYPE_DICTIONARY:
-                var pool := tile_variants.get(cat, [])
-                if typeof(pool) == TYPE_ARRAY and pool.size() > 0:
-                    vid = str(pool[0].get("id", ""))
+                var maybe_pool = tile_variants.get(cat, [])
+                if typeof(maybe_pool) == TYPE_ARRAY:
+                    var pool_array := maybe_pool as Array
+                    if pool_array.size() > 0:
+                        var first_variant := pool_array[0] as Dictionary
+                        vid = str(first_variant.get("id", ""))
             if vid.is_empty():
                 push_warning("Missing chosen variant for %s" % cat)
                 continue

@@ -32,11 +32,11 @@ func _show_category(idx:int) -> void:
     _render_cards(cat, _choices)
 
 func _sample_three(cat:String) -> Array:
-    var variants := []
+    var variants: Array = []
     if Config.tiles().has("variants"):
-        var pool = Config.tiles()["variants"].get(cat, [])
-        if typeof(pool) == TYPE_ARRAY:
-            variants = pool.duplicate(true)
+        var maybe_pool = Config.tiles()["variants"].get(cat, [])
+        if typeof(maybe_pool) == TYPE_ARRAY:
+            variants = (maybe_pool as Array).duplicate(true)
     var available := variants.size()
     if available <= 0:
         return []
