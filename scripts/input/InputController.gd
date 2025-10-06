@@ -8,11 +8,11 @@ extends Node
 const CellType := preload("res://scripts/core/CellType.gd")
 const HexGrid := preload("res://scripts/grid/HexGrid.gd")
 const PaletteState := preload("res://scripts/input/PaletteState.gd")
-const RunState := preload("res://scripts/core/RunState.gd")
+const RunStateController := preload("res://scripts/core/RunState.gd")
 
 var _hex_grid: HexGrid
 var _palette_state: PaletteState
-var _run_state: RunState
+var _run_state: RunStateController
 var _pending_build_axial: Vector2i = Vector2i.ZERO
 var _has_pending_build: bool = false
 
