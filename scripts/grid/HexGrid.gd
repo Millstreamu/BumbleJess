@@ -17,8 +17,8 @@ signal grove_bloomed(cells: Array[Vector2i])
 @export var cell_scene: PackedScene = preload("res://scenes/HexCell.tscn")
 @export var cursor_scene: PackedScene = preload("res://scenes/HexCursor.tscn")
 
-var cells: Dictionary = {}
-var _cell_states: Dictionary = {}
+var cells: Dictionary[Vector2i, HexCell] = {}
+var _cell_states: Dictionary[Vector2i, CellData] = {}
 var _cursor_node: HexCursor
 var _cursor_axial: Vector2i = Vector2i.ZERO
 
@@ -61,7 +61,7 @@ func _generate_grid() -> void:
 			cell.configure(axial, grid_config.cell_size, grid_config.selection_color, color)
 			cells[axial] = cell
 
-			var data := CellData.new()
+                        var data: CellData = CellData.new()
 			data.set_type(cell_type, color)
 			if cell_type == CellType.Type.TOTEM:
 				data.variant_id = "totem_default"
@@ -114,7 +114,7 @@ func get_cell_data(axial: Vector2i) -> CellData:
 
 func get_neighbors(axial: Vector2i) -> Array[Vector2i]:
         var result: Array[Vector2i] = []
-        for direction in Coord.DIRECTIONS:
+        for direction: Vector2i in Coord.DIRECTIONS:
                 var neighbor: Vector2i = axial + direction
                 if _cell_states.has(neighbor):
                         result.append(neighbor)
@@ -129,11 +129,11 @@ func get_cells_of_type(cell_type: int) -> Array[Vector2i]:
 	return positions
 
 func count_neighbors_of_type(axial: Vector2i, cell_type: int) -> int:
-	var count := 0
-	for neighbor in get_neighbors(axial):
-		if get_cell_type_at(neighbor) == cell_type:
-			count += 1
-	return count
+        var count := 0
+        for neighbor: Vector2i in get_neighbors(axial):
+                if get_cell_type_at(neighbor) == cell_type:
+                        count += 1
+        return count
 
 func highlight_cell(axial: Vector2i, selected: bool) -> void:
 	var cell: HexCell = cells.get(axial)
@@ -189,14 +189,14 @@ func process_turn() -> Dictionary:
 	}
 
 func get_total_sprouts() -> int:
-	var total := 0
-	for data: CellData in _cell_states.values():
-		total += data.sprout_count
-	return total
+        var total := 0
+        for data: CellData in _cell_states.values():
+                total += data.sprout_count
+        return total
 
 func collect_clusters(cell_type: int) -> Array:
-	var clusters: Array = []
-	var visited: Dictionary = {}
+        var clusters: Array = []
+        var visited: Dictionary[Vector2i, bool] = {}
 	for axial in _cell_states.keys():
 		var data: CellData = _cell_states[axial]
 		if data.cell_type != cell_type:
@@ -210,12 +210,12 @@ func collect_clusters(cell_type: int) -> Array:
                         if visited.has(current):
                                 continue
                         visited[current] = true
-			cluster.append(current)
-			for neighbor in get_neighbors(current):
-				if visited.has(neighbor):
-					continue
-				if get_cell_type_at(neighbor) == cell_type:
-					pending.append(neighbor)
+                        cluster.append(current)
+                        for neighbor: Vector2i in get_neighbors(current):
+                                if visited.has(neighbor):
+                                        continue
+                                if get_cell_type_at(neighbor) == cell_type:
+                                        pending.append(neighbor)
 		if not cluster.is_empty():
 			clusters.append(cluster)
 	return clusters
@@ -226,11 +226,11 @@ func _update_cursor_position() -> void:
 	_cursor_node.position = axial_to_world(_cursor_axial)
 
 func _is_connected_to_network(axial: Vector2i) -> bool:
-	for neighbor in get_neighbors(axial):
-		var neighbor_type := get_cell_type_at(neighbor)
-		if CellType.is_network_member(neighbor_type):
-			return true
-	return false
+        for neighbor: Vector2i in get_neighbors(axial):
+                var neighbor_type: int = get_cell_type_at(neighbor)
+                if CellType.is_network_member(neighbor_type):
+                        return true
+        return false
 
 func _recompute_overgrowth() -> void:
 	var empty_cells: Array[Vector2i] = []
@@ -246,23 +246,23 @@ func _recompute_overgrowth() -> void:
 	if empty_cells.is_empty():
 		return
 
-	var boundary: Array[Vector2i] = []
-	for axial in empty_cells:
-		if _is_boundary(axial):
-			boundary.append(axial)
+        var boundary: Array[Vector2i] = []
+        for axial in empty_cells:
+                if _is_boundary(axial):
+                        boundary.append(axial)
 
-	var outside: Dictionary = {}
-	var queue: Array[Vector2i] = boundary.duplicate()
-	while not queue.is_empty():
-		var current: Vector2i = queue.pop_back()
-		if outside.has(current):
-			continue
-		outside[current] = true
-                for direction in Coord.DIRECTIONS:
+        var outside: Dictionary[Vector2i, bool] = {}
+        var queue: Array[Vector2i] = boundary.duplicate()
+        while not queue.is_empty():
+                var current: Vector2i = queue.pop_back()
+                if outside.has(current):
+                        continue
+                outside[current] = true
+                for direction: Vector2i in Coord.DIRECTIONS:
                         var neighbor: Vector2i = current + direction
                         if not _cell_states.has(neighbor):
                                 continue
-			var neighbor_data: CellData = _cell_states[neighbor]
+                        var neighbor_data: CellData = _cell_states[neighbor]
 			if neighbor_data.cell_type != CellType.Type.EMPTY:
 				continue
 			if outside.has(neighbor):
