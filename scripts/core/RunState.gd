@@ -168,11 +168,17 @@ func _load_deck_distribution() -> Dictionary:
 		push_warning("deck.json has unexpected structure; using fallback distribution")
 		return _default_deck_distribution()
 	var data: Dictionary = json.data
-	var distribution: Dictionary = data.get("default_distribution", {})
-	if distribution.is_empty():
-		push_warning("deck.json missing default_distribution; using fallback distribution")
-		return _default_deck_distribution()
-	return distribution
+        var distribution_variant: Variant = data.get("default_distribution", {})
+        if typeof(distribution_variant) != TYPE_DICTIONARY or (distribution_variant as Dictionary).is_empty():
+                distribution_variant = data.get("distribution", {})
+        if typeof(distribution_variant) != TYPE_DICTIONARY:
+                push_warning("deck.json distribution must be a dictionary; using fallback distribution")
+                return _default_deck_distribution()
+        var distribution: Dictionary = distribution_variant
+        if distribution.is_empty():
+                push_warning("deck.json missing deck distribution; using fallback distribution")
+                return _default_deck_distribution()
+        return distribution
 
 func _default_deck_distribution() -> Dictionary:
 	return {
