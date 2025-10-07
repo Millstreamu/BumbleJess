@@ -11,9 +11,13 @@ const TEST_SCRIPTS := [
         preload("res://tests/test_enclosure.gd"),
         preload("res://tests/test_growth_to_grove.gd"),
         preload("res://tests/test_mutation_grove_thicket.gd"),
+        preload("res://tests/test_turn_bus.gd"),
 ]
 
 func _init() -> void:
+        call_deferred("_run_all_tests")
+
+func _run_all_tests() -> void:
         var failed := false
         for script in TEST_SCRIPTS:
                 var test_case := script.new()
@@ -22,6 +26,8 @@ func _init() -> void:
                         if not name.begins_with("test_"):
                                 continue
                         var result = test_case.call(name)
+                        if result is GDScriptFunctionState:
+                                result = await result
                         if result is bool and not result:
                                 failed = true
         quit(failed ? 1 : 0)
