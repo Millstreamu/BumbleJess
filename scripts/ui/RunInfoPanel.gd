@@ -39,16 +39,16 @@ func update_resources(resources: Dictionary, generation: Dictionary) -> void:
 		_life_label.text = _format_resource("life", resources, generation)
 
 func update_sprouts(total: int) -> void:
-        if _sprout_label:
-                _sprout_label.text = "Sprouts: %d" % max(total, 0)
+		if _sprout_label:
+				_sprout_label.text = "Sprouts: %d" % max(total, 0)
 
 func update_next_tile(cell_type: int) -> void:
-        if not _next_tile_label:
-                return
-        if cell_type == CellType.Type.EMPTY:
-                _next_tile_label.text = "Next Tile: (deck empty)"
-        else:
-                _next_tile_label.text = "Next Tile: %s" % CellType.to_display_name(cell_type)
+		if not _next_tile_label:
+				return
+		if cell_type == CellType.Type.EMPTY:
+				_next_tile_label.text = "Next Tile: (deck empty)"
+		else:
+				_next_tile_label.text = "Next Tile: %s" % CellType.to_display_name(cell_type)
 
 func _format_resource(key: String, resources: Dictionary, generation: Dictionary) -> String:
 	var entry: Dictionary = resources.get(key, {})

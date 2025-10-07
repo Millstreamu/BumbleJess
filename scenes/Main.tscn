@@ -44,3 +44,4 @@ info_panel_path = NodePath("../RunInfoPanel")
 
 [node name="RunInfoPanel" parent="." instance=ExtResource("7_f9p8j")]
 layout_mode = 3
+anchors_preset = 2
