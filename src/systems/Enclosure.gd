@@ -41,29 +41,26 @@ static func detect_and_mark_overgrowth(board: Node) -> void:
         for k in RunState.overgrowth.keys():
                 og[k] = true
 
-        func is_empty(ax: Vector2i) -> bool:
-                var k := key(ax)
-                return (not placed.has(k)) and (not og.has(k))
-
         var visited := {}
         var queue: Array = []
-
-        func enqueue(ax: Vector2i) -> void:
-                var k := key(ax)
-                if visited.has(k):
-                        return
-                queue.append(ax)
+        var enqueued := {}
 
         for q in range(min_q, max_q + 1):
                 for r in [min_r, max_r]:
                         var ax := Vector2i(q, r)
-                        if is_empty(ax):
-                                enqueue(ax)
+                        if _is_empty(ax, placed, og):
+                                var k := key(ax)
+                                if not enqueued.has(k):
+                                        queue.append(ax)
+                                        enqueued[k] = true
         for r in range(min_r, max_r + 1):
                 for q in [min_q, max_q]:
                         var ax := Vector2i(q, r)
-                        if is_empty(ax):
-                                enqueue(ax)
+                        if _is_empty(ax, placed, og):
+                                var k := key(ax)
+                                if not enqueued.has(k):
+                                        queue.append(ax)
+                                        enqueued[k] = true
 
         while queue.size() > 0:
                 var cur: Vector2i = queue.pop_back()
@@ -77,17 +74,23 @@ static func detect_and_mark_overgrowth(board: Node) -> void:
                         var nk := key(n)
                         if visited.has(nk):
                                 continue
-                        if is_empty(n):
-                                queue.append(n)
+                        if _is_empty(n, placed, og):
+                                if not enqueued.has(nk):
+                                        queue.append(n)
+                                        enqueued[nk] = true
 
         for q in range(min_q, max_q + 1):
                 for r in range(min_r, max_r + 1):
                         var ax := Vector2i(q, r)
                         var k := key(ax)
-                        if is_empty(ax) and not visited.has(k):
+                        if _is_empty(ax, placed, og) and not visited.has(k):
                                 if not RunState.overgrowth.has(k):
                                         RunState.overgrowth[k] = 0
 
 static func _unkey(k: String) -> Vector2i:
         var parts := k.split(",")
         return Vector2i(int(parts[0]), int(parts[1]))
+
+static func _is_empty(ax: Vector2i, placed: Dictionary, og: Dictionary) -> bool:
+        var k := key(ax)
+        return (not placed.has(k)) and (not og.has(k))
