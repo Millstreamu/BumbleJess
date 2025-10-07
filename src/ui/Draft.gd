@@ -8,6 +8,7 @@ var _choices : Array = []
 var _picked : Dictionary = {}
 var _rng := RandomNumberGenerator.new()
 var _selection := 0
+var _card_panel_style: StyleBoxFlat
 
 @onready var _category_label: Label = %CategoryLabel
 @onready var _card_container: HBoxContainer = %CardContainer
@@ -17,7 +18,26 @@ func _ready():
     _rng.seed = Time.get_unix_time_from_system()
     _index = 0
     _picked.clear()
+    _card_panel_style = _build_card_style()
     _next_category()
+
+func _build_card_style() -> StyleBoxFlat:
+    var style := StyleBoxFlat.new()
+    style.bg_color = Color(0.102, 0.109, 0.133, 0.96)
+    style.corner_radius_bottom_left = 12
+    style.corner_radius_bottom_right = 12
+    style.corner_radius_top_left = 12
+    style.corner_radius_top_right = 12
+    style.border_color = Color(0.35, 0.43, 0.74, 1)
+    style.border_width_bottom = 2
+    style.border_width_left = 2
+    style.border_width_right = 2
+    style.border_width_top = 2
+    style.expand_margin_bottom = 12
+    style.expand_margin_left = 12
+    style.expand_margin_right = 12
+    style.expand_margin_top = 12
+    return style
 
 func _next_category():
     if _index >= _categories.size():
@@ -65,10 +85,18 @@ func _render_cards(cat:String, choices:Array) -> void:
     _update_highlight()
 
 func _create_card(choice:Dictionary) -> Control:
+    var panel := PanelContainer.new()
+    panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+    panel.custom_minimum_size = Vector2(200, 240)
+    if _card_panel_style:
+        panel.add_theme_stylebox_override("panel", _card_panel_style.duplicate())
+
     var card := VBoxContainer.new()
     card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    card.size_flags_vertical = Control.SIZE_EXPAND_FILL
     card.alignment = BoxContainer.ALIGNMENT_CENTER
-    card.custom_minimum_size = Vector2(180, 0)
+    card.custom_minimum_size = Vector2(0, 160)
     var name_label := Label.new()
     name_label.text = str(choice.get("name", choice.get("id", "Unknown")))
     name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -80,10 +108,12 @@ func _create_card(choice:Dictionary) -> Control:
     effects_label.text = _summarize_effects(choice.get("effects", {}))
     effects_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     effects_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    effects_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
     card.add_child(name_label)
     card.add_child(id_label)
     card.add_child(effects_label)
-    return card
+    panel.add_child(card)
+    return panel
 
 func _summarize_effects(effects:Variant) -> String:
     if typeof(effects) != TYPE_DICTIONARY:
