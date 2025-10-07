@@ -60,10 +60,10 @@ func _generate_grid() -> void:
 			var cell_type: int = CellType.Type.EMPTY
 			if axial == Vector2i.ZERO:
 				cell_type = CellType.Type.TOTEM
-                        var color: Color = grid_config.get_color(cell_type)
-                        cell.configure(axial, grid_config.cell_size, grid_config.selection_color, color)
-                        cell.set_buildable_highlight(false, grid_config.buildable_highlight_color)
-                        cells[axial] = cell
+						var color: Color = grid_config.get_color(cell_type)
+						cell.configure(axial, grid_config.cell_size, grid_config.selection_color, color)
+						cell.set_buildable_highlight(false, grid_config.buildable_highlight_color)
+						cells[axial] = cell
 
 			var data: CellData = CellData.new()
 			data.set_type(cell_type, color)
@@ -152,66 +152,66 @@ func count_neighbors_of_type(axial: Vector2i, cell_type: int) -> int:
 
 
 func highlight_cell(axial: Vector2i, selected: bool) -> void:
-        var cell: HexCell = cells.get(axial)
-        if cell:
-                cell.set_selected(selected)
+		var cell: HexCell = cells.get(axial)
+		if cell:
+				cell.set_selected(selected)
 
 
 func clear_all_highlights() -> void:
-        for cell in cells.values():
-                if cell is HexCell:
-                        (cell as HexCell).set_selected(false)
+		for cell in cells.values():
+				if cell is HexCell:
+						(cell as HexCell).set_selected(false)
 
 
 func update_buildable_highlights(cell_type: int) -> void:
-        if not _ensure_grid_config():
-                return
-        var highlight_color: Color = grid_config.buildable_highlight_color
-        var allow_highlight := CellType.is_placeable(cell_type)
-        for axial in _cell_states.keys():
-                var cell: HexCell = cells.get(axial)
-                if not cell:
-                        continue
-                var active := allow_highlight and can_place_tile(axial, cell_type)
-                cell.set_buildable_highlight(active, highlight_color)
+		if not _ensure_grid_config():
+				return
+		var highlight_color: Color = grid_config.buildable_highlight_color
+		var allow_highlight := CellType.is_placeable(cell_type)
+		for axial in _cell_states.keys():
+				var cell: HexCell = cells.get(axial)
+				if not cell:
+						continue
+				var active := allow_highlight and can_place_tile(axial, cell_type)
+				cell.set_buildable_highlight(active, highlight_color)
 
 
 func can_place_tile(axial: Vector2i, cell_type: int) -> bool:
-        if not _ensure_grid_config():
-                return false
-        if not _cell_states.has(axial):
-                return false
-        if not CellType.is_placeable(cell_type):
-                return false
-        var data: CellData = _cell_states[axial]
-        if data.cell_type == CellType.Type.TOTEM:
-                return false
-        if data.cell_type != CellType.Type.EMPTY:
-                return false
-        if not grid_config.allow_isolated_builds and not _is_connected_to_network(axial):
-                return false
-        return true
+		if not _ensure_grid_config():
+				return false
+		if not _cell_states.has(axial):
+				return false
+		if not CellType.is_placeable(cell_type):
+				return false
+		var data: CellData = _cell_states[axial]
+		if data.cell_type == CellType.Type.TOTEM:
+				return false
+		if data.cell_type != CellType.Type.EMPTY:
+				return false
+		if not grid_config.allow_isolated_builds and not _is_connected_to_network(axial):
+				return false
+		return true
 
 
 func try_place_tile(axial: Vector2i, cell_type: int, variant_id: String = "") -> bool:
-        if not _cell_states.has(axial):
-                _log_build_failure("Cannot build outside the grid.")
-                return false
-        if not CellType.is_placeable(cell_type):
-                _log_build_failure("That tile type cannot be constructed.")
-                return false
-        var data: CellData = _cell_states[axial]
-        if data.cell_type == CellType.Type.TOTEM:
-                _log_build_failure("The totem cannot be replaced.")
-                return false
-        if data.cell_type != CellType.Type.EMPTY:
-                _log_build_failure("This cell is already occupied.")
-                return false
-        if not grid_config.allow_isolated_builds and not _is_connected_to_network(axial):
-                _log_build_failure("Placement blocked: tiles must connect to the forest network.")
-                return false
+		if not _cell_states.has(axial):
+				_log_build_failure("Cannot build outside the grid.")
+				return false
+		if not CellType.is_placeable(cell_type):
+				_log_build_failure("That tile type cannot be constructed.")
+				return false
+		var data: CellData = _cell_states[axial]
+		if data.cell_type == CellType.Type.TOTEM:
+				_log_build_failure("The totem cannot be replaced.")
+				return false
+		if data.cell_type != CellType.Type.EMPTY:
+				_log_build_failure("This cell is already occupied.")
+				return false
+		if not grid_config.allow_isolated_builds and not _is_connected_to_network(axial):
+				_log_build_failure("Placement blocked: tiles must connect to the forest network.")
+				return false
 
-        var color: Color = grid_config.get_color(cell_type)
+		var color: Color = grid_config.get_color(cell_type)
 	data.set_type(cell_type, color)
 	data.variant_id = variant_id
 	data.sprout_capacity = 0

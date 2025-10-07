@@ -19,11 +19,14 @@ z_index = -10
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -640.0
-offset_top = -360.0
-offset_right = 640.0
-offset_bottom = 360.0
+offset_left = -86.0
+offset_top = -33.0
+offset_right = 1194.0
+offset_bottom = 687.0
+grow_horizontal = 2
+grow_vertical = 2
 color = Color(0.141176, 0.141176, 0.141176, 1)
+metadata/_edit_use_anchors_ = true
 
 [node name="HexGrid" parent="." instance=ExtResource("1_kg8yr")]
 
@@ -63,8 +66,9 @@ grow_horizontal = 2
 [node name="RunInfoPanel" parent="." instance=ExtResource("7_f9p8j")]
 layout_mode = 3
 anchors_preset = 2
-offset_left = 0.0
-offset_top = -224.0
-offset_right = 264.0
-offset_bottom = 0.0
+offset_left = 40.0
+offset_top = 37.0
+offset_right = 304.0
+offset_bottom = 261.0
 grow_vertical = 0
+metadata/_edit_use_anchors_ = true
