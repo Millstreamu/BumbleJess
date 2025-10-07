@@ -32,7 +32,8 @@ hex_grid_path = NodePath("../HexGrid")
 script = ExtResource("4_k4cvo")
 
 [node name="BuildPalette" parent="." instance=ExtResource("5_sef0j")]
-layout_mode = 3
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="RunState" type="Node" parent="."]
 script = ExtResource("6_37f6p")
