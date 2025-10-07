@@ -7,6 +7,10 @@ signal resources_reset
 
 const RESOURCE_TYPES := ["nature", "earth", "water", "life"]
 
+static func do_production(_board: Node) -> void:
+        # TODO (Phase 4): clusters, storage capacity, refine cooldown conversions, etc.
+        print_debug("Resources.do_production() — stub")
+
 var _data: Dictionary = {}
 
 func _init() -> void:

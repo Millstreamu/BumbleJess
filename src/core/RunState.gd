@@ -3,6 +3,7 @@ extends Node
 const Deck := preload("res://src/systems/Deck.gd")
 
 var seed:int = 0
+var turn:int = 0
 var chosen_variants:Dictionary = {}
 var deck:Array = []
 var draw_index:int = 0
@@ -17,6 +18,7 @@ func start_new_run() -> void:
                 draw_index = 0
                 overgrowth = {}
                 connected_set = {}
+                turn = 0
                 finalize_after_draft()
 
 func finalize_after_draft() -> void:
