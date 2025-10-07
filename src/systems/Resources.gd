@@ -65,7 +65,7 @@ func set_cap_delta(resource_type: String, delta: int) -> int:
         var key := _normalize(resource_type)
         var entry := _ensure_entry(key)
         var cap: int = int(entry.get("cap", 0))
-        var new_cap := max(0, cap + delta)
+        var new_cap: int = max(0, cap + delta)
         if new_cap == cap:
                 return cap
         entry["cap"] = new_cap
