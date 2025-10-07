@@ -5,15 +5,13 @@
 [node name="BuildPalette" type="Control"]
 visible = false
 layout_mode = 3
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = -140.0
-offset_right = 200.0
-offset_bottom = 140.0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_right = 400.0
+offset_bottom = 280.0
 script = ExtResource("1_5ux0s")
 
 [node name="Panel" type="Panel" parent="."]

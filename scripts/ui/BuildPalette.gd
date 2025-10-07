@@ -64,6 +64,7 @@ func _create_labels() -> void:
     _refresh_counts()
     _refresh_in_hand_visuals(_palette_state.get_in_hand_type())
     _refresh_label_tooltips()
+    call_deferred("_center_on_screen")
 
 func _refresh_counts() -> void:
     for cell_type in _labels.keys():
@@ -89,6 +90,7 @@ func _on_palette_opened() -> void:
     _refresh_selection_visuals(_palette_state.get_selected_type())
     _refresh_counts()
     _refresh_in_hand_visuals(_palette_state.get_in_hand_type())
+    call_deferred("_center_on_screen")
 
 func _on_palette_closed() -> void:
     visible = false
@@ -136,4 +138,8 @@ func _center_on_screen() -> void:
     if not _viewport:
         return
     var viewport_size := _viewport.get_visible_rect().size
-    position = viewport_size * 0.5 - size * 0.5
+    var control_size := size
+    if control_size == Vector2.ZERO:
+        control_size = get_combined_minimum_size()
+    var centered_position := (viewport_size - control_size) * 0.5
+    position = centered_position
