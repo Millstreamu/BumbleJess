@@ -56,9 +56,10 @@ func _ready() -> void:
 	_tile_definitions = _load_tile_definitions()
 	_build_initial_deck()
 	_reset_resources()
-	_apply_tile_descriptions()
-	_refresh_palette_options()
-	_update_info_panel()
+        _apply_tile_descriptions()
+        _refresh_palette_options()
+        _update_info_panel()
+        _update_buildable_highlights()
 
 func try_place_tile(axial: Vector2i, cell_type: int = CellType.Type.EMPTY) -> bool:
 		if is_deck_empty():
@@ -84,9 +85,10 @@ func try_place_tile(axial: Vector2i, cell_type: int = CellType.Type.EMPTY) -> bo
 		_turn += 1
 		_hex_grid.process_turn()
 		_recalculate_resources()
-		_refresh_palette_options()
-		_update_info_panel()
-		return true
+                _refresh_palette_options()
+                _update_info_panel()
+                _update_buildable_highlights()
+                return true
 
 func is_deck_empty() -> bool:
 		return _deck_queue.is_empty()
@@ -252,12 +254,17 @@ func _refresh_palette_options() -> void:
 	_palette_state.set_options(available, counts)
 
 func _update_info_panel() -> void:
-		if _info_panel:
-				_info_panel.update_turn(_turn)
-				_info_panel.update_deck(_get_total_deck_count(), _deck_counts)
-				_info_panel.update_resources(_resources, _resource_generation)
-				_info_panel.update_sprouts(_hex_grid.get_total_sprouts())
-				_info_panel.update_next_tile(peek_next_tile_type())
+                if _info_panel:
+                                _info_panel.update_turn(_turn)
+                                _info_panel.update_deck(_get_total_deck_count(), _deck_counts)
+                                _info_panel.update_resources(_resources, _resource_generation)
+                                _info_panel.update_sprouts(_hex_grid.get_total_sprouts())
+                                _info_panel.update_next_tile(peek_next_tile_type())
+
+func _update_buildable_highlights() -> void:
+        if not _hex_grid:
+                return
+        _hex_grid.update_buildable_highlights(peek_next_tile_type())
 
 func _get_variant_id(cell_type: int) -> String:
 	var key := CellType.to_key(cell_type)
