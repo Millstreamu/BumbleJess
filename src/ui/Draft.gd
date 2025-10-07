@@ -2,12 +2,20 @@ extends Control
 
 signal draft_completed
 
-var _categories := ["Harvest","Build","Refine","Storage","Guard","Upgrade","Chanting"]
+var _categories: Array[String] = [
+    "Harvest",
+    "Build",
+    "Refine",
+    "Storage",
+    "Guard",
+    "Upgrade",
+    "Chanting",
+]
 var _index := 0
-var _choices : Array = []
+var _choices: Array[Dictionary] = []
 var _picked : Dictionary = {}
-var _rng := RandomNumberGenerator.new()
-var _selection := 0
+var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
+var _selection: int = 0
 var _card_panel_style: StyleBoxFlat
 
 @onready var _category_label: Label = %CategoryLabel
@@ -47,21 +55,21 @@ func _next_category():
     _show_category(_index)
 
 func _show_category(idx:int) -> void:
-    var cat := _categories[idx]
+    var cat: String = _categories[idx]
     _choices = _sample_three(cat)
     _render_cards(cat, _choices)
 
-func _sample_three(cat:String) -> Array:
-    var variants: Array = []
+func _sample_three(cat:String) -> Array[Dictionary]:
+    var variants: Array[Dictionary] = []
     if Config.tiles().has("variants"):
-        var maybe_pool = Config.tiles()["variants"].get(cat, [])
+        var maybe_pool: Variant = Config.tiles()["variants"].get(cat, [])
         if typeof(maybe_pool) == TYPE_ARRAY:
             variants = (maybe_pool as Array).duplicate(true)
     var available := variants.size()
     if available <= 0:
         return []
     var count := min(3, available)
-    var results : Array = []
+    var results : Array[Dictionary] = []
     for i in range(count):
         var idx := _rng.randi_range(0, variants.size() - 1)
         results.append(variants[idx])
@@ -118,9 +126,9 @@ func _create_card(choice:Dictionary) -> Control:
 func _summarize_effects(effects:Variant) -> String:
     if typeof(effects) != TYPE_DICTIONARY:
         return ""
-    var parts : Array = []
+    var parts : Array[String] = []
     for key in effects.keys():
-        var value = effects[key]
+        var value: Variant = effects[key]
         if typeof(value) in [TYPE_DICTIONARY, TYPE_ARRAY]:
             parts.append("%s: %s" % [key, JSON.stringify(value)])
         else:
@@ -161,7 +169,7 @@ func _current_sel() -> int:
 func _confirm_pick():
     if _choices.is_empty():
         return
-    var cat := _categories[_index]
+    var cat: String = _categories[_index]
     var sel := clamp(_current_sel(), 0, _choices.size() - 1)
     var picked_id := str(_choices[sel].get("id", ""))
     if picked_id != "":
@@ -173,7 +181,7 @@ func _go_back():
     if _index <= 0:
         return
     _index -= 1
-    var cat := _categories[_index]
+    var cat: String = _categories[_index]
     if _picked.has(cat):
         _picked.erase(cat)
     _show_category(_index)
