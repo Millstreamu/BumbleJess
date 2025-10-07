@@ -7,8 +7,8 @@
 [ext_resource type="PackedScene" uid="uid://buildpalette" path="res://scenes/BuildPalette.tscn" id="5_sef0j"]
 [ext_resource type="Script" uid="uid://bkxqon2flwvp2" path="res://scripts/core/RunState.gd" id="6_37f6p"]
 [ext_resource type="PackedScene" uid="uid://runinfopanel" path="res://scenes/ui/RunInfoPanel.tscn" id="7_f9p8j"]
-[ext_resource type="Script" path="res://src/systems/TurnController.gd" id="8_turpc"]
-[ext_resource type="Script" path="res://src/systems/Board.gd" id="9_brd0u"]
+[ext_resource type="Script" uid="uid://cb618hgrcjhg1" path="res://src/systems/TurnController.gd" id="8_turpc"]
+[ext_resource type="Script" uid="uid://cacloj67bsx5u" path="res://src/systems/Board.gd" id="9_brd0u"]
 [ext_resource type="PackedScene" path="res://src/ui/ReviewBanner.tscn" id="10_rvbnr"]
 
 [node name="Main" type="Node2D"]
@@ -54,6 +54,8 @@ info_panel_path = NodePath("../RunInfoPanel")
 [node name="UI" type="CanvasLayer" parent="."]
 
 [node name="ReviewBanner" parent="UI" instance=ExtResource("10_rvbnr")]
+layout_mode = 3
+anchors_preset = 5
 
 [node name="RunInfoPanel" parent="." instance=ExtResource("7_f9p8j")]
 layout_mode = 3

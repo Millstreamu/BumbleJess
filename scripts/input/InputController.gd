@@ -23,20 +23,20 @@ const MOVE_VECTORS := {
 func _ready() -> void:
 		if hex_grid_path.is_empty():
 				hex_grid_path = NodePath("../HexGrid")
-                if run_state_path.is_empty():
-                                run_state_path = NodePath("../RunState")
-                if turn_controller_path.is_empty():
-                                turn_controller_path = NodePath("../TurnController")
+				if run_state_path.is_empty():
+								run_state_path = NodePath("../RunState")
+				if turn_controller_path.is_empty():
+								turn_controller_path = NodePath("../TurnController")
 
-                _hex_grid = get_node_or_null(hex_grid_path)
-                if not _hex_grid:
-                                push_warning("InputController could not find HexGrid node at %s" % hex_grid_path)
-                _run_state = get_node_or_null(run_state_path)
-                if not _run_state:
-                                push_warning("InputController could not find RunState node at %s" % run_state_path)
-                _turn_controller = get_node_or_null(turn_controller_path)
-                if not _turn_controller:
-                                push_warning("InputController could not find TurnController node at %s" % turn_controller_path)
+				_hex_grid = get_node_or_null(hex_grid_path)
+				if not _hex_grid:
+								push_warning("InputController could not find HexGrid node at %s" % hex_grid_path)
+				_run_state = get_node_or_null(run_state_path)
+				if not _run_state:
+								push_warning("InputController could not find RunState node at %s" % run_state_path)
+				_turn_controller = get_node_or_null(turn_controller_path)
+				if not _turn_controller:
+								push_warning("InputController could not find TurnController node at %s" % turn_controller_path)
 
 func _unhandled_input(event: InputEvent) -> void:
 		if not _hex_grid:
@@ -49,13 +49,13 @@ func _unhandled_input(event: InputEvent) -> void:
 						get_viewport().set_input_as_handled()
 						return
 
-                if event.is_action_pressed("ui_accept"):
-                                if _turn_controller and _turn_controller.is_in_review:
-                                                get_viewport().set_input_as_handled()
-                                                return
-                                if _run_state and not _run_state.is_deck_empty():
-                                                var axial := _hex_grid.get_cursor_axial()
-                                                _hex_grid.clear_all_highlights()
+				if event.is_action_pressed("ui_accept"):
+								if _turn_controller and _turn_controller.is_in_review:
+												get_viewport().set_input_as_handled()
+												return
+								if _run_state and not _run_state.is_deck_empty():
+												var axial := _hex_grid.get_cursor_axial()
+												_hex_grid.clear_all_highlights()
 						var placed: bool = _run_state.try_place_tile(axial)
 						if not placed:
 								_hex_grid.highlight_cell(axial, true)
