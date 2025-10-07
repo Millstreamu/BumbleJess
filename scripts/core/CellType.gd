@@ -70,8 +70,20 @@ static func to_key(cell_type: int) -> String:
     return str(cell_type)
 
 static func from_key(key: String) -> int:
+    var normalized := key.strip_edges()
+    if normalized.is_empty():
+        return Type.EMPTY
+
     var keys := Type.keys()
     for i in range(keys.size()):
-        if String(keys[i]) == key:
+        var enum_key := String(keys[i])
+        if enum_key == normalized:
             return i
+
+    var normalized_upper := normalized.to_upper()
+    for i in range(keys.size()):
+        var enum_key := String(keys[i])
+        if enum_key == normalized_upper:
+            return i
+
     return Type.EMPTY
