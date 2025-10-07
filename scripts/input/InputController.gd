@@ -6,11 +6,10 @@ extends Node
 @export var turn_controller_path: NodePath
 
 const HexGrid := preload("res://scripts/grid/HexGrid.gd")
-const RunState := preload("res://scripts/core/RunState.gd")
 const TurnController := preload("res://src/systems/TurnController.gd")
 
 var _hex_grid: HexGrid
-var _run_state: RunState
+var _run_state
 var _turn_controller: TurnController
 
 const MOVE_VECTORS := {
