@@ -45,19 +45,19 @@ func _generate_grid() -> void:
 	if not _ensure_grid_config():
 		return
 
-	var radius := grid_config.radius
+        var radius: int = grid_config.radius
 	for q in range(-radius, radius + 1):
 		for r in range(-radius, radius + 1):
 			if abs(q + r) > radius:
 				continue
-			var axial := Vector2i(q, r)
+                        var axial: Vector2i = Vector2i(q, r)
 			var cell: HexCell = cell_scene.instantiate()
 			add_child(cell)
 			cell.position = Coord.axial_to_world(axial, grid_config.cell_size)
-			var cell_type := CellType.Type.EMPTY
+                        var cell_type: int = CellType.Type.EMPTY
 			if axial == Vector2i.ZERO:
 				cell_type = CellType.Type.TOTEM
-			var color := grid_config.get_color(cell_type)
+                        var color: Color = grid_config.get_color(cell_type)
 			cell.configure(axial, grid_config.cell_size, grid_config.selection_color, color)
 			cells[axial] = cell
 
@@ -79,7 +79,7 @@ func _spawn_cursor() -> void:
 	_update_cursor_position()
 
 func move_cursor(delta: Vector2i) -> void:
-	var target := _cursor_axial + delta
+        var target: Vector2i = _cursor_axial + delta
 	if not is_within_grid(target):
 		return
 	_cursor_axial = target
@@ -129,7 +129,7 @@ func get_cells_of_type(cell_type: int) -> Array[Vector2i]:
 	return positions
 
 func count_neighbors_of_type(axial: Vector2i, cell_type: int) -> int:
-	var count := 0
+        var count: int = 0
 	for neighbor: Vector2i in get_neighbors(axial):
 		if get_cell_type_at(neighbor) == cell_type:
 			count += 1
@@ -163,7 +163,7 @@ func try_place_tile(axial: Vector2i, cell_type: int, variant_id: String = "") ->
 		_log_build_failure("Placement blocked: tiles must connect to the forest network.")
 		return false
 
-	var color := grid_config.get_color(cell_type)
+        var color: Color = grid_config.get_color(cell_type)
 	data.set_type(cell_type, color)
 	data.variant_id = variant_id
 	data.sprout_capacity = 0
@@ -189,7 +189,7 @@ func process_turn() -> Dictionary:
 	}
 
 func get_total_sprouts() -> int:
-	var total := 0
+        var total: int = 0
 	for data: CellData in _cell_states.values():
 		total += data.sprout_count
 	return total
@@ -304,7 +304,7 @@ func _advance_overgrowth() -> Array[Vector2i]:
 			data.growth_timer = grid_config.overgrowth_maturation_turns
 		else:
 			data.growth_timer = max(0, data.growth_timer - 1)
-		var elapsed := data.growth_duration - data.growth_timer
+                var elapsed: int = data.growth_duration - data.growth_timer
 		var cell: HexCell = cells.get(axial)
 		if cell:
 			cell.set_growth_progress(elapsed, data.growth_duration, true)
