@@ -1,9 +1,38 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
-[ext_resource type="Script" path="res://src/ui/Draft.gd" id="1"]
+[sub_resource type="StyleBoxFlat" id="1"]
+content_margin_left = 24.0
+content_margin_top = 24.0
+content_margin_right = 24.0
+content_margin_bottom = 24.0
+bg_color = Color(0.121569, 0.121569, 0.137255, 0.960784)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.423529, 0.517647, 0.819608, 1)
+
+[sub_resource type="StyleBoxFlat" id="2"]
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+bg_color = Color(0.0705882, 0.0705882, 0.0823529, 0.960784)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.258824, 0.317647, 0.52549, 1)
 
 [node name="Draft" type="Control"]
-script = ExtResource("1")
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -12,30 +41,130 @@ offset_left = -640.0
 offset_top = -360.0
 offset_right = 640.0
 offset_bottom = 360.0
+mouse_filter = Control.MOUSE_FILTER_PASS
 
-[node name="Root" type="VBoxContainer" parent="."]
+[node name="Backdrop" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.0, 0.0, 0.0, 0.588235)
+
+[node name="Panel" type="Panel" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 120.0
+offset_top = 80.0
+offset_right = -120.0
+offset_bottom = -80.0
+size_flags_horizontal = Control.SIZE_EXPAND_FILL
+size_flags_vertical = Control.SIZE_EXPAND_FILL
+theme_override_styles/panel = SubResource("1")
+
+[node name="Content" type="MarginContainer" parent="Panel"]
 layout_mode = 2
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 40.0
-offset_top = 40.0
-offset_right = -40.0
-offset_bottom = -40.0
+custom_minimum_size = Vector2(0, 480)
+offset_left = 16.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = -16.0
+size_flags_horizontal = Control.SIZE_EXPAND_FILL
+size_flags_vertical = Control.SIZE_EXPAND_FILL
+mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+[node name="Root" type="VBoxContainer" parent="Content"]
+layout_mode = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+size_flags_horizontal = Control.SIZE_EXPAND_FILL
+size_flags_vertical = Control.SIZE_EXPAND_FILL
 alignment = BoxContainer.ALIGNMENT_CENTER
+custom_minimum_size = Vector2(0, 420)
+
+[node name="Heading" type="Label" parent="Root"]
+layout_mode = 2
+text = "Queen Jessie's Draft"
+horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+size_flags_horizontal = Control.SIZE_EXPAND_FILL
+size_flags_vertical = Control.SIZE_FILL
 
 [node name="CategoryLabel" type="Label" parent="Root"]
 layout_mode = 2
-text = ""
+text = "Select a tile"
 horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 [node name="CardContainer" type="HBoxContainer" parent="Root"]
 layout_mode = 2
+size_flags_horizontal = Control.SIZE_EXPAND_FILL
 size_flags_vertical = Control.SIZE_EXPAND_FILL
 alignment = BoxContainer.ALIGNMENT_CENTER
-separation = 24
+separation = 32
+mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 [node name="InstructionsLabel" type="Label" parent="Root"]
 layout_mode = 2
 text = "Use ←/→ to choose, Space to confirm, Z to go back"
 horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+[node name="Footer" type="Label" parent="Root"]
+layout_mode = 2
+text = "The hive depends on your choices!"
+horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+modulate = Color(0.827451, 0.807843, 0.639216, 0.784314)
+size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+[node name="CardTemplate" type="PanelContainer" parent="CardContainer"]
+visible = false
+custom_minimum_size = Vector2(200, 260)
+size_flags_horizontal = Control.SIZE_EXPAND_FILL
+size_flags_vertical = Control.SIZE_EXPAND_FILL
+theme_override_styles/panel = SubResource("2")
+
+[node name="CardVBox" type="VBoxContainer" parent="CardContainer/CardTemplate"]
+anchors_preset = 8
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+alignment = BoxContainer.ALIGNMENT_CENTER
+size_flags_horizontal = Control.SIZE_EXPAND_FILL
+size_flags_vertical = Control.SIZE_EXPAND_FILL
+
+[node name="CardName" type="Label" parent="CardContainer/CardTemplate/CardVBox"]
+text = "Tile Name"
+horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+[node name="CardId" type="Label" parent="CardContainer/CardTemplate/CardVBox"]
+text = "tile_id"
+horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+modulate = Color(0.619608, 0.666667, 0.858824, 1)
+size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+[node name="CardEffects" type="Label" parent="CardContainer/CardTemplate/CardVBox"]
+autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+size_flags_horizontal = Control.SIZE_EXPAND_FILL
+size_flags_vertical = Control.SIZE_EXPAND_FILL
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+
+[node name="FocusTrap" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = Control.MOUSE_FILTER_IGNORE
+focus_mode = Control.FOCUS_ALL
