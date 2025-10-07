@@ -4,12 +4,13 @@
 
 [node name="RunInfoPanel" type="Control"]
 anchors_preset = 0
+anchor_top = 1.0
 anchor_right = 0.0
-anchor_bottom = 0.0
+anchor_bottom = 1.0
 offset_left = 16.0
-offset_top = 16.0
+offset_top = -240.0
 offset_right = 280.0
-offset_bottom = 240.0
+offset_bottom = -16.0
 script = ExtResource("1_c7r0m")
 
 [node name="Panel" type="Panel" parent="."]
@@ -88,3 +89,6 @@ text = "Life Essence"
 [node name="LifeValue" type="Label" parent="Panel/Margin/VBox/ResourceGrid"]
 text = "0"
 horizontal_alignment = 2
+
+[node name="NextTileLabel" type="Label" parent="Panel/Margin/VBox"]
+text = "Next Tile: (deck empty)"

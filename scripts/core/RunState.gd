@@ -19,6 +19,7 @@ var _info_panel: RunInfoPanel
 
 var _tile_definitions: Dictionary = {}
 var _deck_counts: Dictionary = {}
+var _deck_queue: Array[int] = []
 var _turn: int = 0
 var _resources := {
 	"nature": {"current": 0, "capacity": 0},
@@ -59,29 +60,41 @@ func _ready() -> void:
 	_refresh_palette_options()
 	_update_info_panel()
 
-func try_place_tile(axial: Vector2i, cell_type: int) -> bool:
-	if is_deck_empty():
-		return false
-	if not CellType.is_placeable(cell_type):
-		return false
-	var remaining: int = int(_deck_counts.get(cell_type, 0))
-	if remaining <= 0:
-		push_warning("No %s tiles remain in the deck." % CellType.to_display_name(cell_type))
-		return false
-	var variant_id := _get_variant_id(cell_type)
-	var placed := _hex_grid.try_place_tile(axial, cell_type, variant_id)
-	if not placed:
-		return false
-	_deck_counts[cell_type] = remaining - 1
-	_turn += 1
-	_hex_grid.process_turn()
-	_recalculate_resources()
-	_refresh_palette_options()
-	_update_info_panel()
-	return true
+func try_place_tile(axial: Vector2i, cell_type: int = CellType.Type.EMPTY) -> bool:
+        if is_deck_empty():
+                return false
+        var next_type := peek_next_tile_type()
+        if next_type == CellType.Type.EMPTY:
+                return false
+        var type_to_place := next_type
+        if cell_type != CellType.Type.EMPTY and cell_type != next_type:
+                push_warning("Attempted to place %s but the next tile is %s." % [CellType.to_display_name(cell_type), CellType.to_display_name(next_type)])
+                return false
+        var remaining: int = int(_deck_counts.get(type_to_place, 0))
+        if remaining <= 0:
+                push_warning("No %s tiles remain in the deck." % CellType.to_display_name(type_to_place))
+                return false
+        var variant_id := _get_variant_id(type_to_place)
+        var placed := _hex_grid.try_place_tile(axial, type_to_place, variant_id)
+        if not placed:
+                return false
+        _deck_counts[type_to_place] = remaining - 1
+        if not _deck_queue.is_empty():
+                _deck_queue.remove_at(0)
+        _turn += 1
+        _hex_grid.process_turn()
+        _recalculate_resources()
+        _refresh_palette_options()
+        _update_info_panel()
+        return true
 
 func is_deck_empty() -> bool:
-	return _get_total_deck_count() <= 0
+        return _deck_queue.is_empty()
+
+func peek_next_tile_type() -> int:
+        if _deck_queue.is_empty():
+                return CellType.Type.EMPTY
+        return _deck_queue[0]
 
 func toggle_info_panel() -> void:
 	if not _info_panel:
@@ -141,13 +154,21 @@ func _default_tile_definitions() -> Dictionary:
 	}
 
 func _build_initial_deck() -> void:
-	_deck_counts.clear()
-	var distribution := _load_deck_distribution()
-	for key in distribution.keys():
-		var cell_type := CellType.from_key(key)
-		if not CellType.is_placeable(cell_type):
-			continue
-		_deck_counts[cell_type] = int(distribution[key])
+        _deck_counts.clear()
+        _deck_queue.clear()
+        var distribution := _load_deck_distribution()
+        for key in distribution.keys():
+                var cell_type := CellType.from_key(key)
+                if not CellType.is_placeable(cell_type):
+                        continue
+                var count := int(distribution[key])
+                if count <= 0:
+                        continue
+                _deck_counts[cell_type] = count
+                for i in range(count):
+                        _deck_queue.append(cell_type)
+        if not _deck_queue.is_empty():
+                _deck_queue.shuffle()
 
 func _load_deck_distribution() -> Dictionary:
 	var path := "res://data/deck.json"
@@ -231,11 +252,12 @@ func _refresh_palette_options() -> void:
 	_palette_state.set_options(available, counts)
 
 func _update_info_panel() -> void:
-	if _info_panel:
-		_info_panel.update_turn(_turn)
-		_info_panel.update_deck(_get_total_deck_count(), _deck_counts)
-		_info_panel.update_resources(_resources, _resource_generation)
-		_info_panel.update_sprouts(_hex_grid.get_total_sprouts())
+        if _info_panel:
+                _info_panel.update_turn(_turn)
+                _info_panel.update_deck(_get_total_deck_count(), _deck_counts)
+                _info_panel.update_resources(_resources, _resource_generation)
+                _info_panel.update_sprouts(_hex_grid.get_total_sprouts())
+                _info_panel.update_next_tile(peek_next_tile_type())
 
 func _get_variant_id(cell_type: int) -> String:
 	var key := CellType.to_key(cell_type)
