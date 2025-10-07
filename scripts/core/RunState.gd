@@ -1,4 +1,3 @@
-class_name RunState
 extends Node
 ## Coordinates deck management, turn resolution, and resource tracking for a run.
 
