@@ -5,6 +5,7 @@ extends Node2D
 class_name HexCell
 
 @onready var polygon: Polygon2D = $Polygon2D
+@onready var buildable_overlay: Polygon2D = $BuildableOverlay
 @onready var growth_badge: Polygon2D = $GrowthBadge
 @onready var sprout_label: Label = $SproutLabel
 
@@ -12,6 +13,7 @@ var axial: Vector2i = Vector2i.ZERO
 var _cell_size: float = 52.0
 var _cell_color: Color = Color.WHITE
 var _selection_color: Color = Color.DARK_GREEN
+var _buildable_color: Color = Color(0.8, 0.8, 0.8, 0.35)
 var _is_selected := false
 var _flash_tween: Tween
 
@@ -24,10 +26,13 @@ func configure(axial_coord: Vector2i, cell_size: float, selection_color: Color, 
 	_cell_size = cell_size
 	_selection_color = selection_color
 	_cell_color = initial_color
-	polygon.polygon = _build_polygon_points(cell_size)
-	polygon.modulate = Color.WHITE
-	growth_badge.polygon = _build_polygon_points(cell_size * 0.35)
-	growth_badge.visible = false
+        polygon.polygon = _build_polygon_points(cell_size)
+        polygon.modulate = Color.WHITE
+        buildable_overlay.polygon = _build_polygon_points(cell_size)
+        buildable_overlay.visible = false
+        buildable_overlay.color = _buildable_color
+        growth_badge.polygon = _build_polygon_points(cell_size * 0.35)
+        growth_badge.visible = false
 	sprout_label.text = ""
 	sprout_label.visible = false
 	_show_growth_progress = false
@@ -46,12 +51,18 @@ func is_selected() -> bool:
 	return _is_selected
 
 func set_cell_color(color: Color) -> void:
-	_cell_color = color
-	_apply_color()
+        _cell_color = color
+        _apply_color()
+
+func set_buildable_highlight(active: bool, color: Color) -> void:
+        _buildable_color = color
+        if buildable_overlay:
+                buildable_overlay.color = _buildable_color
+                buildable_overlay.visible = active
 
 func flash(duration: float = 0.2) -> void:
-	if _flash_tween:
-		_flash_tween.kill()
+        if _flash_tween:
+                _flash_tween.kill()
 	polygon.modulate = Color(1.4, 1.4, 1.4, 1.0)
 	_flash_tween = create_tween()
 	_flash_tween.tween_property(polygon, "modulate", Color.WHITE, duration)
