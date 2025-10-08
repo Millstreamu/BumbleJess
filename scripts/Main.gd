@@ -18,21 +18,21 @@ const ReviewBanner := preload("res://src/ui/ReviewBanner.gd")
 @onready var review_banner: ReviewBanner = $UI/ReviewBanner
 
 func _ready() -> void:
-		if hex_grid and hex_grid.grid_config:
-				background.color = hex_grid.grid_config.background_color
-		hex_grid.position = get_viewport_rect().size * 0.5
-		_wire_turn_systems()
+    if hex_grid and hex_grid.grid_config:
+        background.color = hex_grid.grid_config.background_color
+    hex_grid.position = get_viewport_rect().size * 0.5
+    _wire_turn_systems()
 
 func _wire_turn_systems() -> void:
-		if not turn_controller:
-				return
-		if board:
-				turn_controller.subscribe("phase_new_tile", func(): Enclosure.detect_and_mark_overgrowth(board))
-				turn_controller.subscribe("phase_growth", func(): Growth.do_growth(board))
-				turn_controller.subscribe("phase_mutation", func(): Mutation.do_mutations(board))
-				turn_controller.subscribe("phase_resources", func(): ResourcesSystem.do_production(board))
-				turn_controller.subscribe("phase_decay", func(): Decay.do_spread(board))
-				turn_controller.subscribe("phase_battle", func(): Battle.resolve_all(board))
-		if review_banner:
-				review_banner.turn_controller = turn_controller
-				turn_controller.subscribe("phase_review", func(): review_banner.show_for_turn(RunState.turn))
+    if not turn_controller:
+        return
+    if board:
+        turn_controller.subscribe("phase_new_tile", func(): Enclosure.detect_and_mark_overgrowth(board))
+        turn_controller.subscribe("phase_growth", func(): Growth.do_growth(board))
+        turn_controller.subscribe("phase_mutation", func(): Mutation.do_mutations(board))
+        turn_controller.subscribe("phase_resources", func(): ResourcesSystem.do_production(board))
+        turn_controller.subscribe("phase_decay", func(): Decay.do_spread(board))
+        turn_controller.subscribe("phase_battle", func(): Battle.resolve_all(board))
+    if review_banner:
+        review_banner.turn_controller = turn_controller
+        turn_controller.subscribe("phase_review", func(): review_banner.show_for_turn(RunState.turn))
