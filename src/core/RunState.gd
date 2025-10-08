@@ -9,17 +9,19 @@ static var deck: Array = []
 static var draw_index: int = 0
 static var overgrowth: Dictionary = {}
 static var connected_set: Dictionary = {}
+static var refine_cooldown: Dictionary = {}
 
 static func start_new_run() -> void:
-	seed = int(Time.get_unix_time_from_system())
-	Config.load_all()
-	chosen_variants = {}
-	deck = []
-	draw_index = 0
-	overgrowth = {}
-	connected_set = {}
-	turn = 0
-	RunState.finalize_after_draft()
+        seed = int(Time.get_unix_time_from_system())
+        Config.load_all()
+        chosen_variants = {}
+        deck = []
+        draw_index = 0
+        overgrowth = {}
+        connected_set = {}
+        refine_cooldown = {}
+        turn = 0
+        RunState.finalize_after_draft()
 
 static func finalize_after_draft() -> void:
 	var distribution: Dictionary = {}
