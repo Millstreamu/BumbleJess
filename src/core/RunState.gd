@@ -15,6 +15,7 @@ static var decay_tiles: Dictionary = {}
 static var decay_adjacent_age: Dictionary = {}
 
 static func start_new_run() -> void:
+
         seed = int(Time.get_unix_time_from_system())
         Config.load_all()
         chosen_variants = {}
@@ -28,6 +29,7 @@ static func start_new_run() -> void:
         decay_adjacent_age = {}
         turn = 0
         RunState.finalize_after_draft()
+
 
 static func finalize_after_draft() -> void:
 	var distribution: Dictionary = {}

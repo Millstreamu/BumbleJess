@@ -28,7 +28,7 @@ var is_advancing := false
 var is_in_review := false
 
 func _init() -> void:
-                pass
+				pass
 
 func subscribe(phase: String, callable: Callable) -> void:
 		if not _subscribers.has(phase):
@@ -85,4 +85,3 @@ func set_tile(axial: Vector2i, category: String) -> void:
 
 func remove_tile(axial: Vector2i) -> void:
 		_grid.erase(axial)
-
