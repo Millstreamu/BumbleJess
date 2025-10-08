@@ -1,9 +1,9 @@
 extends Node
 class_name PanelSwitcher
 
-var _panels : Dictionary = {}
-var _order : Array = []
-var _current := ""
+var _panels: Dictionary = {}
+var _order: Array[String] = []
+var _current: String = ""
 
 func _ready() -> void:
     ensure_draft_panel()
@@ -26,9 +26,11 @@ func ensure_draft_panel() -> void:
 func show(name:String) -> void:
     if not _panels.has(name):
         return
-    for key in _panels.keys():
-        var panel = _panels[key]
-        if panel is CanvasItem:
+    for raw_key in _panels.keys():
+        var key: String = str(raw_key)
+        var panel_value: Variant = _panels[key]
+        if panel_value is CanvasItem:
+            var panel: CanvasItem = panel_value
             panel.visible = key == name
     _current = name
 

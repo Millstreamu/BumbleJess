@@ -11,7 +11,7 @@ static var last_water_gain: int = 0
 static func tick_and_convert(board: Node) -> void:
         last_water_gain = 0
         var cooldown_turns := _cooldown_turns()
-        var tiles := _placed_tiles(board)
+        var tiles: Dictionary = _placed_tiles(board)
         var active := {}
         for key in tiles.keys():
                 var tile: Dictionary = tiles[key]
@@ -60,7 +60,7 @@ static func _try_convert(_key: String) -> void:
         last_water_gain += gained
 
 static func _cooldown_turns() -> int:
-        var variant := Config.get_variant("Refine", "refine_default")
+        var variant: Dictionary = Config.get_variant("Refine", "refine_default")
         var effects: Dictionary = variant.get("effects", {})
         return int(effects.get("cooldown_turns", 2))
 
