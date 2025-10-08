@@ -16,10 +16,6 @@ script = ExtResource("1_k0v1n")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
 self_modulate = Color(1, 1, 1, 0.9)
 
 [node name="Margin" type="MarginContainer" parent="Panel"]
@@ -35,50 +31,23 @@ offset_bottom = -12.0
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
-separation = 8
 
 [node name="Title" type="Label" parent="Panel/Margin/VBox"]
 text = "Resources"
 horizontal_alignment = 1
-vertical_alignment = 1
 
-[node name="Grid" type="GridContainer" parent="Panel/Margin/VBox"]
-columns = 2
-custom_constants/vertical_separation = 4
-custom_constants/horizontal_separation = 12
-
-[node name="NatureLabel" type="Label" parent="Panel/Margin/VBox/Grid"]
-text = "Nature"
-
-[node name="NatureValue" type="Label" parent="Panel/Margin/VBox/Grid"]
+[node name="Nature" type="Label" parent="Panel/Margin/VBox"]
 unique_name_in_owner = true
-text = "0"
-horizontal_alignment = 2
+text = "Nature: 0 / 0"
 
-[node name="EarthLabel" type="Label" parent="Panel/Margin/VBox/Grid"]
-text = "Earth"
-
-[node name="EarthValue" type="Label" parent="Panel/Margin/VBox/Grid"]
+[node name="Earth" type="Label" parent="Panel/Margin/VBox"]
 unique_name_in_owner = true
-text = "0"
-horizontal_alignment = 2
+text = "Earth:  0 / 0"
 
-[node name="WaterLabel" type="Label" parent="Panel/Margin/VBox/Grid"]
-text = "Water"
-
-[node name="WaterValue" type="Label" parent="Panel/Margin/VBox/Grid"]
+[node name="Water" type="Label" parent="Panel/Margin/VBox"]
 unique_name_in_owner = true
-text = "0"
-horizontal_alignment = 2
+text = "Water:  0 / 0"
 
-[node name="LifeLabel" type="Label" parent="Panel/Margin/VBox/Grid"]
-text = "Life"
-
-[node name="LifeValue" type="Label" parent="Panel/Margin/VBox/Grid"]
+[node name="Life" type="Label" parent="Panel/Margin/VBox"]
 unique_name_in_owner = true
-text = "0"
-horizontal_alignment = 2
+text = "Life:   0 / 0"

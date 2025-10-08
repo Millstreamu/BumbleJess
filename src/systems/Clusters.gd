@@ -1,55 +1,64 @@
-extends RefCounted
-## Identifies contiguous clusters of tiles by category on a hex grid.
+extends Node
+## Utilities for working with contiguous tile clusters on the hex grid.
 class_name Clusters
 
-const Hex := preload("res://src/core/Hex.gd")
+static func neighbors(ax: Vector2i) -> Array:
+        var dirs := [
+                Vector2i(+1, 0),
+                Vector2i(+1, -1),
+                Vector2i(0, -1),
+                Vector2i(-1, 0),
+                Vector2i(-1, +1),
+                Vector2i(0, +1),
+        ]
+        var out: Array = []
+        for d in dirs:
+                out.append(ax + d)
+        return out
 
-static func collect(grid: Dictionary, category: String) -> Array:
-        var clusters: Array = []
-        var target := category
-        var visited: Dictionary = {}
-        for key in grid.keys():
-                var axial := _to_vector2i(key)
-                if visited.has(axial):
+static func key(ax: Vector2i) -> String:
+        return "%d,%d" % [ax.x, ax.y]
+
+static func unkey(k: String) -> Vector2i:
+        var parts := k.split(",")
+        if parts.size() != 2:
+                return Vector2i.ZERO
+        return Vector2i(int(parts[0]), int(parts[1]))
+
+static func count_harvest_cluster_tiles(board: Node) -> int:
+        if board == null:
+                return 0
+        var tiles_variant := board.get("placed_tiles")
+        if typeof(tiles_variant) != TYPE_DICTIONARY:
+                return 0
+        var tiles: Dictionary = tiles_variant
+        var visited := {}
+        var total := 0
+        for key in tiles.keys():
+                if visited.has(key):
                         continue
-                var tile_category := str(_get_category(grid.get(key)))
-                if tile_category != target:
+                var tile: Dictionary = tiles[key]
+                if String(tile.get("category", "")) != "Harvest":
                         continue
-                clusters.append(_flood_fill(grid, axial, target, visited))
-        return clusters
+                total += _flood_count(board, key, tiles, visited)
+        return total
 
-static func _flood_fill(grid: Dictionary, start: Vector2i, category: String, visited: Dictionary) -> Array:
-        var cluster: Array = []
-        var frontier: Array = [start]
-        visited[start] = true
-        while frontier.size() > 0:
-                var current: Vector2i = frontier[0]
-                frontier.remove_at(0)
-                cluster.append(current)
-                for neighbor in Hex.neighbors(Hex.Axial.from_vector2i(current)):
-                        var vec := neighbor.to_vector2i()
-                        if visited.has(vec):
+static func _flood_count(board: Node, start_key: String, tiles: Dictionary, visited: Dictionary) -> int:
+        var stack: Array = [start_key]
+        visited[start_key] = true
+        var count := 0
+        while stack.size() > 0:
+                var current_key: String = stack.pop_back()
+                count += 1
+                var axial := unkey(current_key)
+                for nb in neighbors(axial):
+                        var nk := key(nb)
+                        if visited.has(nk):
                                 continue
-                        if not grid.has(vec):
+                        if not tiles.has(nk):
                                 continue
-                        if str(_get_category(grid.get(vec))) != category:
+                        if String(tiles[nk].get("category", "")) != "Harvest":
                                 continue
-                        visited[vec] = true
-                        frontier.append(vec)
-        return cluster
-
-static func _get_category(tile_data: Variant) -> String:
-        if typeof(tile_data) == TYPE_DICTIONARY:
-                return String(tile_data.get("category", ""))
-        if typeof(tile_data) == TYPE_STRING:
-                return String(tile_data)
-        return ""
-
-static func _to_vector2i(value: Variant) -> Vector2i:
-        if value is Vector2i:
-                return value
-        if value is Hex.Axial:
-                return value.to_vector2i()
-        if typeof(value) == TYPE_DICTIONARY and value.has("q") and value.has("r"):
-                return Vector2i(int(value.q), int(value.r))
-        return Vector2i.ZERO
+                        visited[nk] = true
+                        stack.append(nk)
+        return count

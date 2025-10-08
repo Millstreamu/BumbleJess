@@ -11,20 +11,8 @@ signal phase_battle
 signal phase_review
 
 const RunState := preload("res://src/core/RunState.gd")
-const Hex := preload("res://src/core/Hex.gd")
-const ResourcesSystem := preload("res://src/systems/Resources.gd")
-const Clusters := preload("res://src/systems/Clusters.gd")
-const ProducerRefine := preload("res://src/systems/ProducerRefine.gd")
 
-const PRODUCER_RESOURCE := {
-"Harvest": "nature",
-"Build": "earth",
-"Refine": "water",
-}
-
-var resources: ResourcesSystem
 var _grid: Dictionary = {}
-var _producer_refine: ProducerRefine
 
 var _subscribers := {
 		"phase_new_tile": [],
@@ -40,10 +28,7 @@ var is_advancing := false
 var is_in_review := false
 
 func _init() -> void:
-		resources = ResourcesSystem.new()
-		_producer_refine = ProducerRefine.new()
-		# Preserve legacy resource processing for tests and tooling.
-		subscribe("phase_resources", Callable(self, "_legacy_process_resources_phase"))
+                pass
 
 func subscribe(phase: String, callable: Callable) -> void:
 		if not _subscribers.has(phase):
@@ -101,46 +86,3 @@ func set_tile(axial: Vector2i, category: String) -> void:
 func remove_tile(axial: Vector2i) -> void:
 		_grid.erase(axial)
 
-func _legacy_process_resources_phase() -> void:
-		_recompute_capacity()
-		_process_refine()
-
-func _recompute_capacity() -> void:
-		var caps := {
-				"nature": 0,
-				"earth": 0,
-				"water": 0,
-				"life": resources.get_cap("life"),
-		}
-		for key in _grid.keys():
-				var category := str(_grid[key].get("category", ""))
-				if PRODUCER_RESOURCE.has(category):
-						var res_type: String = PRODUCER_RESOURCE[category]
-						caps[res_type] = caps.get(res_type, 0) + 5
-		var harvest_clusters := Clusters.collect(_grid, "Harvest")
-		for cluster in harvest_clusters:
-				caps["nature"] = caps.get("nature", 0) + cluster.size() * 10
-		var storage_positions := _positions_for_category("Storage")
-		for storage_pos in storage_positions:
-				for neighbor in Hex.neighbors(Hex.Axial.from_vector2i(storage_pos)):
-						var neighbor_vec := neighbor.to_vector2i()
-						if not _grid.has(neighbor_vec):
-								continue
-						var neighbor_category := str(_grid[neighbor_vec].get("category", ""))
-						if PRODUCER_RESOURCE.has(neighbor_category):
-								var res_key: String = PRODUCER_RESOURCE[neighbor_category]
-								caps[res_key] = caps.get(res_key, 0) + 5
-		for key in caps.keys():
-				resources.set_cap(key, int(caps[key]))
-
-func _process_refine() -> void:
-		var refine_positions := _positions_for_category("Refine")
-		_producer_refine.process_turn(refine_positions, resources)
-
-func _positions_for_category(category: String) -> Array:
-		var results: Array = []
-		for key in _grid.keys():
-				var tile_category := str(_grid[key].get("category", ""))
-				if tile_category == category:
-						results.append(key)
-		return results
