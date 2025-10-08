@@ -3,7 +3,7 @@ extends Node
 class_name Clusters
 
 static func neighbors(ax: Vector2i) -> Array:
-        var dirs := [
+        var dirs: Array[Vector2i] = [
                 Vector2i(+1, 0),
                 Vector2i(+1, -1),
                 Vector2i(0, -1),

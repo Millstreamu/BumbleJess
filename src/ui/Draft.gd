@@ -68,7 +68,7 @@ func _sample_three(cat:String) -> Array[Dictionary]:
     var available := variants.size()
     if available <= 0:
         return []
-    var count := min(3, available)
+    var count: int = min(3, available)
     var results : Array[Dictionary] = []
     for i in range(count):
         var idx := _rng.randi_range(0, variants.size() - 1)
@@ -170,7 +170,7 @@ func _confirm_pick():
     if _choices.is_empty():
         return
     var cat: String = _categories[_index]
-    var sel := clamp(_current_sel(), 0, _choices.size() - 1)
+    var sel: int = clamp(_current_sel(), 0, _choices.size() - 1)
     var picked_id := str(_choices[sel].get("id", ""))
     if picked_id != "":
         _picked[cat] = picked_id
