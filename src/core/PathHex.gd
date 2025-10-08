@@ -18,20 +18,20 @@ static func set_board(board: Node) -> void:
 	_board = board
 
 static func bfs_first_step(from_ax: Vector2i, is_goal: Callable, is_walkable: Callable) -> Variant:
-        var visited := {}
-        var parents := {}
-        var queue: Array = []
-        queue.append(from_ax)
-        visited[_key(from_ax)] = true
-        while queue.size() > 0:
-                var current: Vector2i = queue.pop_front()
-                if is_goal.call([current]):
-                        var step := _retrace_first_step(from_ax, current, parents)
-                        if step != null:
-                                return step
-                for dir in DIRECTIONS:
-                        var nxt := current + dir
-                        var nxt_key := _key(nxt)
+		var visited := {}
+		var parents := {}
+		var queue: Array = []
+		queue.append(from_ax)
+		visited[_key(from_ax)] = true
+		while queue.size() > 0:
+				var current: Vector2i = queue.pop_front()
+				if is_goal.call([current]):
+						var step := _retrace_first_step(from_ax, current, parents)
+						if step != null:
+								return step
+				for dir in DIRECTIONS:
+						var nxt := current + dir
+						var nxt_key := _key(nxt)
 			if visited.has(nxt_key):
 				continue
 			if not is_walkable.call([nxt]):
@@ -65,33 +65,33 @@ static func _key(ax: Vector2i) -> String:
 	return "%d,%d" % [ax.x, ax.y]
 
 static func _retrace_first_step(start_ax: Vector2i, goal_ax: Vector2i, parents: Dictionary) -> Variant:
-        var path: Array = []
-        var current := goal_ax
-        var current_key := _key(current)
-        path.push_front(current)
-        while parents.has(current_key):
-                var prev: Vector2i = parents[current_key]
-                path.push_front(prev)
-                current = prev
-                current_key = _key(current)
-        if path.is_empty():
-                return null
-        if path[0] != start_ax:
-                path.push_front(start_ax)
-        return _first_non_decay_step(path)
+		var path: Array = []
+		var current := goal_ax
+		var current_key := _key(current)
+		path.push_front(current)
+		while parents.has(current_key):
+				var prev: Vector2i = parents[current_key]
+				path.push_front(prev)
+				current = prev
+				current_key = _key(current)
+		if path.is_empty():
+				return null
+		if path[0] != start_ax:
+				path.push_front(start_ax)
+		return _first_non_decay_step(path)
 
 static func _first_non_decay_step(path: Array) -> Variant:
-        if path.size() <= 1:
-                return null
-        for i in range(1, path.size()):
-                var step: Variant = path[i]
-                if typeof(step) != TYPE_VECTOR2I:
-                        continue
-                var step_ax: Vector2i = step
-                if _board == null:
-                        return step_ax
-                if not _board.has_method("is_decay"):
-                        return step_ax
-                if not _board.is_decay(step_ax):
-                        return step_ax
-        return null
+		if path.size() <= 1:
+				return null
+		for i in range(1, path.size()):
+				var step: Variant = path[i]
+				if typeof(step) != TYPE_VECTOR2I:
+						continue
+				var step_ax: Vector2i = step
+				if _board == null:
+						return step_ax
+				if not _board.has_method("is_decay"):
+						return step_ax
+				if not _board.is_decay(step_ax):
+						return step_ax
+		return null

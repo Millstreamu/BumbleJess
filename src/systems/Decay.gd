@@ -150,19 +150,19 @@ static func _ring_coords(radius: int) -> Array:
 	return coords
 
 static func _gather_decay_axes(board: Node) -> Array:
-        var axes: Array = []
-        if board == null:
-                return axes
-        if board is Board:
-                var b: Board = board
-                for k in b.placed_tiles.keys():
-                        var tile: Dictionary = b.placed_tiles[k]
-                        if tile.get("category", "") == "Decay":
-                                var ax := Board.unkey(k)
-                                axes.append(ax)
-                                if not RunState.decay_tiles.has(k):
-                                        RunState.decay_tiles[k] = {"age_adj_life": 0}
-        if axes.is_empty():
-                for key in RunState.decay_tiles.keys():
-                        axes.append(Board.unkey(key))
-        return axes
+		var axes: Array = []
+		if board == null:
+				return axes
+		if board is Board:
+				var b: Board = board
+				for k in b.placed_tiles.keys():
+						var tile: Dictionary = b.placed_tiles[k]
+						if tile.get("category", "") == "Decay":
+								var ax := Board.unkey(k)
+								axes.append(ax)
+								if not RunState.decay_tiles.has(k):
+										RunState.decay_tiles[k] = {"age_adj_life": 0}
+		if axes.is_empty():
+				for key in RunState.decay_tiles.keys():
+						axes.append(Board.unkey(key))
+		return axes
