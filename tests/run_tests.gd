@@ -14,6 +14,10 @@ const TEST_SCRIPTS := [
         preload("res://tests/test_growth_to_grove.gd"),
         preload("res://tests/test_mutation_grove_thicket.gd"),
         preload("res://tests/test_turn_bus.gd"),
+        preload("res://tests/test_decay_seed.gd"),
+        preload("res://tests/test_decay_spread.gd"),
+        preload("res://tests/test_decay_adjacency_corruption.gd"),
+        preload("res://tests/test_pathhex.gd"),
 ]
 
 func _init() -> void:
