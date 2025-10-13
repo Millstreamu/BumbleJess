@@ -1,5 +1,4 @@
 extends Node
-class_name Config
 
 static var _tiles: Dictionary = {}
 static var _deck: Dictionary = {}
