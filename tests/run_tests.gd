@@ -36,4 +36,7 @@ func _run_all_tests() -> void:
 								result = await result
 						if result is bool and not result:
 								failed = true
-		quit(failed ? 1 : 0)
+                if failed:
+                                quit(1)
+                else:
+                                quit(0)
