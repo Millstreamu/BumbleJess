@@ -15,10 +15,10 @@ var sprout_capacity: int = 0
 var decay_timer: int = 0
 
 func set_type(new_type: int, new_color: Color) -> void:
-    cell_type = new_type
-    color = new_color
-    if new_type != CellType.Type.OVERGROWTH:
-        growth_timer = 0
-        growth_duration = 0
-    if new_type != CellType.Type.GROVE:
-        sprout_count = 0
+	cell_type = new_type
+	color = new_color
+	if new_type != CellType.Type.OVERGROWTH:
+		growth_timer = 0
+		growth_duration = 0
+	if new_type != CellType.Type.GROVE:
+		sprout_count = 0

@@ -1,42 +1,30 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=2 format=3 uid="uid://0ypp6kvpjy6i"]
 
-[ext_resource type="Script" path="res://src/ui/ReviewBanner.gd" id="1_ahcsw"]
+[ext_resource type="Script" uid="uid://dordtjtg3s3ax" path="res://src/ui/ReviewBanner.gd" id="1_ahcsw"]
 
 [node name="ReviewBanner" type="Control"]
-script = ExtResource("1_ahcsw")
+visible = false
+layout_mode = 3
+anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -220.0
-offset_right = 220.0
 offset_top = 16.0
+offset_right = 220.0
 offset_bottom = 80.0
-visible = false
 mouse_filter = 2
+script = ExtResource("1_ahcsw")
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
-anchors_preset = 8
-anchor_left = 0.0
+layout_mode = 0
 anchor_right = 1.0
-anchor_top = 0.0
 anchor_bottom = 1.0
 
 [node name="MarginContainer" type="MarginContainer" parent="PanelContainer"]
-anchors_preset = 15
-anchor_left = 0.0
-anchor_right = 1.0
-anchor_top = 0.0
-anchor_bottom = 1.0
-offset_left = 8.0
-offset_right = -8.0
-offset_top = 8.0
-offset_bottom = -8.0
+layout_mode = 2
 
 [node name="Label" type="Label" parent="PanelContainer/MarginContainer"]
-anchors_preset = 15
-anchor_left = 0.0
-anchor_right = 1.0
-anchor_top = 0.0
-anchor_bottom = 1.0
+layout_mode = 2
+text = "Turn 0 — Review (Space to continue)"
 horizontal_alignment = 1
 vertical_alignment = 1
-text = "Turn 0 — Review (Space to continue)"

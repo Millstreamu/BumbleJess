@@ -9,7 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://runinfopanel" path="res://scenes/ui/RunInfoPanel.tscn" id="7_f9p8j"]
 [ext_resource type="Script" uid="uid://cb618hgrcjhg1" path="res://src/systems/TurnController.gd" id="8_turpc"]
 [ext_resource type="Script" uid="uid://cacloj67bsx5u" path="res://src/systems/Board.gd" id="9_brd0u"]
-[ext_resource type="PackedScene" path="res://src/ui/ReviewBanner.tscn" id="10_rvbnr"]
+[ext_resource type="PackedScene" uid="uid://0ypp6kvpjy6i" path="res://src/ui/ReviewBanner.tscn" id="10_rvbnr"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("3_p3b4o")

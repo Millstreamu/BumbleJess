@@ -79,8 +79,8 @@ func test_decay_spread_respects_timer_and_cap() -> bool:
 	ok = ok and timer_a_turn1 == 2 and timer_b_turn1 == 2
 	ok = ok and timer_a_turn2 == 1 and timer_b_turn2 == 1
 	ok = ok and timer_a_turn3 == 2 and timer_b_turn3 == 2
-        ok = ok and decay_positions.has(Vector2i(1, -1))
-        ok = ok and decay_positions.has(Vector2i(1, 0))
+		ok = ok and decay_positions.has(Vector2i(1, -1))
+		ok = ok and decay_positions.has(Vector2i(1, 0))
 	_restore_config(backup)
 	RunState.decay_totems = []
 	RunState.decay_tiles = {}

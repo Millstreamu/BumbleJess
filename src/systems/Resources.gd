@@ -12,17 +12,17 @@ const Clusters := preload("res://src/systems/Clusters.gd")
 const ProducerRefine := preload("res://src/systems/ProducerRefine.gd")
 
 static var amount: Dictionary = {
-        "Nature": 0,
-        "Earth": 0,
-        "Water": 0,
-        "Life": 0,
+		"Nature": 0,
+		"Earth": 0,
+		"Water": 0,
+		"Life": 0,
 }
 
 static var cap: Dictionary = {
-        "Nature": 0,
-        "Earth": 0,
-        "Water": 0,
-        "Life": 0,
+		"Nature": 0,
+		"Earth": 0,
+		"Water": 0,
+		"Life": 0,
 }
 
 static func reset() -> void:
@@ -40,15 +40,15 @@ static func set_cap(type: String, value: int) -> void:
 		amount[key] = clamp(amount[key], 0, clamped)
 
 static func add(type: String, delta: int) -> int:
-        var key := _ensure_type(type)
-        var before: int = int(amount.get(key, 0))
-        var limit: int = int(cap.get(key, 0))
-        if limit <= 0 and key != "Life":
-                amount[key] = max(0, min(before + delta, 0))
-        else:
-                var max_value: int = limit if limit > 0 else before + delta
-                amount[key] = clamp(before + delta, 0, max_value)
-        return int(amount[key]) - before
+		var key := _ensure_type(type)
+		var before: int = int(amount.get(key, 0))
+		var limit: int = int(cap.get(key, 0))
+		if limit <= 0 and key != "Life":
+				amount[key] = max(0, min(before + delta, 0))
+		else:
+				var max_value: int = limit if limit > 0 else before + delta
+				amount[key] = clamp(before + delta, 0, max_value)
+		return int(amount[key]) - before
 
 static func get_amount(type: String) -> int:
 	var key := _ensure_type(type)
