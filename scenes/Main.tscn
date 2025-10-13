@@ -59,7 +59,6 @@ info_panel_path = NodePath("../RunInfoPanel")
 [node name="ReviewBanner" parent="UI" instance=ExtResource("10_rvbnr")]
 offset_top = 0.0
 offset_bottom = 64.0
-grow_horizontal = 2
 
 [node name="RunInfoPanel" parent="." instance=ExtResource("7_f9p8j")]
 layout_mode = 3

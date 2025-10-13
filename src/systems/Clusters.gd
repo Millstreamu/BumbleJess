@@ -26,39 +26,39 @@ static func unkey(k: String) -> Vector2i:
 		return Vector2i(int(parts[0]), int(parts[1]))
 
 static func count_harvest_cluster_tiles(board: Node) -> int:
-        if board == null:
-                return 0
-        var tiles_variant: Variant = board.get("placed_tiles")
-        if typeof(tiles_variant) != TYPE_DICTIONARY:
-                return 0
-        var tiles: Dictionary = tiles_variant
-        var visited: Dictionary[String, bool] = {}
-        var total := 0
-        for key in tiles.keys():
-                if visited.has(key):
-                        continue
-                var tile: Dictionary = tiles[key]
-                if String(tile.get("category", "")) != "Harvest":
-                        continue
-                total += _flood_count(board, key, tiles, visited)
-        return total
+		if board == null:
+				return 0
+		var tiles_variant: Variant = board.get("placed_tiles")
+		if typeof(tiles_variant) != TYPE_DICTIONARY:
+				return 0
+		var tiles: Dictionary = tiles_variant
+		var visited: Dictionary[String, bool] = {}
+		var total := 0
+		for key in tiles.keys():
+				if visited.has(key):
+						continue
+				var tile: Dictionary = tiles[key]
+				if String(tile.get("category", "")) != "Harvest":
+						continue
+				total += _flood_count(board, key, tiles, visited)
+		return total
 
 static func _flood_count(board: Node, start_key: String, tiles: Dictionary, visited: Dictionary[String, bool]) -> int:
-        var stack: Array[String] = [start_key]
-        visited[start_key] = true
-        var count := 0
-        while stack.size() > 0:
-                var current_key: String = stack.pop_back()
-                count += 1
-                var axial := unkey(current_key)
-                for nb in neighbors(axial):
-                        var nk := key(nb)
-                        if visited.has(nk):
-                                continue
-                        if not tiles.has(nk):
-                                continue
-                        if String(tiles[nk].get("category", "")) != "Harvest":
-                                continue
-                        visited[nk] = true
-                        stack.append(nk)
-        return count
+		var stack: Array[String] = [start_key]
+		visited[start_key] = true
+		var count := 0
+		while stack.size() > 0:
+				var current_key: String = stack.pop_back()
+				count += 1
+				var axial := unkey(current_key)
+				for nb in neighbors(axial):
+						var nk := key(nb)
+						if visited.has(nk):
+								continue
+						if not tiles.has(nk):
+								continue
+						if String(tiles[nk].get("category", "")) != "Harvest":
+								continue
+						visited[nk] = true
+						stack.append(nk)
+		return count
