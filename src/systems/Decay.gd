@@ -81,7 +81,7 @@ static func do_spread(board: Node) -> void:
         var should_attempt := timer_value <= 0
         if should_attempt:
             if placed_this_turn < global_cap:
-                var step_variant := _next_decay_step_from(totem.get("ax", Vector2i.ZERO))
+                var step_variant: Variant = _next_decay_step_from(totem.get("ax", Vector2i.ZERO))
                 if typeof(step_variant) == TYPE_VECTOR2I:
                     var step_ax: Vector2i = step_variant
                     if not board.is_decay(step_ax):
