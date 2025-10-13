@@ -26,13 +26,13 @@ func _init() -> void:
 func _run_all_tests() -> void:
     var failed := false
     for script in TEST_SCRIPTS:
-        var test_case := script.new()
+        var test_case: Object = script.new()
         for method in test_case.get_method_list():
             var name: String = method.name
             if not name.begins_with("test_"):
                 continue
-            var result = test_case.call(name)
-            if result is GDScriptFunctionState:
+            var result: Variant = test_case.call(name)
+            if typeof(result) == TYPE_OBJECT and result.get_class() == "GDScriptFunctionState":
                 result = await result
             if result is bool and not result:
                 failed = true

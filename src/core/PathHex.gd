@@ -26,7 +26,7 @@ static func bfs_first_step(from_ax: Vector2i, is_goal: Callable, is_walkable: Ca
     while queue.size() > 0:
         var current: Vector2i = queue.pop_front()
         if is_goal.call([current]):
-            var step := _retrace_first_step(from_ax, current, parents)
+            var step: Variant = _retrace_first_step(from_ax, current, parents)
             if step != null:
                 return step
         for dir in DIRECTIONS:
