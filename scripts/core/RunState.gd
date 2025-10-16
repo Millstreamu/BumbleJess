@@ -41,8 +41,8 @@ func _ready() -> void:
 		palette_state_path = NodePath("../PaletteState")
 	if build_palette_path.is_empty():
 		build_palette_path = NodePath("../BuildPalette")
-	if info_panel_path.is_empty():
-		info_panel_path = NodePath("../RunInfoPanel")
+        if info_panel_path.is_empty():
+                info_panel_path = NodePath("../UI/Panels/RunInfoPanel")
 
 	_hex_grid = get_node_or_null(hex_grid_path)
 	_palette_state = get_node_or_null(palette_state_path)
