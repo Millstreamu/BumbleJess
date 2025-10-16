@@ -86,15 +86,15 @@ static func do_spread(board: Node) -> void:
 				if typeof(step_variant) == TYPE_VECTOR2I:
 					var step_ax: Vector2i = step_variant
 					if not board.is_decay(step_ax):
-                                                board.add_decay(step_ax, "corrupt")
-                                                var k := Board.key(step_ax)
-                                                RunState.decay_tiles[k] = {"age_adj_life": 0}
-                                                if RunState.overgrowth.has(k):
-                                                        RunState.overgrowth.erase(k)
-                                                placed_this_turn += 1
-                                                var spread_msg := "Decay spread to %s" % k
-                                                RunState.add_turn_note(spread_msg)
-                                                CombatLog.log("• " + spread_msg)
+						board.add_decay(step_ax, "corrupt")
+						var k := Board.key(step_ax)
+						RunState.decay_tiles[k] = {"age_adj_life": 0}
+						if RunState.overgrowth.has(k):
+							RunState.overgrowth.erase(k)
+						placed_this_turn += 1
+						var spread_msg := "Decay spread to %s" % k
+						RunState.add_turn_note(spread_msg)
+						CombatLog.log("• " + spread_msg)
 					else:
 						var existing_key := Board.key(step_ax)
 						if not RunState.decay_tiles.has(existing_key):
@@ -123,16 +123,16 @@ static func apply_adjacency_corruption(board: Node) -> void:
 		RunState.decay_adjacent_age[key] = age
 		if age >= 3:
 			var ax: Vector2i = adjacent_life[key]
-                        board.replace_tile(ax, "Decay", "decay_base", "corrupt")
-                        RunState.decay_tiles[key] = {"age_adj_life": 0}
-                        RunState.decay_adjacent_age.erase(key)
-                        if RunState.overgrowth.has(key):
-                                RunState.overgrowth.erase(key)
-                        if RunState.connected_set.has(key):
-                                RunState.connected_set.erase(key)
-                        var corrupt_msg := "Decay consumed %s" % key
-                        RunState.add_turn_note(corrupt_msg)
-                        CombatLog.log("• " + corrupt_msg)
+			board.replace_tile(ax, "Decay", "decay_base", "corrupt")
+			RunState.decay_tiles[key] = {"age_adj_life": 0}
+			RunState.decay_adjacent_age.erase(key)
+			if RunState.overgrowth.has(key):
+				RunState.overgrowth.erase(key)
+			if RunState.connected_set.has(key):
+				RunState.connected_set.erase(key)
+			var corrupt_msg := "Decay consumed %s" % key
+			RunState.add_turn_note(corrupt_msg)
+			CombatLog.log("• " + corrupt_msg)
 
 static func neighbors(ax: Vector2i) -> Array:
 	var out: Array = []
