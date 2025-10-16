@@ -2,6 +2,8 @@ extends Node
 class_name Growth
 
 const RunState := preload("res://src/core/RunState.gd")
+const CombatLog := preload("res://src/ui/CombatLogPanel.gd")
+const Board := preload("res://src/systems/Board.gd")
 
 static func key(ax: Vector2i) -> String:
 		return "%d,%d" % [ax.x, ax.y]
@@ -24,5 +26,8 @@ static func do_growth(board: Node) -> void:
 		for k in to_promote:
 				RunState.overgrowth.erase(k)
 				var ax := unkey(k)
-				board.replace_tile(ax, "Grove", "grove_base")
-				RunState.connected_set[k] = true
+                                board.replace_tile(ax, "Grove", "grove_base", "grow")
+                                RunState.connected_set[k] = true
+                                var message := "Grove blossomed at %s" % Board.key(ax)
+                                RunState.add_turn_note(message)
+                                CombatLog.log("• " + message)

@@ -10,6 +10,8 @@ const DEFAULT_LIFE_CAP := 999
 
 const Clusters := preload("res://src/systems/Clusters.gd")
 const ProducerRefine := preload("res://src/systems/ProducerRefine.gd")
+const RunState := preload("res://src/core/RunState.gd")
+const CombatLog := preload("res://src/ui/CombatLogPanel.gd")
 
 static var amount: Dictionary = {
 	"Nature": 0,
@@ -50,8 +52,14 @@ static func add(type: String, delta: int) -> int:
 		new_value = clamp(new_value, 0, limit)
 	else:
 		new_value = max(new_value, 0)
-	amount[key] = max(new_value, 0)
-	return amount[key] - before
+        amount[key] = max(new_value, 0)
+        var diff := amount[key] - before
+        if diff != 0:
+                var action := "gained" if diff > 0 else "spent"
+                var text := "%s %d %s" % [action.capitalize(), abs(diff), key]
+                RunState.add_turn_note(text)
+                CombatLog.log("• " + text)
+        return diff
 
 static func get_amount(type: String) -> int:
 	var key: String = _ensure_type(type)
