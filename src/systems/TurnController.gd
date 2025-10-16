@@ -12,7 +12,7 @@ signal phase_review
 
 const RunState := preload("res://src/core/RunState.gd")
 const EndOverlay := preload("res://src/ui/EndOverlay.gd")
-const Board := preload("res://src/systems/Board.gd")
+const Board: Script = preload("res://src/systems/Board.gd")
 
 var _grid: Dictionary = {}
 
@@ -90,7 +90,7 @@ func _check_end_conditions() -> void:
 		var ax_variant: Variant = totem.get("ax", null)
 		if typeof(ax_variant) != TYPE_VECTOR2I:
 			continue
-		var key := Board.key(ax_variant)
+		var key: String = Board.key(ax_variant)
 		if RunState.decay_tiles.has(key):
 			EndOverlay.show_defeat()
 			return
