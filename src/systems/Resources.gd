@@ -53,7 +53,7 @@ static func add(type: String, delta: int) -> int:
 	else:
 		new_value = max(new_value, 0)
         amount[key] = max(new_value, 0)
-        var diff := amount[key] - before
+        var diff: int = int(amount[key]) - before
         if diff != 0:
                 var action := "gained" if diff > 0 else "spent"
                 var text := "%s %d %s" % [action.capitalize(), abs(diff), key]
@@ -62,12 +62,12 @@ static func add(type: String, delta: int) -> int:
         return diff
 
 static func get_amount(type: String) -> int:
-	var key: String = _ensure_type(type)
-	return amount[key]
+        var key: String = _ensure_type(type)
+        return int(amount[key])
 
 static func get_cap(type: String) -> int:
-	var key: String = _ensure_type(type)
-	return cap[key]
+        var key: String = _ensure_type(type)
+        return int(cap[key])
 
 static func do_production(board: Node) -> void:
 	_baseline_caps(board)
