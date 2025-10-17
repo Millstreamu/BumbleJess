@@ -2,8 +2,35 @@
 
 ## Developer Summary
 
-### Core Gameplay Overview
+### Repository Layout
 
+```
+sprouts/
+├─ seeds/
+│  └─ demo_forest_seed.json
+godot/
+├─ project.godot
+├─ autoload/
+├─ data/
+├─ scenes/
+│  ├─ main.tscn
+│  ├─ world/
+│  ├─ battle/
+│  └─ ui/
+├─ scripts/
+│  ├─ world/
+│  ├─ tiles/
+│  ├─ battle/
+│  ├─ sprouts/
+│  └─ ui/
+├─ assets/
+├─ tests/
+└─ addons/
+ci/
+└─ github/
+```
+
+### Core Gameplay Overview
 * **Genre:** Turn-based forest regrowth roguelite
 * **Goal:** Restore the forest by placing life-giving tiles, nurturing Sprouts, and defeating Decay Totems.
 * **Core Loop:** Place → World Updates → Every 3 Turns: Totem Generates New Tiles → Manage Sprouts → Battle Decay.

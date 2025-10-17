@@ -1,0 +1,53 @@
+[gd_scene load_steps=2 format=3 uid="uid://resourcespanel"]
+
+[ext_resource type="Script" path="res://scripts/ui/ResourcesPanel.gd" id="1_k0v1n"]
+
+[node name="ResourcesPanel" type="Control"]
+anchors_preset = 0
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -220.0
+offset_right = 240.0
+offset_bottom = -16.0
+script = ExtResource("1_k0v1n")
+
+[node name="Panel" type="Panel" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+self_modulate = Color(1, 1, 1, 0.9)
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = -12.0
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Title" type="Label" parent="Panel/Margin/VBox"]
+text = "Resources"
+horizontal_alignment = 1
+
+[node name="Nature" type="Label" parent="Panel/Margin/VBox"]
+unique_name_in_owner = true
+text = "Nature: 0 / 0"
+
+[node name="Earth" type="Label" parent="Panel/Margin/VBox"]
+unique_name_in_owner = true
+text = "Earth:  0 / 0"
+
+[node name="Water" type="Label" parent="Panel/Margin/VBox"]
+unique_name_in_owner = true
+text = "Water:  0 / 0"
+
+[node name="Life" type="Label" parent="Panel/Margin/VBox"]
+unique_name_in_owner = true
+text = "Life:   0 / 0"
