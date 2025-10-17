@@ -34,3 +34,20 @@ mouse_filter = 2
 current = true
 position = Vector2(0, 0)
 zoom = Vector2(1, 1)
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="MarginContainer" type="MarginContainer" parent="HUD"]
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+
+[node name="Label" type="Label" parent="HUD/MarginContainer"]
+text = "Next: -  |  Deck: 0"
+horizontal_alignment = 0
+vertical_alignment = 0
