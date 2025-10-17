@@ -1,7 +1,0 @@
-[gd_scene load_steps=3 format=3 uid="uid://hexgrid"]
-
-[ext_resource type="Script" path="res://scripts/grid/HexGrid.gd" id="1_m45n4"]
-[ext_resource type="Resource" path="res://assets/world/GridConfig.tres" id="2_dcgwp"]
-[node name="HexGrid" type="Node2D"]
-script = ExtResource("1_m45n4")
-grid_config = ExtResource("2_dcgwp")
