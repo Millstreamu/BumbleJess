@@ -32,36 +32,23 @@ func load_map(map_id: String, world: Node) -> void:
     world.set("height", int(grid.get("height", 12)))
     world.set("tile_px", int(grid.get("tile_px", 64)))
 
+    if world.has_method("clear_tiles"):
+        world.call("clear_tiles")
     if world.has_method("draw_debug_grid"):
         world.call("draw_debug_grid")
 
-    var markers := world.get_node_or_null("Markers")
-    if markers == null:
-        markers = Node2D.new()
-        markers.name = "Markers"
-        world.add_child(markers)
-    else:
-        for child in markers.get_children():
-            child.queue_free()
-
     var totem_data := map.get("totem", {})
     var totem_cell := Vector2i(int(totem_data.get("x", 0)), int(totem_data.get("y", 0)))
-    var totem_scene := load("res://scenes/world/Totem.tscn") as PackedScene
-    if totem_scene:
-        var totem := totem_scene.instantiate()
-        if totem_data.has("totem_id"):
-            totem.set("totem_id", String(totem_data.get("totem_id")))
-        totem.position = world.call("cell_to_world", totem_cell)
-        markers.add_child(totem)
+    if world.has_method("set_cell_named"):
+        world.call("set_cell_named", world.LAYER_OBJECTS, totem_cell, "totem")
+    if world.has_method("set_origin_cell"):
+        world.call("set_origin_cell", totem_cell)
 
-    var decay_scene := load("res://scenes/world/DecayTotem.tscn") as PackedScene
     var decay_totems := map.get("decay_totems", [])
     for decay_data in decay_totems:
         var decay_cell := Vector2i(int(decay_data.get("x", 0)), int(decay_data.get("y", 0)))
-        if decay_scene:
-            var decay := decay_scene.instantiate()
-            decay.position = world.call("cell_to_world", decay_cell)
-            markers.add_child(decay)
+        if world.has_method("set_cell_named"):
+            world.call("set_cell_named", world.LAYER_OBJECTS, decay_cell, "decay")
 
 func _show_missing_map_label(world: Node, map_id: String) -> void:
     var label := Label.new()

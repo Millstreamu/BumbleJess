@@ -1,1 +1,9 @@
-{}
+[
+  {"id":"tile.harvest.default","category":"harvest","name":"Harvest"},
+  {"id":"tile.build.default","category":"build","name":"Build"},
+  {"id":"tile.refine.default","category":"refine","name":"Refine"},
+  {"id":"tile.storage.default","category":"storage","name":"Storage"},
+  {"id":"tile.guard.default","category":"guard","name":"Guard"},
+  {"id":"tile.upgrade.default","category":"upgrade","name":"Upgrade"},
+  {"id":"tile.chanting.default","category":"chanting","name":"Chanting"}
+]
