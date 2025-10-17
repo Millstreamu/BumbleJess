@@ -23,20 +23,14 @@ anchor_bottom = 1.0
 
 [node name="MarginContainer" type="MarginContainer" parent="PanelContainer"]
 layout_mode = 2
-offset_left = 8.0
-offset_top = 8.0
-offset_right = -8.0
-offset_bottom = -8.0
 
 [node name="VBox" type="VBoxContainer" parent="PanelContainer/MarginContainer"]
 layout_mode = 2
-anchor_right = 1.0
-anchor_bottom = 1.0
-separation = 8
 
 [node name="Header" type="Label" parent="PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
 text = "Turn 0 — Review (Space to continue)"
 horizontal_alignment = 1
 
 [node name="List" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBox"]
-separation = 4
+layout_mode = 2
