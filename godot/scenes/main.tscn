@@ -1,3 +1,13 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
-; Placeholder scene for main.tscn
+[ext_resource type="PackedScene" path="res://scenes/world/World.tscn" id="1"]
+
+[sub_resource type="GDScript" id="GDScript_main"]
+source_code = "extends Control\n\nfunc _ready() -> void:\n    set_anchors_preset(Control.PRESET_FULL_RECT)\n    var map_id := ProjectSettings.get_setting(\"application/config/starting_map_id\", \"map.demo_001\")\n    MapSeeder.load_map(map_id, $World)\n"
+
+[node name="Main" type="Control"]
+layout_mode = 3
+script = SubResource("GDScript_main")
+mouse_filter = 2
+
+[node name="World" parent="." instance=ExtResource("1")]
