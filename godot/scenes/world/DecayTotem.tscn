@@ -1,3 +1,11 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=1 format=3]
 
-; Placeholder scene for DecayTotem.tscn
+[node name="DecayTotem" type="Node2D"]
+
+[node name="Body" type="ColorRect" parent="."]
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+color = Color(0.6, 0.2, 0.7, 1)
+mouse_filter = 2

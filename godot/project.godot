@@ -1,1 +1,36 @@
-; Godot project placeholder
+; Engine configuration file.
+; It's recommended that you don't edit this file manually, unless you know what you are doing.
+
+[application]
+config/name="BumbleJess"
+run/main_scene="res://scenes/main.tscn"
+config/starting_map_id="map.demo_001"
+
+[autoload]
+MapSeeder="*res://autoload/MapSeeder.gd"
+
+[input]
+ui_left={
+"deadzone": 0.5,
+"events": [ { "type": "InputEventKey", "keycode": 4194319, "physical_keycode": 80 } ]
+}
+ui_right={
+"deadzone": 0.5,
+"events": [ { "type": "InputEventKey", "keycode": 4194321, "physical_keycode": 79 } ]
+}
+ui_up={
+"deadzone": 0.5,
+"events": [ { "type": "InputEventKey", "keycode": 4194322, "physical_keycode": 82 } ]
+}
+ui_down={
+"deadzone": 0.5,
+"events": [ { "type": "InputEventKey", "keycode": 4194320, "physical_keycode": 81 } ]
+}
+ui_accept={
+"deadzone": 0.5,
+"events": [ { "type": "InputEventKey", "keycode": 4194309, "physical_keycode": 32 } ]
+}
+ui_cancel={
+"deadzone": 0.5,
+"events": [ { "type": "InputEventKey", "keycode": 90, "physical_keycode": 44 } ]
+}
