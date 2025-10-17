@@ -42,24 +42,26 @@ static func set_cap(type: String, value: int) -> void:
 		amount[key] = clamp(amount[key], 0, clamped)
 
 static func add(type: String, delta: int) -> int:
-	var key: String = _ensure_type(type)
-	var before: int = int(amount.get(key, 0))
-	var limit: int = int(cap.get(key, 0))
-	var new_value: int = before + delta
-	if limit <= 0 and key != "Life":
-		new_value = 0
-	elif limit > 0:
-		new_value = clamp(new_value, 0, limit)
-	else:
-		new_value = max(new_value, 0)
-		amount[key] = max(new_value, 0)
-		var diff := amount[key] - before
-		if diff != 0:
-				var action := "gained" if diff > 0 else "spent"
-				var text := "%s %d %s" % [action.capitalize(), abs(diff), key]
-				RunState.add_turn_note(text)
-				CombatLog.log("• " + text)
-		return diff
+        var key: String = _ensure_type(type)
+        var before: int = int(amount.get(key, 0))
+        var limit: int = int(cap.get(key, 0))
+        var new_value: int = before + delta
+        if limit <= 0 and key != "Life":
+                new_value = 0
+        elif limit > 0:
+                new_value = clamp(new_value, 0, limit)
+        else:
+                new_value = max(new_value, 0)
+
+        var clamped_value := max(new_value, 0)
+        amount[key] = clamped_value
+        var diff := amount[key] - before
+        if diff != 0:
+                var action := "gained" if diff > 0 else "spent"
+                var text := "%s %d %s" % [action.capitalize(), abs(diff), key]
+                RunState.add_turn_note(text)
+                CombatLog.log("• " + text)
+        return diff
 
 static func get_amount(type: String) -> int:
 	var key: String = _ensure_type(type)
