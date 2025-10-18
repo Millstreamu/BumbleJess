@@ -10,11 +10,11 @@ const LAYER_LIFE := 2
 
 @onready var hexmap: TileMap = $HexMap
 @onready var cursor: Node = $Cursor
-@onready var hud_label: Label = $HUD/MarginContainer/Label
+@onready var hud: Label = $HUD/DeckLabel
 
 var _is_ready := false
-var tileset_ids: Dictionary = {}
-var tileset_names_by_source: Dictionary = {}
+var tiles_name_to_id: Dictionary = {}
+var tiles_id_to_name: Dictionary = {}
 var origin_cell: Vector2i = Vector2i.ZERO
 var rules := PlacementRules.new()
 var turn := 0
@@ -22,9 +22,12 @@ var turn := 0
 func _ready() -> void:
     add_child(rules)
     rules.set_world(self)
+    _ensure_hex_config()
+    _ensure_layers()
+    _build_tileset()
     _is_ready = true
-    _configure_tile_map()
     draw_debug_grid()
+    _setup_hud()
     _update_hud()
 
 func set_width(value: int) -> void:
@@ -40,23 +43,15 @@ func set_height(value: int) -> void:
 func set_tile_px(value: int) -> void:
     tile_px = max(1, value)
     if _is_ready:
-        _configure_tile_map()
+        _ensure_hex_config()
+        _build_tileset()
         draw_debug_grid()
 
-func _configure_tile_map() -> void:
-    if hexmap.tile_set == null:
-        hexmap.tile_set = TileSet.new()
-    var tile_set := hexmap.tile_set
-    tile_set.tile_shape = TileSet.TILE_SHAPE_HEXAGONAL
-    tile_set.tile_layout = TileSet.TILE_LAYOUT_STAGGERED
-    tile_set.tile_offset_axis = TileSet.TILE_OFFSET_AXIS_HORIZONTAL
-    tile_set.tile_offset = TileSet.TILE_OFFSET_EVEN
-    tile_set.tile_size = Vector2i(tile_px, tile_px)
+func _ensure_hex_config() -> void:
+    hexmap.tile_shape = TileMap.TILE_SHAPE_HEXAGON
+    hexmap.layout = TileMap.LAYOUT_STACKED
+    hexmap.y_sort_enabled = false
     hexmap.cell_size = Vector2i(tile_px, tile_px)
-    _ensure_layers()
-    tileset_ids.clear()
-    tileset_names_by_source.clear()
-    _ensure_runtime_tiles(tile_set)
 
 func _ensure_layers() -> void:
     while hexmap.get_layers_count() < 3:
@@ -68,96 +63,66 @@ func _ensure_layers() -> void:
     hexmap.set_layer_z_index(LAYER_OBJECTS, 1)
     hexmap.set_layer_z_index(LAYER_LIFE, 2)
 
-func _ensure_runtime_tiles(tile_set: TileSet) -> void:
-    tile_set.clear()
-    var color_map := {
+func _build_tileset() -> void:
+    var names_to_colors := {
         "empty": Color(0, 0, 0, 0),
-        "totem": Color(0.2, 0.8, 0.4, 1.0),
-        "decay": Color(0.55, 0.2, 0.7, 1.0),
-        "harvest": Color(0.15, 0.45, 0.15, 1.0),
-        "build": Color(0.55, 0.38, 0.2, 1.0),
-        "refine": Color(0.2, 0.4, 0.85, 1.0),
-        "storage": Color(0.6, 0.6, 0.6, 1.0),
-        "guard": Color(0.9, 0.8, 0.2, 1.0),
-        "upgrade": Color(0.2, 0.7, 0.7, 1.0),
-        "chanting": Color(0.8, 0.2, 0.7, 1.0),
+        "totem": Color(0.2, 0.85, 0.4, 1),
+        "decay": Color(0.6, 0.2, 0.8, 1),
+        "harvest": Color(0.15, 0.5, 0.2, 1),
+        "build": Color(0.5, 0.35, 0.2, 1),
+        "refine": Color(0.2, 0.4, 0.9, 1),
+        "storage": Color(0.55, 0.55, 0.55, 1),
+        "guard": Color(0.85, 0.75, 0.2, 1),
+        "upgrade": Color(0.1, 0.7, 0.7, 1),
+        "chanting": Color(0.8, 0.2, 0.6, 1),
     }
-    for name in color_map.keys():
-        var texture := _create_hex_texture(tile_px, color_map[name])
-        var source := TileSetAtlasSource.new()
-        source.texture = texture
-        var source_id := tile_set.add_source(source)
-        var tile_id := source.create_tile(Vector2i.ZERO)
-        source.set_tile_texture_region(tile_id, Rect2i(Vector2i.ZERO, texture.get_size()))
-        tile_set.set_tile_name(source_id, tile_id, name)
-        tileset_ids[name] = source_id
-        tileset_names_by_source[source_id] = name
+    tiles_name_to_id = TileSetBuilder.build_named_hex_tiles(hexmap, names_to_colors, tile_px)
+    tiles_id_to_name = hexmap.get_meta("tiles_id_to_name") if hexmap.has_meta("tiles_id_to_name") else {}
 
-func _create_hex_texture(size: int, color: Color) -> Texture2D:
-    var image := Image.create(size, size, false, Image.FORMAT_RGBA8)
-    image.fill(Color(0, 0, 0, 0))
-    var center := Vector2(size / 2.0, size / 2.0)
-    var radius := size / 2.0 - 1.0
-    var polygon: Array[Vector2] = []
-    for i in range(6):
-        var angle := deg_to_rad(60.0 * i + 30.0)
-        polygon.append(center + Vector2(cos(angle), sin(angle)) * radius)
-    image.lock()
-    for y in range(size):
-        for x in range(size):
-            var point := Vector2(x + 0.5, y + 0.5)
-            if _point_in_polygon(point, polygon):
-                image.set_pixel(x, y, color)
-    image.unlock()
-    return ImageTexture.create_from_image(image)
+func clear_tiles() -> void:
+    hexmap.clear()
+    rules.occupied.clear()
+    turn = 0
+    origin_cell = Vector2i.ZERO
 
-func _point_in_polygon(point: Vector2, polygon: Array[Vector2]) -> bool:
-    var inside := false
-    var j := polygon.size() - 1
-    for i in range(polygon.size()):
-        var pi: Vector2 = polygon[i]
-        var pj: Vector2 = polygon[j]
-        var intersect := ((pi.y > point.y) != (pj.y > point.y)) and (point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y + 0.000001) + pi.x)
-        if intersect:
-            inside = not inside
-        j = i
-    return inside
+func set_origin_cell(c: Vector2i) -> void:
+    origin_cell = clamp_cell(c)
+    rules.set_origin(origin_cell)
+    if is_instance_valid(cursor):
+        cursor.move_to(origin_cell)
+    _update_hud()
 
 func clamp_cell(c: Vector2i) -> Vector2i:
-    return Vector2i(clamp(c.x, 0, width - 1), clamp(c.y, 0, height - 1))
+    return HexUtil.clamp_cell(c, width, height)
 
 func neighbors_even_q(c: Vector2i) -> Array[Vector2i]:
-    var deltas: Array[Vector2i]
-    if c.x % 2 == 0:
-        deltas = [
-            Vector2i(1, 0),
-            Vector2i(-1, 0),
-            Vector2i(0, -1),
-            Vector2i(0, 1),
-            Vector2i(1, -1),
-            Vector2i(-1, -1),
-        ]
-    else:
-        deltas = [
-            Vector2i(1, 0),
-            Vector2i(-1, 0),
-            Vector2i(0, -1),
-            Vector2i(0, 1),
-            Vector2i(1, 1),
-            Vector2i(-1, 1),
-        ]
-    var results: Array[Vector2i] = []
-    for d in deltas:
-        var candidate := c + d
-        if candidate.x >= 0 and candidate.x < width and candidate.y >= 0 and candidate.y < height:
-            results.append(candidate)
-    return results
+    return HexUtil.neighbors_even_q(c, width, height)
 
 func cell_to_world(c: Vector2i) -> Vector2:
     return hexmap.map_to_local(c)
 
 func world_to_cell(p: Vector2) -> Vector2i:
     return hexmap.local_to_map(p)
+
+func set_cell_named(layer: int, c: Vector2i, name: String) -> void:
+    if tiles_name_to_id.is_empty():
+        _build_tileset()
+    if not tiles_name_to_id.has(name):
+        return
+    var comp := int(tiles_name_to_id[name])
+    var src_id := comp >> 16
+    var tile_id := comp & 0xFFFF
+    hexmap.set_cell(layer, c, src_id, tile_id)
+
+func get_cell_name(layer: int, c: Vector2i) -> String:
+    var td := hexmap.get_cell_tile_data(layer, c)
+    if td == null:
+        return ""
+    var comp := int((td.get_source_id() << 16) | td.get_tile_id())
+    return String(tiles_id_to_name.get(comp, ""))
+
+func is_empty(layer: int, c: Vector2i) -> bool:
+    return hexmap.get_cell_tile_data(layer, c) == null
 
 func draw_debug_grid() -> void:
     var existing := get_node_or_null("DebugGrid")
@@ -178,27 +143,6 @@ func draw_debug_grid() -> void:
             marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
             marker.z_index = -10
             grid.add_child(marker)
-
-func clear_tiles() -> void:
-    hexmap.clear()
-    rules.occupied.clear()
-    turn = 0
-    origin_cell = Vector2i.ZERO
-
-func set_cell_named(layer: int, c: Vector2i, name: String) -> void:
-    if tileset_ids.is_empty():
-        _configure_tile_map()
-    var source_id := tileset_ids.get(name, -1)
-    if source_id == -1:
-        return
-    hexmap.set_cell(layer, c, source_id, Vector2i.ZERO, 0)
-
-func get_cell_name(layer: int, c: Vector2i) -> String:
-    var tile_data := hexmap.get_cell_tile_data(layer, c)
-    if tile_data == null:
-        return ""
-    var source_id := tile_data.get_source_id()
-    return String(tileset_names_by_source.get(source_id, ""))
 
 func can_place_at(cell: Vector2i) -> bool:
     if DeckManager.peek().is_empty():
@@ -222,15 +166,19 @@ func attempt_place_at(cell: Vector2i) -> void:
     if is_instance_valid(cursor):
         cursor.update_highlight_state()
 
-func set_origin_cell(c: Vector2i) -> void:
-    origin_cell = clamp_cell(c)
-    rules.set_origin(origin_cell)
-    if is_instance_valid(cursor):
-        cursor.move_to(origin_cell)
-    _update_hud()
+func world_to_map(p: Vector2) -> Vector2i:
+    return world_to_cell(p)
+
+func _setup_hud() -> void:
+    if is_instance_valid(hud):
+        hud.text = "Next: — | Deck: —"
+
+func update_hud(next_name: String, remaining: int) -> void:
+    if is_instance_valid(hud):
+        hud.text = "Next: %s | Deck: %d" % [next_name, remaining]
 
 func _update_hud() -> void:
-    if hud_label == null:
+    if not is_instance_valid(hud):
         return
     var tile_id := DeckManager.peek()
     var remaining := DeckManager.remaining()
@@ -242,4 +190,4 @@ func _update_hud() -> void:
             display_name = name
         else:
             display_name = "%s (%s)" % [name, category]
-    hud_label.text = "Next: %s  |  Deck: %d" % [display_name, remaining]
+    hud.text = "Next: %s | Deck: %d" % [display_name, remaining]
