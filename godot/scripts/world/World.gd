@@ -48,15 +48,15 @@ func set_tile_px(value: int) -> void:
 		draw_debug_grid()
 
 func _ensure_hex_config() -> void:
-        if hexmap == null:
-                return
-        var ts: TileSet = hexmap.tile_set
-        if ts != null:
-                ts.tile_shape = TileSet.TILE_SHAPE_HEXAGON
-                ts.tile_layout = TileSet.TILE_LAYOUT_STACKED
-                ts.tile_size = Vector2i(tile_px, tile_px)
-        hexmap.y_sort_enabled = false
-        hexmap.cell_size = Vector2(tile_px, tile_px)
+		if hexmap == null:
+				return
+		var ts: TileSet = hexmap.tile_set
+		if ts != null:
+				ts.tile_shape = TileSet.TILE_SHAPE_HEXAGON
+				ts.tile_layout = TileSet.TILE_LAYOUT_STACKED
+				ts.tile_size = Vector2i(tile_px, tile_px)
+		hexmap.y_sort_enabled = false
+		hexmap.cell_size = Vector2(tile_px, tile_px)
 
 func _ensure_layers() -> void:
 	while hexmap.get_layers_count() < 3:
@@ -69,10 +69,10 @@ func _ensure_layers() -> void:
 	hexmap.set_layer_z_index(LAYER_LIFE, 2)
 
 func _build_tileset() -> void:
-        if hexmap == null:
-                return
-        var names_to_colors: Dictionary = {
-                "empty": Color(0, 0, 0, 0),
+		if hexmap == null:
+				return
+		var names_to_colors: Dictionary = {
+				"empty": Color(0, 0, 0, 0),
 		"totem": Color(0.2, 0.85, 0.4, 1),
 		"decay": Color(0.6, 0.2, 0.8, 1),
 		"harvest": Color(0.15, 0.5, 0.2, 1),
@@ -83,20 +83,20 @@ func _build_tileset() -> void:
 		"upgrade": Color(0.1, 0.7, 0.7, 1),
 		"chanting": Color(0.8, 0.2, 0.6, 1),
 	}
-        tiles_name_to_id = TileSetBuilder.build_named_hex_tiles(hexmap, names_to_colors, tile_px)
-        var id_meta: Variant = hexmap.get_meta("tiles_id_to_name") if hexmap.has_meta("tiles_id_to_name") else {}
-        tiles_id_to_name = id_meta if id_meta is Dictionary else {}
+		tiles_name_to_id = TileSetBuilder.build_named_hex_tiles(hexmap, names_to_colors, tile_px)
+		var id_meta: Variant = hexmap.get_meta("tiles_id_to_name") if hexmap.has_meta("tiles_id_to_name") else {}
+		tiles_id_to_name = id_meta if id_meta is Dictionary else {}
 
 func clear_tiles() -> void:
-        if hexmap == null:
-                return
-        for layer in range(hexmap.get_layers_count()):
-                var used_cells: Array = hexmap.get_used_cells(layer)
-                for cell in used_cells:
-                        hexmap.erase_cell(layer, cell)
-        rules.occupied.clear()
-        turn = 0
-        origin_cell = Vector2i.ZERO
+		if hexmap == null:
+				return
+		for layer in range(hexmap.get_layers_count()):
+				var used_cells: Array = hexmap.get_used_cells(layer)
+				for cell in used_cells:
+						hexmap.erase_cell(layer, cell)
+		rules.occupied.clear()
+		turn = 0
+		origin_cell = Vector2i.ZERO
 
 func set_origin_cell(c: Vector2i) -> void:
 	origin_cell = clamp_cell(c)
@@ -112,22 +112,22 @@ func neighbors_even_q(c: Vector2i) -> Array[Vector2i]:
 	return HexUtil.neighbors_even_q(c, width, height)
 
 func cell_to_world(c: Vector2i) -> Vector2:
-        if hexmap == null:
-                return Vector2.ZERO
-        return hexmap.map_to_local(c)
+		if hexmap == null:
+				return Vector2.ZERO
+		return hexmap.map_to_local(c)
 
 func world_to_cell(p: Vector2) -> Vector2i:
-        if hexmap == null:
-                return Vector2i.ZERO
-        return hexmap.local_to_map(p)
+		if hexmap == null:
+				return Vector2i.ZERO
+		return hexmap.local_to_map(p)
 
 func set_cell_named(layer: int, c: Vector2i, name: String) -> void:
-        if hexmap == null:
-                return
-        if tiles_name_to_id.is_empty():
-                _build_tileset()
-        if not tiles_name_to_id.has(name):
-                return
+		if hexmap == null:
+				return
+		if tiles_name_to_id.is_empty():
+				_build_tileset()
+		if not tiles_name_to_id.has(name):
+				return
 	var tile_info: Dictionary = tiles_name_to_id[name]
 	var src_id: int = int(tile_info.get("source_id", -1))
 	var atlas_value: Variant = tile_info.get("atlas_coords", Vector2i.ZERO)
@@ -137,20 +137,20 @@ func set_cell_named(layer: int, c: Vector2i, name: String) -> void:
 	hexmap.set_cell(layer, c, src_id, atlas_coords)
 
 func get_cell_name(layer: int, c: Vector2i) -> String:
-        if hexmap == null:
-                return ""
-        var td: TileData = hexmap.get_cell_tile_data(layer, c)
-        if td == null:
-                return ""
+		if hexmap == null:
+				return ""
+		var td: TileData = hexmap.get_cell_tile_data(layer, c)
+		if td == null:
+				return ""
 	var atlas_value: Variant = td.get_tile_id()
 	var atlas_coords: Vector2i = atlas_value if atlas_value is Vector2i else Vector2i(int(atlas_value), 0)
 	var key := TileSetBuilder.encode_tile_key(td.get_source_id(), atlas_coords)
 	return String(tiles_id_to_name.get(key, ""))
 
 func is_empty(layer: int, c: Vector2i) -> bool:
-        if hexmap == null:
-                return true
-        return hexmap.get_cell_tile_data(layer, c) == null
+		if hexmap == null:
+				return true
+		return hexmap.get_cell_tile_data(layer, c) == null
 
 func draw_debug_grid() -> void:
 	var existing: Node = get_node_or_null("DebugGrid")
