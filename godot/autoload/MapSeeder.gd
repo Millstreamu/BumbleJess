@@ -16,24 +16,24 @@ func get_map(id: String) -> Dictionary:
 	return {}
 
 func load_map(map_id: String, world: Node) -> void:
-	var map := get_map(map_id)
-	if map.is_empty():
-		push_error("Map not found: %s" % map_id)
-		_show_missing_map_label(world, map_id)
-		return
+        var map: Dictionary = get_map(map_id)
+        if map.is_empty():
+                push_error("Map not found: %s" % map_id)
+                _show_missing_map_label(world, map_id)
+                return
 
-	var grid := map.get("grid", {})
-	world.set("width", int(grid.get("width", 16)))
-	world.set("height", int(grid.get("height", 12)))
-	world.set("tile_px", int(grid.get("tile_px", 64)))
+        var grid: Dictionary = map.get("grid", {})
+        world.set("width", int(grid.get("width", 16)))
+        world.set("height", int(grid.get("height", 12)))
+        world.set("tile_px", int(grid.get("tile_px", 64)))
 
 	if world.has_method("clear_tiles"):
 		world.call("clear_tiles")
 	if world.has_method("draw_debug_grid"):
 		world.call("draw_debug_grid")
 
-	var totem_data := map.get("totem", {})
-	var totem_cell := Vector2i(int(totem_data.get("x", 0)), int(totem_data.get("y", 0)))
+        var totem_data: Dictionary = map.get("totem", {})
+        var totem_cell := Vector2i(int(totem_data.get("x", 0)), int(totem_data.get("y", 0)))
 	if world.has_method("set_cell_named"):
 		world.call("set_cell_named", world.LAYER_OBJECTS, totem_cell, "totem")
 	if world.has_method("set_origin_cell"):
@@ -41,9 +41,10 @@ func load_map(map_id: String, world: Node) -> void:
 
 	_origin_cell = totem_cell
 
-	var decay_totems := map.get("decay_totems", [])
-	for decay_data in decay_totems:
-		var decay_cell := Vector2i(int(decay_data.get("x", 0)), int(decay_data.get("y", 0)))
+        var decay_totems: Array = map.get("decay_totems", [])
+        for raw_decay_data in decay_totems:
+                var decay_data: Dictionary = raw_decay_data if raw_decay_data is Dictionary else {}
+                var decay_cell := Vector2i(int(decay_data.get("x", 0)), int(decay_data.get("y", 0)))
 		if world.has_method("set_cell_named"):
 			world.call("set_cell_named", world.LAYER_OBJECTS, decay_cell, "decay")
 

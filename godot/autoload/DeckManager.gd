@@ -18,9 +18,8 @@ func build_starting_deck() -> void:
     tiles_by_category.clear()
     tiles_by_id.clear()
 
-    var tiles := _load_json("res://data/tiles.json")
-    if typeof(tiles) != TYPE_ARRAY:
-        tiles = []
+    var tiles_raw := _load_json("res://data/tiles.json")
+    var tiles: Array = tiles_raw if tiles_raw is Array else []
     for t in tiles:
         if typeof(t) != TYPE_DICTIONARY:
             continue
@@ -39,16 +38,17 @@ func build_starting_deck() -> void:
             tiles_by_category[category] = []
         tiles_by_category[category].append(id)
 
-    var deck_data := _load_json("res://data/deck.json")
-    if typeof(deck_data) != TYPE_DICTIONARY:
-        deck_data = {}
-    var counts: Dictionary = deck_data.get("counts", {})
+    var deck_data_raw := _load_json("res://data/deck.json")
+    var deck_data: Dictionary = deck_data_raw if deck_data_raw is Dictionary else {}
+    var counts_variant := deck_data.get("counts", {})
+    var counts: Dictionary = counts_variant if counts_variant is Dictionary else {}
     var target_size := int(deck_data.get("target_size", 30))
     var filler_category := String(deck_data.get("fill_with", "harvest"))
 
     for cat in counts.keys():
         var count := int(counts[cat])
-        var list: Array = tiles_by_category.get(cat, [])
+        var list_variant := tiles_by_category.get(cat, [])
+        var list: Array = list_variant if list_variant is Array else []
         if list.is_empty():
             continue
         var base_id := String(list[0])
@@ -56,7 +56,8 @@ func build_starting_deck() -> void:
             deck.append(base_id)
 
     if deck.size() < target_size:
-        var filler_list: Array = tiles_by_category.get(filler_category, [])
+        var filler_variant := tiles_by_category.get(filler_category, [])
+        var filler_list: Array = filler_variant if filler_variant is Array else []
         if not filler_list.is_empty():
             var filler_id := String(filler_list[0])
             while deck.size() < target_size:
@@ -83,17 +84,20 @@ func remaining() -> int:
     return deck.size()
 
 func get_tile_info(id: String) -> Dictionary:
-    return tiles_by_id.get(id, {})
+    var info_variant := tiles_by_id.get(id, {})
+    return info_variant if info_variant is Dictionary else {}
 
 func get_tile_category(id: String) -> String:
-    var info: Dictionary = tiles_by_id.get(id, {})
+    var info_variant := tiles_by_id.get(id, {})
+    var info: Dictionary = info_variant if info_variant is Dictionary else {}
     return String(info.get("category", ""))
 
 func get_tile_name(id: String) -> String:
-    var info: Dictionary = tiles_by_id.get(id, {})
+    var info_variant := tiles_by_id.get(id, {})
+    var info: Dictionary = info_variant if info_variant is Dictionary else {}
     return String(info.get("name", id))
 
-func _load_json(path: String):
+func _load_json(path: String) -> Variant:
     var file := FileAccess.open(path, FileAccess.READ)
     if file == null:
         return []

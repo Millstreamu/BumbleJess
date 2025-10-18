@@ -1,6 +1,6 @@
 extends Node
 
-var _cache := {}
+var _cache: Dictionary = {}
 
 func load_json_array(p: String) -> Array:
     if _cache.has(p):

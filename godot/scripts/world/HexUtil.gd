@@ -17,7 +17,8 @@ static func neighbors_even_q(c: Vector2i, w: int, h: int) -> Array[Vector2i]:
         Vector2i(+1, +1), Vector2i(-1, +1),
     ]
     var out: Array[Vector2i] = []
-    for d in (even ? deltas_even : deltas_odd):
+    var deltas: Array[Vector2i] = deltas_even if even else deltas_odd
+    for d in deltas:
         var n := Vector2i(c.x + d.x, c.y + d.y)
         if n.x >= 0 and n.x < w and n.y >= 0 and n.y < h:
             out.append(n)
