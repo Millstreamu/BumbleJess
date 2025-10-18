@@ -1,18 +1,13 @@
 extends Node
 
 var maps_data: Array = []
+var _origin_cell: Vector2i = Vector2i.ZERO
 
 func _ready() -> void:
     var path := "res://data/maps.json"
-    if ResourceLoader.exists(path):
-        var file := FileAccess.open(path, FileAccess.READ)
-        if file:
-            var text := file.get_as_text()
-            var parsed := JSON.parse_string(text)
-            if typeof(parsed) == TYPE_ARRAY:
-                maps_data = parsed
-    else:
-        push_warning("maps.json not found at " + path)
+    maps_data = DataLite.load_json_array(path)
+    if maps_data.is_empty():
+        push_warning("maps.json not found or empty at " + path)
 
 func get_map(id: String) -> Dictionary:
     for m in maps_data:
@@ -44,11 +39,16 @@ func load_map(map_id: String, world: Node) -> void:
     if world.has_method("set_origin_cell"):
         world.call("set_origin_cell", totem_cell)
 
+    _origin_cell = totem_cell
+
     var decay_totems := map.get("decay_totems", [])
     for decay_data in decay_totems:
         var decay_cell := Vector2i(int(decay_data.get("x", 0)), int(decay_data.get("y", 0)))
         if world.has_method("set_cell_named"):
             world.call("set_cell_named", world.LAYER_OBJECTS, decay_cell, "decay")
+
+func get_origin_cell() -> Vector2i:
+    return _origin_cell
 
 func _show_missing_map_label(world: Node, map_id: String) -> void:
     var label := Label.new()

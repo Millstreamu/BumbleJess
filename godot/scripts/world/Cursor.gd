@@ -3,12 +3,14 @@ extends Node2D
 @export var cell: Vector2i = Vector2i.ZERO
 
 @onready var world: Node = get_parent()
-@onready var camera: Camera2D = get_node("../Camera")
+@onready var cam: Camera2D = get_node("../Camera")
 @onready var highlight := $Highlight
 
 func _ready() -> void:
     set_process_unhandled_input(true)
-    _update_position()
+    position = world.call("cell_to_world", cell)
+    if cam:
+        cam.global_position = global_position
     _update_highlight()
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -31,21 +33,13 @@ func _unhandled_input(event: InputEvent) -> void:
 
     if moved:
         cell = world.call("clamp_cell", cell)
-        _update_position()
-        _ping()
+        position = world.call("cell_to_world", cell)
+        if cam:
+            cam.global_position = global_position
+        var tw := create_tween()
+        scale = Vector2.ONE * 0.95
+        tw.tween_property(self, "scale", Vector2.ONE, 0.08)
         _update_highlight()
-
-func _update_position() -> void:
-    position = world.call("cell_to_world", cell)
-    if camera:
-        camera.global_position = global_position
-
-func _ping() -> void:
-    if highlight == null:
-        return
-    highlight.scale = Vector2(0.9, 0.9)
-    var tween := create_tween()
-    tween.tween_property(highlight, "scale", Vector2.ONE, 0.12).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 func _update_highlight() -> void:
     if highlight == null:
@@ -57,7 +51,9 @@ func _update_highlight() -> void:
 
 func move_to(new_cell: Vector2i) -> void:
     cell = world.call("clamp_cell", new_cell)
-    _update_position()
+    position = world.call("cell_to_world", cell)
+    if cam:
+        cam.global_position = global_position
     _update_highlight()
 
 func update_highlight_state() -> void:
