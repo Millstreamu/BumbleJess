@@ -13,10 +13,7 @@ func _ready() -> void:
 [node name="Totem" type="Node2D"]
 script = SubResource("GDScript_cgnyc")
 
-[node name="Body" type="ColorRect" parent="."]
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
-mouse_filter = 2
+[node name="Body" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(0, -24, 20.7846, -12, 20.7846, 12, 0, 24, -20.7846, 12, -20.7846, -12)
 color = Color(0.2, 0.8, 0.3, 1)
+antialiased = true
