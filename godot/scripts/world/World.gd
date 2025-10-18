@@ -48,14 +48,17 @@ func set_tile_px(value: int) -> void:
         draw_debug_grid()
 
 func _ensure_hex_config() -> void:
-    hexmap.tile_shape = TileMap.TILE_SHAPE_HEXAGON
-    hexmap.layout = TileMap.LAYOUT_STACKED
+    var ts := hexmap.tile_set
+    if ts != null:
+        ts.tile_shape = TileSet.TILE_SHAPE_HEXAGON
+        ts.tile_layout = TileSet.TILE_LAYOUT_STACKED
+        ts.tile_size = Vector2i(tile_px, tile_px)
     hexmap.y_sort_enabled = false
     hexmap.cell_size = Vector2i(tile_px, tile_px)
 
 func _ensure_layers() -> void:
     while hexmap.get_layers_count() < 3:
-        hexmap.add_layer()
+        hexmap.add_layer(hexmap.get_layers_count())
     hexmap.set_layer_name(LAYER_GROUND, "ground")
     hexmap.set_layer_name(LAYER_OBJECTS, "objects")
     hexmap.set_layer_name(LAYER_LIFE, "life")
@@ -77,7 +80,8 @@ func _build_tileset() -> void:
         "chanting": Color(0.8, 0.2, 0.6, 1),
     }
     tiles_name_to_id = TileSetBuilder.build_named_hex_tiles(hexmap, names_to_colors, tile_px)
-    tiles_id_to_name = hexmap.get_meta("tiles_id_to_name") if hexmap.has_meta("tiles_id_to_name") else {}
+    var id_meta := hexmap.get_meta("tiles_id_to_name") if hexmap.has_meta("tiles_id_to_name") else {}
+    tiles_id_to_name = id_meta if id_meta is Dictionary else {}
 
 func clear_tiles() -> void:
     hexmap.clear()
@@ -109,17 +113,22 @@ func set_cell_named(layer: int, c: Vector2i, name: String) -> void:
         _build_tileset()
     if not tiles_name_to_id.has(name):
         return
-    var comp := int(tiles_name_to_id[name])
-    var src_id := comp >> 16
-    var tile_id := comp & 0xFFFF
-    hexmap.set_cell(layer, c, src_id, tile_id)
+    var tile_info: Dictionary = tiles_name_to_id[name]
+    var src_id := int(tile_info.get("source_id", -1))
+    var atlas_value := tile_info.get("atlas_coords", Vector2i.ZERO)
+    var atlas_coords: Vector2i = atlas_value if atlas_value is Vector2i else Vector2i.ZERO
+    if src_id < 0:
+        return
+    hexmap.set_cell(layer, c, src_id, atlas_coords)
 
 func get_cell_name(layer: int, c: Vector2i) -> String:
     var td := hexmap.get_cell_tile_data(layer, c)
     if td == null:
         return ""
-    var comp := int((td.get_source_id() << 16) | td.get_tile_id())
-    return String(tiles_id_to_name.get(comp, ""))
+    var atlas_value := td.get_tile_id()
+    var atlas_coords: Vector2i = atlas_value if atlas_value is Vector2i else Vector2i(int(atlas_value), 0)
+    var key := TileSetBuilder.encode_tile_key(td.get_source_id(), atlas_coords)
+    return String(tiles_id_to_name.get(key, ""))
 
 func is_empty(layer: int, c: Vector2i) -> bool:
     return hexmap.get_cell_tile_data(layer, c) == null

@@ -13,16 +13,16 @@ func set_origin(c: Vector2i) -> void:
     occupied.clear()
 
 func mark_occupied(cell: Vector2i) -> void:
-    occupied[cell.hash()] = true
+    occupied[cell] = true
 
 func is_cell_empty(world: Node, cell: Vector2i) -> bool:
-    var in_bounds := cell.x >= 0 and cell.x < world.width and cell.y >= 0 and cell.y < world.height
+    var in_bounds: bool = cell.x >= 0 and cell.x < world.width and cell.y >= 0 and cell.y < world.height
     if not in_bounds:
         return false
-    var life_data := world.hexmap.get_cell_tile_data(world.LAYER_LIFE, cell)
+    var life_data: TileData = world.hexmap.get_cell_tile_data(world.LAYER_LIFE, cell)
     if life_data != null:
         return false
-    var object_data := world.hexmap.get_cell_tile_data(world.LAYER_OBJECTS, cell)
+    var object_data: TileData = world.hexmap.get_cell_tile_data(world.LAYER_OBJECTS, cell)
     if object_data != null:
         return false
     return true

@@ -18,14 +18,14 @@ func _ready() -> void:
     await world.ready
 
     MapSeeder.load_map(MAP_ID, world)
-    await get_tree().process_frame()
+    await get_tree().process_frame
 
     var origin := MapSeeder.get_origin_cell()
     assert(origin == Vector2i(8, 6), "Origin cell should match map seed data")
     assert(world.width == 16 and world.height == 12, "World dimensions should match map data")
     assert(world.tile_px == 64, "Tile pixel size should match map data")
 
-    var totem_name := world.get_cell_name(world.LAYER_OBJECTS, origin)
+    var totem_name: String = world.get_cell_name(world.LAYER_OBJECTS, origin)
     assert(totem_name == "totem", "Totem must be placed at the origin cell")
 
     var decay_one := Vector2i(3, 2)
@@ -43,10 +43,10 @@ func _ready() -> void:
     assert(world.turn == 0, "Turn counter should start at zero")
 
     world.attempt_place_at(neighbor)
-    await get_tree().process_frame()
+    await get_tree().process_frame
 
     assert(world.turn == 1, "Placing a tile should advance the turn counter")
-    var placed_name := world.get_cell_name(world.LAYER_LIFE, neighbor)
+    var placed_name: String = world.get_cell_name(world.LAYER_LIFE, neighbor)
     assert(placed_name == initial_category, "Placed tile should match the drawn tile category")
 
     var after_remaining := DeckManager.remaining()

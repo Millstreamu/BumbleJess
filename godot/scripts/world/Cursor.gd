@@ -4,7 +4,7 @@ extends Node2D
 
 @onready var world: Node = get_parent()
 @onready var cam: Camera2D = get_node("../Camera")
-@onready var highlight := $Highlight
+@onready var highlight: CanvasItem = $Highlight
 
 func _ready() -> void:
     set_process_unhandled_input(true)
@@ -47,7 +47,7 @@ func _update_highlight() -> void:
     var can_place := false
     if world.has_method("can_place_at"):
         can_place = world.call("can_place_at", cell)
-    highlight.color = can_place ? Color(1, 1, 1, 0.4) : Color(1, 0.3, 0.3, 0.5)
+    highlight.color = Color(1, 1, 1, 0.4) if can_place else Color(1, 0.3, 0.3, 0.5)
 
 func move_to(new_cell: Vector2i) -> void:
     cell = world.call("clamp_cell", new_cell)

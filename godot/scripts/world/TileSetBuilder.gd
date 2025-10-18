@@ -15,6 +15,9 @@ static func _make_hex_image(px: int, color: Color) -> Image:
     img.unlock()
     return img
 
+static func encode_tile_key(source_id: int, atlas_coords: Vector2i) -> String:
+    return "%d:%d:%d" % [source_id, atlas_coords.x, atlas_coords.y]
+
 static func build_named_hex_tiles(tilemap: TileMap, names_to_colors: Dictionary, tile_px: int) -> Dictionary:
     var ts := tilemap.tile_set
     if ts == null:
@@ -34,17 +37,22 @@ static func build_named_hex_tiles(tilemap: TileMap, names_to_colors: Dictionary,
         src.texture = tex
         src.texture_region_size = Vector2i(tile_px, tile_px)
 
-        var src_id := ts.get_last_source_id() + 1
+        var src_id: int = ts.get_last_source_id() + 1
         ts.add_source(src, src_id)
 
-        var tile_id := ts.get_last_unused_tile_id(src_id)
-        ts.create_tile(src_id, tile_id)
-        ts.set_tile_texture_region(src_id, tile_id, Rect2i(Vector2i.ZERO, Vector2i(tile_px, tile_px)))
-        ts.set_tile_texture_origin(src_id, tile_id, Vector2(tile_px / 2, tile_px / 2))
+        var atlas_coords: Vector2i = ts.get_last_unused_tile_id(src_id)
+        ts.create_tile(src_id, atlas_coords)
+        ts.set_tile_texture_region(src_id, atlas_coords, Rect2i(Vector2i.ZERO, Vector2i(tile_px, tile_px)))
+        ts.set_tile_texture_origin(src_id, atlas_coords, Vector2(tile_px / 2, tile_px / 2))
 
-        var comp := int((src_id << 16) | tile_id)
-        name_to_id[name] = comp
-        id_to_name[comp] = name
+        var key := encode_tile_key(src_id, atlas_coords)
+        var tile_ref := {
+            "source_id": src_id,
+            "atlas_coords": atlas_coords,
+            "key": key,
+        }
+        name_to_id[name] = tile_ref
+        id_to_name[key] = name
 
     tilemap.set_meta("tiles_name_to_id", name_to_id)
     tilemap.set_meta("tiles_id_to_name", id_to_name)
