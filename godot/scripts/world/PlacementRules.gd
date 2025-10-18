@@ -28,9 +28,9 @@ func is_cell_empty(world: Node, cell: Vector2i) -> bool:
 	return true
 
 func neighbors_even_q(c: Vector2i) -> Array[Vector2i]:
-	if _world != null and _world.has_method("neighbors_even_q"):
-		return _world.neighbors_even_q(c)
-	return []
+        if _world != null and _world.has_method("neighbors_even_q"):
+                return _world.neighbors_even_q(c)
+        return [] as Array[Vector2i]
 
 func is_adjacent_to_network(world: Node, cell: Vector2i) -> bool:
 	set_world(world)

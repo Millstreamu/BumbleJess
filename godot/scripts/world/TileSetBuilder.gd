@@ -19,15 +19,14 @@ static func encode_tile_key(source_id: int, atlas_coords: Vector2i) -> String:
 	return "%d:%d:%d" % [source_id, atlas_coords.x, atlas_coords.y]
 
 static func build_named_hex_tiles(tilemap: TileMap, names_to_colors: Dictionary, tile_px: int) -> Dictionary:
-	var ts := tilemap.tile_set
-	if ts == null:
-		ts = TileSet.new()
-		tilemap.tile_set = ts
-	else:
-		ts.clear()
+        var ts := TileSet.new()
+        ts.tile_shape = TileSet.TILE_SHAPE_HEXAGON
+        ts.tile_layout = TileSet.TILE_LAYOUT_STACKED
+        ts.tile_size = Vector2i(tile_px, tile_px)
+        tilemap.tile_set = ts
 
-	var name_to_id: Dictionary = {}
-	var id_to_name: Dictionary = {}
+        var name_to_id: Dictionary = {}
+        var id_to_name: Dictionary = {}
 
 	for name in names_to_colors.keys():
 		var img := _make_hex_image(tile_px, names_to_colors[name])
