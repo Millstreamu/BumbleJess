@@ -6,9 +6,9 @@
 script/source = "extends Control
 
 func _ready() -> void:
-    set_anchors_preset(Control.PRESET_FULL_RECT)
-    var map_id := ProjectSettings.get_setting(\"application/config/starting_map_id\", \"map.demo_001\")
-    MapSeeder.load_map(map_id, $World)
+	set_anchors_preset(Control.PRESET_FULL_RECT)
+	var map_id := ProjectSettings.get_setting(\"application/config/starting_map_id\", \"map.demo_001\")
+	MapSeeder.load_map(map_id, $World)
 "
 
 [node name="Main" type="Control"]
