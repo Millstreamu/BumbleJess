@@ -16,7 +16,7 @@ var _is_ready := false
 var tiles_name_to_id: Dictionary = {}
 var tiles_id_to_name: Dictionary = {}
 var origin_cell: Vector2i = Vector2i.ZERO
-var rules := PlacementRules.new()
+var rules: PlacementRules = PlacementRules.new()
 var turn := 0
 
 func _ready() -> void:
@@ -48,7 +48,7 @@ func set_tile_px(value: int) -> void:
         draw_debug_grid()
 
 func _ensure_hex_config() -> void:
-    var ts := hexmap.tile_set
+    var ts: TileSet = hexmap.tile_set
     if ts != null:
         ts.tile_shape = TileSet.TILE_SHAPE_HEXAGON
         ts.tile_layout = TileSet.TILE_LAYOUT_STACKED
@@ -67,7 +67,7 @@ func _ensure_layers() -> void:
     hexmap.set_layer_z_index(LAYER_LIFE, 2)
 
 func _build_tileset() -> void:
-    var names_to_colors := {
+    var names_to_colors: Dictionary = {
         "empty": Color(0, 0, 0, 0),
         "totem": Color(0.2, 0.85, 0.4, 1),
         "decay": Color(0.6, 0.2, 0.8, 1),
@@ -80,7 +80,7 @@ func _build_tileset() -> void:
         "chanting": Color(0.8, 0.2, 0.6, 1),
     }
     tiles_name_to_id = TileSetBuilder.build_named_hex_tiles(hexmap, names_to_colors, tile_px)
-    var id_meta := hexmap.get_meta("tiles_id_to_name") if hexmap.has_meta("tiles_id_to_name") else {}
+    var id_meta: Variant = hexmap.get_meta("tiles_id_to_name") if hexmap.has_meta("tiles_id_to_name") else {}
     tiles_id_to_name = id_meta if id_meta is Dictionary else {}
 
 func clear_tiles() -> void:
@@ -114,18 +114,18 @@ func set_cell_named(layer: int, c: Vector2i, name: String) -> void:
     if not tiles_name_to_id.has(name):
         return
     var tile_info: Dictionary = tiles_name_to_id[name]
-    var src_id := int(tile_info.get("source_id", -1))
-    var atlas_value := tile_info.get("atlas_coords", Vector2i.ZERO)
+    var src_id: int = int(tile_info.get("source_id", -1))
+    var atlas_value: Variant = tile_info.get("atlas_coords", Vector2i.ZERO)
     var atlas_coords: Vector2i = atlas_value if atlas_value is Vector2i else Vector2i.ZERO
     if src_id < 0:
         return
     hexmap.set_cell(layer, c, src_id, atlas_coords)
 
 func get_cell_name(layer: int, c: Vector2i) -> String:
-    var td := hexmap.get_cell_tile_data(layer, c)
+    var td: TileData = hexmap.get_cell_tile_data(layer, c)
     if td == null:
         return ""
-    var atlas_value := td.get_tile_id()
+    var atlas_value: Variant = td.get_tile_id()
     var atlas_coords: Vector2i = atlas_value if atlas_value is Vector2i else Vector2i(int(atlas_value), 0)
     var key := TileSetBuilder.encode_tile_key(td.get_source_id(), atlas_coords)
     return String(tiles_id_to_name.get(key, ""))
@@ -134,17 +134,17 @@ func is_empty(layer: int, c: Vector2i) -> bool:
     return hexmap.get_cell_tile_data(layer, c) == null
 
 func draw_debug_grid() -> void:
-    var existing := get_node_or_null("DebugGrid")
+    var existing: Node = get_node_or_null("DebugGrid")
     if existing:
         existing.queue_free()
-    var grid := Node2D.new()
+    var grid: Node2D = Node2D.new()
     grid.name = "DebugGrid"
     grid.z_index = -10
     add_child(grid)
 
     for x in range(width):
         for y in range(height):
-            var marker := ColorRect.new()
+            var marker: ColorRect = ColorRect.new()
             marker.color = Color(1, 1, 1, 0.08)
             marker.size = Vector2(6, 6)
             marker.pivot_offset = marker.size * 0.5
@@ -161,10 +161,10 @@ func can_place_at(cell: Vector2i) -> bool:
 func attempt_place_at(cell: Vector2i) -> void:
     if not can_place_at(cell):
         return
-    var tile_id := DeckManager.peek()
+    var tile_id: String = DeckManager.peek()
     if tile_id.is_empty():
         return
-    var category := DeckManager.get_tile_category(tile_id)
+    var category: String = DeckManager.get_tile_category(tile_id)
     if category.is_empty():
         return
     set_cell_named(LAYER_LIFE, cell, category)
@@ -189,12 +189,12 @@ func update_hud(next_name: String, remaining: int) -> void:
 func _update_hud() -> void:
     if not is_instance_valid(hud):
         return
-    var tile_id := DeckManager.peek()
-    var remaining := DeckManager.remaining()
-    var display_name := "-"
+    var tile_id: String = DeckManager.peek()
+    var remaining: int = DeckManager.remaining()
+    var display_name: String = "-"
     if not tile_id.is_empty():
-        var name := DeckManager.get_tile_name(tile_id)
-        var category := DeckManager.get_tile_category(tile_id)
+        var name: String = DeckManager.get_tile_name(tile_id)
+        var category: String = DeckManager.get_tile_category(tile_id)
         if category.is_empty():
             display_name = name
         else:
