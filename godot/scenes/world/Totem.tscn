@@ -14,6 +14,6 @@ func _ready() -> void:
 script = SubResource("GDScript_cgnyc")
 
 [node name="Body" type="Polygon2D" parent="."]
-polygon = PackedVector2Array(0, -24, 20.7846, -12, 20.7846, 12, 0, 24, -20.7846, 12, -20.7846, -12)
 color = Color(0.2, 0.8, 0.3, 1)
 antialiased = true
+polygon = PackedVector2Array(0, -24, 20.7846, -12, 20.7846, 12, 0, 24, -20.7846, 12, -20.7846, -12)
