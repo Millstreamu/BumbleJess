@@ -27,12 +27,12 @@ func build_starting_deck() -> void:
 		if id.is_empty():
 			continue
 		var category: String = String(t.get("category", ""))
-                var tile_name: String = String(t.get("name", id))
-                var info: Dictionary = {
-                        "id": id,
-                        "category": category,
-                        "name": tile_name,
-                }
+		var tile_name: String = String(t.get("name", id))
+		var info: Dictionary = {
+			"id": id,
+			"category": category,
+			"name": tile_name,
+		}
 		tiles_by_id[id] = info
 		if not tiles_by_category.has(category):
 			tiles_by_category[category] = []
