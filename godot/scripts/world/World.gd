@@ -103,10 +103,14 @@ func neighbors_even_q(c: Vector2i) -> Array[Vector2i]:
 	return HexUtil.neighbors_even_q(c, width, height)
 
 func cell_to_world(c: Vector2i) -> Vector2:
-	return hexmap.map_to_local(c)
+        if hexmap == null:
+                return Vector2.ZERO
+        return hexmap.map_to_local(c)
 
 func world_to_cell(p: Vector2) -> Vector2i:
-	return hexmap.local_to_map(p)
+        if hexmap == null:
+                return Vector2i.ZERO
+        return hexmap.local_to_map(p)
 
 func set_cell_named(layer: int, c: Vector2i, name: String) -> void:
 	if tiles_name_to_id.is_empty():
