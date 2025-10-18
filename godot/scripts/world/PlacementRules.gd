@@ -37,7 +37,7 @@ func is_adjacent_to_network(world: Node, cell: Vector2i) -> bool:
     for neighbor in neighbors_even_q(cell):
         if neighbor == origin:
             return true
-        var life_data := world.hexmap.get_cell_tile_data(world.LAYER_LIFE, neighbor)
+        var life_data: TileData = world.hexmap.get_cell_tile_data(world.LAYER_LIFE, neighbor)
         if life_data != null:
             return true
     return false
