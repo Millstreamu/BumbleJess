@@ -56,7 +56,6 @@ func _ensure_hex_config() -> void:
         ts.tile_layout = TileSet.TILE_LAYOUT_STACKED
         ts.tile_size = Vector2i(tile_px, tile_px)
     hexmap.y_sort_enabled = false
-    hexmap.cell_size = Vector2(tile_px, tile_px)
 
 func _ensure_layers() -> void:
     while hexmap.get_layers_count() < 3:
@@ -212,10 +211,10 @@ func _update_hud() -> void:
     var remaining: int = DeckManager.remaining()
     var display_name: String = "-"
     if not tile_id.is_empty():
-        var name: String = DeckManager.get_tile_name(tile_id)
+        var tile_name: String = DeckManager.get_tile_name(tile_id)
         var category: String = DeckManager.get_tile_category(tile_id)
         if category.is_empty():
-            display_name = name
+            display_name = tile_name
         else:
-            display_name = "%s (%s)" % [name, category]
+            display_name = "%s (%s)" % [tile_name, category]
     hud.text = "Next: %s | Deck: %d" % [display_name, remaining]
