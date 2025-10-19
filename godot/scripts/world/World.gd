@@ -20,15 +20,15 @@ var rules: PlacementRules = PlacementRules.new()
 var turn := 0
 
 func _calculate_hex_cell_size(px: int) -> Vector2i:
-        var horizontal_spacing := int(round(float(px) * 0.75))
-        var vertical_spacing := int(round(float(px) * (sqrt(3.0) / 2.0)))
-        return Vector2i(max(horizontal_spacing, 1), max(vertical_spacing, 1))
+		var horizontal_spacing := int(round(float(px) * 0.75))
+		var vertical_spacing := int(round(float(px) * (sqrt(3.0) / 2.0)))
+		return Vector2i(max(horizontal_spacing, 1), max(vertical_spacing, 1))
 
 func _ready() -> void:
-        add_child(rules)
-        rules.set_world(self)
-        _ensure_hex_config()
-        _ensure_layers()
+	add_child(rules)
+	rules.set_world(self)
+	_ensure_hex_config()
+	_ensure_layers()
 	_build_tileset()
 	_is_ready = true
 	draw_debug_grid()
@@ -53,17 +53,17 @@ func set_tile_px(value: int) -> void:
 		draw_debug_grid()
 
 func _ensure_hex_config() -> void:
-        if hexmap == null:
-                return
-        var ts: TileSet = hexmap.tile_set
-        if ts != null:
-                ts.tile_shape = TileSet.TILE_SHAPE_HEXAGON
-                ts.tile_layout = TileSet.TILE_LAYOUT_STACKED
-                ts.tile_offset_axis = TileSet.TILE_OFFSET_AXIS_VERTICAL
-                var cell_size := _calculate_hex_cell_size(tile_px)
-                ts.tile_size = Vector2i(tile_px, cell_size.y)
-                hexmap.cell_size = cell_size
-        hexmap.y_sort_enabled = false
+		if hexmap == null:
+				return
+		var ts: TileSet = hexmap.tile_set
+		if ts != null:
+			ts.tile_shape = TileSet.TILE_SHAPE_HEXAGON
+			ts.tile_layout = TileSet.TILE_LAYOUT_STACKED
+			ts.tile_offset_axis = TileSet.TILE_OFFSET_AXIS_VERTICAL
+			var cell_size := _calculate_hex_cell_size(tile_px)
+			ts.tile_size = Vector2i(tile_px, cell_size.y)
+			hexmap.cell_size = cell_size
+		hexmap.y_sort_enabled = false
 
 func _ensure_layers() -> void:
 	while hexmap.get_layers_count() < 3:
@@ -90,10 +90,10 @@ func _build_tileset() -> void:
 		"upgrade": Color(0.1, 0.7, 0.7, 1),
 		"chanting": Color(0.8, 0.2, 0.6, 1),
 	}
-        tiles_name_to_id = TileSetBuilder.build_named_hex_tiles(hexmap, names_to_colors, tile_px)
-        var id_meta: Variant = hexmap.get_meta("tiles_id_to_name") if hexmap.has_meta("tiles_id_to_name") else {}
-        tiles_id_to_name = id_meta if id_meta is Dictionary else {}
-        _ensure_hex_config()
+	tiles_name_to_id = TileSetBuilder.build_named_hex_tiles(hexmap, names_to_colors, tile_px)
+	var id_meta: Variant = hexmap.get_meta("tiles_id_to_name") if hexmap.has_meta("tiles_id_to_name") else {}
+	tiles_id_to_name = id_meta if id_meta is Dictionary else {}
+	_ensure_hex_config()
 
 func clear_tiles() -> void:
 	if hexmap == null:
