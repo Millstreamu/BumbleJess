@@ -62,7 +62,7 @@ func _ensure_hex_config() -> void:
         ts.tile_offset_axis = TileSet.TILE_OFFSET_AXIS_VERTICAL
         var cell_size := _calculate_hex_cell_size(tile_px)
         ts.tile_size = Vector2i(tile_px, cell_size.y)
-        hexmap.cell_size = Vector2(cell_size)
+        hexmap.cell_size = cell_size
     hexmap.y_sort_enabled = false
 
 func _ensure_layers() -> void:
