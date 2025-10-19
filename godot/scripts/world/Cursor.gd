@@ -58,10 +58,11 @@ func _update_highlight() -> void:
     var can_place := false
     if world.has_method("can_place_at"):
         can_place = world.call("can_place_at", cell)
-        if can_place:
-            highlight.color = Color(0.95, 0.95, 0.4, 0.45)
-        else:
-            highlight.color = Color(1.0, 0.35, 0.35, 0.55)
+        var color := Color(0.95, 0.95, 0.4, 0.9) if can_place else Color(1.0, 0.35, 0.35, 0.95)
+        if highlight is Line2D:
+            (highlight as Line2D).default_color = color
+        elif highlight.has_method("set"):
+            highlight.set("color", color)
 
 func move_to(new_cell: Vector2i) -> void:
     cell = world.call("clamp_cell", new_cell)
@@ -78,7 +79,9 @@ func update_highlight_state() -> void:
 func _configure_highlight_shape() -> void:
     if highlight == null or world == null:
         return
+    var margin := 2.0
+    var poly := TileSetBuilder.make_flat_top_hex_polygon(world.tile_px, margin)
     if highlight is Polygon2D:
-        var margin := 2.0
-        var poly := TileSetBuilder.make_flat_top_hex_polygon(world.tile_px, margin)
         (highlight as Polygon2D).polygon = poly
+    elif highlight is Line2D:
+        (highlight as Line2D).points = poly
