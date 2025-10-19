@@ -55,10 +55,14 @@ func _update_from_mouse_click() -> void:
 func _update_highlight() -> void:
 	if highlight == null:
 		return
-	var can_place := false
-	if world.has_method("can_place_at"):
-		can_place = world.call("can_place_at", cell)
-		var color := Color(0.95, 0.95, 0.4, 0.9) if can_place else Color(1.0, 0.35, 0.35, 0.95)
+        var can_place := false
+        if world.has_method("can_place_at"):
+                can_place = world.call("can_place_at", cell)
+                var color: Color
+                if can_place:
+                        color = Color(0.95, 0.95, 0.4, 0.9)
+                else:
+                        color = Color(1.0, 0.35, 0.35, 0.95)
 		if highlight is Line2D:
 			(highlight as Line2D).default_color = color
 		elif highlight.has_method("set"):
