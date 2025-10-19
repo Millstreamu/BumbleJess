@@ -2,23 +2,23 @@ extends RefCounted
 class_name TileSetBuilder
 
 static func _make_hex_image(px: int, color: Color) -> Image:
-    var img := Image.create(px, px, false, Image.FORMAT_RGBA8)
-    img.fill(Color(0, 0, 0, 0))
+	var img := Image.create(px, px, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
 
-    var center := Vector2(px / 2.0, px / 2.0)
-    var radius := px * 0.5 - 1.0
-    var polygon := PackedVector2Array()
-    for i in range(6):
-        var angle := deg_to_rad(60.0 * i - 30.0)
-        polygon.push_back(center + Vector2(cos(angle), sin(angle)) * radius)
+	var center := Vector2(px / 2.0, px / 2.0)
+	var radius := px * 0.5 - 1.0
+	var polygon := PackedVector2Array()
+	for i in range(6):
+		var angle := deg_to_rad(60.0 * i - 30.0)
+		polygon.push_back(center + Vector2(cos(angle), sin(angle)) * radius)
 
-    for y in range(px):
-        for x in range(px):
-            var point := Vector2(x + 0.5, y + 0.5)
-            if Geometry2D.is_point_in_polygon(point, polygon):
-                img.set_pixelv(Vector2i(x, y), color)
+	for y in range(px):
+		for x in range(px):
+			var point := Vector2(x + 0.5, y + 0.5)
+			if Geometry2D.is_point_in_polygon(point, polygon):
+				img.set_pixelv(Vector2i(x, y), color)
 
-    return img
+	return img
 
 static func encode_tile_key(source_id: int, atlas_coords: Vector2i) -> String:
 	return "%d:%d:%d" % [source_id, atlas_coords.x, atlas_coords.y]
