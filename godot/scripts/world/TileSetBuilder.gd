@@ -1,34 +1,47 @@
 extends RefCounted
 class_name TileSetBuilder
 
+static func make_flat_top_hex_polygon(px: int, margin: float = 1.0, center: Vector2 = Vector2.ZERO) -> PackedVector2Array:
+        var effective_px := max(float(px) - margin * 2.0, 1.0)
+        var radius_x := effective_px * 0.5
+        var radius_y := radius_x * (sqrt(3.0) / 2.0)
+        var c := center if center != Vector2.ZERO else Vector2.ZERO
+
+        var poly := PackedVector2Array()
+        poly.push_back(c + Vector2(+radius_x, 0.0))
+        poly.push_back(c + Vector2(+radius_x * 0.5, +radius_y))
+        poly.push_back(c + Vector2(-radius_x * 0.5, +radius_y))
+        poly.push_back(c + Vector2(-radius_x, 0.0))
+        poly.push_back(c + Vector2(-radius_x * 0.5, -radius_y))
+        poly.push_back(c + Vector2(+radius_x * 0.5, -radius_y))
+        return poly
+
 static func _make_hex_image(px: int, color: Color) -> Image:
-	var img := Image.create(px, px, false, Image.FORMAT_RGBA8)
-	img.fill(Color(0, 0, 0, 0))
+        var img := Image.create(px, px, false, Image.FORMAT_RGBA8)
+        img.fill(Color(0, 0, 0, 0))
 
-	var center := Vector2(px / 2.0, px / 2.0)
-	var radius := px * 0.5 - 1.0
-	var polygon := PackedVector2Array()
-	for i in range(6):
-		var angle := deg_to_rad(60.0 * i - 30.0)
-		polygon.push_back(center + Vector2(cos(angle), sin(angle)) * radius)
+        var center := Vector2(px / 2.0, px / 2.0)
+        var polygon := make_flat_top_hex_polygon(px, 2.0, center)
 
-	for y in range(px):
-		for x in range(px):
-			var point := Vector2(x + 0.5, y + 0.5)
-			if Geometry2D.is_point_in_polygon(point, polygon):
-				img.set_pixelv(Vector2i(x, y), color)
+        for y in range(px):
+                for x in range(px):
+                        var point := Vector2(x + 0.5, y + 0.5)
+                        if Geometry2D.is_point_in_polygon(point, polygon):
+                                img.set_pixelv(Vector2i(x, y), color)
 
-	return img
+        return img
 
 static func encode_tile_key(source_id: int, atlas_coords: Vector2i) -> String:
 	return "%d:%d:%d" % [source_id, atlas_coords.x, atlas_coords.y]
 
 static func build_named_hex_tiles(tilemap: TileMap, names_to_colors: Dictionary, tile_px: int) -> Dictionary:
-	var ts := TileSet.new()
-	ts.tile_shape = TileSet.TILE_SHAPE_HEXAGON
-	ts.tile_layout = TileSet.TILE_LAYOUT_STACKED
-	ts.tile_size = Vector2i(tile_px, tile_px)
-	tilemap.tile_set = ts
+        var ts := TileSet.new()
+        ts.tile_shape = TileSet.TILE_SHAPE_HEXAGON
+        ts.tile_layout = TileSet.TILE_LAYOUT_STACKED
+        ts.tile_offset_axis = TileSet.TILE_OFFSET_AXIS_HORIZONTAL
+        ts.tile_offset = TileSet.TILE_OFFSET_EVEN
+        ts.tile_size = Vector2i(tile_px, tile_px)
+        tilemap.tile_set = ts
 
 	var name_to_id: Dictionary = {}
 	var id_to_name: Dictionary = {}
