@@ -154,12 +154,13 @@ func set_cell_named(layer: int, c: Vector2i, name: String) -> void:
 func get_cell_name(layer: int, c: Vector2i) -> String:
     if hexmap == null:
         return ""
-    var td: TileData = hexmap.get_cell_tile_data(layer, c)
-    if td == null:
+    if hexmap.get_cell_tile_data(layer, c) == null:
         return ""
-    var atlas_value: Variant = td.get_atlas_coords()
-    var atlas_coords: Vector2i = atlas_value if atlas_value is Vector2i else Vector2i(int(atlas_value), 0)
-    var key := TileSetBuilder.encode_tile_key(td.get_source_id(), atlas_coords)
+    var source_id: int = hexmap.get_cell_source_id(layer, c)
+    if source_id < 0:
+        return ""
+    var atlas_coords: Vector2i = hexmap.get_cell_atlas_coords(layer, c)
+    var key := TileSetBuilder.encode_tile_key(source_id, atlas_coords)
     return String(tiles_id_to_name.get(key, ""))
 
 func is_empty(layer: int, c: Vector2i) -> bool:
