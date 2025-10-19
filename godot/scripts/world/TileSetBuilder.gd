@@ -39,7 +39,7 @@ static func build_named_hex_tiles(tilemap: TileMap, names_to_colors: Dictionary,
         ts.tile_shape = TileSet.TILE_SHAPE_HEXAGON
         ts.tile_layout = TileSet.TILE_LAYOUT_STACKED
         ts.tile_offset_axis = TileSet.TILE_OFFSET_AXIS_HORIZONTAL
-        ts.tile_offset = TileSet.TileOffset.TILE_OFFSET_EVEN
+        # Godot 4.2+ no longer exposes TileSet.TileOffset; the stacked layout defaults to even offsets.
         ts.tile_size = Vector2i(tile_px, tile_px)
         tilemap.tile_set = ts
 
