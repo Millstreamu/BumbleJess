@@ -25,21 +25,22 @@ func _calculate_hex_cell_size(px: int) -> Vector2i:
 	return Vector2i(max(horizontal_spacing, 1), max(vertical_spacing, 1))
 
 func _ready() -> void:
-	add_child(rules)
-	rules.set_world(self)
-	_ensure_hex_config()
-	_ensure_layers()
-	_build_tileset()
-	var growth_manager: Node = get_node_or_null("/root/GrowthManager")
-	if growth_manager != null:
-		growth_manager.bind_world(self)
-		var sprout_registry: Node = get_node_or_null("/root/SproutRegistry")
-		if sprout_registry != null and not growth_manager.is_connected("grove_spawned", Callable(sprout_registry, "on_grove_spawned")):
-			growth_manager.connect("grove_spawned", Callable(sprout_registry, "on_grove_spawned"))
-	_is_ready = true
-	draw_debug_grid()
-	_setup_hud()
-	_update_hud()
+        add_child(rules)
+        rules.set_world(self)
+        _ensure_hex_config()
+        _ensure_layers()
+        _build_tileset()
+        var growth_manager: Node = get_node_or_null("/root/GrowthManager")
+        if growth_manager != null:
+                growth_manager.bind_world(self)
+                var sprout_registry: Node = get_node_or_null("/root/SproutRegistry")
+                if sprout_registry != null and not growth_manager.is_connected("grove_spawned", Callable(sprout_registry, "on_grove_spawned")):
+                        growth_manager.connect("grove_spawned", Callable(sprout_registry, "on_grove_spawned"))
+        _bind_resource_manager()
+        _is_ready = true
+        draw_debug_grid()
+        _setup_hud()
+        _update_hud()
 
 func set_width(value: int) -> void:
 	width = max(1, value)
@@ -194,54 +195,85 @@ func can_place_at(cell: Vector2i) -> bool:
 	return rules.can_place(self, cell)
 
 func attempt_place_at(cell: Vector2i) -> void:
-	if not can_place_at(cell):
-		return
-	var tile_id: String = DeckManager.peek()
-	if tile_id.is_empty():
-		return
-	var category: String = DeckManager.get_tile_category(tile_id)
-	if category.is_empty():
-		return
-	set_cell_named(LAYER_LIFE, cell, category)
-	rules.mark_occupied(cell)
-	turn += 1
-	DeckManager.draw_one()
-	_update_hud()
-	if is_instance_valid(cursor):
-		cursor.update_highlight_state()
-	var growth_manager: Node = get_node_or_null("/root/GrowthManager")
-	if growth_manager != null and growth_manager.has_method("request_growth_update"):
-		growth_manager.request_growth_update(turn)
+        if not can_place_at(cell):
+                return
+        var tile_id: String = DeckManager.peek()
+        if tile_id.is_empty():
+                return
+        var category: String = DeckManager.get_tile_category(tile_id)
+        if category.is_empty():
+                return
+        set_cell_named(LAYER_LIFE, cell, category)
+        rules.mark_occupied(cell)
+        turn += 1
+        DeckManager.draw_one()
+        _update_hud()
+        if is_instance_valid(cursor):
+                cursor.update_highlight_state()
+        var growth_manager: Node = get_node_or_null("/root/GrowthManager")
+        if growth_manager != null and growth_manager.has_method("request_growth_update"):
+                growth_manager.request_growth_update(turn)
+        if Engine.has_singleton("ResourceManager"):
+                ResourceManager.emit_signal("resources_changed")
+        if Engine.has_singleton("TurnEngine"):
+                TurnEngine.advance_one_turn()
+        elif Engine.has_singleton("Game"):
+                Game.advance_one_turn()
 
 func world_to_map(p: Vector2) -> Vector2i:
 	return world_to_cell(p)
 
 func _setup_hud() -> void:
-	if is_instance_valid(hud):
-		hud.text = "Next: — | Deck: —\nOvergrowth: 0 | Groves: 0"
+        if is_instance_valid(hud):
+                hud.text = _build_hud_text("-", 0)
 
 func update_hud(next_name: String, remaining: int) -> void:
-	if is_instance_valid(hud):
-		var text := "Next: %s | Deck: %d" % [next_name, remaining]
-		text += "\nOvergrowth: %d | Groves: %d" % [_count_cells_named("overgrowth"), _count_cells_named("grove")]
-		hud.text = text
+        if is_instance_valid(hud):
+                hud.text = _build_hud_text(next_name, remaining)
 
 func _update_hud() -> void:
-	if not is_instance_valid(hud):
-		return
-	var tile_id: String = DeckManager.peek()
-	var remaining: int = DeckManager.remaining()
-	var display_name: String = "-"
-	if not tile_id.is_empty():
-		var tile_name: String = DeckManager.get_tile_name(tile_id)
-		var category: String = DeckManager.get_tile_category(tile_id)
-		if category.is_empty():
-			display_name = tile_name
-		else:
-			display_name = "%s (%s)" % [tile_name, category]
-	var text := "Next: %s | Deck: %d" % [display_name, remaining]
-	text += "\nOvergrowth: %d | Groves: %d" % [_count_cells_named("overgrowth"), _count_cells_named("grove")]
-	hud.text = text
+        if not is_instance_valid(hud):
+                return
+        var tile_id: String = DeckManager.peek()
+        var remaining: int = DeckManager.remaining()
+        var display_name: String = "-"
+        if not tile_id.is_empty():
+                var tile_name: String = DeckManager.get_tile_name(tile_id)
+                var category: String = DeckManager.get_tile_category(tile_id)
+                if category.is_empty():
+                        display_name = tile_name
+                else:
+                        display_name = "%s (%s)" % [tile_name, category]
+        hud.text = _build_hud_text(display_name, remaining)
+
+func _build_hud_text(next_name: String, remaining: int) -> String:
+        var text := "Next: %s | Deck: %d" % [next_name, remaining]
+        text += "\nOvergrowth: %d | Groves: %d" % [_count_cells_named("overgrowth"), _count_cells_named("grove")]
+        if Engine.has_singleton("ResourceManager"):
+                text += "\nNature %d/%d Earth %d/%d Water %d/%d Life %d Seeds %d" % [
+                        ResourceManager.get_amount("nature"), ResourceManager.get_capacity("nature"),
+                        ResourceManager.get_amount("earth"), ResourceManager.get_capacity("earth"),
+                        ResourceManager.get_amount("water"), ResourceManager.get_capacity("water"),
+                        ResourceManager.get_amount("life"),
+                        ResourceManager.soul_seeds,
+                ]
+        return text
+
+func _bind_resource_manager() -> void:
+        if not Engine.has_singleton("ResourceManager"):
+                return
+        ResourceManager.bind_world(self)
+        if not ResourceManager.is_connected("resources_changed", Callable(self, "_on_resources_changed")):
+                ResourceManager.connect("resources_changed", Callable(self, "_on_resources_changed"))
+        if not ResourceManager.is_connected("item_changed", Callable(self, "_on_item_changed")):
+                ResourceManager.connect("item_changed", Callable(self, "_on_item_changed"))
+        _on_resources_changed()
+
+func _on_resources_changed() -> void:
+        _update_hud()
+
+func _on_item_changed(_item: String) -> void:
+        _update_hud()
 
 func _count_cells_named(tile_name: String) -> int:
 	var total := 0

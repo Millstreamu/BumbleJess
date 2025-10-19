@@ -19,6 +19,8 @@ config/starting_map_id="map.demo_001"
 
 DataLite="*res://autoload/DataLite.gd"
 DeckManager="*res://autoload/DeckManager.gd"
+ResourceManager="*res://autoload/ResourceManager.gd"
+TurnEngine="*res://autoload/TurnEngine.gd"
 GrowthManager="*res://autoload/GrowthManager.gd"
 MapSeeder="*res://autoload/MapSeeder.gd"
 SproutRegistry="*res://autoload/SproutRegistry.gd"
