@@ -20,9 +20,8 @@ var capacity: Dictionary = {
 var soul_seeds: int = 0
 
 var _tiles: Array = []
-var _tile_rules: Dictionary = {}
-var _rules_by_category: Dictionary = {}
-var _by_category: Dictionary = {}
+var _rules_by_id: Dictionary = {}
+var _category_by_id: Dictionary = {}
 var _world: Node = null
 var _turn_counter: int = 1
 
@@ -83,21 +82,30 @@ func _load_tile_rules() -> void:
         if not Engine.has_singleton("DataLite"):
                 return
         _tiles = DataLite.load_json_array("res://data/tiles.json")
+        _rules_by_id.clear()
+        _category_by_id.clear()
         for entry_variant in _tiles:
                 if entry_variant is Dictionary:
                         var entry: Dictionary = entry_variant
                         var id: String = String(entry.get("id", ""))
                         if id.is_empty():
                                 continue
+                        var category: String = String(entry.get("category", ""))
+                        _category_by_id[id] = category
                         var rules_variant: Variant = entry.get("rules", {})
                         var rules: Dictionary = rules_variant if rules_variant is Dictionary else {}
-                        _tile_rules[id] = rules
-                        var category: String = String(entry.get("category", ""))
-                        if not _by_category.has(category):
-                                _by_category[category] = []
-                        _by_category[category].append(id)
-                        if not _rules_by_category.has(category):
-                                _rules_by_category[category] = rules
+                        _rules_by_id[id] = rules
+
+func _rule(id: String, key: String, default_value = null):
+        var rules_variant: Variant = _rules_by_id.get(id, {})
+        var rules: Dictionary = rules_variant if rules_variant is Dictionary else {}
+        return rules.get(key, default_value)
+
+func _add_capacity(kind: String, value: int) -> void:
+        var previous: int = int(capacity.get(kind, 0))
+        capacity[kind] = previous + value
+        if not amounts.has(kind):
+                amounts[kind] = 0
 
 func _connect_turn_engine() -> void:
         var turn_engine: Node = null
@@ -120,123 +128,188 @@ func _connect_battle_manager() -> void:
                 battle_manager.connect("battle_result", Callable(self, "_on_battle_result"))
 
 func _recompute_capacity() -> void:
-        capacity["nature"] = 0
-        capacity["earth"] = 0
-        capacity["water"] = 0
+        for key in capacity.keys():
+                if key == "life":
+                        continue
+                capacity[key] = 0
         if _world == null:
                 return
         var width: int = int(_world.width)
         var height: int = int(_world.height)
-        var producers: Dictionary = {
-                "harvest": [],
-                "build": [],
-                "refine": [],
-                "storage": [],
-        }
+
         for y in range(height):
                 for x in range(width):
                         var cell := Vector2i(x, y)
-                        var category: String = _world.get_cell_name(_world.LAYER_LIFE, cell)
-                        if producers.has(category):
-                                producers[category].append(cell)
-        capacity["nature"] += producers["harvest"].size() * 5
-        capacity["earth"] += producers["build"].size() * 5
-        capacity["water"] += producers["refine"].size() * 5
-        for storage_cell in producers["storage"]:
-                for neighbor in _world.neighbors_even_q(storage_cell):
-                        var neighbor_category: String = _world.get_cell_name(_world.LAYER_LIFE, neighbor)
-                        match neighbor_category:
-                                "harvest":
-                                        capacity["nature"] += 5
-                                "build":
-                                        capacity["earth"] += 5
-                                "refine":
-                                        capacity["water"] += 5
-        for kind in ["nature", "earth", "water"]:
-                amounts[kind] = clamp(amounts[kind], 0, capacity[kind])
+                        var base_category: String = _world.get_cell_name(_world.LAYER_LIFE, cell)
+                        if base_category.is_empty():
+                                continue
+                        var id: String = _world.get_cell_tile_id(_world.LAYER_LIFE, cell)
+                        var category: String = base_category
+                        if not id.is_empty():
+                                category = String(_category_by_id.get(id, base_category))
+                        var cap_base_variant: Variant = _rule(id, "capacity_base", {})
+                        var cap_base: Dictionary = cap_base_variant if cap_base_variant is Dictionary else {}
+                        if cap_base.is_empty():
+                                match category:
+                                        "harvest":
+                                                cap_base = {"nature": 5}
+                                        "build":
+                                                cap_base = {"earth": 5}
+                                        "refine":
+                                                cap_base = {"water": 5}
+                                        _:
+                                                cap_base = {}
+                        for res in cap_base.keys():
+                                var value: int = int(cap_base[res])
+                                if value == 0:
+                                        continue
+                                _add_capacity(res, value)
+
+        for y in range(height):
+                for x in range(width):
+                        var cell := Vector2i(x, y)
+                        var base_category: String = _world.get_cell_name(_world.LAYER_LIFE, cell)
+                        if base_category.is_empty():
+                                continue
+                        var id: String = _world.get_cell_tile_id(_world.LAYER_LIFE, cell)
+                        var category: String = base_category
+                        if not id.is_empty():
+                                category = String(_category_by_id.get(id, base_category))
+                        var aura_variant: Variant = _rule(id, "capacity_aura_adjacent", {})
+                        var aura: Dictionary = aura_variant if aura_variant is Dictionary else {}
+                        if aura.is_empty() and category == "storage":
+                                aura = {
+                                        "harvest": {"nature": 5},
+                                        "build": {"earth": 5},
+                                        "refine": {"water": 5},
+                                }
+                        if aura.is_empty():
+                                continue
+                        for neighbor in _world.neighbors_even_q(cell):
+                                var neighbor_category: String = _world.get_cell_name(_world.LAYER_LIFE, neighbor)
+                                if neighbor_category.is_empty():
+                                        continue
+                                var bonus_variant: Variant = aura.get(neighbor_category, null)
+                                if bonus_variant is Dictionary:
+                                        var bonus: Dictionary = bonus_variant
+                                        for res in bonus.keys():
+                                                var value: int = int(bonus[res])
+                                                if value == 0:
+                                                        continue
+                                                _add_capacity(res, value)
+
+        for key in capacity.keys():
+                if key == "life":
+                        continue
+                var cap_value: int = int(capacity[key])
+                if not amounts.has(key):
+                        amounts[key] = 0
+                amounts[key] = clamp(int(amounts[key]), 0, cap_value)
 
 func _produce_resources() -> void:
         if _world == null:
                 return
         var width: int = int(_world.width)
         var height: int = int(_world.height)
-        var harvest_rules: Dictionary = _rules_by_category.get("harvest", {})
-        var refine_rules: Dictionary = _rules_by_category.get("refine", {})
-        var upgrade_rules: Dictionary = _rules_by_category.get("upgrade", {})
-        var nature_per_grove: int = int(harvest_rules.get("nature_per_adjacent_grove", 1))
-        var refine_every: int = int(refine_rules.get("refine_every_turns", 2))
-        if refine_every <= 0:
-                refine_every = 1
-        var consume_variant: Variant = refine_rules.get("consume", {"nature": 1, "earth": 1})
-        var consume: Dictionary = consume_variant if consume_variant is Dictionary else {"nature": 1, "earth": 1}
-        var produce_variant: Variant = refine_rules.get("produce", {"water": 1})
-        var produce: Dictionary = produce_variant if produce_variant is Dictionary else {"water": 1}
-        var upgrade_every: int = int(upgrade_rules.get("soul_seed_every_turns", 3))
-        if upgrade_every <= 0:
-                upgrade_every = 1
+
         for y in range(height):
                 for x in range(width):
                         var cell := Vector2i(x, y)
-                        if _world.get_cell_name(_world.LAYER_LIFE, cell) == "harvest":
-                                var gain: int = _adjacent_grove_count(cell) * nature_per_grove
-                                if gain > 0:
-                                        amounts["nature"] = clamp(amounts["nature"] + gain, 0, capacity["nature"])
-        for y in range(height):
-                for x in range(width):
-                        var cell := Vector2i(x, y)
-                        if _world.get_cell_name(_world.LAYER_LIFE, cell) == "build":
-                                var slowed: bool = _is_adjacent_to_category(cell, "harvest")
+                        var base_category: String = _world.get_cell_name(_world.LAYER_LIFE, cell)
+                        if base_category.is_empty():
+                                continue
+                        var id: String = _world.get_cell_tile_id(_world.LAYER_LIFE, cell)
+                        var category: String = base_category
+                        if not id.is_empty():
+                                category = String(_category_by_id.get(id, base_category))
+
+                        if category == "harvest":
+                                var per_adjacent_variant: Variant = _rule(id, "nature_per_adjacent", {"grove": 1})
+                                var per_adjacent: Dictionary = per_adjacent_variant if per_adjacent_variant is Dictionary else {"grove": 1}
+                                if per_adjacent.is_empty():
+                                        per_adjacent = {"grove": 1}
+                                var total_gain: int = 0
+                                for target_category in per_adjacent.keys():
+                                        var per_value: int = int(per_adjacent[target_category])
+                                        if per_value == 0:
+                                                continue
+                                        var adjacent_count: int = 0
+                                        for neighbor in _world.neighbors_even_q(cell):
+                                                if _world.get_cell_name(_world.LAYER_LIFE, neighbor) == target_category:
+                                                        adjacent_count += 1
+                                        total_gain += per_value * adjacent_count
+                                if total_gain > 0:
+                                        if not amounts.has("nature"):
+                                                amounts["nature"] = 0
+                                        var cap: int = int(capacity.get("nature", 0))
+                                        amounts["nature"] = clamp(int(amounts["nature"]) + total_gain, 0, cap)
+
+                        elif category == "build":
+                                var per_turn: int = int(_rule(id, "earth_per_turn", 1))
+                                if per_turn <= 0:
+                                        continue
+                                var slows_variant: Variant = _rule(id, "slow_if_adjacent_any", ["harvest"])
+                                var slows: Array = []
+                                if slows_variant is Array:
+                                        slows = slows_variant
+                                elif slows_variant is PackedStringArray:
+                                        slows = Array(slows_variant)
+                                var slow_multiplier: int = int(_rule(id, "slow_multiplier", 2))
+                                if slow_multiplier <= 0:
+                                        slow_multiplier = 1
+                                var slowed: bool = false
+                                for neighbor in _world.neighbors_even_q(cell):
+                                        var neighbor_category: String = _world.get_cell_name(_world.LAYER_LIFE, neighbor)
+                                        if slows.has(neighbor_category):
+                                                slowed = true
+                                                break
                                 var produce_now: bool = true
                                 if slowed:
-                                        # Build tiles work at half speed when touching Harvest tiles.
-                                        produce_now = (_turn_counter % 2) == 0
+                                        produce_now = (_turn_counter % slow_multiplier) == 0
                                 if produce_now:
-                                        amounts["earth"] = clamp(amounts["earth"] + 1, 0, capacity["earth"])
-        if _turn_counter % refine_every == 0:
-                for y in range(height):
-                        for x in range(width):
-                                var cell := Vector2i(x, y)
-                                if _world.get_cell_name(_world.LAYER_LIFE, cell) == "refine":
-                                        var can_convert: bool = true
-                                        for consume_kind in consume.keys():
-                                                var need: int = int(consume[consume_kind])
-                                                if amounts.get(consume_kind, 0) < need:
-                                                        can_convert = false
-                                                        break
-                                        if not can_convert:
+                                        if not amounts.has("earth"):
+                                                amounts["earth"] = 0
+                                        var cap: int = int(capacity.get("earth", 0))
+                                        amounts["earth"] = clamp(int(amounts["earth"]) + per_turn, 0, cap)
+
+                        elif category == "refine":
+                                var every: int = int(_rule(id, "refine_every_turns", 2))
+                                if every <= 0:
+                                        every = 1
+                                if (_turn_counter % every) != 0:
+                                        continue
+                                var consume_variant: Variant = _rule(id, "consume", {"nature": 1, "earth": 1})
+                                var consume: Dictionary = consume_variant if consume_variant is Dictionary else {"nature": 1, "earth": 1}
+                                var produce_variant: Variant = _rule(id, "produce", {"water": 1})
+                                var produce: Dictionary = produce_variant if produce_variant is Dictionary else {"water": 1}
+                                var can_convert: bool = true
+                                for consume_kind in consume.keys():
+                                        var need: int = int(consume[consume_kind])
+                                        if need <= 0:
                                                 continue
-                                        for consume_kind in consume.keys():
-                                                var need: int = int(consume[consume_kind])
-                                                amounts[consume_kind] = max(0, amounts[consume_kind] - need)
-                                        for produce_kind in produce.keys():
-                                                var value: int = int(produce[produce_kind])
-                                                if not amounts.has(produce_kind):
-                                                        continue
-                                                # Refiners transmute inputs into water at their cadence.
-                                                amounts[produce_kind] = clamp(amounts[produce_kind] + value, 0, get_capacity(produce_kind))
-        if _turn_counter % upgrade_every == 0:
-                var upgrades: int = 0
-                for y in range(height):
-                        for x in range(width):
-                                if _world.get_cell_name(_world.LAYER_LIFE, Vector2i(x, y)) == "upgrade":
-                                        upgrades += 1
-                if upgrades > 0:
-                        # Upgrade tiles drip Soul Seeds on their cadence.
-                        add_soul_seed(upgrades)
+                                        if int(amounts.get(consume_kind, 0)) < need:
+                                                can_convert = false
+                                                break
+                                if not can_convert:
+                                        continue
+                                for consume_kind in consume.keys():
+                                        var need: int = int(consume[consume_kind])
+                                        if need <= 0:
+                                                continue
+                                        var current_amount: int = int(amounts.get(consume_kind, 0))
+                                        amounts[consume_kind] = max(0, current_amount - need)
+                                for produce_kind in produce.keys():
+                                        var value: int = int(produce[produce_kind])
+                                        if value == 0:
+                                                continue
+                                        if not amounts.has(produce_kind):
+                                                amounts[produce_kind] = 0
+                                        var cap: int = int(capacity.get(produce_kind, 0))
+                                        amounts[produce_kind] = clamp(int(amounts[produce_kind]) + value, 0, cap)
 
-func _is_adjacent_to_category(cell: Vector2i, category: String) -> bool:
-        if _world == null:
-                return false
-        for neighbor in _world.neighbors_even_q(cell):
-                if _world.get_cell_name(_world.LAYER_LIFE, neighbor) == category:
-                        return true
-        return false
-
-func _adjacent_grove_count(cell: Vector2i) -> int:
-        if _world == null:
-                return 0
-        var total: int = 0
-        for neighbor in _world.neighbors_even_q(cell):
-                if _world.get_cell_name(_world.LAYER_LIFE, neighbor) == "grove":
-                        total += 1
-        return total
+                        elif category == "upgrade":
+                                var every_seeds: int = int(_rule(id, "soul_seed_every_turns", 3))
+                                if every_seeds <= 0:
+                                        every_seeds = 1
+                                if (_turn_counter % every_seeds) == 0:
+                                        add_soul_seed(1)
