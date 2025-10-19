@@ -15,51 +15,42 @@ func _ready() -> void:
 	_update_highlight()
 
 func _unhandled_input(event: InputEvent) -> void:
-		var moved := false
-		if event.is_action_pressed("ui_left"):
-				cell.x -= 1
-				moved = true
-		elif event.is_action_pressed("ui_right"):
-			cell.x += 1
-			moved = true
-		elif event.is_action_pressed("ui_up"):
-			cell.y -= 1
-			moved = true
-		elif event.is_action_pressed("ui_down"):
-			cell.y += 1
-			moved = true
-		elif event.is_action_pressed("ui_accept"):
-				world.call("attempt_place_at", cell)
-				_update_highlight()
-		elif event is InputEventMouseMotion:
-				_update_from_mouse_motion()
-		elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-				world.call("attempt_place_at", cell)
-				_update_highlight()
+        var moved := false
+        if event.is_action_pressed("ui_left"):
+                cell.x -= 1
+                moved = true
+        elif event.is_action_pressed("ui_right"):
+                cell.x += 1
+                moved = true
+        elif event.is_action_pressed("ui_up"):
+                cell.y -= 1
+                moved = true
+        elif event.is_action_pressed("ui_down"):
+                cell.y += 1
+                moved = true
+        elif event.is_action_pressed("ui_accept"):
+                world.call("attempt_place_at", cell)
+                _update_highlight()
+        elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+                _update_from_mouse_click()
+                world.call("attempt_place_at", cell)
+                _update_highlight()
 
-		if moved:
-				cell = world.call("clamp_cell", cell)
-				position = world.call("cell_to_world", cell)
-				if cam:
-						cam.global_position = global_position
-				var tw := create_tween()
-				scale = Vector2.ONE * 0.95
-				tw.tween_property(self, "scale", Vector2.ONE, 0.08)
-				_update_highlight()
+        if moved:
+                move_to(cell)
+                var tw := create_tween()
+                scale = Vector2.ONE * 0.95
+                tw.tween_property(self, "scale", Vector2.ONE, 0.08)
 
-func _update_from_mouse_motion() -> void:
-		if world == null:
-				return
-		var mouse_world: Vector2 = world.to_local(get_global_mouse_position())
-		var hovered_cell: Vector2i = world.call("world_to_map", mouse_world)
-		hovered_cell = world.call("clamp_cell", hovered_cell)
-		if hovered_cell == cell:
-				return
-		cell = hovered_cell
-		position = world.call("cell_to_world", cell)
-		if cam:
-				cam.global_position = global_position
-		_update_highlight()
+func _update_from_mouse_click() -> void:
+        if world == null:
+                return
+        var mouse_world: Vector2 = world.to_local(get_global_mouse_position())
+        var hovered_cell: Vector2i = world.call("world_to_map", mouse_world)
+        hovered_cell = world.call("clamp_cell", hovered_cell)
+        if hovered_cell == cell:
+                return
+        move_to(hovered_cell)
 
 func _update_highlight() -> void:
 	if highlight == null:
