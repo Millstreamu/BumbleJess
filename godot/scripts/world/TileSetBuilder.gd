@@ -2,10 +2,10 @@ extends RefCounted
 class_name TileSetBuilder
 
 static func make_flat_top_hex_polygon(px: int, margin: float = 1.0, center: Vector2 = Vector2.ZERO) -> PackedVector2Array:
-        var effective_px := max(float(px) - margin * 2.0, 1.0)
-        var radius_x := effective_px * 0.5
-        var radius_y := radius_x * (sqrt(3.0) / 2.0)
-        var c := center if center != Vector2.ZERO else Vector2.ZERO
+        var effective_px: float = max(float(px) - margin * 2.0, 1.0)
+        var radius_x: float = effective_px * 0.5
+        var radius_y: float = radius_x * (sqrt(3.0) / 2.0)
+        var c: Vector2 = center if center != Vector2.ZERO else Vector2.ZERO
 
         var poly := PackedVector2Array()
         poly.push_back(c + Vector2(+radius_x, 0.0))
@@ -39,7 +39,7 @@ static func build_named_hex_tiles(tilemap: TileMap, names_to_colors: Dictionary,
         ts.tile_shape = TileSet.TILE_SHAPE_HEXAGON
         ts.tile_layout = TileSet.TILE_LAYOUT_STACKED
         ts.tile_offset_axis = TileSet.TILE_OFFSET_AXIS_HORIZONTAL
-        ts.tile_offset = TileSet.TILE_OFFSET_EVEN
+        ts.tile_offset = TileSet.TileOffset.TILE_OFFSET_EVEN
         ts.tile_size = Vector2i(tile_px, tile_px)
         tilemap.tile_set = ts
 
