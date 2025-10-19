@@ -1,7 +1,7 @@
 [
   {
 	"id": "map.demo_001",
-	"grid": { "width": 16, "height": 12, "hex": "flat-top", "offset": "even-q", "tile_px": 64 },
+    "grid": { "width": 16, "height": 12, "hex": "flat-top", "offset": "even-q", "tile_px": 128 },
 	"seed": 987654,
 	"totem": { "x": 8, "y": 6, "totem_id": "totem.heartwood" },
 	"decay_totems": [
