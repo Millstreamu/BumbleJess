@@ -157,7 +157,7 @@ func get_cell_name(layer: int, c: Vector2i) -> String:
     var td: TileData = hexmap.get_cell_tile_data(layer, c)
     if td == null:
         return ""
-    var atlas_value: Variant = td.get_tile_id()
+    var atlas_value: Variant = td.get_atlas_coords()
     var atlas_coords: Vector2i = atlas_value if atlas_value is Vector2i else Vector2i(int(atlas_value), 0)
     var key := TileSetBuilder.encode_tile_key(td.get_source_id(), atlas_coords)
     return String(tiles_id_to_name.get(key, ""))
