@@ -30,6 +30,12 @@ func _ready() -> void:
     _ensure_hex_config()
     _ensure_layers()
     _build_tileset()
+    var growth_manager: Node = get_node_or_null("/root/GrowthManager")
+    if growth_manager != null:
+        growth_manager.bind_world(self)
+        var sprout_registry: Node = get_node_or_null("/root/SproutRegistry")
+        if sprout_registry != null and not growth_manager.is_connected("grove_spawned", Callable(sprout_registry, "on_grove_spawned")):
+            growth_manager.connect("grove_spawned", Callable(sprout_registry, "on_grove_spawned"))
     _is_ready = true
     draw_debug_grid()
     _setup_hud()
@@ -88,6 +94,8 @@ func _build_tileset() -> void:
         "guard": Color(0.85, 0.75, 0.2, 1),
         "upgrade": Color(0.1, 0.7, 0.7, 1),
         "chanting": Color(0.8, 0.2, 0.6, 1),
+        "overgrowth": Color(0.35, 0.7, 0.35, 0.75),
+        "grove": Color(0.10, 0.55, 0.25, 1.0),
     }
     tiles_name_to_id = TileSetBuilder.build_named_hex_tiles(hexmap, names_to_colors, tile_px)
     var id_meta: Variant = hexmap.get_meta("tiles_id_to_name") if hexmap.has_meta("tiles_id_to_name") else {}
@@ -206,11 +214,13 @@ func world_to_map(p: Vector2) -> Vector2i:
 
 func _setup_hud() -> void:
     if is_instance_valid(hud):
-        hud.text = "Next: — | Deck: —"
+        hud.text = "Next: — | Deck: —\nOvergrowth: 0 | Groves: 0"
 
 func update_hud(next_name: String, remaining: int) -> void:
     if is_instance_valid(hud):
-        hud.text = "Next: %s | Deck: %d" % [next_name, remaining]
+        var text := "Next: %s | Deck: %d" % [next_name, remaining]
+        text += "\nOvergrowth: %d | Groves: %d" % [_count_cells_named("overgrowth"), _count_cells_named("grove")]
+        hud.text = text
 
 func _update_hud() -> void:
     if not is_instance_valid(hud):
@@ -225,4 +235,14 @@ func _update_hud() -> void:
             display_name = tile_name
         else:
             display_name = "%s (%s)" % [tile_name, category]
-    hud.text = "Next: %s | Deck: %d" % [display_name, remaining]
+    var text := "Next: %s | Deck: %d" % [display_name, remaining]
+    text += "\nOvergrowth: %d | Groves: %d" % [_count_cells_named("overgrowth"), _count_cells_named("grove")]
+    hud.text = text
+
+func _count_cells_named(name: String) -> int:
+    var total := 0
+    for y in range(height):
+        for x in range(width):
+            if get_cell_name(LAYER_LIFE, Vector2i(x, y)) == name:
+                total += 1
+    return total
