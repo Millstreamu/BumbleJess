@@ -136,14 +136,14 @@ func world_to_cell(p: Vector2) -> Vector2i:
         return Vector2i.ZERO
     return hexmap.local_to_map(p)
 
-func set_cell_named(layer: int, c: Vector2i, name: String) -> void:
+func set_cell_named(layer: int, c: Vector2i, tile_name: String) -> void:
     if hexmap == null:
         return
     if tiles_name_to_id.is_empty():
         _build_tileset()
-    if not tiles_name_to_id.has(name):
+    if not tiles_name_to_id.has(tile_name):
         return
-    var tile_info: Dictionary = tiles_name_to_id[name]
+    var tile_info: Dictionary = tiles_name_to_id[tile_name]
     var src_id: int = int(tile_info.get("source_id", -1))
     var atlas_value: Variant = tile_info.get("atlas_coords", Vector2i.ZERO)
     var atlas_coords: Vector2i = atlas_value if atlas_value is Vector2i else Vector2i.ZERO
@@ -209,6 +209,9 @@ func attempt_place_at(cell: Vector2i) -> void:
     _update_hud()
     if is_instance_valid(cursor):
         cursor.update_highlight_state()
+    var growth_manager: Node = get_node_or_null("/root/GrowthManager")
+    if growth_manager != null and growth_manager.has_method("request_growth_update"):
+        growth_manager.request_growth_update(turn)
 
 func world_to_map(p: Vector2) -> Vector2i:
     return world_to_cell(p)
@@ -240,10 +243,10 @@ func _update_hud() -> void:
     text += "\nOvergrowth: %d | Groves: %d" % [_count_cells_named("overgrowth"), _count_cells_named("grove")]
     hud.text = text
 
-func _count_cells_named(name: String) -> int:
+func _count_cells_named(tile_name: String) -> int:
     var total := 0
     for y in range(height):
         for x in range(width):
-            if get_cell_name(LAYER_LIFE, Vector2i(x, y)) == name:
+            if get_cell_name(LAYER_LIFE, Vector2i(x, y)) == tile_name:
                 total += 1
     return total
