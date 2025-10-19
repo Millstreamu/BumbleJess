@@ -6,6 +6,8 @@ var next_tile_id: String = ""
 
 var tiles_by_category: Dictionary = {}
 var tiles_by_id: Dictionary = {}
+var id_to_category: Dictionary = {}
+var id_to_name: Dictionary = {}
 
 func _ready() -> void:
 	rng.randomize()
@@ -14,9 +16,11 @@ func _ready() -> void:
 	draw_one()
 
 func build_starting_deck() -> void:
-	deck.clear()
-	tiles_by_category.clear()
-	tiles_by_id.clear()
+        deck.clear()
+        tiles_by_category.clear()
+        tiles_by_id.clear()
+        id_to_category.clear()
+        id_to_name.clear()
 
 	var tiles_raw: Variant = _load_json("res://data/tiles.json")
 	var tiles: Array = tiles_raw if tiles_raw is Array else []
@@ -28,15 +32,17 @@ func build_starting_deck() -> void:
 			continue
 		var category: String = String(t.get("category", ""))
 		var tile_name: String = String(t.get("name", id))
-		var info: Dictionary = {
-			"id": id,
-			"category": category,
-			"name": tile_name,
-		}
-		tiles_by_id[id] = info
-		if not tiles_by_category.has(category):
-			tiles_by_category[category] = []
-		tiles_by_category[category].append(id)
+                var info: Dictionary = {
+                        "id": id,
+                        "category": category,
+                        "name": tile_name,
+                }
+                tiles_by_id[id] = info
+                id_to_category[id] = category
+                id_to_name[id] = tile_name
+                if not tiles_by_category.has(category):
+                        tiles_by_category[category] = []
+                tiles_by_category[category].append(id)
 
 	var deck_data_raw: Variant = _load_json("res://data/deck.json")
 	var deck_data: Dictionary = deck_data_raw if deck_data_raw is Dictionary else {}
@@ -78,10 +84,20 @@ func draw_one() -> String:
 	return next_tile_id
 
 func peek() -> String:
-	return next_tile_id
+        return next_tile_id
+
+func peek_name() -> String:
+        if next_tile_id.is_empty():
+                return ""
+        return get_tile_name(next_tile_id)
+
+func peek_category() -> String:
+        if next_tile_id.is_empty():
+                return ""
+        return get_tile_category(next_tile_id)
 
 func remaining() -> int:
-	return deck.size()
+        return deck.size()
 
 func get_tile_info(id: String) -> Dictionary:
 	var info_variant: Variant = tiles_by_id.get(id, {})

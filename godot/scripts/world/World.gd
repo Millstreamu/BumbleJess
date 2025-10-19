@@ -106,10 +106,12 @@ func _build_tileset() -> void:
 func clear_tiles() -> void:
 	if hexmap == null:
 		return
-	for layer in range(hexmap.get_layers_count()):
-		var used_cells: Array = hexmap.get_used_cells(layer)
-		for cell in used_cells:
-			hexmap.erase_cell(layer, cell)
+        for layer in range(hexmap.get_layers_count()):
+                var used_cells: Array = hexmap.get_used_cells(layer)
+                for cell in used_cells:
+                        hexmap.erase_cell(layer, cell)
+                        if layer == LAYER_LIFE:
+                                clear_cell_tile_id(layer, cell)
 	rules.occupied.clear()
 	turn = 0
 	origin_cell = Vector2i.ZERO
@@ -138,31 +140,67 @@ func world_to_cell(p: Vector2) -> Vector2i:
 	return hexmap.local_to_map(p)
 
 func set_cell_named(layer: int, c: Vector2i, tile_name: String) -> void:
-	if hexmap == null:
-		return
-	if tiles_name_to_id.is_empty():
-		_build_tileset()
+        if hexmap == null:
+                return
+        if tiles_name_to_id.is_empty():
+                _build_tileset()
 	if not tiles_name_to_id.has(tile_name):
 		return
 	var tile_info: Dictionary = tiles_name_to_id[tile_name]
 	var src_id: int = int(tile_info.get("source_id", -1))
 	var atlas_value: Variant = tile_info.get("atlas_coords", Vector2i.ZERO)
 	var atlas_coords: Vector2i = atlas_value if atlas_value is Vector2i else Vector2i.ZERO
-	if src_id < 0:
-		return
-	hexmap.set_cell(layer, c, src_id, atlas_coords)
+        if src_id < 0:
+                return
+        hexmap.set_cell(layer, c, src_id, atlas_coords)
+        if layer == LAYER_LIFE:
+                clear_cell_tile_id(layer, c)
+
+func set_cell_meta(layer: int, c: Vector2i, key: String, value) -> void:
+        if hexmap == null:
+                return
+        hexmap.set_cell_metadata(layer, c, key, value)
+
+func get_cell_meta(layer: int, c: Vector2i, key: String):
+        if hexmap == null:
+                return null
+        return hexmap.get_cell_metadata(layer, c, key)
+
+func set_cell_tile_id(layer: int, c: Vector2i, id: String) -> void:
+        set_cell_meta(layer, c, "id", id)
+
+func get_cell_tile_id(layer: int, c: Vector2i) -> String:
+        if hexmap == null:
+                return ""
+        var value = hexmap.get_cell_metadata(layer, c, "id")
+        return value if typeof(value) == TYPE_STRING else ""
+
+func id_to_category(id: String) -> String:
+        if id.is_empty():
+                return ""
+        return String(DeckManager.id_to_category.get(id, ""))
+
+func id_to_name(id: String) -> String:
+        if id.is_empty():
+                return ""
+        return String(DeckManager.id_to_name.get(id, id))
 
 func get_cell_name(layer: int, c: Vector2i) -> String:
-	if hexmap == null:
-		return ""
-	if hexmap.get_cell_tile_data(layer, c) == null:
-		return ""
+        if hexmap == null:
+                return ""
+        if hexmap.get_cell_tile_data(layer, c) == null:
+                return ""
 	var source_id: int = hexmap.get_cell_source_id(layer, c)
 	if source_id < 0:
 		return ""
-	var atlas_coords: Vector2i = hexmap.get_cell_atlas_coords(layer, c)
-	var key := TileSetBuilder.encode_tile_key(source_id, atlas_coords)
-	return String(tiles_id_to_name.get(key, ""))
+        var atlas_coords: Vector2i = hexmap.get_cell_atlas_coords(layer, c)
+        var key := TileSetBuilder.encode_tile_key(source_id, atlas_coords)
+        return String(tiles_id_to_name.get(key, ""))
+
+func clear_cell_tile_id(layer: int, c: Vector2i) -> void:
+        if hexmap == null:
+                return
+        hexmap.set_cell_metadata(layer, c, "id", null)
 
 func is_empty(layer: int, c: Vector2i) -> bool:
 	if hexmap == null:
@@ -197,17 +235,23 @@ func can_place_at(cell: Vector2i) -> bool:
 func attempt_place_at(cell: Vector2i) -> void:
         if not can_place_at(cell):
                 return
-        var tile_id: String = DeckManager.peek()
-        if tile_id.is_empty():
+        place_current_tile(cell)
+
+func place_current_tile(cell: Vector2i) -> void:
+        if DeckManager.next_tile_id.is_empty():
                 return
-        var category: String = DeckManager.get_tile_category(tile_id)
+        if not rules.can_place(self, cell):
+                return
+        var tile_id: String = DeckManager.next_tile_id
+        var category: String = id_to_category(tile_id)
         if category.is_empty():
                 return
         set_cell_named(LAYER_LIFE, cell, category)
+        set_cell_tile_id(LAYER_LIFE, cell, tile_id)
         rules.mark_occupied(cell)
         turn += 1
         DeckManager.draw_one()
-        _update_hud()
+        update_hud(DeckManager.peek_name(), DeckManager.remaining())
         if is_instance_valid(cursor):
                 cursor.update_highlight_state()
         var growth_manager: Node = get_node_or_null("/root/GrowthManager")
@@ -238,8 +282,8 @@ func _update_hud() -> void:
         var remaining: int = DeckManager.remaining()
         var display_name: String = "-"
         if not tile_id.is_empty():
-                var tile_name: String = DeckManager.get_tile_name(tile_id)
-                var category: String = DeckManager.get_tile_category(tile_id)
+                var tile_name: String = DeckManager.peek_name()
+                var category: String = DeckManager.peek_category()
                 if category.is_empty():
                         display_name = tile_name
                 else:
