@@ -51,10 +51,11 @@ func _ensure_hex_config() -> void:
 	if hexmap == null:
 		return
 	var ts: TileSet = hexmap.tile_set
-	if ts != null:
-		ts.tile_shape = TileSet.TILE_SHAPE_HEXAGON
-		ts.tile_layout = TileSet.TILE_LAYOUT_STACKED
-		ts.tile_size = Vector2i(tile_px, tile_px)
+        if ts != null:
+                ts.tile_shape = TileSet.TILE_SHAPE_HEXAGON
+                ts.tile_layout = TileSet.TILE_LAYOUT_STACKED
+                ts.tile_offset_axis = TileSet.TILE_OFFSET_AXIS_VERTICAL
+                ts.tile_size = Vector2i(tile_px, tile_px)
 	hexmap.y_sort_enabled = false
 
 func _ensure_layers() -> void:
