@@ -17,9 +17,11 @@ config/starting_map_id="map.demo_001"
 
 [autoload]
 
-MapSeeder="*res://autoload/MapSeeder.gd"
-DeckManager="*res://autoload/DeckManager.gd"
 DataLite="*res://autoload/DataLite.gd"
+DeckManager="*res://autoload/DeckManager.gd"
+GrowthManager="*res://autoload/GrowthManager.gd"
+MapSeeder="*res://autoload/MapSeeder.gd"
+SproutRegistry="*res://autoload/SproutRegistry.gd"
 
 [input]
 
