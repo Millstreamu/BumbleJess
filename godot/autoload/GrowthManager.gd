@@ -56,10 +56,10 @@ func _recompute_overgrowth() -> void:
     for y in range(height):
         for x in range(width):
             var cell := Vector2i(x, y)
-            var object_name := _world.get_cell_name(_world.LAYER_OBJECTS, cell)
-            var life_name := _world.get_cell_name(_world.LAYER_LIFE, cell)
-            var has_object := not (object_name.is_empty() or object_name == "empty")
-            var has_life := not (life_name.is_empty() or life_name == "empty")
+            var object_name: String = _world.get_cell_name(_world.LAYER_OBJECTS, cell)
+            var life_name: String = _world.get_cell_name(_world.LAYER_LIFE, cell)
+            var has_object: bool = not (object_name.is_empty() or object_name == "empty")
+            var has_life: bool = not (life_name.is_empty() or life_name == "empty")
             empty[y * width + x] = 1 if (not has_object and not has_life) else 0
 
     _tmp_reachable_from_edge.clear()
@@ -77,7 +77,7 @@ func _recompute_overgrowth() -> void:
             queue.append(Vector2i(width - 1, y))
 
     while queue.size() > 0:
-        var cell := queue.pop_back()
+        var cell: Vector2i = queue.pop_back()
         var hash := _hash_cell(cell, width)
         if _tmp_reachable_from_edge.has(hash):
             continue
@@ -95,7 +95,7 @@ func _recompute_overgrowth() -> void:
             var cell := Vector2i(x, y)
             var hash := _hash_cell(cell, width)
             var reachable := _tmp_reachable_from_edge.has(hash)
-            var life_name := _world.get_cell_name(_world.LAYER_LIFE, cell)
+            var life_name: String = _world.get_cell_name(_world.LAYER_LIFE, cell)
             if not reachable:
                 if life_name == "" or life_name == "empty":
                     _world.set_cell_named(_world.LAYER_LIFE, cell, "overgrowth")
