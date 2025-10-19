@@ -84,11 +84,11 @@ func update_highlight_state() -> void:
 func _configure_highlight_shape() -> void:
 	if highlight == null or world == null:
 		return
-	if highlight is Polygon2D:
-		var poly := PackedVector2Array()
-		var tile_size := float(world.tile_px)
-		var radius := max(tile_size * 0.5 - 2.0, 1.0)
-		for i in range(6):
-			var angle := deg_to_rad(60.0 * i - 30.0)
-			poly.push_back(Vector2(cos(angle), sin(angle)) * radius)
-		(highlight as Polygon2D).polygon = poly
+        if highlight is Polygon2D:
+                var poly: PackedVector2Array = PackedVector2Array()
+                var tile_size: float = float(world.tile_px)
+                var radius: float = max(tile_size * 0.5 - 2.0, 1.0)
+                for i in range(6):
+                        var angle: float = deg_to_rad(60.0 * i - 30.0)
+                        poly.push_back(Vector2(cos(angle), sin(angle)) * radius)
+                (highlight as Polygon2D).polygon = poly
