@@ -34,9 +34,17 @@ func bind_world(world: Node) -> void:
 func _on_turn_started(turn: int) -> void:
     _turn = max(turn, 1)
 
-func _on_phase_started(name: String) -> void:
-    if name != "growth":
+func _on_phase_started(phase_name: String) -> void:
+    if phase_name != "growth":
         return
+    _run_growth_cycle()
+
+func request_growth_update(current_turn: int = -1) -> void:
+    if current_turn >= 0:
+        _turn = max(current_turn, 1)
+    _run_growth_cycle()
+
+func _run_growth_cycle() -> void:
     _recompute_overgrowth()
     _handle_decay_contact()
     _bloom_groves()
@@ -78,10 +86,10 @@ func _recompute_overgrowth() -> void:
 
     while queue.size() > 0:
         var cell: Vector2i = queue.pop_back()
-        var hash := _hash_cell(cell, width)
-        if _tmp_reachable_from_edge.has(hash):
+        var cell_hash := _hash_cell(cell, width)
+        if _tmp_reachable_from_edge.has(cell_hash):
             continue
-        _tmp_reachable_from_edge[hash] = true
+        _tmp_reachable_from_edge[cell_hash] = true
         for neighbor in _world.neighbors_even_q(cell):
             if empty[neighbor.y * width + neighbor.x] == 1:
                 var neighbor_hash := _hash_cell(neighbor, width)
@@ -93,17 +101,17 @@ func _recompute_overgrowth() -> void:
             if empty[y * width + x] != 1:
                 continue
             var cell := Vector2i(x, y)
-            var hash := _hash_cell(cell, width)
-            var reachable := _tmp_reachable_from_edge.has(hash)
+            var cell_hash := _hash_cell(cell, width)
+            var reachable := _tmp_reachable_from_edge.has(cell_hash)
             var life_name: String = _world.get_cell_name(_world.LAYER_LIFE, cell)
             if not reachable:
                 if life_name == "" or life_name == "empty":
                     _world.set_cell_named(_world.LAYER_LIFE, cell, "overgrowth")
-                    if not _overgrowth_born.has(hash):
-                        _overgrowth_born[hash] = _turn
+                    if not _overgrowth_born.has(cell_hash):
+                        _overgrowth_born[cell_hash] = _turn
             else:
-                if _overgrowth_born.has(hash):
-                    _overgrowth_born.erase(hash)
+                if _overgrowth_born.has(cell_hash):
+                    _overgrowth_born.erase(cell_hash)
                 if life_name == "overgrowth":
                     _world.set_cell_named(_world.LAYER_LIFE, cell, "empty")
 
@@ -126,9 +134,9 @@ func _handle_decay_contact() -> void:
 
     for cell in to_clear:
         _world.set_cell_named(_world.LAYER_LIFE, cell, "empty")
-        var hash := _hash_cell(cell, width)
-        if _overgrowth_born.has(hash):
-            _overgrowth_born.erase(hash)
+        var cell_hash := _hash_cell(cell, width)
+        if _overgrowth_born.has(cell_hash):
+            _overgrowth_born.erase(cell_hash)
 
 func _bloom_groves() -> void:
     if _world == null:
@@ -136,22 +144,22 @@ func _bloom_groves() -> void:
     var width: int = _world.width
     var to_bloom: Array[Vector2i] = []
 
-    for hash in _overgrowth_born.keys():
-        var born_turn := int(_overgrowth_born[hash])
+    for cell_hash in _overgrowth_born.keys():
+        var born_turn := int(_overgrowth_born[cell_hash])
         if _turn - born_turn < MATURATION_TURNS:
             continue
-        var cell := _unhash_cell(hash, width)
+        var cell := _unhash_cell(cell_hash, width)
         if _world.get_cell_name(_world.LAYER_LIFE, cell) == "overgrowth":
             to_bloom.append(cell)
 
     for cell in to_bloom:
         _world.set_cell_named(_world.LAYER_LIFE, cell, "grove")
-        var hash := _hash_cell(cell, width)
-        _overgrowth_born.erase(hash)
+        var cell_hash := _hash_cell(cell, width)
+        _overgrowth_born.erase(cell_hash)
         emit_signal("grove_spawned", cell)
 
 func _hash_cell(cell: Vector2i, width: int) -> int:
     return cell.y * width + cell.x
 
-func _unhash_cell(hash: int, width: int) -> Vector2i:
-    return Vector2i(hash % width, int(hash / width))
+func _unhash_cell(cell_hash: int, width: int) -> Vector2i:
+    return Vector2i(cell_hash % width, cell_hash // width)
