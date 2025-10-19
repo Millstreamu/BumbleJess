@@ -6,7 +6,7 @@ const LAYER_LIFE := 2
 
 @export var width := 16 : set = set_width
 @export var height := 12 : set = set_height
-@export var tile_px := 64 : set = set_tile_px
+@export var tile_px := 128 : set = set_tile_px
 
 @onready var hexmap: TileMap = $HexMap
 @onready var cursor: Node = $Cursor

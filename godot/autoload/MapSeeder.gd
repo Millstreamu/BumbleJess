@@ -26,7 +26,7 @@ func load_map(map_id: String, world: Node) -> void:
 	var grid: Dictionary = grid_variant if grid_variant is Dictionary else {}
 	world.set("width", int(grid.get("width", 16)))
 	world.set("height", int(grid.get("height", 12)))
-	world.set("tile_px", int(grid.get("tile_px", 64)))
+	world.set("tile_px", int(grid.get("tile_px", 128)))
 
 	if world.has_method("clear_tiles"):
 		world.call("clear_tiles")

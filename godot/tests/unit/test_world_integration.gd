@@ -23,7 +23,7 @@ func _ready() -> void:
 	var origin := MapSeeder.get_origin_cell()
 	assert(origin == Vector2i(8, 6), "Origin cell should match map seed data")
 	assert(world.width == 16 and world.height == 12, "World dimensions should match map data")
-	assert(world.tile_px == 64, "Tile pixel size should match map data")
+	assert(world.tile_px == 128, "Tile pixel size should match map data")
 
 	var totem_name: String = world.get_cell_name(world.LAYER_OBJECTS, origin)
 	assert(totem_name == "totem", "Totem must be placed at the origin cell")

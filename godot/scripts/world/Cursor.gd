@@ -79,9 +79,11 @@ func update_highlight_state() -> void:
 func _configure_highlight_shape() -> void:
 	if highlight == null or world == null:
 		return
-	var margin := 2.0
+	var margin := max(world.tile_px * 0.03, 2.0)
 	var poly := TileSetBuilder.make_flat_top_hex_polygon(world.tile_px, margin)
 	if highlight is Polygon2D:
 		(highlight as Polygon2D).polygon = poly
 	elif highlight is Line2D:
-		(highlight as Line2D).points = poly
+		var line := highlight as Line2D
+		line.points = poly
+		line.width = max(world.tile_px * 0.06, 4.0)
