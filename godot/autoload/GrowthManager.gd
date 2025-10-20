@@ -162,8 +162,8 @@ func _hash_cell(cell: Vector2i, width: int) -> int:
 	return cell.y * width + cell.x
 
 func _unhash_cell(cell_hash: int, width: int) -> Vector2i:
-        if width <= 0:
-                return Vector2i.ZERO
-        var x := cell_hash % width
-        var y := int(floor(float(cell_hash) / float(width)))
-        return Vector2i(x, y)
+		if width <= 0:
+				return Vector2i.ZERO
+		var x := cell_hash % width
+		var y := int(floor(float(cell_hash) / float(width)))
+		return Vector2i(x, y)

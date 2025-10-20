@@ -1,71 +1,71 @@
 [
   {
-    "id": "tile.harvest.default",
-    "category": "harvest",
-    "name": "Harvest",
-    "rules": {
-      "capacity_base": {"nature": 5},
-      "nature_per_adjacent": {"grove": 1}
-    }
+	"id": "tile.harvest.default",
+	"category": "harvest",
+	"name": "Harvest",
+	"rules": {
+	  "capacity_base": {"nature": 5},
+	  "nature_per_adjacent": {"grove": 1}
+	}
   },
   {
-    "id": "tile.build.default",
-    "category": "build",
-    "name": "Build",
-    "rules": {
-      "capacity_base": {"earth": 5},
-      "earth_per_turn": 1,
-      "slow_if_adjacent_any": ["harvest"],
-      "slow_multiplier": 2
-    }
+	"id": "tile.build.default",
+	"category": "build",
+	"name": "Build",
+	"rules": {
+	  "capacity_base": {"earth": 5},
+	  "earth_per_turn": 1,
+	  "slow_if_adjacent_any": ["harvest"],
+	  "slow_multiplier": 2
+	}
   },
   {
-    "id": "tile.refine.default",
-    "category": "refine",
-    "name": "Refine",
-    "rules": {
-      "capacity_base": {"water": 5},
-      "refine_every_turns": 2,
-      "consume": {"nature": 1, "earth": 1},
-      "produce": {"water": 1}
-    }
+	"id": "tile.refine.default",
+	"category": "refine",
+	"name": "Refine",
+	"rules": {
+	  "capacity_base": {"water": 5},
+	  "refine_every_turns": 2,
+	  "consume": {"nature": 1, "earth": 1},
+	  "produce": {"water": 1}
+	}
   },
   {
-    "id": "tile.storage.default",
-    "category": "storage",
-    "name": "Storage",
-    "rules": {
-      "capacity_aura_adjacent": {
-        "harvest": {"nature": 5},
-        "build": {"earth": 5},
-        "refine": {"water": 5}
-      }
-    }
+	"id": "tile.storage.default",
+	"category": "storage",
+	"name": "Storage",
+	"rules": {
+	  "capacity_aura_adjacent": {
+		"harvest": {"nature": 5},
+		"build": {"earth": 5},
+		"refine": {"water": 5}
+	  }
+	}
   },
   {
-    "id": "tile.guard.default",
-    "category": "guard",
-    "name": "Guard"
+	"id": "tile.guard.default",
+	"category": "guard",
+	"name": "Guard"
   },
   {
-    "id": "tile.upgrade.default",
-    "category": "upgrade",
-    "name": "Upgrade",
-    "rules": {"soul_seed_every_turns": 3}
+	"id": "tile.upgrade.default",
+	"category": "upgrade",
+	"name": "Upgrade",
+	"rules": {"soul_seed_every_turns": 3}
   },
   {
-    "id": "tile.chanting.default",
-    "category": "chanting",
-    "name": "Chanting"
+	"id": "tile.chanting.default",
+	"category": "chanting",
+	"name": "Chanting"
   },
   {
-    "id": "tile.grove.default",
-    "category": "grove",
-    "name": "Grove"
+	"id": "tile.grove.default",
+	"category": "grove",
+	"name": "Grove"
   },
   {
-    "id": "tile.overgrowth.default",
-    "category": "overgrowth",
-    "name": "Overgrowth"
+	"id": "tile.overgrowth.default",
+	"category": "overgrowth",
+	"name": "Overgrowth"
   }
 ]
