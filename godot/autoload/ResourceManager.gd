@@ -215,21 +215,21 @@ func _recompute_capacity() -> void:
 			var aura: Dictionary = aura_variant if aura_variant is Dictionary else {}
 			if aura.is_empty():
 				continue
-                        for neighbor in _world.neighbors_even_q(cell):
-                                var neighbor_cat: String = _world.get_cell_name(_world.LAYER_LIFE, neighbor)
-                                if neighbor_cat.is_empty():
-                                        continue
-                                if not aura.has(neighbor_cat):
-                                        continue
-                                var add_variant: Variant = aura[neighbor_cat]
-                                if not (add_variant is Dictionary):
-                                        continue
-                                var aura_bonus: Dictionary = add_variant
-                                for res in aura_bonus.keys():
-                                        var value: int = int(aura_bonus[res])
-                                        if value == 0:
-                                                continue
-                                        capacity[res] = int(capacity.get(res, 0)) + value
+			for neighbor in _world.neighbors_even_q(cell):
+				var neighbor_cat: String = _world.get_cell_name(_world.LAYER_LIFE, neighbor)
+				if neighbor_cat.is_empty():
+					continue
+				if not aura.has(neighbor_cat):
+					continue
+				var add_variant: Variant = aura[neighbor_cat]
+				if not (add_variant is Dictionary):
+					continue
+				var aura_bonus: Dictionary = add_variant
+				for res in aura_bonus.keys():
+					var value: int = int(aura_bonus[res])
+					if value == 0:
+						continue
+					capacity[res] = int(capacity.get(res, 0)) + value
 
 	for res in capacity.keys():
 		if res == "life":
