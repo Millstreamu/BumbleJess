@@ -148,7 +148,7 @@ func _add_threat(c: Vector2i, turns: int) -> void:
 		label.text = str(turns)
 		label.add_theme_color_override("font_color", _threat_color(turns))
 		label.add_theme_font_size_override("font_size", 16)
-		var pos := _world.world_pos_of_cell(c)
+                var pos: Vector2 = _world.world_pos_of_cell(c)
 		label.position = pos + Vector2(-8, -8)
 		hud.add_child(label)
 	_threats[key] = {
@@ -260,8 +260,8 @@ func _apply_battle_outcome(cell: Vector2i, victory: bool) -> void:
 		if _world.get_cell_name(_world.LAYER_LIFE, cell) != "guard":
 			_world.set_cell_named(_world.LAYER_LIFE, cell, "empty")
 			_world.set_cell_named(_world.LAYER_OBJECTS, cell, "decay")
-		for neighbor in _world.neighbors_even_q(cell):
-			var life_name := _world.get_cell_name(_world.LAYER_LIFE, neighbor)
+                for neighbor in _world.neighbors_even_q(cell):
+                        var life_name: String = _world.get_cell_name(_world.LAYER_LIFE, neighbor)
 			if life_name != "" and life_name != "guard":
 				_world.set_cell_named(_world.LAYER_LIFE, neighbor, "empty")
 				_world.set_cell_named(_world.LAYER_OBJECTS, neighbor, "decay")
