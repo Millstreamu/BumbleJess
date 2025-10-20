@@ -3,6 +3,7 @@ extends Node2D
 const LAYER_GROUND := 0
 const LAYER_OBJECTS := 1
 const LAYER_LIFE := 2
+const LAYER_FX := 3
 
 @export var width := 16 : set = set_width
 @export var height := 12 : set = set_height
@@ -37,6 +38,8 @@ func _ready() -> void:
                 if sprout_registry != null and not growth_manager.is_connected("grove_spawned", Callable(sprout_registry, "on_grove_spawned")):
                         growth_manager.connect("grove_spawned", Callable(sprout_registry, "on_grove_spawned"))
         _bind_resource_manager()
+        if Engine.has_singleton("ResourceManager") and not ResourceManager.is_connected("produced_cells", Callable(self, "_on_produced_cells")):
+                ResourceManager.connect("produced_cells", Callable(self, "_on_produced_cells"))
         _is_ready = true
         draw_debug_grid()
         _setup_hud()
@@ -72,36 +75,85 @@ func _ensure_hex_config() -> void:
 	hexmap.y_sort_enabled = false
 
 func _ensure_layers() -> void:
-	while hexmap.get_layers_count() < 3:
-		hexmap.add_layer(hexmap.get_layers_count())
-	hexmap.set_layer_name(LAYER_GROUND, "ground")
-	hexmap.set_layer_name(LAYER_OBJECTS, "objects")
-	hexmap.set_layer_name(LAYER_LIFE, "life")
-	hexmap.set_layer_z_index(LAYER_GROUND, 0)
-	hexmap.set_layer_z_index(LAYER_OBJECTS, 1)
-	hexmap.set_layer_z_index(LAYER_LIFE, 2)
+        while hexmap.get_layers_count() <= LAYER_FX:
+                hexmap.add_layer(hexmap.get_layers_count())
+        hexmap.set_layer_name(LAYER_GROUND, "ground")
+        hexmap.set_layer_name(LAYER_OBJECTS, "objects")
+        hexmap.set_layer_name(LAYER_LIFE, "life")
+        hexmap.set_layer_name(LAYER_FX, "fx")
+        hexmap.set_layer_z_index(LAYER_GROUND, 0)
+        hexmap.set_layer_z_index(LAYER_OBJECTS, 1)
+        hexmap.set_layer_z_index(LAYER_LIFE, 2)
+        hexmap.set_layer_z_index(LAYER_FX, 10)
 
 func _build_tileset() -> void:
 	if hexmap == null:
 		return
-	var names_to_colors: Dictionary = {
-		"empty": Color(0, 0, 0, 0),
-		"totem": Color(0.2, 0.85, 0.4, 1),
-		"decay": Color(0.6, 0.2, 0.8, 1),
-		"harvest": Color(0.15, 0.5, 0.2, 1),
-		"build": Color(0.5, 0.35, 0.2, 1),
-		"refine": Color(0.2, 0.4, 0.9, 1),
-		"storage": Color(0.55, 0.55, 0.55, 1),
-		"guard": Color(0.85, 0.75, 0.2, 1),
-		"upgrade": Color(0.1, 0.7, 0.7, 1),
-		"chanting": Color(0.8, 0.2, 0.6, 1),
-		"overgrowth": Color(0.35, 0.7, 0.35, 0.75),
-		"grove": Color(0.10, 0.55, 0.25, 1.0),
-	}
-	tiles_name_to_id = TileSetBuilder.build_named_hex_tiles(hexmap, names_to_colors, tile_px)
-	var id_meta: Variant = hexmap.get_meta("tiles_id_to_name") if hexmap.has_meta("tiles_id_to_name") else {}
-	tiles_id_to_name = id_meta if id_meta is Dictionary else {}
-	_ensure_hex_config()
+        var names_to_colors: Dictionary = {
+                "empty": Color(0, 0, 0, 0),
+                "totem": Color(0.2, 0.85, 0.4, 1),
+                "decay": Color(0.6, 0.2, 0.8, 1),
+                "harvest": Color(0.15, 0.5, 0.2, 1),
+                "build": Color(0.5, 0.35, 0.2, 1),
+                "refine": Color(0.2, 0.4, 0.9, 1),
+                "storage": Color(0.55, 0.55, 0.55, 1),
+                "guard": Color(0.85, 0.75, 0.2, 1),
+                "upgrade": Color(0.1, 0.7, 0.7, 1),
+                "chanting": Color(0.8, 0.2, 0.6, 1),
+                "overgrowth": Color(0.35, 0.7, 0.35, 0.75),
+                "grove": Color(0.10, 0.55, 0.25, 1.0),
+                "fx_nature": Color(0.20, 0.85, 0.40, 0.40),
+                "fx_earth": Color(0.60, 0.45, 0.25, 0.40),
+                "fx_water": Color(0.20, 0.45, 0.95, 0.40),
+                "fx_seed": Color(0.95, 0.80, 0.20, 0.45),
+        }
+        tiles_name_to_id = TileSetBuilder.build_named_hex_tiles(hexmap, names_to_colors, tile_px)
+        var id_meta: Variant = hexmap.get_meta("tiles_id_to_name") if hexmap.has_meta("tiles_id_to_name") else {}
+        tiles_id_to_name = id_meta if id_meta is Dictionary else {}
+        _ensure_hex_config()
+
+func set_fx(cell: Vector2i, fx_name: String) -> void:
+        if hexmap == null:
+                return
+        if tiles_name_to_id.is_empty():
+                _build_tileset()
+        if not tiles_name_to_id.has(fx_name):
+                return
+        var tile_info_variant: Variant = tiles_name_to_id[fx_name]
+        if not (tile_info_variant is Dictionary):
+                return
+        var tile_info: Dictionary = tile_info_variant
+        var src_id: int = int(tile_info.get("source_id", -1))
+        var atlas_value: Variant = tile_info.get("atlas_coords", Vector2i.ZERO)
+        var atlas_coords: Vector2i = atlas_value if atlas_value is Vector2i else Vector2i.ZERO
+        if src_id < 0:
+                return
+        hexmap.set_cell(LAYER_FX, cell, src_id, atlas_coords)
+
+func clear_fx(cell: Vector2i) -> void:
+        if hexmap == null:
+                return
+        hexmap.erase_cell(LAYER_FX, cell)
+
+func clear_all_fx() -> void:
+        if hexmap == null:
+                return
+        hexmap.clear_layer(LAYER_FX)
+
+func flash_fx(cells_by_fx: Dictionary, duration_sec: float = 0.35) -> void:
+        for fx_name in cells_by_fx.keys():
+                var cells_variant: Variant = cells_by_fx[fx_name]
+                if cells_variant is Array:
+                        for c in cells_variant:
+                                if c is Vector2i:
+                                        set_fx(c, fx_name)
+        await get_tree().create_timer(duration_sec).timeout
+        for fx_name in cells_by_fx.keys():
+                var cells_variant: Variant = cells_by_fx[fx_name]
+                if cells_variant is Array:
+                        for c in cells_variant:
+                                if c is Vector2i:
+                                        clear_fx(c)
 
 func clear_tiles() -> void:
 	if hexmap == null:
@@ -318,6 +370,11 @@ func _on_resources_changed() -> void:
 
 func _on_item_changed(_item: String) -> void:
         _update_hud()
+
+func _on_produced_cells(cells_by_fx: Dictionary) -> void:
+        if cells_by_fx.is_empty():
+                return
+        flash_fx(cells_by_fx, 0.35)
 
 func _count_cells_named(tile_name: String) -> int:
 	var total := 0

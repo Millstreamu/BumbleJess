@@ -2,6 +2,7 @@ extends Node
 
 signal resources_changed()
 signal item_changed(item: String)
+signal produced_cells(cells_by_fx: Dictionary)
 
 var amounts: Dictionary = {
         "nature": 0,
@@ -209,6 +210,12 @@ func _recompute_capacity() -> void:
 func _produce_resources() -> void:
         if _world == null:
                 return
+        var fx: Dictionary = {
+                "fx_nature": [],
+                "fx_earth": [],
+                "fx_water": [],
+                "fx_seed": [],
+        }
         var width: int = int(_world.width)
         var height: int = int(_world.height)
 
@@ -243,6 +250,11 @@ func _produce_resources() -> void:
                                                 amounts["nature"] = 0
                                         var cap: int = int(capacity.get("nature", 0))
                                         amounts["nature"] = clamp(int(amounts["nature"]) + total_gain, 0, cap)
+                                        var nature_list_variant: Variant = fx.get("fx_nature", null)
+                                        if nature_list_variant is Array:
+                                                var nature_list: Array = nature_list_variant
+                                                nature_list.append(cell)
+                                                fx["fx_nature"] = nature_list
 
                         elif category == "build":
                                 var per_turn: int = int(_rule(id, "earth_per_turn", 1))
@@ -271,6 +283,11 @@ func _produce_resources() -> void:
                                                 amounts["earth"] = 0
                                         var cap: int = int(capacity.get("earth", 0))
                                         amounts["earth"] = clamp(int(amounts["earth"]) + per_turn, 0, cap)
+                                        var earth_list_variant: Variant = fx.get("fx_earth", null)
+                                        if earth_list_variant is Array:
+                                                var earth_list: Array = earth_list_variant
+                                                earth_list.append(cell)
+                                                fx["fx_earth"] = earth_list
 
                         elif category == "refine":
                                 var every: int = int(_rule(id, "refine_every_turns", 2))
@@ -292,6 +309,7 @@ func _produce_resources() -> void:
                                                 break
                                 if not can_convert:
                                         continue
+                                var produced_any: bool = false
                                 for consume_kind in consume.keys():
                                         var need: int = int(consume[consume_kind])
                                         if need <= 0:
@@ -306,6 +324,13 @@ func _produce_resources() -> void:
                                                 amounts[produce_kind] = 0
                                         var cap: int = int(capacity.get(produce_kind, 0))
                                         amounts[produce_kind] = clamp(int(amounts[produce_kind]) + value, 0, cap)
+                                        produced_any = true
+                                if produced_any:
+                                        var water_list_variant: Variant = fx.get("fx_water", null)
+                                        if water_list_variant is Array:
+                                                var water_list: Array = water_list_variant
+                                                water_list.append(cell)
+                                                fx["fx_water"] = water_list
 
                         elif category == "upgrade":
                                 var every_seeds: int = int(_rule(id, "soul_seed_every_turns", 3))
@@ -313,3 +338,21 @@ func _produce_resources() -> void:
                                         every_seeds = 1
                                 if (_turn_counter % every_seeds) == 0:
                                         add_soul_seed(1)
+                                        var seed_list_variant: Variant = fx.get("fx_seed", null)
+                                        if seed_list_variant is Array:
+                                                var seed_list: Array = seed_list_variant
+                                                seed_list.append(cell)
+                                                fx["fx_seed"] = seed_list
+
+        var empty_keys: Array = []
+        for key in fx.keys():
+                var cells_variant: Variant = fx[key]
+                if cells_variant is Array:
+                        var cells_list: Array = cells_variant
+                        if cells_list.is_empty():
+                                empty_keys.append(key)
+                else:
+                        empty_keys.append(key)
+        for key in empty_keys:
+                fx.erase(key)
+        emit_signal("produced_cells", fx)
