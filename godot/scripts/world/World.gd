@@ -56,10 +56,29 @@ func _ready() -> void:
 	var decay_manager: Node = get_node_or_null("/root/DecayManager")
 	if decay_manager != null and decay_manager.has_method("bind_world"):
 		decay_manager.call("bind_world", self)
+	_ensure_toggle_threats_action()
+	var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
+	if threat_list != null:
+		threat_list.visible = false
 	_is_ready = true
 	draw_debug_grid()
 	_setup_hud()
 	_update_hud()
+
+func _ensure_toggle_threats_action() -> void:
+	var action := "ui_toggle_threats"
+	if not InputMap.has_action(action):
+		InputMap.add_action(action)
+	var has_event := false
+	for existing_event in InputMap.action_get_events(action):
+		if existing_event is InputEventKey and existing_event.physical_keycode == Key.KEY_T:
+			has_event = true
+			break
+	if not has_event:
+		var event := InputEventKey.new()
+		event.physical_keycode = Key.KEY_T
+		event.keycode = Key.KEY_T
+		InputMap.action_add_event(action, event)
 
 func set_width(value: int) -> void:
 	width = max(1, value)
@@ -394,6 +413,13 @@ func _setup_hud() -> void:
 	if is_instance_valid(hud):
 		hud.text = _build_hud_text("-", 0)
 	_update_resource_panel()
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_toggle_threats"):
+		var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
+		if threat_list != null:
+			threat_list.visible = not threat_list.visible
+			accept_event()
 
 func update_hud(next_name: String, remaining: int) -> void:
 	if is_instance_valid(hud):
