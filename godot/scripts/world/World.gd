@@ -12,6 +12,14 @@ const LAYER_FX := 3
 @onready var hexmap: TileMap = $HexMap
 @onready var cursor: Node = $Cursor
 @onready var hud: Label = $HUD/DeckLabel
+@onready var resources_panel: Control = $HUD.get_node_or_null("ResourcesPanel")
+@onready var resource_labels: Dictionary[String, Label] = {
+        "nature": $HUD.get_node_or_null("ResourcesPanel/Content/Rows/NatureValue") as Label,
+        "earth": $HUD.get_node_or_null("ResourcesPanel/Content/Rows/EarthValue") as Label,
+        "water": $HUD.get_node_or_null("ResourcesPanel/Content/Rows/WaterValue") as Label,
+        "life": $HUD.get_node_or_null("ResourcesPanel/Content/Rows/LifeValue") as Label,
+}
+@onready var soul_seeds_label: Label = $HUD.get_node_or_null("ResourcesPanel/Content/Rows/SoulSeedsValue") as Label
 
 var _is_ready := false
 var tiles_name_to_id: Dictionary = {}
@@ -368,40 +376,85 @@ func world_to_map(p: Vector2) -> Vector2i:
 	return world_to_cell(p)
 
 func _setup_hud() -> void:
-	if is_instance_valid(hud):
-		hud.text = _build_hud_text("-", 0)
+        if is_instance_valid(hud):
+                hud.text = _build_hud_text("-", 0)
+        _update_resource_panel()
 
 func update_hud(next_name: String, remaining: int) -> void:
-	if is_instance_valid(hud):
-		hud.text = _build_hud_text(next_name, remaining)
+        if is_instance_valid(hud):
+                hud.text = _build_hud_text(next_name, remaining)
+        _update_resource_panel()
 
 func _update_hud() -> void:
-	if not is_instance_valid(hud):
-		return
-	var tile_id: String = DeckManager.peek()
+        if not is_instance_valid(hud):
+                return
+        var tile_id: String = DeckManager.peek()
 	var remaining: int = DeckManager.remaining()
 	var display_name: String = "-"
-	if not tile_id.is_empty():
-		var tile_name: String = DeckManager.peek_name()
-		var category: String = DeckManager.peek_category()
-		if category.is_empty():
-			display_name = tile_name
-		else:
-			display_name = "%s (%s)" % [tile_name, category]
-	hud.text = _build_hud_text(display_name, remaining)
+        if not tile_id.is_empty():
+                var tile_name: String = DeckManager.peek_name()
+                var category: String = DeckManager.peek_category()
+                if category.is_empty():
+                        display_name = tile_name
+                else:
+                        display_name = "%s (%s)" % [tile_name, category]
+        hud.text = _build_hud_text(display_name, remaining)
+        _update_resource_panel()
 
 func _build_hud_text(next_name: String, remaining: int) -> String:
-	var text := "Next: %s | Deck: %d" % [next_name, remaining]
-	text += "\nOvergrowth: %d | Groves: %d" % [_count_cells_named("overgrowth"), _count_cells_named("grove")]
-	if Engine.has_singleton("ResourceManager"):
-		text += "\nNature %d/%d Earth %d/%d Water %d/%d Life %d Seeds %d" % [
-			ResourceManager.get_amount("nature"), ResourceManager.get_capacity("nature"),
-			ResourceManager.get_amount("earth"), ResourceManager.get_capacity("earth"),
-			ResourceManager.get_amount("water"), ResourceManager.get_capacity("water"),
-			ResourceManager.get_amount("life"),
-			ResourceManager.soul_seeds,
-		]
-	return text
+        var text := "Next: %s | Deck: %d" % [next_name, remaining]
+        text += "\nOvergrowth: %d | Groves: %d" % [_count_cells_named("overgrowth"), _count_cells_named("grove")]
+        return text
+
+func _update_resource_panel() -> void:
+        if not is_instance_valid(resources_panel):
+                return
+        var has_manager := Engine.has_singleton("ResourceManager")
+        resources_panel.visible = true
+        var display_names := {
+                "nature": "Nature",
+                "earth": "Earth",
+                "water": "Water",
+                "life": "Life",
+        }
+        if not has_manager:
+                for key in resource_labels.keys():
+                        var label: Label = resource_labels[key]
+                        if label != null:
+                                var display_name: String = display_names.get(key, String(key).capitalize())
+                                label.text = "%s: -" % display_name
+                if is_instance_valid(soul_seeds_label):
+                        soul_seeds_label.text = "Soul Seeds: -"
+                return
+        var nature_label: Label = resource_labels.get("nature")
+        if nature_label != null:
+                nature_label.text = "%s: %d/%d" % [
+                        display_names.get("nature", "Nature"),
+                        ResourceManager.get_amount("nature"),
+                        ResourceManager.get_capacity("nature"),
+                ]
+        var earth_label: Label = resource_labels.get("earth")
+        if earth_label != null:
+                earth_label.text = "%s: %d/%d" % [
+                        display_names.get("earth", "Earth"),
+                        ResourceManager.get_amount("earth"),
+                        ResourceManager.get_capacity("earth"),
+                ]
+        var water_label: Label = resource_labels.get("water")
+        if water_label != null:
+                water_label.text = "%s: %d/%d" % [
+                        display_names.get("water", "Water"),
+                        ResourceManager.get_amount("water"),
+                        ResourceManager.get_capacity("water"),
+                ]
+        var life_label: Label = resource_labels.get("life")
+        if life_label != null:
+                life_label.text = "%s: %d" % [
+                        display_names.get("life", "Life"),
+                        ResourceManager.get_amount("life"),
+                ]
+        if is_instance_valid(soul_seeds_label):
+                soul_seeds_label.text = "Soul Seeds: %d" % [ResourceManager.soul_seeds]
 
 func _bind_resource_manager() -> void:
 	if not Engine.has_singleton("ResourceManager"):
