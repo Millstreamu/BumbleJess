@@ -224,9 +224,9 @@ func _recompute_capacity() -> void:
 				var add_variant: Variant = aura[neighbor_cat]
 				if not (add_variant is Dictionary):
 					continue
-				var add: Dictionary = add_variant
-				for res in add.keys():
-					var value: int = int(add[res])
+                               var aura_bonus: Dictionary = add_variant
+                               for res in aura_bonus.keys():
+                                       var value: int = int(aura_bonus[res])
 					if value == 0:
 						continue
 					capacity[res] = int(capacity.get(res, 0)) + value
