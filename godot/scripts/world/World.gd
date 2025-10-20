@@ -14,10 +14,10 @@ const LAYER_FX := 3
 @onready var hud: Label = $HUD/DeckLabel
 @onready var resources_panel: Control = $HUD.get_node_or_null("ResourcesPanel")
 @onready var resource_labels: Dictionary[String, Label] = {
-        "nature": $HUD.get_node_or_null("ResourcesPanel/Content/Rows/NatureValue") as Label,
-        "earth": $HUD.get_node_or_null("ResourcesPanel/Content/Rows/EarthValue") as Label,
-        "water": $HUD.get_node_or_null("ResourcesPanel/Content/Rows/WaterValue") as Label,
-        "life": $HUD.get_node_or_null("ResourcesPanel/Content/Rows/LifeValue") as Label,
+	"nature": $HUD.get_node_or_null("ResourcesPanel/Content/Rows/NatureValue") as Label,
+	"earth": $HUD.get_node_or_null("ResourcesPanel/Content/Rows/EarthValue") as Label,
+	"water": $HUD.get_node_or_null("ResourcesPanel/Content/Rows/WaterValue") as Label,
+	"life": $HUD.get_node_or_null("ResourcesPanel/Content/Rows/LifeValue") as Label,
 }
 @onready var soul_seeds_label: Label = $HUD.get_node_or_null("ResourcesPanel/Content/Rows/SoulSeedsValue") as Label
 
@@ -165,17 +165,17 @@ func flash_fx(cells_by_fx: Dictionary, duration_sec: float = 0.35) -> void:
 					clear_fx(c)
 
 func clear_tiles() -> void:
-        if hexmap == null:
-                return
-        for layer in range(hexmap.get_layers_count()):
-                var used_cells: Array = hexmap.get_used_cells(layer)
-                for cell in used_cells:
-                        hexmap.erase_cell(layer, cell)
-                        _clear_cell_meta(layer, cell)
-        _cell_metadata.clear()
-        rules.occupied.clear()
-        turn = 0
-        origin_cell = Vector2i.ZERO
+	if hexmap == null:
+		return
+	for layer in range(hexmap.get_layers_count()):
+		var used_cells: Array = hexmap.get_used_cells(layer)
+		for cell in used_cells:
+			hexmap.erase_cell(layer, cell)
+			_clear_cell_meta(layer, cell)
+	_cell_metadata.clear()
+	rules.occupied.clear()
+	turn = 0
+	origin_cell = Vector2i.ZERO
 
 func set_origin_cell(c: Vector2i) -> void:
 	origin_cell = clamp_cell(c)
@@ -218,55 +218,55 @@ func set_cell_named(layer: int, c: Vector2i, tile_name: String) -> void:
 		clear_cell_tile_id(layer, c)
 
 func set_cell_meta(layer: int, c: Vector2i, key: String, value) -> void:
-        if hexmap == null:
-                return
-        var layer_meta: Dictionary = _cell_metadata.get(layer, {})
-        if not _cell_metadata.has(layer) or not (layer_meta is Dictionary):
-                layer_meta = {}
-                _cell_metadata[layer] = layer_meta
-        var cell_meta: Dictionary = {}
-        if layer_meta.has(c):
-                var meta_variant: Variant = layer_meta[c]
-                if meta_variant is Dictionary:
-                        cell_meta = meta_variant
-        if value == null:
-                if not cell_meta.is_empty():
-                        cell_meta.erase(key)
-                if cell_meta.is_empty():
-                        layer_meta.erase(c)
-                        if layer_meta.is_empty():
-                                _cell_metadata.erase(layer)
-                        return
-        else:
-                if cell_meta.is_empty():
-                        cell_meta = {}
-                cell_meta[key] = value
-        if not cell_meta.is_empty():
-                layer_meta[c] = cell_meta
+	if hexmap == null:
+		return
+	var layer_meta: Dictionary = _cell_metadata.get(layer, {})
+	if not _cell_metadata.has(layer) or not (layer_meta is Dictionary):
+		layer_meta = {}
+		_cell_metadata[layer] = layer_meta
+	var cell_meta: Dictionary = {}
+	if layer_meta.has(c):
+		var meta_variant: Variant = layer_meta[c]
+		if meta_variant is Dictionary:
+			cell_meta = meta_variant
+	if value == null:
+		if not cell_meta.is_empty():
+			cell_meta.erase(key)
+		if cell_meta.is_empty():
+			layer_meta.erase(c)
+			if layer_meta.is_empty():
+				_cell_metadata.erase(layer)
+			return
+	else:
+		if cell_meta.is_empty():
+			cell_meta = {}
+		cell_meta[key] = value
+	if not cell_meta.is_empty():
+		layer_meta[c] = cell_meta
 
 func get_cell_meta(layer: int, c: Vector2i, key: String):
-        if hexmap == null:
-                return null
-        var layer_meta_variant: Variant = _cell_metadata.get(layer, null)
-        if not (layer_meta_variant is Dictionary):
-                return null
-        var layer_meta: Dictionary = layer_meta_variant
-        if not layer_meta.has(c):
-                return null
-        var cell_meta_variant: Variant = layer_meta[c]
-        if not (cell_meta_variant is Dictionary):
-                return null
-        var cell_meta: Dictionary = cell_meta_variant
-        return cell_meta.get(key, null)
+	if hexmap == null:
+		return null
+	var layer_meta_variant: Variant = _cell_metadata.get(layer, null)
+	if not (layer_meta_variant is Dictionary):
+		return null
+	var layer_meta: Dictionary = layer_meta_variant
+	if not layer_meta.has(c):
+		return null
+	var cell_meta_variant: Variant = layer_meta[c]
+	if not (cell_meta_variant is Dictionary):
+		return null
+	var cell_meta: Dictionary = cell_meta_variant
+	return cell_meta.get(key, null)
 
 func set_cell_tile_id(layer: int, c: Vector2i, id: String) -> void:
 	set_cell_meta(layer, c, "id", id)
 
 func get_cell_tile_id(layer: int, c: Vector2i) -> String:
-        if hexmap == null:
-                return ""
-        var value = get_cell_meta(layer, c, "id")
-        return value if typeof(value) == TYPE_STRING else ""
+	if hexmap == null:
+		return ""
+	var value = get_cell_meta(layer, c, "id")
+	return value if typeof(value) == TYPE_STRING else ""
 
 func id_to_category(id: String) -> String:
 	if id.is_empty():
@@ -291,27 +291,27 @@ func get_cell_name(layer: int, c: Vector2i) -> String:
 	return String(tiles_id_to_name.get(key, ""))
 
 func clear_cell_tile_id(layer: int, c: Vector2i) -> void:
-        if hexmap == null:
-                return
-        set_cell_meta(layer, c, "id", null)
+	if hexmap == null:
+		return
+	set_cell_meta(layer, c, "id", null)
 
 func is_empty(layer: int, c: Vector2i) -> bool:
-        if hexmap == null:
-                return true
-        return hexmap.get_cell_tile_data(layer, c) == null
+	if hexmap == null:
+		return true
+	return hexmap.get_cell_tile_data(layer, c) == null
 
 func _clear_cell_meta(layer: int, c: Vector2i) -> void:
-        if not _cell_metadata.has(layer):
-                return
-        var layer_meta_variant: Variant = _cell_metadata[layer]
-        if not (layer_meta_variant is Dictionary):
-                return
-        var layer_meta: Dictionary = layer_meta_variant
-        if not layer_meta.has(c):
-                return
-        layer_meta.erase(c)
-        if layer_meta.is_empty():
-                _cell_metadata.erase(layer)
+	if not _cell_metadata.has(layer):
+		return
+	var layer_meta_variant: Variant = _cell_metadata[layer]
+	if not (layer_meta_variant is Dictionary):
+		return
+	var layer_meta: Dictionary = layer_meta_variant
+	if not layer_meta.has(c):
+		return
+	layer_meta.erase(c)
+	if layer_meta.is_empty():
+		_cell_metadata.erase(layer)
 
 func draw_debug_grid() -> void:
 	var existing: Node = get_node_or_null("DebugGrid")
@@ -365,96 +365,96 @@ func place_current_tile(cell: Vector2i) -> void:
 		growth_manager.request_growth_update(turn)
 	if Engine.has_singleton("ResourceManager"):
 		ResourceManager.emit_signal("resources_changed")
-        if Engine.has_singleton("TurnEngine"):
-                TurnEngine.advance_one_turn()
-        elif Engine.has_singleton("Game"):
-                var game_singleton: Object = Engine.get_singleton("Game")
-                if game_singleton != null and game_singleton.has_method("advance_one_turn"):
-                        game_singleton.call("advance_one_turn")
+	if Engine.has_singleton("TurnEngine"):
+		TurnEngine.advance_one_turn()
+	elif Engine.has_singleton("Game"):
+		var game_singleton: Object = Engine.get_singleton("Game")
+		if game_singleton != null and game_singleton.has_method("advance_one_turn"):
+			game_singleton.call("advance_one_turn")
 
 func world_to_map(p: Vector2) -> Vector2i:
 	return world_to_cell(p)
 
 func _setup_hud() -> void:
-        if is_instance_valid(hud):
-                hud.text = _build_hud_text("-", 0)
-        _update_resource_panel()
+	if is_instance_valid(hud):
+		hud.text = _build_hud_text("-", 0)
+	_update_resource_panel()
 
 func update_hud(next_name: String, remaining: int) -> void:
-        if is_instance_valid(hud):
-                hud.text = _build_hud_text(next_name, remaining)
-        _update_resource_panel()
+	if is_instance_valid(hud):
+		hud.text = _build_hud_text(next_name, remaining)
+	_update_resource_panel()
 
 func _update_hud() -> void:
-        if not is_instance_valid(hud):
-                return
-        var tile_id: String = DeckManager.peek()
+	if not is_instance_valid(hud):
+		return
+	var tile_id: String = DeckManager.peek()
 	var remaining: int = DeckManager.remaining()
 	var display_name: String = "-"
-        if not tile_id.is_empty():
-                var tile_name: String = DeckManager.peek_name()
-                var category: String = DeckManager.peek_category()
-                if category.is_empty():
-                        display_name = tile_name
-                else:
-                        display_name = "%s (%s)" % [tile_name, category]
-        hud.text = _build_hud_text(display_name, remaining)
-        _update_resource_panel()
+	if not tile_id.is_empty():
+		var tile_name: String = DeckManager.peek_name()
+		var category: String = DeckManager.peek_category()
+		if category.is_empty():
+			display_name = tile_name
+		else:
+			display_name = "%s (%s)" % [tile_name, category]
+	hud.text = _build_hud_text(display_name, remaining)
+	_update_resource_panel()
 
 func _build_hud_text(next_name: String, remaining: int) -> String:
-        var text := "Next: %s | Deck: %d" % [next_name, remaining]
-        text += "\nOvergrowth: %d | Groves: %d" % [_count_cells_named("overgrowth"), _count_cells_named("grove")]
-        return text
+	var text := "Next: %s | Deck: %d" % [next_name, remaining]
+	text += "\nOvergrowth: %d | Groves: %d" % [_count_cells_named("overgrowth"), _count_cells_named("grove")]
+	return text
 
 func _update_resource_panel() -> void:
-        if not is_instance_valid(resources_panel):
-                return
-        var has_manager := Engine.has_singleton("ResourceManager")
-        resources_panel.visible = true
-        var display_names := {
-                "nature": "Nature",
-                "earth": "Earth",
-                "water": "Water",
-                "life": "Life",
-        }
-        if not has_manager:
-                for key in resource_labels.keys():
-                        var label: Label = resource_labels[key]
-                        if label != null:
-                                var display_name: String = display_names.get(key, String(key).capitalize())
-                                label.text = "%s: -" % display_name
-                if is_instance_valid(soul_seeds_label):
-                        soul_seeds_label.text = "Soul Seeds: -"
-                return
-        var nature_label: Label = resource_labels.get("nature")
-        if nature_label != null:
-                nature_label.text = "%s: %d/%d" % [
-                        display_names.get("nature", "Nature"),
-                        ResourceManager.get_amount("nature"),
-                        ResourceManager.get_capacity("nature"),
-                ]
-        var earth_label: Label = resource_labels.get("earth")
-        if earth_label != null:
-                earth_label.text = "%s: %d/%d" % [
-                        display_names.get("earth", "Earth"),
-                        ResourceManager.get_amount("earth"),
-                        ResourceManager.get_capacity("earth"),
-                ]
-        var water_label: Label = resource_labels.get("water")
-        if water_label != null:
-                water_label.text = "%s: %d/%d" % [
-                        display_names.get("water", "Water"),
-                        ResourceManager.get_amount("water"),
-                        ResourceManager.get_capacity("water"),
-                ]
-        var life_label: Label = resource_labels.get("life")
-        if life_label != null:
-                life_label.text = "%s: %d" % [
-                        display_names.get("life", "Life"),
-                        ResourceManager.get_amount("life"),
-                ]
-        if is_instance_valid(soul_seeds_label):
-                soul_seeds_label.text = "Soul Seeds: %d" % [ResourceManager.soul_seeds]
+	if not is_instance_valid(resources_panel):
+		return
+	var has_manager := Engine.has_singleton("ResourceManager")
+	resources_panel.visible = true
+	var display_names := {
+		"nature": "Nature",
+		"earth": "Earth",
+		"water": "Water",
+		"life": "Life",
+	}
+	if not has_manager:
+		for key in resource_labels.keys():
+			var label: Label = resource_labels[key]
+			if label != null:
+				var display_name: String = display_names.get(key, String(key).capitalize())
+				label.text = "%s: -" % display_name
+		if is_instance_valid(soul_seeds_label):
+			soul_seeds_label.text = "Soul Seeds: -"
+		return
+	var nature_label: Label = resource_labels.get("nature")
+	if nature_label != null:
+		nature_label.text = "%s: %d/%d" % [
+			display_names.get("nature", "Nature"),
+			ResourceManager.get_amount("nature"),
+			ResourceManager.get_capacity("nature"),
+		]
+	var earth_label: Label = resource_labels.get("earth")
+	if earth_label != null:
+		earth_label.text = "%s: %d/%d" % [
+			display_names.get("earth", "Earth"),
+			ResourceManager.get_amount("earth"),
+			ResourceManager.get_capacity("earth"),
+		]
+	var water_label: Label = resource_labels.get("water")
+	if water_label != null:
+		water_label.text = "%s: %d/%d" % [
+			display_names.get("water", "Water"),
+			ResourceManager.get_amount("water"),
+			ResourceManager.get_capacity("water"),
+		]
+	var life_label: Label = resource_labels.get("life")
+	if life_label != null:
+		life_label.text = "%s: %d" % [
+			display_names.get("life", "Life"),
+			ResourceManager.get_amount("life"),
+		]
+	if is_instance_valid(soul_seeds_label):
+		soul_seeds_label.text = "Soul Seeds: %d" % [ResourceManager.soul_seeds]
 
 func _bind_resource_manager() -> void:
 	if not Engine.has_singleton("ResourceManager"):
