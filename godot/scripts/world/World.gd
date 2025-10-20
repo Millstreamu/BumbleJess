@@ -53,6 +53,9 @@ func _ready() -> void:
 		if sprout_registry != null and not growth_manager.is_connected("grove_spawned", Callable(sprout_registry, "on_grove_spawned")):
 			growth_manager.connect("grove_spawned", Callable(sprout_registry, "on_grove_spawned"))
 	_bind_resource_manager()
+	var decay_manager: Node = get_node_or_null("/root/DecayManager")
+	if decay_manager != null and decay_manager.has_method("bind_world"):
+		decay_manager.call("bind_world", self)
 	_is_ready = true
 	draw_debug_grid()
 	_setup_hud()
@@ -119,6 +122,7 @@ func _build_tileset() -> void:
 		"fx_earth": Color(0.60, 0.45, 0.25, 0.40),
 		"fx_water": Color(0.20, 0.45, 0.95, 0.40),
 		"fx_seed": Color(0.95, 0.80, 0.20, 0.45),
+		"fx_threat": Color(0.90, 0.20, 0.20, 0.35),
 	}
 	tiles_name_to_id = TileSetBuilder.build_named_hex_tiles(hexmap, names_to_colors, tile_px)
 	var id_meta: Variant = hexmap.get_meta("tiles_id_to_name") if hexmap.has_meta("tiles_id_to_name") else {}
@@ -198,6 +202,9 @@ func cell_to_world(c: Vector2i) -> Vector2:
 	if hexmap == null:
 		return Vector2.ZERO
 	return hexmap.map_to_local(c)
+
+func world_pos_of_cell(c: Vector2i) -> Vector2:
+	return cell_to_world(c)
 
 func world_to_cell(p: Vector2) -> Vector2i:
 	if hexmap == null:
