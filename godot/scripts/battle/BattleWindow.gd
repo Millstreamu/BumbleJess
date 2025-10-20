@@ -7,6 +7,7 @@ signal window_closed
 @onready var sprout_grid: GridContainer = $"Frame/Layout/LeftCol/SproutGrid"
 @onready var decay_grid: GridContainer = $"Frame/Layout/RightCol/DecayGrid"
 @onready var status_label: Label = $"Frame/Layout/MidCol/StatusLabel"
+@onready var select_btn: Button = $"Frame/Layout/MidCol/SelectBtn"
 @onready var start_btn: Button = $"Frame/Layout/MidCol/StartButton"
 @onready var close_btn: Button = $"Frame/Layout/MidCol/CloseButton"
 @onready var time_bar: ProgressBar = $"Frame/Layout/MidCol/TimeBar"
@@ -19,6 +20,8 @@ var elapsed := 0.0
 
 var left_units: Array = []
 var right_units: Array = []
+var selected_team: Array = []
+var _picker: BattlePicker
 
 const SLOT_COUNT := 6
 const FRONT_INDICES := PackedInt32Array([0, 1, 2])
@@ -26,27 +29,29 @@ const UNIT_SLOT_SCENE := preload("res://scenes/battle/UnitSlot.tscn")
 const LIFE_REWARD := 3
 
 func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_WHEN_PAUSED
-	set_process(true)
-	start_btn.pressed.connect(_on_start_pressed)
-	close_btn.pressed.connect(_on_close_pressed)
-	hide()
+        process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+        set_process(true)
+        start_btn.pressed.connect(_on_start_pressed)
+        close_btn.pressed.connect(_on_close_pressed)
+        select_btn.pressed.connect(_on_select_pressed)
+        hide()
 
 func open(enc: Dictionary, finish_cb: Callable) -> void:
-	encounter = enc
-	on_finish = finish_cb
-	running = false
-	elapsed = 0.0
-	time_bar.min_value = 0
-	time_bar.max_value = 100
-	time_bar.value = 0
-	status_label.text = "Ready"
-	start_btn.disabled = false
-	close_btn.disabled = true
-	_build_teams()
-	_populate_ui()
-	_refresh_ui()
-	show()
+        encounter = enc
+        on_finish = finish_cb
+        running = false
+        elapsed = 0.0
+        time_bar.min_value = 0
+        time_bar.max_value = 100
+        time_bar.value = 0
+        status_label.text = "Ready"
+        selected_team = _clamp_selection(SproutRegistry.get_last_selection())
+        _update_team_ready_ui()
+        close_btn.disabled = true
+        _build_teams()
+        _populate_ui()
+        _refresh_ui()
+        show()
 
 func _process(delta: float) -> void:
 	if not visible:
@@ -70,24 +75,75 @@ func _on_start_pressed() -> void:
 	status_label.text = "Battle…"
 
 func _on_close_pressed() -> void:
-	hide()
-	emit_signal("window_closed")
+        hide()
+        emit_signal("window_closed")
+
+func _update_team_ready_ui() -> void:
+        if running:
+                return
+        if selected_team.is_empty():
+                status_label.text = "Select a team"
+        else:
+                status_label.text = "Team ready (%d)" % selected_team.size()
+        start_btn.disabled = _should_disable_start()
+
+func _should_disable_start() -> bool:
+        if selected_team.size() > 0:
+                return false
+        var roster: Array = SproutRegistry.get_roster()
+        return roster.size() > 0
+
+func _clamp_selection(sel: Array) -> Array:
+        var result: Array = []
+        var limit := min(sel.size(), SLOT_COUNT)
+        for i in range(limit):
+                var entry := sel[i]
+                if typeof(entry) == TYPE_DICTIONARY:
+                        result.append(entry.duplicate(true))
+        return result
+
+func _on_select_pressed() -> void:
+        if _picker == null:
+                var scene := load("res://scenes/battle/BattlePicker.tscn") as PackedScene
+                _picker = scene.instantiate()
+                var parent := get_tree().current_scene
+                if parent == null:
+                        parent = get_tree().root
+                parent.add_child(_picker)
+                _picker.selection_done.connect(_on_picker_done)
+                _picker.cancelled.connect(_on_picker_cancel)
+        _picker.open()
+
+func _on_picker_done(sel: Array) -> void:
+        selected_team = _clamp_selection(sel)
+        _update_team_ready_ui()
+        _build_teams()
+        _populate_ui()
+        _refresh_ui()
+
+func _on_picker_cancel() -> void:
+        pass
 
 func _build_teams() -> void:
 	left_units.clear()
 	right_units.clear()
-	var sprout_defs: Array = DataLite.load_json_array("res://data/sprouts.json")
-	var attack_defs: Array = DataLite.load_json_array("res://data/attacks.json")
-	var registry := get_tree().root.get_node_or_null("SproutRegistry")
-	var sprouts: Array = []
-	if registry and registry.has_method("pick_for_battle"):
-		sprouts = registry.call("pick_for_battle", SLOT_COUNT)
-	if sprouts.is_empty():
-		for i in range(3):
-			sprouts.append({"id": "sprout.woodling", "level": 1})
-	for i in range(SLOT_COUNT):
-		var entry: Dictionary = i < sprouts.size() ? sprouts[i] : {}
-		left_units.append(_make_sprout_unit(entry, sprout_defs, attack_defs))
+        var sprout_defs: Array = DataLite.load_json_array("res://data/sprouts.json")
+        var attack_defs: Array = DataLite.load_json_array("res://data/attacks.json")
+        var sprouts: Array = []
+        if selected_team.size() > 0:
+                sprouts = selected_team.duplicate(true)
+        else:
+                var registry := get_tree().root.get_node_or_null("SproutRegistry")
+                if registry and registry.has_method("pick_for_battle"):
+                        sprouts = registry.call("pick_for_battle", SLOT_COUNT)
+                if sprouts.is_empty():
+                        for i in range(3):
+                                sprouts.append({"id": "sprout.woodling", "level": 1})
+        for i in range(SLOT_COUNT):
+                var entry: Dictionary = {}
+                if i < sprouts.size() and typeof(sprouts[i]) == TYPE_DICTIONARY:
+                        entry = sprouts[i]
+                left_units.append(_make_sprout_unit(entry, sprout_defs, attack_defs))
 	var turn_engine := get_tree().root.get_node_or_null("TurnEngine")
 	var scale := 1.0
 	if turn_engine:
