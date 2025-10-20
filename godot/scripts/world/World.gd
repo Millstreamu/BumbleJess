@@ -419,7 +419,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
 		if threat_list != null:
 			threat_list.visible = not threat_list.visible
-			accept_event()
+			var viewport := get_viewport()
+			if viewport != null:
+				viewport.set_input_as_handled()
 
 func update_hud(next_name: String, remaining: int) -> void:
 	if is_instance_valid(hud):
