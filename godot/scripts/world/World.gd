@@ -311,10 +311,12 @@ func place_current_tile(cell: Vector2i) -> void:
 		growth_manager.request_growth_update(turn)
 	if Engine.has_singleton("ResourceManager"):
 		ResourceManager.emit_signal("resources_changed")
-	if Engine.has_singleton("TurnEngine"):
-		TurnEngine.advance_one_turn()
-	elif Engine.has_singleton("Game"):
-		Game.advance_one_turn()
+        if Engine.has_singleton("TurnEngine"):
+                TurnEngine.advance_one_turn()
+        elif Engine.has_singleton("Game"):
+                var game_singleton: Object = Engine.get_singleton("Game")
+                if game_singleton != null and game_singleton.has_method("advance_one_turn"):
+                        game_singleton.call("advance_one_turn")
 
 func world_to_map(p: Vector2) -> Vector2i:
 	return world_to_cell(p)
