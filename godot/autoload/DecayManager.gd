@@ -85,10 +85,10 @@ func bind_world(world: Node) -> void:
 func _on_turn_started(turn: int) -> void:
 	_turn = turn
 
-func _on_phase_started(name: String) -> void:
+func _on_phase_started(phase_name: String) -> void:
 	if _world == null:
 		return
-	if name == "decay":
+	if phase_name == "decay":
 		_spread_decay_if_due()
 		_tick_and_trigger_battles()
 		_start_new_threats_up_to_limit()
