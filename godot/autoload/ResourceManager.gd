@@ -67,11 +67,11 @@ func add_soul_seed(val: int = 1) -> void:
 func _on_turn_started(turn: int) -> void:
 		_turn_counter = turn
 
-func _on_phase_started(name: String) -> void:
-		if name == "resources":
-				_recompute_capacity()
-				_produce_resources()
-				emit_signal("resources_changed")
+func _on_phase_started(phase_name: String) -> void:
+        if phase_name == "resources":
+                _recompute_capacity()
+                _produce_resources()
+                emit_signal("resources_changed")
 
 func _on_battle_result(victory: bool, rewards: Dictionary) -> void:
 		if not victory:

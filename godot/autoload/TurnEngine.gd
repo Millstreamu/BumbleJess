@@ -1,7 +1,7 @@
 extends Node
 
 signal turn_started(turn: int)
-signal phase_started(name: String)
+signal phase_started(phase_name: String)
 signal turn_ended(turn: int)
 signal triple_turn(turn: int)
 
@@ -19,5 +19,5 @@ func advance_one_turn() -> void:
                 emit_signal("triple_turn", turn_count)
         emit_signal("turn_ended", turn_count)
 
-func _phase(name: String) -> void:
-        emit_signal("phase_started", name)
+func _phase(phase_name: String) -> void:
+        emit_signal("phase_started", phase_name)

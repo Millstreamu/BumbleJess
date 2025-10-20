@@ -19,6 +19,7 @@ var tiles_id_to_name: Dictionary = {}
 var origin_cell: Vector2i = Vector2i.ZERO
 var rules: PlacementRules = PlacementRules.new()
 var turn := 0
+var _cell_metadata: Dictionary = {}
 
 func _calculate_hex_cell_size(px: int) -> Vector2i:
 	var horizontal_spacing := int(round(float(px) * 0.75))
@@ -156,17 +157,17 @@ func flash_fx(cells_by_fx: Dictionary, duration_sec: float = 0.35) -> void:
 					clear_fx(c)
 
 func clear_tiles() -> void:
-	if hexmap == null:
-		return
-	for layer in range(hexmap.get_layers_count()):
-		var used_cells: Array = hexmap.get_used_cells(layer)
-		for cell in used_cells:
-			hexmap.erase_cell(layer, cell)
-			if layer == LAYER_LIFE:
-				clear_cell_tile_id(layer, cell)
-	rules.occupied.clear()
-	turn = 0
-	origin_cell = Vector2i.ZERO
+        if hexmap == null:
+                return
+        for layer in range(hexmap.get_layers_count()):
+                var used_cells: Array = hexmap.get_used_cells(layer)
+                for cell in used_cells:
+                        hexmap.erase_cell(layer, cell)
+                        _clear_cell_meta(layer, cell)
+        _cell_metadata.clear()
+        rules.occupied.clear()
+        turn = 0
+        origin_cell = Vector2i.ZERO
 
 func set_origin_cell(c: Vector2i) -> void:
 	origin_cell = clamp_cell(c)
@@ -209,23 +210,55 @@ func set_cell_named(layer: int, c: Vector2i, tile_name: String) -> void:
 		clear_cell_tile_id(layer, c)
 
 func set_cell_meta(layer: int, c: Vector2i, key: String, value) -> void:
-	if hexmap == null:
-		return
-	hexmap.set_cell_metadata(layer, c, key, value)
+        if hexmap == null:
+                return
+        var layer_meta: Dictionary = _cell_metadata.get(layer, {})
+        if not _cell_metadata.has(layer) or not (layer_meta is Dictionary):
+                layer_meta = {}
+                _cell_metadata[layer] = layer_meta
+        var cell_meta: Dictionary = {}
+        if layer_meta.has(c):
+                var meta_variant: Variant = layer_meta[c]
+                if meta_variant is Dictionary:
+                        cell_meta = meta_variant
+        if value == null:
+                if not cell_meta.is_empty():
+                        cell_meta.erase(key)
+                if cell_meta.is_empty():
+                        layer_meta.erase(c)
+                        if layer_meta.is_empty():
+                                _cell_metadata.erase(layer)
+                        return
+        else:
+                if cell_meta.is_empty():
+                        cell_meta = {}
+                cell_meta[key] = value
+        if not cell_meta.is_empty():
+                layer_meta[c] = cell_meta
 
 func get_cell_meta(layer: int, c: Vector2i, key: String):
-	if hexmap == null:
-		return null
-	return hexmap.get_cell_metadata(layer, c, key)
+        if hexmap == null:
+                return null
+        var layer_meta_variant: Variant = _cell_metadata.get(layer, null)
+        if not (layer_meta_variant is Dictionary):
+                return null
+        var layer_meta: Dictionary = layer_meta_variant
+        if not layer_meta.has(c):
+                return null
+        var cell_meta_variant: Variant = layer_meta[c]
+        if not (cell_meta_variant is Dictionary):
+                return null
+        var cell_meta: Dictionary = cell_meta_variant
+        return cell_meta.get(key, null)
 
 func set_cell_tile_id(layer: int, c: Vector2i, id: String) -> void:
 	set_cell_meta(layer, c, "id", id)
 
 func get_cell_tile_id(layer: int, c: Vector2i) -> String:
-	if hexmap == null:
-		return ""
-	var value = hexmap.get_cell_metadata(layer, c, "id")
-	return value if typeof(value) == TYPE_STRING else ""
+        if hexmap == null:
+                return ""
+        var value = get_cell_meta(layer, c, "id")
+        return value if typeof(value) == TYPE_STRING else ""
 
 func id_to_category(id: String) -> String:
 	if id.is_empty():
@@ -250,14 +283,27 @@ func get_cell_name(layer: int, c: Vector2i) -> String:
 	return String(tiles_id_to_name.get(key, ""))
 
 func clear_cell_tile_id(layer: int, c: Vector2i) -> void:
-	if hexmap == null:
-		return
-	hexmap.set_cell_metadata(layer, c, "id", null)
+        if hexmap == null:
+                return
+        set_cell_meta(layer, c, "id", null)
 
 func is_empty(layer: int, c: Vector2i) -> bool:
-	if hexmap == null:
-		return true
-	return hexmap.get_cell_tile_data(layer, c) == null
+        if hexmap == null:
+                return true
+        return hexmap.get_cell_tile_data(layer, c) == null
+
+func _clear_cell_meta(layer: int, c: Vector2i) -> void:
+        if not _cell_metadata.has(layer):
+                return
+        var layer_meta_variant: Variant = _cell_metadata[layer]
+        if not (layer_meta_variant is Dictionary):
+                return
+        var layer_meta: Dictionary = layer_meta_variant
+        if not layer_meta.has(c):
+                return
+        layer_meta.erase(c)
+        if layer_meta.is_empty():
+                _cell_metadata.erase(layer)
 
 func draw_debug_grid() -> void:
 	var existing: Node = get_node_or_null("DebugGrid")
