@@ -23,11 +23,13 @@ static func _make_hex_image(px: int, color: Color) -> Image:
 		var center := Vector2(px / 2.0, px / 2.0)
 		var polygon := make_flat_top_hex_polygon(px, 2.0, center)
 
+		img.lock()
 		for y in range(px):
 				for x in range(px):
 						var point := Vector2(x + 0.5, y + 0.5)
 						if Geometry2D.is_point_in_polygon(point, polygon):
 								img.set_pixelv(Vector2i(x, y), color)
+		img.unlock()
 
 		return img
 
