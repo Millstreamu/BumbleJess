@@ -125,10 +125,10 @@ func _load_tile_rules() -> void:
 			_rules_by_id[id] = rules
 
 func _connect_turn_engine() -> void:
-	var turn_engine: Node = null
-	if Engine.has_singleton("TurnEngine"):
-		turn_engine = get_node_or_null("/root/TurnEngine")
-	elif Engine.has_singleton("Game"):
+	var turn_engine: Node = get_node_or_null("/root/TurnEngine")
+	if turn_engine == null and Engine.has_singleton("Game"):
+		turn_engine = Engine.get_singleton("Game")
+	if turn_engine == null:
 		turn_engine = get_node_or_null("/root/Game")
 	if turn_engine == null:
 		return

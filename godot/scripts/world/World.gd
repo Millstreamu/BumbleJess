@@ -29,6 +29,12 @@ var rules: PlacementRules = PlacementRules.new()
 var turn := 0
 var _cell_metadata: Dictionary = {}
 
+func _get_resource_manager() -> Node:
+	return get_node_or_null("/root/ResourceManager")
+
+func _get_turn_engine() -> Node:
+	return get_node_or_null("/root/TurnEngine")
+
 func _calculate_hex_cell_size(px: int) -> Vector2i:
 	var horizontal_spacing := int(round(float(px) * 0.75))
 	var vertical_spacing := int(round(float(px) * (sqrt(3.0) / 2.0)))
@@ -47,8 +53,6 @@ func _ready() -> void:
 		if sprout_registry != null and not growth_manager.is_connected("grove_spawned", Callable(sprout_registry, "on_grove_spawned")):
 			growth_manager.connect("grove_spawned", Callable(sprout_registry, "on_grove_spawned"))
 	_bind_resource_manager()
-	if Engine.has_singleton("ResourceManager") and not ResourceManager.is_connected("produced_cells", Callable(self, "_on_produced_cells")):
-		ResourceManager.connect("produced_cells", Callable(self, "_on_produced_cells"))
 	_is_ready = true
 	draw_debug_grid()
 	_setup_hud()
@@ -363,12 +367,16 @@ func place_current_tile(cell: Vector2i) -> void:
 	var growth_manager: Node = get_node_or_null("/root/GrowthManager")
 	if growth_manager != null and growth_manager.has_method("request_growth_update"):
 		growth_manager.request_growth_update(turn)
-	if Engine.has_singleton("ResourceManager"):
-		ResourceManager.emit_signal("resources_changed")
-	if Engine.has_singleton("TurnEngine"):
-		TurnEngine.advance_one_turn()
-	elif Engine.has_singleton("Game"):
-		var game_singleton: Object = Engine.get_singleton("Game")
+	var resource_manager: Node = _get_resource_manager()
+	if resource_manager != null:
+		resource_manager.emit_signal("resources_changed")
+	var turn_engine: Node = _get_turn_engine()
+	if turn_engine != null:
+		turn_engine.call("advance_one_turn")
+	else:
+		var game_singleton: Object = null
+		if Engine.has_singleton("Game"):
+			game_singleton = Engine.get_singleton("Game")
 		if game_singleton != null and game_singleton.has_method("advance_one_turn"):
 			game_singleton.call("advance_one_turn")
 
@@ -409,7 +417,8 @@ func _build_hud_text(next_name: String, remaining: int) -> String:
 func _update_resource_panel() -> void:
 	if not is_instance_valid(resources_panel):
 		return
-	var has_manager := Engine.has_singleton("ResourceManager")
+	var resource_manager: Node = _get_resource_manager()
+	var has_manager := resource_manager != null
 	resources_panel.visible = true
 	var display_names := {
 		"nature": "Nature",
@@ -430,40 +439,43 @@ func _update_resource_panel() -> void:
 	if nature_label != null:
 		nature_label.text = "%s: %d/%d" % [
 			display_names.get("nature", "Nature"),
-			ResourceManager.get_amount("nature"),
-			ResourceManager.get_capacity("nature"),
+			resource_manager.get_amount("nature"),
+			resource_manager.get_capacity("nature"),
 		]
 	var earth_label: Label = resource_labels.get("earth")
 	if earth_label != null:
 		earth_label.text = "%s: %d/%d" % [
 			display_names.get("earth", "Earth"),
-			ResourceManager.get_amount("earth"),
-			ResourceManager.get_capacity("earth"),
+			resource_manager.get_amount("earth"),
+			resource_manager.get_capacity("earth"),
 		]
 	var water_label: Label = resource_labels.get("water")
 	if water_label != null:
 		water_label.text = "%s: %d/%d" % [
 			display_names.get("water", "Water"),
-			ResourceManager.get_amount("water"),
-			ResourceManager.get_capacity("water"),
+			resource_manager.get_amount("water"),
+			resource_manager.get_capacity("water"),
 		]
 	var life_label: Label = resource_labels.get("life")
 	if life_label != null:
 		life_label.text = "%s: %d" % [
 			display_names.get("life", "Life"),
-			ResourceManager.get_amount("life"),
+			resource_manager.get_amount("life"),
 		]
 	if is_instance_valid(soul_seeds_label):
-		soul_seeds_label.text = "Soul Seeds: %d" % [ResourceManager.soul_seeds]
+		soul_seeds_label.text = "Soul Seeds: %d" % [resource_manager.soul_seeds]
 
 func _bind_resource_manager() -> void:
-	if not Engine.has_singleton("ResourceManager"):
+	var resource_manager: Node = _get_resource_manager()
+	if resource_manager == null:
 		return
-	ResourceManager.bind_world(self)
-	if not ResourceManager.is_connected("resources_changed", Callable(self, "_on_resources_changed")):
-		ResourceManager.connect("resources_changed", Callable(self, "_on_resources_changed"))
-	if not ResourceManager.is_connected("item_changed", Callable(self, "_on_item_changed")):
-		ResourceManager.connect("item_changed", Callable(self, "_on_item_changed"))
+	resource_manager.bind_world(self)
+	if not resource_manager.is_connected("resources_changed", Callable(self, "_on_resources_changed")):
+		resource_manager.connect("resources_changed", Callable(self, "_on_resources_changed"))
+	if not resource_manager.is_connected("item_changed", Callable(self, "_on_item_changed")):
+		resource_manager.connect("item_changed", Callable(self, "_on_item_changed"))
+	if not resource_manager.is_connected("produced_cells", Callable(self, "_on_produced_cells")):
+		resource_manager.connect("produced_cells", Callable(self, "_on_produced_cells"))
 	_on_resources_changed()
 
 func _on_resources_changed() -> void:
