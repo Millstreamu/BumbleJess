@@ -233,14 +233,7 @@ func _trigger_battle(target_cell: Vector2i) -> void:
 	var encounter := {
 		"target": target_cell,
 	}
-	var battle_manager := get_node_or_null("/root/BattleManager")
-	if battle_manager != null and battle_manager.has_method("open_battle"):
-		battle_manager.call("open_battle", encounter, Callable(self, "_on_battle_finished"))
-	else:
-		var rng := RandomNumberGenerator.new()
-		rng.randomize()
-		var victory := rng.randf() < 0.6
-		_apply_battle_outcome(target_cell, victory)
+	BattleManager.open_battle(encounter, Callable(self, "_on_battle_finished"))
 
 func _on_battle_finished(result: Dictionary) -> void:
 	var cell: Vector2i = result.get("target_cell", Vector2i.ZERO)

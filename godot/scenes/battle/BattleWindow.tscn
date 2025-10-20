@@ -1,3 +1,99 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
-; Placeholder scene for BattleWindow.tscn
+[ext_resource type="Script" path="res://scripts/battle/BattleWindow.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/battle/UnitSlot.tscn" id="2"]
+
+[node name="BattleWindow" type="CanvasLayer"]
+visible = false
+layer = 5
+script = ExtResource("1")
+
+[node name="Backdrop" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0, 0, 0, 0.35)
+
+[node name="Frame" type="Panel" parent="."]
+layout_mode = 1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -460.0
+offset_top = -260.0
+offset_right = 460.0
+offset_bottom = 260.0
+mouse_filter = 2
+
+[node name="Layout" type="HBoxContainer" parent="Frame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = -24.0
+
+[node name="LeftCol" type="VBoxContainer" parent="Frame/Layout"]
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Frame/Layout/LeftCol"]
+text = "Sprouts"
+
+[node name="SproutGrid" type="GridContainer" parent="Frame/Layout/LeftCol"]
+columns = 3
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_minimum_size = Vector2(360, 320)
+
+[node name="SproutSlot1" parent="Frame/Layout/LeftCol/SproutGrid" instance=ExtResource("2")]
+[node name="SproutSlot2" parent="Frame/Layout/LeftCol/SproutGrid" instance=ExtResource("2")]
+[node name="SproutSlot3" parent="Frame/Layout/LeftCol/SproutGrid" instance=ExtResource("2")]
+[node name="SproutSlot4" parent="Frame/Layout/LeftCol/SproutGrid" instance=ExtResource("2")]
+[node name="SproutSlot5" parent="Frame/Layout/LeftCol/SproutGrid" instance=ExtResource("2")]
+[node name="SproutSlot6" parent="Frame/Layout/LeftCol/SproutGrid" instance=ExtResource("2")]
+
+[node name="MidCol" type="VBoxContainer" parent="Frame/Layout"]
+custom_minimum_size = Vector2(160, 0)
+size_flags_horizontal = 1
+alignment = 1
+
+[node name="StatusLabel" type="Label" parent="Frame/Layout/MidCol"]
+horizontal_alignment = 1
+text = "Ready"
+
+[node name="StartButton" type="Button" parent="Frame/Layout/MidCol"]
+text = "Start"
+
+[node name="TimeBar" type="ProgressBar" parent="Frame/Layout/MidCol"]
+min_value = 0.0
+max_value = 100.0
+value = 0.0
+size_flags_horizontal = 3
+
+[node name="CloseButton" type="Button" parent="Frame/Layout/MidCol"]
+disabled = true
+text = "Close"
+
+[node name="RightCol" type="VBoxContainer" parent="Frame/Layout"]
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Frame/Layout/RightCol"]
+text = "Decay"
+
+[node name="DecayGrid" type="GridContainer" parent="Frame/Layout/RightCol"]
+columns = 3
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_minimum_size = Vector2(360, 320)
+
+[node name="DecaySlot1" parent="Frame/Layout/RightCol/DecayGrid" instance=ExtResource("2")]
+[node name="DecaySlot2" parent="Frame/Layout/RightCol/DecayGrid" instance=ExtResource("2")]
+[node name="DecaySlot3" parent="Frame/Layout/RightCol/DecayGrid" instance=ExtResource("2")]
+[node name="DecaySlot4" parent="Frame/Layout/RightCol/DecayGrid" instance=ExtResource("2")]
+[node name="DecaySlot5" parent="Frame/Layout/RightCol/DecayGrid" instance=ExtResource("2")]
+[node name="DecaySlot6" parent="Frame/Layout/RightCol/DecayGrid" instance=ExtResource("2")]

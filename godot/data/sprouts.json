@@ -1,1 +1,13 @@
-{}
+[
+  {
+    "id": "sprout.woodling",
+    "name": "Woodling",
+    "base_stats": {
+      "hp": 30,
+      "attack": 6,
+      "attack_speed": 1.0
+    },
+    "attack_id": "atk.thorn_bolt",
+    "passive_ids": []
+  }
+]
