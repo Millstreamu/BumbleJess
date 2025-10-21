@@ -103,7 +103,7 @@ func _make_card(entry: Dictionary, idx: int) -> Button:
     var level := int(entry.get("level", 1))
     var uid := String(entry.get("uid", ""))
     var name_label: Label = card.get_node("Name")
-    var display_name := SproutRegistry.get_name(id)
+    var display_name := SproutRegistry.get_sprout_name(id)
     if not uid.is_empty():
         display_name = "%s [%s]" % [display_name, uid]
     name_label.text = display_name
@@ -173,7 +173,7 @@ func _try_add(roster_index: int) -> void:
 func _slot_label(entry: Dictionary) -> String:
     var id := String(entry.get("id", "sprout.woodling"))
     var level := int(entry.get("level", 1))
-    return "%s (Lv%d)" % [SproutRegistry.get_name(id), level]
+    return "%s (Lv%d)" % [SproutRegistry.get_sprout_name(id), level]
 
 func _refresh_state() -> void:
     confirm_btn.disabled = _selected.is_empty()
