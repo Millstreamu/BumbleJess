@@ -191,12 +191,12 @@ func _make_slot_ui(team: Array, idx: int) -> Control:
 
 func _make_unit_from_sprout(entry: Dictionary, is_left: bool, attack_defs: Array) -> Dictionary:
         if entry.is_empty():
-                return _make_blank_unit(is_left ? "left" : "right")
+                return _make_blank_unit("left" if is_left else "right")
         var sprout_id: String = String(entry.get("id", "sprout.woodling"))
         var level: int = max(1, int(entry.get("level", 1)))
         var stats: Dictionary = SproutRegistry.compute_stats(sprout_id, level)
         if stats.is_empty():
-                return _make_blank_unit(is_left ? "left" : "right")
+                return _make_blank_unit("left" if is_left else "right")
         var name: String = SproutRegistry.get_name(sprout_id)
         var attack_id: String = SproutRegistry.get_attack_id(sprout_id)
         var attack_def: Dictionary = _find_by_id(attack_defs, attack_id)
@@ -223,7 +223,7 @@ func _make_unit_from_sprout(entry: Dictionary, is_left: bool, attack_defs: Array
         var base_cooldown: float = float(attack_def.get("cooldown_sec", 1.5))
         var cooldown: float = max(0.2, base_cooldown * (1.0 / attack_speed))
         return {
-                "side": (is_left ? "left" : "right"),
+                "side": ("left" if is_left else "right"),
                 "name": name,
                 "hp": hp,
                 "hp_max": hp,
@@ -236,35 +236,38 @@ func _make_unit_from_sprout(entry: Dictionary, is_left: bool, attack_defs: Array
         }
 
 func _make_decay_unit(difficulty_scale: float, attack_defs: Array) -> Dictionary:
-		var hp: int = int(round(26.0 * max(difficulty_scale, 0.5)))
-		var attack_amount: int = int(round(5.0 * max(difficulty_scale, 0.5)))
-		var attack_def: Dictionary = _find_by_id(attack_defs, "atk.smog_bite")
-		if attack_def.is_empty():
-				attack_def = {"id": "atk.smog_bite", "effects": []}
-		attack_def = attack_def.duplicate(true)
-		var effects: Array = attack_def.get("effects", [])
-		var has_damage: bool = false
-		for i in range(effects.size()):
-				var eff: Dictionary = effects[i]
-				if String(eff.get("type", "")) == "damage":
-						eff["amount"] = attack_amount
-						effects[i] = eff
-						has_damage = true
-		if not has_damage:
-				effects.append({"type": "damage", "amount": attack_amount})
-		attack_def["effects"] = effects
-		var cooldown: float = float(attack_def.get("cooldown_sec", 1.8))
-		return {
-				"side": "right",
-				"name": "Smogling",
-				"hp": hp,
-				"hp_max": hp,
-				"atk": attack_amount,
-				"cd": cooldown,
-				"cd_curr": 0.0,
-				"atk_def": attack_def,
-				"alive": true,
-		}
+        var hp: int = int(round(26.0 * max(difficulty_scale, 0.5)))
+        var attack_amount: int = int(round(5.0 * max(difficulty_scale, 0.5)))
+        var attack_def: Dictionary = _find_by_id(attack_defs, "atk.smog_bite")
+        if attack_def.is_empty():
+                attack_def = {"id": "atk.smog_bite", "effects": []}
+        else:
+                attack_def = attack_def.duplicate(true)
+        var effects: Array = attack_def.get("effects", [])
+        var has_damage: bool = false
+        for i in range(effects.size()):
+                var eff_variant: Variant = effects[i]
+                if eff_variant is Dictionary:
+                        var eff: Dictionary = eff_variant
+                        if String(eff.get("type", "")) == "damage":
+                                eff["amount"] = attack_amount
+                                effects[i] = eff
+                                has_damage = true
+        if not has_damage:
+                effects.append({"type": "damage", "amount": attack_amount})
+        attack_def["effects"] = effects
+        var cooldown: float = float(attack_def.get("cooldown_sec", 1.8))
+        return {
+                "side": "right",
+                "name": "Smogling",
+                "hp": hp,
+                "hp_max": hp,
+                "atk": attack_amount,
+                "cd": cooldown,
+                "cd_curr": 0.0,
+                "atk_def": attack_def,
+                "alive": true,
+        }
 
 func _make_blank_unit(side: String) -> Dictionary:
         return {
