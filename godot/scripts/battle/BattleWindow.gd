@@ -145,13 +145,13 @@ func _build_teams() -> void:
 						entry = sprouts[i]
 				left_units.append(_make_sprout_unit(entry, sprout_defs, attack_defs))
 		var turn_engine: Node = get_tree().root.get_node_or_null("TurnEngine")
-		var scale: float = 1.0
-		if turn_engine:
-				var turn_value: Variant = turn_engine.get("turn_count")
-				if typeof(turn_value) == TYPE_INT:
-						scale += 0.03 * max(0, int(turn_value))
-		for i in range(SLOT_COUNT):
-				right_units.append(_make_decay_unit(scale, attack_defs))
+                var difficulty_scale: float = 1.0
+                if turn_engine:
+                                var turn_value: Variant = turn_engine.get("turn_count")
+                                if typeof(turn_value) == TYPE_INT:
+                                                difficulty_scale += 0.03 * max(0, int(turn_value))
+                for i in range(SLOT_COUNT):
+                                right_units.append(_make_decay_unit(difficulty_scale, attack_defs))
 
 func _populate_ui() -> void:
 		_clear_children(sprout_grid)
@@ -229,9 +229,9 @@ func _make_sprout_unit(entry: Dictionary, sprout_defs: Array, attack_defs: Array
 				"alive": true,
 		}
 
-func _make_decay_unit(scale: float, attack_defs: Array) -> Dictionary:
-		var hp: int = int(round(26.0 * max(scale, 0.5)))
-		var attack_amount: int = int(round(5.0 * max(scale, 0.5)))
+func _make_decay_unit(difficulty_scale: float, attack_defs: Array) -> Dictionary:
+                var hp: int = int(round(26.0 * max(difficulty_scale, 0.5)))
+                var attack_amount: int = int(round(5.0 * max(difficulty_scale, 0.5)))
 		var attack_def: Dictionary = _find_by_id(attack_defs, "atk.smog_bite")
 		if attack_def.is_empty():
 				attack_def = {"id": "atk.smog_bite", "effects": []}
@@ -358,10 +358,10 @@ func _update_slot(slot: Node, unit: Dictionary) -> void:
 				return
 		var name_label: Label = slot.get_node_or_null("Name") as Label
 		if name_label:
-				var name: String = String(unit.get("name", ""))
-				if not unit.get("alive", false) and unit.get("hp", 0) <= 0:
-						name += " (X)"
-				name_label.text = name
+                                var display_name: String = String(unit.get("name", ""))
+                                if not unit.get("alive", false) and unit.get("hp", 0) <= 0:
+                                                display_name += " (X)"
+                                name_label.text = display_name
 		var hp_bar: TextureProgressBar = slot.get_node_or_null("HP") as TextureProgressBar
 		if hp_bar:
 				var hp_max: float = max(1.0, float(unit.get("hp_max", 1)))
