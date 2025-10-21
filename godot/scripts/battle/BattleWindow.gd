@@ -172,7 +172,7 @@ func _make_slot_ui(team: Array, idx: int) -> Control:
         var hp_bar: TextureProgressBar = slot.get_node("HP")
         hp_bar.min_value = 0
         hp_bar.max_value = 100
-        hp_bar.value = unit.get("alive", false) ? 100 : 0
+        hp_bar.value = 100 if unit.get("alive", false) else 0
         var cd_bar: TextureProgressBar = slot.get_node("CD")
         cd_bar.min_value = 0
         cd_bar.max_value = 100
@@ -396,7 +396,7 @@ func _finish(state: String) -> void:
         status_label.text = state.capitalize()
         _refresh_ui()
         var victory := state == "victory"
-        var rewards := {"life": victory ? LIFE_REWARD : 0}
+        var rewards := {"life": LIFE_REWARD if victory else 0}
         var result := {
                 "victory": victory,
                 "outcome": state,
