@@ -93,7 +93,7 @@ func _should_disable_start() -> bool:
 		var roster: Array = SproutRegistry.get_roster()
 		return roster.is_empty()
 
-func _clamp_selection(sel: Array) -> Array:
+func _clamp_selection(sel: Array) -> Array[Dictionary]:
 		var result: Array[Dictionary] = []
 		var limit: int = min(sel.size(), SLOT_COUNT)
 		for i in range(limit):
@@ -197,7 +197,7 @@ func _make_unit_from_sprout(entry: Dictionary, is_left: bool, attack_defs: Array
 		var stats: Dictionary = SproutRegistry.compute_stats(sprout_id, level)
 		if stats.is_empty():
 				return _make_blank_unit("left" if is_left else "right")
-		var name: String = SproutRegistry.get_sprout_name(sprout_id)
+		var sprout_name: String = SproutRegistry.get_sprout_name(sprout_id)
 		var attack_id: String = SproutRegistry.get_attack_id(sprout_id)
 		var attack_def: Dictionary = _find_by_id(attack_defs, attack_id)
 		if attack_def.is_empty():
@@ -224,7 +224,7 @@ func _make_unit_from_sprout(entry: Dictionary, is_left: bool, attack_defs: Array
 		var cooldown: float = max(0.2, base_cooldown * (1.0 / attack_speed))
 		return {
 				"side": ("left" if is_left else "right"),
-				"name": name,
+				"name": sprout_name,
 				"hp": hp,
 				"hp_max": hp,
 				"atk": attack_amount,
