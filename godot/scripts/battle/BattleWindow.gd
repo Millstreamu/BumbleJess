@@ -54,25 +54,25 @@ func open(enc: Dictionary, finish_cb: Callable) -> void:
         show()
 
 func _process(delta: float) -> void:
-	if not visible:
-		return
-	if not running:
-		return
-	elapsed += delta
-	time_bar.value = clamp(int((elapsed / time_limit) * 100.0), 0, 100)
-	_tick_cooldowns(delta)
-	_auto_attacks()
-	_refresh_ui()
-	var state := _check_end()
-	if state != "":
-		_finish(state)
-	elif elapsed >= time_limit:
-		_finish("timeout")
+        if not visible:
+                return
+        if not running:
+                return
+        elapsed += delta
+        time_bar.value = clamp(int((elapsed / time_limit) * 100.0), 0, 100)
+        _tick_cooldowns(delta)
+        _auto_attacks()
+        _refresh_ui()
+        var state := _check_end()
+        if state != "":
+                _finish(state)
+        elif elapsed >= time_limit:
+                _finish("timeout")
 
 func _on_start_pressed() -> void:
-	running = true
-	start_btn.disabled = true
-	status_label.text = "Battle…"
+        running = true
+        start_btn.disabled = true
+        status_label.text = "Battle…"
 
 func _on_close_pressed() -> void:
         hide()
@@ -125,8 +125,8 @@ func _on_picker_cancel() -> void:
         pass
 
 func _build_teams() -> void:
-	left_units.clear()
-	right_units.clear()
+        left_units.clear()
+        right_units.clear()
         var sprout_defs: Array = DataLite.load_json_array("res://data/sprouts.json")
         var attack_defs: Array = DataLite.load_json_array("res://data/attacks.json")
         var sprouts: Array = []
@@ -144,264 +144,264 @@ func _build_teams() -> void:
                 if i < sprouts.size() and typeof(sprouts[i]) == TYPE_DICTIONARY:
                         entry = sprouts[i]
                 left_units.append(_make_sprout_unit(entry, sprout_defs, attack_defs))
-	var turn_engine := get_tree().root.get_node_or_null("TurnEngine")
-	var scale := 1.0
-	if turn_engine:
-		var turn_value := turn_engine.get("turn_count")
-		if typeof(turn_value) == TYPE_INT:
-			scale += 0.03 * max(0, int(turn_value))
-	for i in range(SLOT_COUNT):
-		right_units.append(_make_decay_unit(scale, attack_defs))
+        var turn_engine := get_tree().root.get_node_or_null("TurnEngine")
+        var scale := 1.0
+        if turn_engine:
+                var turn_value := turn_engine.get("turn_count")
+                if typeof(turn_value) == TYPE_INT:
+                        scale += 0.03 * max(0, int(turn_value))
+        for i in range(SLOT_COUNT):
+                right_units.append(_make_decay_unit(scale, attack_defs))
 
 func _populate_ui() -> void:
-	_clear_children(sprout_grid)
-	_clear_children(decay_grid)
-	for i in range(SLOT_COUNT):
-		sprout_grid.add_child(_make_slot_ui(left_units, i))
-		decay_grid.add_child(_make_slot_ui(right_units, i))
+        _clear_children(sprout_grid)
+        _clear_children(decay_grid)
+        for i in range(SLOT_COUNT):
+                sprout_grid.add_child(_make_slot_ui(left_units, i))
+                decay_grid.add_child(_make_slot_ui(right_units, i))
 
 func _clear_children(container: Node) -> void:
-	for child in container.get_children():
-		child.queue_free()
+        for child in container.get_children():
+                child.queue_free()
 
 func _make_slot_ui(team: Array, idx: int) -> Control:
-	var slot := UNIT_SLOT_SCENE.instantiate()
-	var unit: Dictionary = team[idx]
-	var name_label: Label = slot.get_node("Name")
-	name_label.text = unit.get("name", "Empty")
-	var hp_bar: TextureProgressBar = slot.get_node("HP")
-	hp_bar.min_value = 0
-	hp_bar.max_value = 100
-	hp_bar.value = unit.get("alive", false) ? 100 : 0
-	var cd_bar: TextureProgressBar = slot.get_node("CD")
-	cd_bar.min_value = 0
-	cd_bar.max_value = 100
-	cd_bar.value = 0
-	var pop_label: Label = slot.get_node("DmgPop")
-	pop_label.text = ""
-	pop_label.modulate.a = 0.0
-	slot.set_meta("team_side", unit.get("side", ""))
-	slot.set_meta("unit_index", idx)
-	return slot
+        var slot := UNIT_SLOT_SCENE.instantiate()
+        var unit: Dictionary = team[idx]
+        var name_label: Label = slot.get_node("Name")
+        name_label.text = unit.get("name", "Empty")
+        var hp_bar: TextureProgressBar = slot.get_node("HP")
+        hp_bar.min_value = 0
+        hp_bar.max_value = 100
+        hp_bar.value = unit.get("alive", false) ? 100 : 0
+        var cd_bar: TextureProgressBar = slot.get_node("CD")
+        cd_bar.min_value = 0
+        cd_bar.max_value = 100
+        cd_bar.value = 0
+        var pop_label: Label = slot.get_node("DmgPop")
+        pop_label.text = ""
+        pop_label.modulate.a = 0.0
+        slot.set_meta("team_side", unit.get("side", ""))
+        slot.set_meta("unit_index", idx)
+        return slot
 
 func _make_sprout_unit(entry: Dictionary, sprout_defs: Array, attack_defs: Array) -> Dictionary:
-	if entry.is_empty():
-		return _make_blank_unit("left")
-	var sprout_id := String(entry.get("id", ""))
-	var sprout_def := _find_by_id(sprout_defs, sprout_id)
-	if sprout_def.is_empty():
-		return _make_blank_unit("left")
-	var level := max(1, int(entry.get("level", 1)))
-	var base_stats: Dictionary = sprout_def.get("base_stats", {})
-	var base_hp := int(base_stats.get("hp", 30))
-	var base_attack := int(base_stats.get("attack", 6))
-	var attack_speed := float(base_stats.get("attack_speed", 1.0))
-	var hp := base_hp + (level - 1) * 3
-	var attack_amount := base_attack + (level - 1)
-	var attack_id := String(sprout_def.get("attack_id", ""))
-	var attack_def := _find_by_id(attack_defs, attack_id)
-	if attack_def.is_empty():
-		attack_def = {"id": attack_id, "effects": []}
-	attack_def = attack_def.duplicate(true)
-	var effects: Array = attack_def.get("effects", [])
-	var has_damage := false
-	for i in range(effects.size()):
-		var eff: Dictionary = effects[i]
-		if String(eff.get("type", "")) == "damage":
-			eff["amount"] = attack_amount
-			effects[i] = eff
-			has_damage = true
-	if not has_damage:
-		effects.append({"type": "damage", "amount": attack_amount})
-	attack_def["effects"] = effects
-	var cooldown := float(attack_def.get("cooldown_sec", 1.5))
-	cooldown = cooldown / max(0.1, attack_speed)
-	cooldown = max(0.2, cooldown)
-	return {
-		"side": "left",
-		"name": String(sprout_def.get("name", "Sprout")),
-		"hp": hp,
-		"hp_max": hp,
-		"atk": attack_amount,
-		"cd": cooldown,
-		"cd_curr": 0.0,
-		"atk_def": attack_def,
-		"alive": true,
-	}
+        if entry.is_empty():
+                return _make_blank_unit("left")
+        var sprout_id := String(entry.get("id", ""))
+        var sprout_def := _find_by_id(sprout_defs, sprout_id)
+        if sprout_def.is_empty():
+                return _make_blank_unit("left")
+        var level := max(1, int(entry.get("level", 1)))
+        var base_stats: Dictionary = sprout_def.get("base_stats", {})
+        var base_hp := int(base_stats.get("hp", 30))
+        var base_attack := int(base_stats.get("attack", 6))
+        var attack_speed := float(base_stats.get("attack_speed", 1.0))
+        var hp := base_hp + (level - 1) * 3
+        var attack_amount := base_attack + (level - 1)
+        var attack_id := String(sprout_def.get("attack_id", ""))
+        var attack_def := _find_by_id(attack_defs, attack_id)
+        if attack_def.is_empty():
+                attack_def = {"id": attack_id, "effects": []}
+        attack_def = attack_def.duplicate(true)
+        var effects: Array = attack_def.get("effects", [])
+        var has_damage := false
+        for i in range(effects.size()):
+                var eff: Dictionary = effects[i]
+                if String(eff.get("type", "")) == "damage":
+                        eff["amount"] = attack_amount
+                        effects[i] = eff
+                        has_damage = true
+        if not has_damage:
+                effects.append({"type": "damage", "amount": attack_amount})
+        attack_def["effects"] = effects
+        var cooldown := float(attack_def.get("cooldown_sec", 1.5))
+        cooldown = cooldown / max(0.1, attack_speed)
+        cooldown = max(0.2, cooldown)
+        return {
+                "side": "left",
+                "name": String(sprout_def.get("name", "Sprout")),
+                "hp": hp,
+                "hp_max": hp,
+                "atk": attack_amount,
+                "cd": cooldown,
+                "cd_curr": 0.0,
+                "atk_def": attack_def,
+                "alive": true,
+        }
 
 func _make_decay_unit(scale: float, attack_defs: Array) -> Dictionary:
-	var hp := int(round(26.0 * max(scale, 0.5)))
-	var attack_amount := int(round(5.0 * max(scale, 0.5)))
-	var attack_def := _find_by_id(attack_defs, "atk.smog_bite")
-	if attack_def.is_empty():
-		attack_def = {"id": "atk.smog_bite", "effects": []}
-	attack_def = attack_def.duplicate(true)
-	var effects: Array = attack_def.get("effects", [])
-	var has_damage := false
-	for i in range(effects.size()):
-		var eff: Dictionary = effects[i]
-		if String(eff.get("type", "")) == "damage":
-			eff["amount"] = attack_amount
-			effects[i] = eff
-			has_damage = true
-	if not has_damage:
-		effects.append({"type": "damage", "amount": attack_amount})
-	attack_def["effects"] = effects
-	var cooldown := float(attack_def.get("cooldown_sec", 1.8))
-	return {
-		"side": "right",
-		"name": "Smogling",
-		"hp": hp,
-		"hp_max": hp,
-		"atk": attack_amount,
-		"cd": cooldown,
-		"cd_curr": 0.0,
-		"atk_def": attack_def,
-		"alive": true,
-	}
+        var hp := int(round(26.0 * max(scale, 0.5)))
+        var attack_amount := int(round(5.0 * max(scale, 0.5)))
+        var attack_def := _find_by_id(attack_defs, "atk.smog_bite")
+        if attack_def.is_empty():
+                attack_def = {"id": "atk.smog_bite", "effects": []}
+        attack_def = attack_def.duplicate(true)
+        var effects: Array = attack_def.get("effects", [])
+        var has_damage := false
+        for i in range(effects.size()):
+                var eff: Dictionary = effects[i]
+                if String(eff.get("type", "")) == "damage":
+                        eff["amount"] = attack_amount
+                        effects[i] = eff
+                        has_damage = true
+        if not has_damage:
+                effects.append({"type": "damage", "amount": attack_amount})
+        attack_def["effects"] = effects
+        var cooldown := float(attack_def.get("cooldown_sec", 1.8))
+        return {
+                "side": "right",
+                "name": "Smogling",
+                "hp": hp,
+                "hp_max": hp,
+                "atk": attack_amount,
+                "cd": cooldown,
+                "cd_curr": 0.0,
+                "atk_def": attack_def,
+                "alive": true,
+        }
 
 func _make_blank_unit(side: String) -> Dictionary:
-	return {
-		"side": side,
-		"name": "Empty",
-		"hp": 0,
-		"hp_max": 1,
-		"atk": 0,
-		"cd": 1.0,
-		"cd_curr": 1.0,
-		"atk_def": {"effects": []},
-		"alive": false,
-	}
+        return {
+                "side": side,
+                "name": "Empty",
+                "hp": 0,
+                "hp_max": 1,
+                "atk": 0,
+                "cd": 1.0,
+                "cd_curr": 1.0,
+                "atk_def": {"effects": []},
+                "alive": false,
+        }
 
 func _find_by_id(data: Array, target_id: String) -> Dictionary:
-	for item in data:
-		if String(item.get("id", "")) == target_id:
-			return item
-	return {}
+        for item in data:
+                if String(item.get("id", "")) == target_id:
+                        return item
+        return {}
 
 func _tick_cooldowns(delta: float) -> void:
-	for unit in left_units:
-		if unit.get("alive", false):
-			unit["cd_curr"] = max(0.0, float(unit.get("cd_curr", 0.0)) - delta)
-	for unit in right_units:
-		if unit.get("alive", false):
-			unit["cd_curr"] = max(0.0, float(unit.get("cd_curr", 0.0)) - delta)
+        for unit in left_units:
+                if unit.get("alive", false):
+                        unit["cd_curr"] = max(0.0, float(unit.get("cd_curr", 0.0)) - delta)
+        for unit in right_units:
+                if unit.get("alive", false):
+                        unit["cd_curr"] = max(0.0, float(unit.get("cd_curr", 0.0)) - delta)
 
 func _auto_attacks() -> void:
-	for i in range(SLOT_COUNT):
-		var attacker: Dictionary = left_units[i]
-		if not attacker.get("alive", false):
-			continue
-		if attacker.get("cd_curr", 0.0) > 0.0:
-			continue
-		var target_idx := _pick_target(right_units)
-		if target_idx >= 0:
-			_apply_attack(attacker, right_units[target_idx], decay_grid.get_child(target_idx))
-			attacker["cd_curr"] = float(attacker.get("cd", 1.0))
-	for i in range(SLOT_COUNT):
-		var attacker: Dictionary = right_units[i]
-		if not attacker.get("alive", false):
-			continue
-		if attacker.get("cd_curr", 0.0) > 0.0:
-			continue
-		var target_idx := _pick_target(left_units)
-		if target_idx >= 0:
-			_apply_attack(attacker, left_units[target_idx], sprout_grid.get_child(target_idx))
-			attacker["cd_curr"] = float(attacker.get("cd", 1.0))
+        for i in range(SLOT_COUNT):
+                var attacker: Dictionary = left_units[i]
+                if not attacker.get("alive", false):
+                        continue
+                if attacker.get("cd_curr", 0.0) > 0.0:
+                        continue
+                var target_idx := _pick_target(right_units)
+                if target_idx >= 0:
+                        _apply_attack(attacker, right_units[target_idx], decay_grid.get_child(target_idx))
+                        attacker["cd_curr"] = float(attacker.get("cd", 1.0))
+        for i in range(SLOT_COUNT):
+                var attacker: Dictionary = right_units[i]
+                if not attacker.get("alive", false):
+                        continue
+                if attacker.get("cd_curr", 0.0) > 0.0:
+                        continue
+                var target_idx := _pick_target(left_units)
+                if target_idx >= 0:
+                        _apply_attack(attacker, left_units[target_idx], sprout_grid.get_child(target_idx))
+                        attacker["cd_curr"] = float(attacker.get("cd", 1.0))
 
 func _pick_target(team: Array) -> int:
-	for idx in FRONT_INDICES:
-		if idx < team.size() and team[idx].get("alive", false):
-			return idx
-	for i in range(team.size()):
-		if team[i].get("alive", false):
-			return i
-	return -1
+        for idx in FRONT_INDICES:
+                if idx < team.size() and team[idx].get("alive", false):
+                        return idx
+        for i in range(team.size()):
+                if team[i].get("alive", false):
+                        return i
+        return -1
 
 func _apply_attack(attacker: Dictionary, defender: Dictionary, slot_ui: Node) -> void:
-	var attack_def: Dictionary = attacker.get("atk_def", {})
-	var damage := 0
-	for eff in attack_def.get("effects", []):
-		if String(eff.get("type", "")) == "damage":
-			damage += int(eff.get("amount", 0))
-	if damage <= 0:
-		return
-	defender["hp"] = max(0, int(defender.get("hp", 0)) - damage)
-	if defender.get("hp", 0) <= 0:
-		defender["alive"] = false
-		_pop_text(slot_ui, "KO")
-	else:
-		_pop_text(slot_ui, "-" + str(damage))
+        var attack_def: Dictionary = attacker.get("atk_def", {})
+        var damage := 0
+        for eff in attack_def.get("effects", []):
+                if String(eff.get("type", "")) == "damage":
+                        damage += int(eff.get("amount", 0))
+        if damage <= 0:
+                return
+        defender["hp"] = max(0, int(defender.get("hp", 0)) - damage)
+        if defender.get("hp", 0) <= 0:
+                defender["alive"] = false
+                _pop_text(slot_ui, "KO")
+        else:
+                _pop_text(slot_ui, "-" + str(damage))
 
 func _pop_text(slot_ui: Node, text: String) -> void:
-	if slot_ui == null:
-		return
-	var label: Label = slot_ui.get_node_or_null("DmgPop")
-	if label == null:
-		return
-	label.text = text
-	label.modulate.a = 1.0
-	var tween := slot_ui.create_tween()
-	tween.tween_property(label, "modulate:a", 0.0, 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+        if slot_ui == null:
+                return
+        var label: Label = slot_ui.get_node_or_null("DmgPop")
+        if label == null:
+                return
+        label.text = text
+        label.modulate.a = 1.0
+        var tween := slot_ui.create_tween()
+        tween.tween_property(label, "modulate:a", 0.0, 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 func _refresh_ui() -> void:
-	for i in range(SLOT_COUNT):
-		var left_unit: Dictionary = left_units[i]
-		var slot := sprout_grid.get_child(i)
-		_update_slot(slot, left_unit)
-		var right_unit: Dictionary = right_units[i]
-		var right_slot := decay_grid.get_child(i)
-		_update_slot(right_slot, right_unit)
+        for i in range(SLOT_COUNT):
+                var left_unit: Dictionary = left_units[i]
+                var slot := sprout_grid.get_child(i)
+                _update_slot(slot, left_unit)
+                var right_unit: Dictionary = right_units[i]
+                var right_slot := decay_grid.get_child(i)
+                _update_slot(right_slot, right_unit)
 
 func _update_slot(slot: Node, unit: Dictionary) -> void:
-	if slot == null:
-		return
-	var name_label: Label = slot.get_node_or_null("Name")
-	if name_label:
-		var name := String(unit.get("name", ""))
-		if not unit.get("alive", false) and unit.get("hp", 0) <= 0:
-			name += " (X)"
-		name_label.text = name
-	var hp_bar: TextureProgressBar = slot.get_node_or_null("HP")
-	if hp_bar:
-		var hp_max := max(1.0, float(unit.get("hp_max", 1)))
-		hp_bar.value = clamp(int((float(unit.get("hp", 0)) / hp_max) * 100.0), 0, 100)
-	var cd_bar: TextureProgressBar = slot.get_node_or_null("CD")
-	if cd_bar:
-		var cd := max(0.01, float(unit.get("cd", 1.0)))
-		var cd_curr := clamp(float(unit.get("cd_curr", 0.0)) / cd, 0.0, 1.0)
-		cd_bar.value = int((1.0 - cd_curr) * 100.0)
+        if slot == null:
+                return
+        var name_label: Label = slot.get_node_or_null("Name")
+        if name_label:
+                var name := String(unit.get("name", ""))
+                if not unit.get("alive", false) and unit.get("hp", 0) <= 0:
+                        name += " (X)"
+                name_label.text = name
+        var hp_bar: TextureProgressBar = slot.get_node_or_null("HP")
+        if hp_bar:
+                var hp_max := max(1.0, float(unit.get("hp_max", 1)))
+                hp_bar.value = clamp(int((float(unit.get("hp", 0)) / hp_max) * 100.0), 0, 100)
+        var cd_bar: TextureProgressBar = slot.get_node_or_null("CD")
+        if cd_bar:
+                var cd := max(0.01, float(unit.get("cd", 1.0)))
+                var cd_curr := clamp(float(unit.get("cd_curr", 0.0)) / cd, 0.0, 1.0)
+                cd_bar.value = int((1.0 - cd_curr) * 100.0)
 
 func _check_end() -> String:
-	var left_alive := false
-	var right_alive := false
-	for unit in left_units:
-		if unit.get("alive", false):
-			left_alive = true
-	for unit in right_units:
-		if unit.get("alive", false):
-			right_alive = true
-	if not left_alive and not right_alive:
-		return "draw"
-	if not left_alive:
-		return "defeat"
-	if not right_alive:
-		return "victory"
-	return ""
+        var left_alive := false
+        var right_alive := false
+        for unit in left_units:
+                if unit.get("alive", false):
+                        left_alive = true
+        for unit in right_units:
+                if unit.get("alive", false):
+                        right_alive = true
+        if not left_alive and not right_alive:
+                return "draw"
+        if not left_alive:
+                return "defeat"
+        if not right_alive:
+                return "victory"
+        return ""
 
 func _finish(state: String) -> void:
-	running = false
-	start_btn.disabled = true
-	close_btn.disabled = false
-	status_label.text = state.capitalize()
-	_refresh_ui()
-	var victory := state == "victory"
-	var rewards := {"life": victory ? LIFE_REWARD : 0}
-	var result := {
-		"victory": victory,
-		"outcome": state,
-		"rewards": rewards,
-		"target_cell": encounter.get("target", Vector2i.ZERO),
-	}
-	emit_signal("battle_finished", result)
+        running = false
+        start_btn.disabled = true
+        close_btn.disabled = false
+        status_label.text = state.capitalize()
+        _refresh_ui()
+        var victory := state == "victory"
+        var rewards := {"life": victory ? LIFE_REWARD : 0}
+        var result := {
+                "victory": victory,
+                "outcome": state,
+                "rewards": rewards,
+                "target_cell": encounter.get("target", Vector2i.ZERO),
+        }
+        emit_signal("battle_finished", result)
 
