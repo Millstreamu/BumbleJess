@@ -82,7 +82,7 @@ func _sync_selection_with_roster(sel: Array) -> Array:
 			var uid := String(entry.get("uid", ""))
 			if uid.is_empty():
 				continue
-			var roster_entry := SproutRegistry.get_entry_by_uid(uid)
+			var roster_entry: Dictionary = SproutRegistry.get_entry_by_uid(uid)
 			if roster_entry.is_empty():
 				continue
 			result.append(roster_entry)
@@ -103,7 +103,7 @@ func _make_card(entry: Dictionary, idx: int) -> Button:
 	var level := int(entry.get("level", 1))
 	var uid := String(entry.get("uid", ""))
 	var name_label: Label = card.get_node("Name")
-	var display_name := SproutRegistry.get_sprout_name(id)
+	var display_name: String = SproutRegistry.get_sprout_name(id)
 	if not uid.is_empty():
 		display_name = "%s [%s]" % [display_name, uid]
 	name_label.text = display_name

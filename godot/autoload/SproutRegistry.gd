@@ -218,12 +218,12 @@ func _new_uid() -> String:
 	return uid
 
 func _sanitize_selection(sel: Array) -> Array[Dictionary]:
-        var result: Array[Dictionary] = []
-        var limit: int = min(sel.size(), MAX_SELECTION)
-        for i in range(limit):
-                var entry_variant: Variant = sel[i]
-                if entry_variant is Dictionary:
-                        var entry: Dictionary = entry_variant
+	var result: Array[Dictionary] = []
+	var limit: int = min(sel.size(), MAX_SELECTION)
+	for i in range(limit):
+		var entry_variant: Variant = sel[i]
+		if entry_variant is Dictionary:
+			var entry: Dictionary = entry_variant
 			var uid := String(entry.get("uid", ""))
 			if not uid.is_empty():
 				var roster_entry := get_entry_by_uid(uid)
@@ -231,15 +231,15 @@ func _sanitize_selection(sel: Array) -> Array[Dictionary]:
 					result.append(roster_entry)
 					continue
 			result.append(_sanitize_roster_entry(entry))
-        return result
+	return result
 
 func _sync_last_selection_with_roster() -> void:
-        var synced: Array[Dictionary] = []
-        for entry_variant in _last_selection:
-                if entry_variant is Dictionary:
-                        var entry: Dictionary = entry_variant
-                        var uid := String(entry.get("uid", ""))
-                        if uid.is_empty():
+	var synced: Array[Dictionary] = []
+	for entry_variant in _last_selection:
+		if entry_variant is Dictionary:
+			var entry: Dictionary = entry_variant
+			var uid := String(entry.get("uid", ""))
+			if uid.is_empty():
 				continue
 			var roster_entry := get_entry_by_uid(uid)
 			if roster_entry.is_empty():
@@ -271,3 +271,4 @@ func _sanitize_roster_entry(entry: Dictionary) -> Dictionary:
 		"nickname": nickname,
 		"meta": meta,
 	}
+
