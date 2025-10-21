@@ -1,26 +1,26 @@
 [
   {
-    "id": "atk.thorn_bolt",
-    "name": "Thorn Bolt",
-    "cooldown_sec": 1.5,
-    "effects": [
-      {
-        "type": "damage",
-        "amount": 6
-      }
-    ],
-    "target_row": "front"
+	"id": "atk.thorn_bolt",
+	"name": "Thorn Bolt",
+	"cooldown_sec": 1.5,
+	"effects": [
+	  {
+		"type": "damage",
+		"amount": 6
+	  }
+	],
+	"target_row": "front"
   },
   {
-    "id": "atk.smog_bite",
-    "name": "Smog Bite",
-    "cooldown_sec": 1.8,
-    "effects": [
-      {
-        "type": "damage",
-        "amount": 5
-      }
-    ],
-    "target_row": "front"
+	"id": "atk.smog_bite",
+	"name": "Smog Bite",
+	"cooldown_sec": 1.8,
+	"effects": [
+	  {
+		"type": "damage",
+		"amount": 5
+	  }
+	],
+	"target_row": "front"
   }
 ]

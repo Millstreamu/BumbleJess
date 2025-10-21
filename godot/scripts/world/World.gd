@@ -59,7 +59,7 @@ func _ready() -> void:
 	_bind_sprout_registry()
 	var decay_manager: Node = get_node_or_null("/root/DecayManager")
 	if decay_manager != null and decay_manager.has_method("bind_world"):
-	        decay_manager.call("bind_world", self)
+			decay_manager.call("bind_world", self)
 	_ensure_toggle_threats_action()
 	_ensure_toggle_sprout_register_action()
 	var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
@@ -73,59 +73,59 @@ func _ready() -> void:
 func _ensure_toggle_threats_action() -> void:
 	var action := "ui_toggle_threats"
 	if not InputMap.has_action(action):
-	        InputMap.add_action(action)
+			InputMap.add_action(action)
 	var has_event := false
 	for existing_event in InputMap.action_get_events(action):
-	        if existing_event is InputEventKey and existing_event.physical_keycode == Key.KEY_T:
-	                has_event = true
-	                break
+			if existing_event is InputEventKey and existing_event.physical_keycode == Key.KEY_T:
+					has_event = true
+					break
 	if not has_event:
-	        var event := InputEventKey.new()
-	        event.physical_keycode = Key.KEY_T
-	        event.keycode = Key.KEY_T
-	        InputMap.action_add_event(action, event)
+			var event := InputEventKey.new()
+			event.physical_keycode = Key.KEY_T
+			event.keycode = Key.KEY_T
+			InputMap.action_add_event(action, event)
 
 func _ensure_toggle_sprout_register_action() -> void:
 	var action := "ui_toggle_sprout_register"
 	if not InputMap.has_action(action):
-	        InputMap.add_action(action)
+			InputMap.add_action(action)
 	var has_event := false
 	for existing_event in InputMap.action_get_events(action):
-	        if existing_event is InputEventKey and existing_event.physical_keycode == Key.KEY_TAB:
-	                has_event = true
-	                break
+			if existing_event is InputEventKey and existing_event.physical_keycode == Key.KEY_TAB:
+					has_event = true
+					break
 	if not has_event:
-	        var event := InputEventKey.new()
-	        event.physical_keycode = Key.KEY_TAB
-	        event.keycode = Key.KEY_TAB
-	        InputMap.action_add_event(action, event)
+			var event := InputEventKey.new()
+			event.physical_keycode = Key.KEY_TAB
+			event.keycode = Key.KEY_TAB
+			InputMap.action_add_event(action, event)
 
 func _ensure_sprout_picker() -> void:
 	if is_instance_valid(_sprout_picker):
-	        return
+			return
 	if SPROUT_REGISTER_SCENE == null:
-	        return
+			return
 	var picker_instance := SPROUT_REGISTER_SCENE.instantiate()
 	if picker_instance == null:
-	        return
+			return
 	var picker := picker_instance as BattlePicker
 	if picker == null:
-	        picker_instance.queue_free()
-	        return
+			picker_instance.queue_free()
+			return
 	var parent: Node = get_tree().current_scene
 	if parent == null:
-	        parent = get_tree().root
+			parent = get_tree().root
 	parent.add_child(picker)
 	_sprout_picker = picker
 
 func _toggle_sprout_register() -> void:
 	_ensure_sprout_picker()
 	if not is_instance_valid(_sprout_picker):
-	        return
+			return
 	if _sprout_picker.visible:
-	        _sprout_picker.close()
+			_sprout_picker.close()
 	else:
-	        _sprout_picker.open()
+			_sprout_picker.open()
 
 func set_width(value: int) -> void:
 	width = max(1, value)

@@ -1,8 +1,8 @@
 [
   {
-    "id": "pas.none",
-    "name": "None",
-    "trigger": "none",
-    "effects": []
+	"id": "pas.none",
+	"name": "None",
+	"trigger": "none",
+	"effects": []
   }
 ]
