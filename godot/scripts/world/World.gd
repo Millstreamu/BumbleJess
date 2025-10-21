@@ -487,13 +487,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	        if sr_viewport != null:
 	                sr_viewport.set_input_as_handled()
 	        return
-	if event.is_action_pressed("ui_toggle_threats"):
-	        var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
-	        if threat_list != null:
-	                threat_list.visible = not threat_list.visible
-	                var viewport := get_viewport()
-			if viewport != null:
-				viewport.set_input_as_handled()
+        if event.is_action_pressed("ui_toggle_threats"):
+                var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
+                if threat_list != null:
+                        threat_list.visible = not threat_list.visible
+                        var threat_viewport := get_viewport()
+                        if threat_viewport != null:
+                                threat_viewport.set_input_as_handled()
 
 func update_hud(next_name: String, remaining: int) -> void:
 	if is_instance_valid(hud):
