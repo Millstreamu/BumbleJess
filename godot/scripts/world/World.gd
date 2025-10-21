@@ -41,22 +41,22 @@ func _calculate_hex_cell_size(px: int) -> Vector2i:
 	return Vector2i(max(horizontal_spacing, 1), max(vertical_spacing, 1))
 
 func _ready() -> void:
-        add_child(rules)
-        rules.set_world(self)
-        _ensure_hex_config()
-        _ensure_layers()
-        _build_tileset()
-        var growth_manager: Node = get_node_or_null("/root/GrowthManager")
-        if growth_manager != null:
-                growth_manager.bind_world(self)
-                var sprout_registry: Node = get_node_or_null("/root/SproutRegistry")
-                if sprout_registry != null and not growth_manager.is_connected("grove_spawned", Callable(sprout_registry, "on_grove_spawned")):
-                        growth_manager.connect("grove_spawned", Callable(sprout_registry, "on_grove_spawned"))
-        _bind_resource_manager()
-        _bind_sprout_registry()
-        var decay_manager: Node = get_node_or_null("/root/DecayManager")
-        if decay_manager != null and decay_manager.has_method("bind_world"):
-                decay_manager.call("bind_world", self)
+	add_child(rules)
+	rules.set_world(self)
+	_ensure_hex_config()
+	_ensure_layers()
+	_build_tileset()
+	var growth_manager: Node = get_node_or_null("/root/GrowthManager")
+	if growth_manager != null:
+		growth_manager.bind_world(self)
+		var sprout_registry: Node = get_node_or_null("/root/SproutRegistry")
+		if sprout_registry != null and not growth_manager.is_connected("grove_spawned", Callable(sprout_registry, "on_grove_spawned")):
+			growth_manager.connect("grove_spawned", Callable(sprout_registry, "on_grove_spawned"))
+	_bind_resource_manager()
+	_bind_sprout_registry()
+	var decay_manager: Node = get_node_or_null("/root/DecayManager")
+	if decay_manager != null and decay_manager.has_method("bind_world"):
+		decay_manager.call("bind_world", self)
 	_ensure_toggle_threats_action()
 	var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
 	if threat_list != null:
