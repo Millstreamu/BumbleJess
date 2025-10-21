@@ -5,6 +5,8 @@ const LAYER_OBJECTS := 1
 const LAYER_LIFE := 2
 const LAYER_FX := 3
 
+const SPROUT_REGISTER_SCENE := preload("res://scenes/battle/BattlePicker.tscn")
+
 @export var width := 16 : set = set_width
 @export var height := 12 : set = set_height
 @export var tile_px := 128 : set = set_tile_px
@@ -28,6 +30,7 @@ var origin_cell: Vector2i = Vector2i.ZERO
 var rules: PlacementRules = PlacementRules.new()
 var turn := 0
 var _cell_metadata: Dictionary = {}
+var _sprout_picker: BattlePicker = null
 
 func _get_resource_manager() -> Node:
 	return get_node_or_null("/root/ResourceManager")
@@ -56,8 +59,9 @@ func _ready() -> void:
 	_bind_sprout_registry()
 	var decay_manager: Node = get_node_or_null("/root/DecayManager")
 	if decay_manager != null and decay_manager.has_method("bind_world"):
-		decay_manager.call("bind_world", self)
+	        decay_manager.call("bind_world", self)
 	_ensure_toggle_threats_action()
+	_ensure_toggle_sprout_register_action()
 	var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
 	if threat_list != null:
 		threat_list.visible = false
@@ -69,17 +73,59 @@ func _ready() -> void:
 func _ensure_toggle_threats_action() -> void:
 	var action := "ui_toggle_threats"
 	if not InputMap.has_action(action):
-		InputMap.add_action(action)
+	        InputMap.add_action(action)
 	var has_event := false
 	for existing_event in InputMap.action_get_events(action):
-		if existing_event is InputEventKey and existing_event.physical_keycode == Key.KEY_T:
-			has_event = true
-			break
+	        if existing_event is InputEventKey and existing_event.physical_keycode == Key.KEY_T:
+	                has_event = true
+	                break
 	if not has_event:
-		var event := InputEventKey.new()
-		event.physical_keycode = Key.KEY_T
-		event.keycode = Key.KEY_T
-		InputMap.action_add_event(action, event)
+	        var event := InputEventKey.new()
+	        event.physical_keycode = Key.KEY_T
+	        event.keycode = Key.KEY_T
+	        InputMap.action_add_event(action, event)
+
+func _ensure_toggle_sprout_register_action() -> void:
+	var action := "ui_toggle_sprout_register"
+	if not InputMap.has_action(action):
+	        InputMap.add_action(action)
+	var has_event := false
+	for existing_event in InputMap.action_get_events(action):
+	        if existing_event is InputEventKey and existing_event.physical_keycode == Key.KEY_TAB:
+	                has_event = true
+	                break
+	if not has_event:
+	        var event := InputEventKey.new()
+	        event.physical_keycode = Key.KEY_TAB
+	        event.keycode = Key.KEY_TAB
+	        InputMap.action_add_event(action, event)
+
+func _ensure_sprout_picker() -> void:
+	if is_instance_valid(_sprout_picker):
+	        return
+	if SPROUT_REGISTER_SCENE == null:
+	        return
+	var picker_instance := SPROUT_REGISTER_SCENE.instantiate()
+	if picker_instance == null:
+	        return
+	var picker := picker_instance as BattlePicker
+	if picker == null:
+	        picker_instance.queue_free()
+	        return
+	var parent: Node = get_tree().current_scene
+	if parent == null:
+	        parent = get_tree().root
+	parent.add_child(picker)
+	_sprout_picker = picker
+
+func _toggle_sprout_register() -> void:
+	_ensure_sprout_picker()
+	if not is_instance_valid(_sprout_picker):
+	        return
+	if _sprout_picker.visible:
+	        _sprout_picker.close()
+	else:
+	        _sprout_picker.open()
 
 func set_width(value: int) -> void:
 	width = max(1, value)
@@ -435,11 +481,17 @@ func _on_sprout_leveled(uid: String, lvl: int) -> void:
 				label.text += "\n[SPR] " + uid + " → Lv" + str(lvl)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_toggle_sprout_register"):
+	        _toggle_sprout_register()
+	        var sr_viewport := get_viewport()
+	        if sr_viewport != null:
+	                sr_viewport.set_input_as_handled()
+	        return
 	if event.is_action_pressed("ui_toggle_threats"):
-		var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
-		if threat_list != null:
-			threat_list.visible = not threat_list.visible
-			var viewport := get_viewport()
+	        var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
+	        if threat_list != null:
+	                threat_list.visible = not threat_list.visible
+	                var viewport := get_viewport()
 			if viewport != null:
 				viewport.set_input_as_handled()
 
