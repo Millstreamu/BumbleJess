@@ -197,7 +197,7 @@ func _make_unit_from_sprout(entry: Dictionary, is_left: bool, attack_defs: Array
         var stats: Dictionary = SproutRegistry.compute_stats(sprout_id, level)
         if stats.is_empty():
                 return _make_blank_unit("left" if is_left else "right")
-        var name: String = SproutRegistry.get_name(sprout_id)
+        var name: String = SproutRegistry.get_sprout_name(sprout_id)
         var attack_id: String = SproutRegistry.get_attack_id(sprout_id)
         var attack_def: Dictionary = _find_by_id(attack_defs, attack_id)
         if attack_def.is_empty():

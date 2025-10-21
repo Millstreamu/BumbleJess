@@ -39,7 +39,7 @@ func _load_persisted_roster() -> void:
     var file := FileAccess.open(SAVE_PATH, FileAccess.READ)
     if file == null:
         return
-    var parsed := JSON.parse_string(file.get_as_text())
+    var parsed: Variant = JSON.parse_string(file.get_as_text())
     if typeof(parsed) != TYPE_ARRAY:
         return
     for entry_variant in parsed:
@@ -142,7 +142,7 @@ func compute_stats(id: String, level: int) -> Dictionary:
         "attack_speed": aspeed,
     }
 
-func get_name(id: String) -> String:
+func get_sprout_name(id: String) -> String:
     return String(_db_by_id.get(id, {}).get("name", "Sprout"))
 
 func get_attack_id(id: String) -> String:
