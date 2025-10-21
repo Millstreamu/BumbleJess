@@ -18,129 +18,129 @@ var _selected: Array = []
 var _sprout_defs: Array = []
 
 func _ready() -> void:
-        visible = false
-        confirm_btn.pressed.connect(_on_confirm)
-        cancel_btn.pressed.connect(_on_cancel)
+		visible = false
+		confirm_btn.pressed.connect(_on_confirm)
+		cancel_btn.pressed.connect(_on_cancel)
 
 func open() -> void:
-        visible = true
-        _sprout_defs = DataLite.load_json_array("res://data/sprouts.json")
-        _roster = SproutRegistry.get_roster()
-        _selected = _sanitize_selection(SproutRegistry.get_last_selection())
-        _build_roster()
-        _build_selected()
-        _refresh_state()
+		visible = true
+		_sprout_defs = DataLite.load_json_array("res://data/sprouts.json")
+		_roster = SproutRegistry.get_roster()
+		_selected = _sanitize_selection(SproutRegistry.get_last_selection())
+		_build_roster()
+		_build_selected()
+		_refresh_state()
 
 func close() -> void:
-        visible = false
+		visible = false
 
 func _sanitize_selection(sel: Array) -> Array:
-        var result: Array = []
-        var limit: int = min(sel.size(), MAX_SELECTION)
-        for i in range(limit):
-                if sel[i] is Dictionary:
-                        var entry: Dictionary = sel[i]
-                        result.append(entry.duplicate(true))
-        return result
+		var result: Array = []
+		var limit: int = min(sel.size(), MAX_SELECTION)
+		for i in range(limit):
+				if sel[i] is Dictionary:
+						var entry: Dictionary = sel[i]
+						result.append(entry.duplicate(true))
+		return result
 
 func _build_roster() -> void:
-        _clear_children(roster_grid)
-        for i in range(_roster.size()):
-                if _roster[i] is not Dictionary:
-                        continue
-                var entry: Dictionary = _roster[i]
-                var btn := _make_card(entry, i)
-                roster_grid.add_child(btn)
+		_clear_children(roster_grid)
+		for i in range(_roster.size()):
+				if _roster[i] is not Dictionary:
+						continue
+				var entry: Dictionary = _roster[i]
+				var btn := _make_card(entry, i)
+				roster_grid.add_child(btn)
 
 func _make_card(entry: Dictionary, idx: int) -> Button:
-        var card: Button = SPROUT_CARD_SCENE.instantiate()
-        var id := String(entry.get("id", "sprout.woodling"))
-        var level := int(entry.get("level", 1))
-        var name_label: Label = card.get_node("Name")
-        name_label.text = _sprout_name(id)
-        var stats_label: Label = card.get_node("Stats")
-        stats_label.text = "Lv%d • %s" % [level, _sprout_stats_text(id, level)]
-        card.pressed.connect(func() -> void:
-                _try_add(idx)
-        )
-        return card
+		var card: Button = SPROUT_CARD_SCENE.instantiate()
+		var id := String(entry.get("id", "sprout.woodling"))
+		var level := int(entry.get("level", 1))
+		var name_label: Label = card.get_node("Name")
+		name_label.text = _sprout_name(id)
+		var stats_label: Label = card.get_node("Stats")
+		stats_label.text = "Lv%d • %s" % [level, _sprout_stats_text(id, level)]
+		card.pressed.connect(func() -> void:
+				_try_add(idx)
+		)
+		return card
 
 func _build_selected() -> void:
-        _clear_children(selected_grid)
-        for i in range(MAX_SELECTION):
-                var slot := Button.new()
-                slot.focus_mode = Control.FOCUS_NONE
-                slot.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-                slot.size_flags_vertical = Control.SIZE_EXPAND_FILL
-                if i < _selected.size():
-                        slot.text = "%s\n(click to remove)" % _slot_label(_selected[i])
-                        var slot_index := i
-                        slot.pressed.connect(func() -> void:
-                                _selected.remove_at(slot_index)
-                                _build_selected()
-                                _refresh_state()
-                        )
-                else:
-                        slot.text = "(empty)"
-                        slot.disabled = true
-                selected_grid.add_child(slot)
+		_clear_children(selected_grid)
+		for i in range(MAX_SELECTION):
+				var slot := Button.new()
+				slot.focus_mode = Control.FOCUS_NONE
+				slot.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				slot.size_flags_vertical = Control.SIZE_EXPAND_FILL
+				if i < _selected.size():
+						slot.text = "%s\n(click to remove)" % _slot_label(_selected[i])
+						var slot_index := i
+						slot.pressed.connect(func() -> void:
+								_selected.remove_at(slot_index)
+								_build_selected()
+								_refresh_state()
+						)
+				else:
+						slot.text = "(empty)"
+						slot.disabled = true
+				selected_grid.add_child(slot)
 
 func _try_add(roster_index: int) -> void:
-        if roster_index < 0 or roster_index >= _roster.size():
-                return
-        if _selected.size() >= MAX_SELECTION:
-                return
-        var entry_value = _roster[roster_index]
-        if entry_value is not Dictionary:
-                return
-        var entry: Dictionary = entry_value
-        _selected.append(entry.duplicate(true))
-        _build_selected()
-        _refresh_state()
+		if roster_index < 0 or roster_index >= _roster.size():
+				return
+		if _selected.size() >= MAX_SELECTION:
+				return
+		var entry_value = _roster[roster_index]
+		if entry_value is not Dictionary:
+				return
+		var entry: Dictionary = entry_value
+		_selected.append(entry.duplicate(true))
+		_build_selected()
+		_refresh_state()
 
 func _slot_label(entry: Dictionary) -> String:
-        var id := String(entry.get("id", "sprout.woodling"))
-        var level := int(entry.get("level", 1))
-        return "%s (Lv%d)" % [_sprout_name(id), level]
+		var id := String(entry.get("id", "sprout.woodling"))
+		var level := int(entry.get("level", 1))
+		return "%s (Lv%d)" % [_sprout_name(id), level]
 
 func _sprout_name(id: String) -> String:
-        for sprout in _sprout_defs:
-            if typeof(sprout) != TYPE_DICTIONARY:
-                continue
-            var sprout_dict: Dictionary = sprout
-            if String(sprout_dict.get("id", "")) == id:
-                return String(sprout_dict.get("name", "Sprout"))
-        return "Sprout"
+		for sprout in _sprout_defs:
+			if typeof(sprout) != TYPE_DICTIONARY:
+				continue
+			var sprout_dict: Dictionary = sprout
+			if String(sprout_dict.get("id", "")) == id:
+				return String(sprout_dict.get("name", "Sprout"))
+		return "Sprout"
 
 func _sprout_stats_text(id: String, level: int) -> String:
-        var def: Dictionary = {}
-        for sprout in _sprout_defs:
-                if typeof(sprout) != TYPE_DICTIONARY:
-                        continue
-                var sprout_dict: Dictionary = sprout
-                if String(sprout_dict.get("id", "")) == id:
-                        def = sprout_dict
-                        break
-        var base_stats: Dictionary = def.get("base_stats", {})
-        var base_hp := int(base_stats.get("hp", 30))
-        var base_atk := int(base_stats.get("attack", 6))
-        var hp: int = base_hp + max(0, level - 1) * 3
-        var atk: int = base_atk + max(0, level - 1)
-        return "HP %d • ATK %d" % [hp, atk]
+		var def: Dictionary = {}
+		for sprout in _sprout_defs:
+				if typeof(sprout) != TYPE_DICTIONARY:
+						continue
+				var sprout_dict: Dictionary = sprout
+				if String(sprout_dict.get("id", "")) == id:
+						def = sprout_dict
+						break
+		var base_stats: Dictionary = def.get("base_stats", {})
+		var base_hp := int(base_stats.get("hp", 30))
+		var base_atk := int(base_stats.get("attack", 6))
+		var hp: int = base_hp + max(0, level - 1) * 3
+		var atk: int = base_atk + max(0, level - 1)
+		return "HP %d • ATK %d" % [hp, atk]
 
 func _refresh_state() -> void:
-        confirm_btn.disabled = _selected.is_empty()
-        info_label.text = "Pick up to %d | Chosen: %d" % [MAX_SELECTION, _selected.size()]
+		confirm_btn.disabled = _selected.is_empty()
+		info_label.text = "Pick up to %d | Chosen: %d" % [MAX_SELECTION, _selected.size()]
 
 func _on_confirm() -> void:
-        SproutRegistry.set_last_selection(_selected)
-        emit_signal("selection_done", _selected.duplicate(true))
-        close()
+		SproutRegistry.set_last_selection(_selected)
+		emit_signal("selection_done", _selected.duplicate(true))
+		close()
 
 func _on_cancel() -> void:
-        emit_signal("cancelled")
-        close()
+		emit_signal("cancelled")
+		close()
 
 func _clear_children(node: Node) -> void:
-        for child in node.get_children():
-                child.queue_free()
+		for child in node.get_children():
+				child.queue_free()

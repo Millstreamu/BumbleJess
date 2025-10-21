@@ -21,7 +21,7 @@ func get_roster() -> Array:
 		return _roster.duplicate(true)
 
 func add_to_roster(entry: Dictionary) -> void:
-                _roster.append(entry.duplicate(true))
+				_roster.append(entry.duplicate(true))
 
 func remove_from_roster_by_index(i: int) -> void:
 		if i >= 0 and i < _roster.size():
@@ -34,20 +34,20 @@ func get_last_selection() -> Array:
 		return _last_selection.duplicate(true)
 
 func pick_for_battle(n: int) -> Array:
-                if _last_selection.size() > 0:
-                                var count: int = min(n, _last_selection.size())
-                                return _last_selection.slice(0, count)
-                var result: Array[Dictionary] = []
-                var limit: int = min(n, _roster.size())
-                for i in range(limit):
-                                result.append(_roster[i].duplicate(true))
-                return result
+				if _last_selection.size() > 0:
+								var count: int = min(n, _last_selection.size())
+								return _last_selection.slice(0, count)
+				var result: Array[Dictionary] = []
+				var limit: int = min(n, _roster.size())
+				for i in range(limit):
+								result.append(_roster[i].duplicate(true))
+				return result
 
 func _sanitize_selection(sel: Array) -> Array:
-                var result: Array[Dictionary] = []
-                var limit: int = min(sel.size(), MAX_SELECTION)
-                for i in range(limit):
-                                var entry: Variant = sel[i]
-                                if typeof(entry) == TYPE_DICTIONARY:
-                                                result.append(Dictionary(entry).duplicate(true))
-                return result
+				var result: Array[Dictionary] = []
+				var limit: int = min(sel.size(), MAX_SELECTION)
+				for i in range(limit):
+								var entry: Variant = sel[i]
+								if typeof(entry) == TYPE_DICTIONARY:
+												result.append(Dictionary(entry).duplicate(true))
+				return result
