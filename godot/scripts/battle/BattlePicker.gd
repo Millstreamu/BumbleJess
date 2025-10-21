@@ -90,7 +90,7 @@ func _try_add(roster_index: int) -> void:
                 return
         if _selected.size() >= MAX_SELECTION:
                 return
-        var entry_value := _roster[roster_index]
+        var entry_value = _roster[roster_index]
         if entry_value is not Dictionary:
                 return
         var entry: Dictionary = entry_value
