@@ -88,19 +88,26 @@ func _update_team_ready_ui() -> void:
 	start_btn.disabled = _should_disable_start()
 
 func _should_disable_start() -> bool:
-	if selected_team.size() > 0:
-		return false
-	var roster: Array = SproutRegistry.get_roster()
-	return roster.size() > 0
+        if selected_team.size() > 0:
+                return false
+        var roster: Array = SproutRegistry.get_roster()
+        return roster.is_empty()
 
 func _clamp_selection(sel: Array) -> Array:
-	var result: Array[Dictionary] = []
-	var limit: int = min(sel.size(), SLOT_COUNT)
-	for i in range(limit):
-		var entry: Variant = sel[i]
-		if typeof(entry) == TYPE_DICTIONARY:
-			result.append(Dictionary(entry).duplicate(true))
-	return result
+        var result: Array[Dictionary] = []
+        var limit: int = min(sel.size(), SLOT_COUNT)
+        for i in range(limit):
+                var entry: Variant = sel[i]
+                if typeof(entry) == TYPE_DICTIONARY:
+                        var entry_dict: Dictionary = entry
+                        var uid := String(entry_dict.get("uid", ""))
+                        if not uid.is_empty():
+                                var roster_entry := SproutRegistry.get_entry_by_uid(uid)
+                                if not roster_entry.is_empty():
+                                        result.append(roster_entry)
+                                        continue
+                        result.append(Dictionary(entry_dict).duplicate(true))
+        return result
 
 func _on_select_pressed() -> void:
 	if _picker == null:
@@ -125,33 +132,31 @@ func _on_picker_cancel() -> void:
 	pass
 
 func _build_teams() -> void:
-		left_units.clear()
-		right_units.clear()
-		var sprout_defs: Array = DataLite.load_json_array("res://data/sprouts.json")
-		var attack_defs: Array = DataLite.load_json_array("res://data/attacks.json")
-		var sprouts: Array = []
-		if selected_team.size() > 0:
-				sprouts = selected_team.duplicate(true)
-		else:
-				var registry: Node = get_tree().root.get_node_or_null("SproutRegistry")
-				if registry and registry.has_method("pick_for_battle"):
-						sprouts = registry.call("pick_for_battle", SLOT_COUNT)
-				if sprouts.is_empty():
-						for i in range(3):
-								sprouts.append({"id": "sprout.woodling", "level": 1})
-		for i in range(SLOT_COUNT):
-				var entry: Dictionary = {}
-				if i < sprouts.size() and typeof(sprouts[i]) == TYPE_DICTIONARY:
-						entry = sprouts[i]
-				left_units.append(_make_sprout_unit(entry, sprout_defs, attack_defs))
-		var turn_engine: Node = get_tree().root.get_node_or_null("TurnEngine")
-		var difficulty_scale: float = 1.0
-		if turn_engine:
-				var turn_value: Variant = turn_engine.get("turn_count")
-				if typeof(turn_value) == TYPE_INT:
-						difficulty_scale += 0.03 * max(0, int(turn_value))
-		for i in range(SLOT_COUNT):
-				right_units.append(_make_decay_unit(difficulty_scale, attack_defs))
+        left_units.clear()
+        right_units.clear()
+        var attack_defs: Array = DataLite.load_json_array("res://data/attacks.json")
+        var sprouts: Array = []
+        if selected_team.size() > 0:
+                selected_team = _clamp_selection(selected_team)
+                sprouts = selected_team.duplicate(true)
+        else:
+                sprouts = SproutRegistry.pick_for_battle(SLOT_COUNT)
+                if sprouts.is_empty():
+                        for i in range(3):
+                                sprouts.append({"id": "sprout.woodling", "level": 1})
+        for i in range(SLOT_COUNT):
+                var entry: Dictionary = {}
+                if i < sprouts.size() and typeof(sprouts[i]) == TYPE_DICTIONARY:
+                        entry = sprouts[i]
+                left_units.append(_make_unit_from_sprout(entry, true, attack_defs))
+        var turn_engine: Node = get_tree().root.get_node_or_null("TurnEngine")
+        var difficulty_scale: float = 1.0
+        if turn_engine:
+                var turn_value: Variant = turn_engine.get("turn_count")
+                if typeof(turn_value) == TYPE_INT:
+                        difficulty_scale += 0.03 * max(0, int(turn_value))
+        for i in range(SLOT_COUNT):
+                right_units.append(_make_decay_unit(difficulty_scale, attack_defs))
 
 func _populate_ui() -> void:
 	_clear_children(sprout_grid)
@@ -184,50 +189,51 @@ func _make_slot_ui(team: Array, idx: int) -> Control:
 	slot.set_meta("unit_index", idx)
 	return slot
 
-func _make_sprout_unit(entry: Dictionary, sprout_defs: Array, attack_defs: Array) -> Dictionary:
-	if entry.is_empty():
-		return _make_blank_unit("left")
-	var sprout_id: String = String(entry.get("id", ""))
-	var sprout_def: Dictionary = _find_by_id(sprout_defs, sprout_id)
-	if sprout_def.is_empty():
-		return _make_blank_unit("left")
-	var level: int = max(1, int(entry.get("level", 1)))
-	var base_stats: Dictionary = sprout_def.get("base_stats", {})
-	var base_hp: int = int(base_stats.get("hp", 30))
-	var base_attack: int = int(base_stats.get("attack", 6))
-	var attack_speed: float = float(base_stats.get("attack_speed", 1.0))
-	var hp: int = base_hp + (level - 1) * 3
-	var attack_amount: int = base_attack + (level - 1)
-	var attack_id: String = String(sprout_def.get("attack_id", ""))
-	var attack_def: Dictionary = _find_by_id(attack_defs, attack_id)
-	if attack_def.is_empty():
-		attack_def = {"id": attack_id, "effects": []}
-	attack_def = attack_def.duplicate(true)
-	var effects: Array = attack_def.get("effects", [])
-	var has_damage: bool = false
-	for i in range(effects.size()):
-		var eff: Dictionary = effects[i]
-		if String(eff.get("type", "")) == "damage":
-			eff["amount"] = attack_amount
-			effects[i] = eff
-			has_damage = true
-	if not has_damage:
-		effects.append({"type": "damage", "amount": attack_amount})
-	attack_def["effects"] = effects
-	var cooldown: float = float(attack_def.get("cooldown_sec", 1.5))
-	cooldown = cooldown / max(0.1, attack_speed)
-	cooldown = max(0.2, cooldown)
-	return {
-		"side": "left",
-		"name": String(sprout_def.get("name", "Sprout")),
-		"hp": hp,
-		"hp_max": hp,
-		"atk": attack_amount,
-		"cd": cooldown,
-		"cd_curr": 0.0,
-		"atk_def": attack_def,
-		"alive": true,
-	}
+func _make_unit_from_sprout(entry: Dictionary, is_left: bool, attack_defs: Array) -> Dictionary:
+        if entry.is_empty():
+                return _make_blank_unit(is_left ? "left" : "right")
+        var sprout_id: String = String(entry.get("id", "sprout.woodling"))
+        var level: int = max(1, int(entry.get("level", 1)))
+        var stats: Dictionary = SproutRegistry.compute_stats(sprout_id, level)
+        if stats.is_empty():
+                return _make_blank_unit(is_left ? "left" : "right")
+        var name: String = SproutRegistry.get_name(sprout_id)
+        var attack_id: String = SproutRegistry.get_attack_id(sprout_id)
+        var attack_def: Dictionary = _find_by_id(attack_defs, attack_id)
+        if attack_def.is_empty():
+                attack_def = {"id": attack_id, "effects": []}
+        else:
+                attack_def = attack_def.duplicate(true)
+        var hp: int = int(stats.get("hp", 30))
+        var attack_amount: int = int(stats.get("attack", 6))
+        var attack_speed: float = max(0.01, float(stats.get("attack_speed", 1.0)))
+        var effects: Array = attack_def.get("effects", [])
+        var has_damage: bool = false
+        for i in range(effects.size()):
+                var eff_variant: Variant = effects[i]
+                if eff_variant is Dictionary:
+                        var eff: Dictionary = eff_variant
+                        if String(eff.get("type", "")) == "damage":
+                                eff["amount"] = attack_amount
+                                effects[i] = eff
+                                has_damage = true
+        if not has_damage:
+                effects.append({"type": "damage", "amount": attack_amount})
+        attack_def["effects"] = effects
+        var base_cooldown: float = float(attack_def.get("cooldown_sec", 1.5))
+        var cooldown: float = max(0.2, base_cooldown * (1.0 / attack_speed))
+        return {
+                "side": (is_left ? "left" : "right"),
+                "name": name,
+                "hp": hp,
+                "hp_max": hp,
+                "atk": attack_amount,
+                "cd": cooldown,
+                "cd_curr": 0.0,
+                "atk_def": attack_def,
+                "alive": true,
+                "uid": String(entry.get("uid", "")),
+        }
 
 func _make_decay_unit(difficulty_scale: float, attack_defs: Array) -> Dictionary:
 		var hp: int = int(round(26.0 * max(difficulty_scale, 0.5)))
@@ -261,17 +267,18 @@ func _make_decay_unit(difficulty_scale: float, attack_defs: Array) -> Dictionary
 		}
 
 func _make_blank_unit(side: String) -> Dictionary:
-	return {
-		"side": side,
-		"name": "Empty",
-		"hp": 0,
-		"hp_max": 1,
-		"atk": 0,
-		"cd": 1.0,
-		"cd_curr": 1.0,
-		"atk_def": {"effects": []},
-		"alive": false,
-	}
+        return {
+                "side": side,
+                "name": "Empty",
+                "hp": 0,
+                "hp_max": 1,
+                "atk": 0,
+                "cd": 1.0,
+                "cd_curr": 1.0,
+                "atk_def": {"effects": []},
+                "alive": false,
+                "uid": "",
+        }
 
 func _find_by_id(data: Array, target_id: String) -> Dictionary:
 	for item in data:

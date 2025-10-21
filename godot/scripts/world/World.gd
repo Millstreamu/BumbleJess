@@ -41,21 +41,22 @@ func _calculate_hex_cell_size(px: int) -> Vector2i:
 	return Vector2i(max(horizontal_spacing, 1), max(vertical_spacing, 1))
 
 func _ready() -> void:
-	add_child(rules)
-	rules.set_world(self)
-	_ensure_hex_config()
-	_ensure_layers()
-	_build_tileset()
-	var growth_manager: Node = get_node_or_null("/root/GrowthManager")
-	if growth_manager != null:
-		growth_manager.bind_world(self)
-		var sprout_registry: Node = get_node_or_null("/root/SproutRegistry")
-		if sprout_registry != null and not growth_manager.is_connected("grove_spawned", Callable(sprout_registry, "on_grove_spawned")):
-			growth_manager.connect("grove_spawned", Callable(sprout_registry, "on_grove_spawned"))
-	_bind_resource_manager()
-	var decay_manager: Node = get_node_or_null("/root/DecayManager")
-	if decay_manager != null and decay_manager.has_method("bind_world"):
-		decay_manager.call("bind_world", self)
+        add_child(rules)
+        rules.set_world(self)
+        _ensure_hex_config()
+        _ensure_layers()
+        _build_tileset()
+        var growth_manager: Node = get_node_or_null("/root/GrowthManager")
+        if growth_manager != null:
+                growth_manager.bind_world(self)
+                var sprout_registry: Node = get_node_or_null("/root/SproutRegistry")
+                if sprout_registry != null and not growth_manager.is_connected("grove_spawned", Callable(sprout_registry, "on_grove_spawned")):
+                        growth_manager.connect("grove_spawned", Callable(sprout_registry, "on_grove_spawned"))
+        _bind_resource_manager()
+        _bind_sprout_registry()
+        var decay_manager: Node = get_node_or_null("/root/DecayManager")
+        if decay_manager != null and decay_manager.has_method("bind_world"):
+                decay_manager.call("bind_world", self)
 	_ensure_toggle_threats_action()
 	var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
 	if threat_list != null:
@@ -410,9 +411,28 @@ func world_to_map(p: Vector2) -> Vector2i:
 	return world_to_cell(p)
 
 func _setup_hud() -> void:
-	if is_instance_valid(hud):
-		hud.text = _build_hud_text("-", 0)
-	_update_resource_panel()
+        if is_instance_valid(hud):
+                hud.text = _build_hud_text("-", 0)
+        _update_resource_panel()
+
+func _bind_sprout_registry() -> void:
+        var sprout_registry: Node = get_node_or_null("/root/SproutRegistry")
+        if sprout_registry == null:
+                return
+        if not sprout_registry.is_connected("error_msg", Callable(self, "_on_sprout_error")):
+                sprout_registry.connect("error_msg", Callable(self, "_on_sprout_error"))
+        if not sprout_registry.is_connected("sprout_leveled", Callable(self, "_on_sprout_leveled")):
+                sprout_registry.connect("sprout_leveled", Callable(self, "_on_sprout_leveled"))
+
+func _on_sprout_error(text: String) -> void:
+        if has_node("HUD/DeckLabel"):
+                var label: Label = $HUD/DeckLabel
+                label.text += "\n[SPR] " + text
+
+func _on_sprout_leveled(uid: String, lvl: int) -> void:
+        if has_node("HUD/DeckLabel"):
+                var label: Label = $HUD/DeckLabel
+                label.text += "\n[SPR] " + uid + " → Lv" + str(lvl)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_toggle_threats"):
@@ -445,9 +465,12 @@ func _update_hud() -> void:
 	_update_resource_panel()
 
 func _build_hud_text(next_name: String, remaining: int) -> String:
-	var text := "Next: %s | Deck: %d" % [next_name, remaining]
-	text += "\nOvergrowth: %d | Groves: %d" % [_count_cells_named("overgrowth"), _count_cells_named("grove")]
-	return text
+        var text := "Next: %s | Deck: %d" % [next_name, remaining]
+        text += "\nOvergrowth: %d | Groves: %d" % [_count_cells_named("overgrowth"), _count_cells_named("grove")]
+        var resource_manager: Node = _get_resource_manager()
+        if resource_manager != null:
+                text += "\nSoul Seeds: %d" % [int(resource_manager.get("soul_seeds"))]
+        return text
 
 func _update_resource_panel() -> void:
 	if not is_instance_valid(resources_panel):
