@@ -88,26 +88,26 @@ func _update_team_ready_ui() -> void:
 	start_btn.disabled = _should_disable_start()
 
 func _should_disable_start() -> bool:
-		if selected_team.size() > 0:
-				return false
-		var roster: Array = SproutRegistry.get_roster()
-		return roster.is_empty()
+	if selected_team.size() > 0:
+		return false
+	var roster: Array = SproutRegistry.get_roster()
+	return roster.is_empty()
 
 func _clamp_selection(sel: Array) -> Array[Dictionary]:
-		var result: Array[Dictionary] = []
-		var limit: int = min(sel.size(), SLOT_COUNT)
-		for i in range(limit):
-				var entry: Variant = sel[i]
-				if typeof(entry) == TYPE_DICTIONARY:
-						var entry_dict: Dictionary = entry
-						var uid := String(entry_dict.get("uid", ""))
-						if not uid.is_empty():
-								var roster_entry := SproutRegistry.get_entry_by_uid(uid)
-								if not roster_entry.is_empty():
-										result.append(roster_entry)
-										continue
-						result.append(Dictionary(entry_dict).duplicate(true))
-		return result
+	var result: Array[Dictionary] = []
+	var limit: int = min(sel.size(), SLOT_COUNT)
+	for i in range(limit):
+		var entry: Variant = sel[i]
+		if typeof(entry) == TYPE_DICTIONARY:
+			var entry_dict: Dictionary = entry
+			var uid := String(entry_dict.get("uid", ""))
+			if not uid.is_empty():
+				var roster_entry: Dictionary = SproutRegistry.get_entry_by_uid(uid)
+				if not roster_entry.is_empty():
+					result.append(roster_entry)
+					continue
+			result.append(Dictionary(entry_dict).duplicate(true))
+	return result
 
 func _on_select_pressed() -> void:
 	if _picker == null:
@@ -414,3 +414,4 @@ func _finish(state: String) -> void:
 		"target_cell": encounter.get("target", Vector2i.ZERO),
 	}
 	emit_signal("battle_finished", result)
+
