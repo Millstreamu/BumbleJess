@@ -14,17 +14,17 @@ signal window_closed
 
 var encounter: Dictionary = {}
 var on_finish: Callable = Callable()
-var running := false
-var time_limit := 30.0
-var elapsed := 0.0
+var running: bool = false
+var time_limit: float = 30.0
+var elapsed: float = 0.0
 
-var left_units: Array = []
-var right_units: Array = []
-var selected_team: Array = []
+var left_units: Array[Dictionary] = []
+var right_units: Array[Dictionary] = []
+var selected_team: Array[Dictionary] = []
 var _picker: BattlePicker
 
 const SLOT_COUNT := 6
-const FRONT_INDICES := PackedInt32Array([0, 1, 2])
+const FRONT_INDICES: Array[int] = [0, 1, 2]
 const UNIT_SLOT_SCENE := preload("res://scenes/battle/UnitSlot.tscn")
 const LIFE_REWARD := 3
 
@@ -63,7 +63,7 @@ func _process(delta: float) -> void:
         _tick_cooldowns(delta)
         _auto_attacks()
         _refresh_ui()
-        var state := _check_end()
+        var state: String = _check_end()
         if state != "":
                 _finish(state)
         elif elapsed >= time_limit:
@@ -94,19 +94,19 @@ func _should_disable_start() -> bool:
         return roster.size() > 0
 
 func _clamp_selection(sel: Array) -> Array:
-        var result: Array = []
-        var limit := min(sel.size(), SLOT_COUNT)
+        var result: Array[Dictionary] = []
+        var limit: int = min(sel.size(), SLOT_COUNT)
         for i in range(limit):
-                var entry := sel[i]
+                var entry: Variant = sel[i]
                 if typeof(entry) == TYPE_DICTIONARY:
-                        result.append(entry.duplicate(true))
+                        result.append(Dictionary(entry).duplicate(true))
         return result
 
 func _on_select_pressed() -> void:
         if _picker == null:
-                var scene := load("res://scenes/battle/BattlePicker.tscn") as PackedScene
+                var scene: PackedScene = load("res://scenes/battle/BattlePicker.tscn") as PackedScene
                 _picker = scene.instantiate()
-                var parent := get_tree().current_scene
+                var parent: Node = get_tree().current_scene
                 if parent == null:
                         parent = get_tree().root
                 parent.add_child(_picker)
@@ -133,7 +133,7 @@ func _build_teams() -> void:
         if selected_team.size() > 0:
                 sprouts = selected_team.duplicate(true)
         else:
-                var registry := get_tree().root.get_node_or_null("SproutRegistry")
+                var registry: Node = get_tree().root.get_node_or_null("SproutRegistry")
                 if registry and registry.has_method("pick_for_battle"):
                         sprouts = registry.call("pick_for_battle", SLOT_COUNT)
                 if sprouts.is_empty():
@@ -144,10 +144,10 @@ func _build_teams() -> void:
                 if i < sprouts.size() and typeof(sprouts[i]) == TYPE_DICTIONARY:
                         entry = sprouts[i]
                 left_units.append(_make_sprout_unit(entry, sprout_defs, attack_defs))
-        var turn_engine := get_tree().root.get_node_or_null("TurnEngine")
-        var scale := 1.0
+        var turn_engine: Node = get_tree().root.get_node_or_null("TurnEngine")
+        var scale: float = 1.0
         if turn_engine:
-                var turn_value := turn_engine.get("turn_count")
+                var turn_value: Variant = turn_engine.get("turn_count")
                 if typeof(turn_value) == TYPE_INT:
                         scale += 0.03 * max(0, int(turn_value))
         for i in range(SLOT_COUNT):
@@ -165,15 +165,15 @@ func _clear_children(container: Node) -> void:
                 child.queue_free()
 
 func _make_slot_ui(team: Array, idx: int) -> Control:
-        var slot := UNIT_SLOT_SCENE.instantiate()
+        var slot: Control = UNIT_SLOT_SCENE.instantiate()
         var unit: Dictionary = team[idx]
-        var name_label: Label = slot.get_node("Name")
+        var name_label: Label = slot.get_node("Name") as Label
         name_label.text = unit.get("name", "Empty")
-        var hp_bar: TextureProgressBar = slot.get_node("HP")
+        var hp_bar: TextureProgressBar = slot.get_node("HP") as TextureProgressBar
         hp_bar.min_value = 0
         hp_bar.max_value = 100
         hp_bar.value = 100 if unit.get("alive", false) else 0
-        var cd_bar: TextureProgressBar = slot.get_node("CD")
+        var cd_bar: TextureProgressBar = slot.get_node("CD") as TextureProgressBar
         cd_bar.min_value = 0
         cd_bar.max_value = 100
         cd_bar.value = 0
@@ -187,24 +187,24 @@ func _make_slot_ui(team: Array, idx: int) -> Control:
 func _make_sprout_unit(entry: Dictionary, sprout_defs: Array, attack_defs: Array) -> Dictionary:
         if entry.is_empty():
                 return _make_blank_unit("left")
-        var sprout_id := String(entry.get("id", ""))
-        var sprout_def := _find_by_id(sprout_defs, sprout_id)
+        var sprout_id: String = String(entry.get("id", ""))
+        var sprout_def: Dictionary = _find_by_id(sprout_defs, sprout_id)
         if sprout_def.is_empty():
                 return _make_blank_unit("left")
-        var level := max(1, int(entry.get("level", 1)))
+        var level: int = max(1, int(entry.get("level", 1)))
         var base_stats: Dictionary = sprout_def.get("base_stats", {})
-        var base_hp := int(base_stats.get("hp", 30))
-        var base_attack := int(base_stats.get("attack", 6))
-        var attack_speed := float(base_stats.get("attack_speed", 1.0))
-        var hp := base_hp + (level - 1) * 3
-        var attack_amount := base_attack + (level - 1)
-        var attack_id := String(sprout_def.get("attack_id", ""))
-        var attack_def := _find_by_id(attack_defs, attack_id)
+        var base_hp: int = int(base_stats.get("hp", 30))
+        var base_attack: int = int(base_stats.get("attack", 6))
+        var attack_speed: float = float(base_stats.get("attack_speed", 1.0))
+        var hp: int = base_hp + (level - 1) * 3
+        var attack_amount: int = base_attack + (level - 1)
+        var attack_id: String = String(sprout_def.get("attack_id", ""))
+        var attack_def: Dictionary = _find_by_id(attack_defs, attack_id)
         if attack_def.is_empty():
                 attack_def = {"id": attack_id, "effects": []}
         attack_def = attack_def.duplicate(true)
         var effects: Array = attack_def.get("effects", [])
-        var has_damage := false
+        var has_damage: bool = false
         for i in range(effects.size()):
                 var eff: Dictionary = effects[i]
                 if String(eff.get("type", "")) == "damage":
@@ -214,7 +214,7 @@ func _make_sprout_unit(entry: Dictionary, sprout_defs: Array, attack_defs: Array
         if not has_damage:
                 effects.append({"type": "damage", "amount": attack_amount})
         attack_def["effects"] = effects
-        var cooldown := float(attack_def.get("cooldown_sec", 1.5))
+        var cooldown: float = float(attack_def.get("cooldown_sec", 1.5))
         cooldown = cooldown / max(0.1, attack_speed)
         cooldown = max(0.2, cooldown)
         return {
@@ -230,14 +230,14 @@ func _make_sprout_unit(entry: Dictionary, sprout_defs: Array, attack_defs: Array
         }
 
 func _make_decay_unit(scale: float, attack_defs: Array) -> Dictionary:
-        var hp := int(round(26.0 * max(scale, 0.5)))
-        var attack_amount := int(round(5.0 * max(scale, 0.5)))
-        var attack_def := _find_by_id(attack_defs, "atk.smog_bite")
+        var hp: int = int(round(26.0 * max(scale, 0.5)))
+        var attack_amount: int = int(round(5.0 * max(scale, 0.5)))
+        var attack_def: Dictionary = _find_by_id(attack_defs, "atk.smog_bite")
         if attack_def.is_empty():
                 attack_def = {"id": "atk.smog_bite", "effects": []}
         attack_def = attack_def.duplicate(true)
         var effects: Array = attack_def.get("effects", [])
-        var has_damage := false
+        var has_damage: bool = false
         for i in range(effects.size()):
                 var eff: Dictionary = effects[i]
                 if String(eff.get("type", "")) == "damage":
@@ -247,7 +247,7 @@ func _make_decay_unit(scale: float, attack_defs: Array) -> Dictionary:
         if not has_damage:
                 effects.append({"type": "damage", "amount": attack_amount})
         attack_def["effects"] = effects
-        var cooldown := float(attack_def.get("cooldown_sec", 1.8))
+        var cooldown: float = float(attack_def.get("cooldown_sec", 1.8))
         return {
                 "side": "right",
                 "name": "Smogling",
@@ -294,7 +294,7 @@ func _auto_attacks() -> void:
                         continue
                 if attacker.get("cd_curr", 0.0) > 0.0:
                         continue
-                var target_idx := _pick_target(right_units)
+                var target_idx: int = _pick_target(right_units)
                 if target_idx >= 0:
                         _apply_attack(attacker, right_units[target_idx], decay_grid.get_child(target_idx))
                         attacker["cd_curr"] = float(attacker.get("cd", 1.0))
@@ -304,7 +304,7 @@ func _auto_attacks() -> void:
                         continue
                 if attacker.get("cd_curr", 0.0) > 0.0:
                         continue
-                var target_idx := _pick_target(left_units)
+                var target_idx: int = _pick_target(left_units)
                 if target_idx >= 0:
                         _apply_attack(attacker, left_units[target_idx], sprout_grid.get_child(target_idx))
                         attacker["cd_curr"] = float(attacker.get("cd", 1.0))
@@ -320,7 +320,7 @@ func _pick_target(team: Array) -> int:
 
 func _apply_attack(attacker: Dictionary, defender: Dictionary, slot_ui: Node) -> void:
         var attack_def: Dictionary = attacker.get("atk_def", {})
-        var damage := 0
+        var damage: int = 0
         for eff in attack_def.get("effects", []):
                 if String(eff.get("type", "")) == "damage":
                         damage += int(eff.get("amount", 0))
@@ -336,45 +336,45 @@ func _apply_attack(attacker: Dictionary, defender: Dictionary, slot_ui: Node) ->
 func _pop_text(slot_ui: Node, text: String) -> void:
         if slot_ui == null:
                 return
-        var label: Label = slot_ui.get_node_or_null("DmgPop")
+        var label: Label = slot_ui.get_node_or_null("DmgPop") as Label
         if label == null:
                 return
         label.text = text
         label.modulate.a = 1.0
-        var tween := slot_ui.create_tween()
+        var tween: Tween = slot_ui.create_tween()
         tween.tween_property(label, "modulate:a", 0.0, 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 func _refresh_ui() -> void:
         for i in range(SLOT_COUNT):
                 var left_unit: Dictionary = left_units[i]
-                var slot := sprout_grid.get_child(i)
+                var slot: Node = sprout_grid.get_child(i)
                 _update_slot(slot, left_unit)
                 var right_unit: Dictionary = right_units[i]
-                var right_slot := decay_grid.get_child(i)
+                var right_slot: Node = decay_grid.get_child(i)
                 _update_slot(right_slot, right_unit)
 
 func _update_slot(slot: Node, unit: Dictionary) -> void:
         if slot == null:
                 return
-        var name_label: Label = slot.get_node_or_null("Name")
+        var name_label: Label = slot.get_node_or_null("Name") as Label
         if name_label:
-                var name := String(unit.get("name", ""))
+                var name: String = String(unit.get("name", ""))
                 if not unit.get("alive", false) and unit.get("hp", 0) <= 0:
                         name += " (X)"
                 name_label.text = name
-        var hp_bar: TextureProgressBar = slot.get_node_or_null("HP")
+        var hp_bar: TextureProgressBar = slot.get_node_or_null("HP") as TextureProgressBar
         if hp_bar:
-                var hp_max := max(1.0, float(unit.get("hp_max", 1)))
+                var hp_max: float = max(1.0, float(unit.get("hp_max", 1)))
                 hp_bar.value = clamp(int((float(unit.get("hp", 0)) / hp_max) * 100.0), 0, 100)
-        var cd_bar: TextureProgressBar = slot.get_node_or_null("CD")
+        var cd_bar: TextureProgressBar = slot.get_node_or_null("CD") as TextureProgressBar
         if cd_bar:
-                var cd := max(0.01, float(unit.get("cd", 1.0)))
-                var cd_curr := clamp(float(unit.get("cd_curr", 0.0)) / cd, 0.0, 1.0)
+                var cd: float = max(0.01, float(unit.get("cd", 1.0)))
+                var cd_curr: float = clamp(float(unit.get("cd_curr", 0.0)) / cd, 0.0, 1.0)
                 cd_bar.value = int((1.0 - cd_curr) * 100.0)
 
 func _check_end() -> String:
-        var left_alive := false
-        var right_alive := false
+        var left_alive: bool = false
+        var right_alive: bool = false
         for unit in left_units:
                 if unit.get("alive", false):
                         left_alive = true
@@ -395,9 +395,9 @@ func _finish(state: String) -> void:
         close_btn.disabled = false
         status_label.text = state.capitalize()
         _refresh_ui()
-        var victory := state == "victory"
-        var rewards := {"life": LIFE_REWARD if victory else 0}
-        var result := {
+        var victory: bool = state == "victory"
+        var rewards: Dictionary = {"life": LIFE_REWARD if victory else 0}
+        var result: Dictionary = {
                 "victory": victory,
                 "outcome": state,
                 "rewards": rewards,
