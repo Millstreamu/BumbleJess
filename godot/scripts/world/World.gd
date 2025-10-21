@@ -481,19 +481,19 @@ func _on_sprout_leveled(uid: String, lvl: int) -> void:
 				label.text += "\n[SPR] " + uid + " → Lv" + str(lvl)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_toggle_sprout_register"):
-	        _toggle_sprout_register()
-	        var sr_viewport := get_viewport()
-	        if sr_viewport != null:
-	                sr_viewport.set_input_as_handled()
-	        return
-        if event.is_action_pressed("ui_toggle_threats"):
-                var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
-                if threat_list != null:
-                        threat_list.visible = not threat_list.visible
-                        var threat_viewport := get_viewport()
-                        if threat_viewport != null:
-                                threat_viewport.set_input_as_handled()
+		if event.is_action_pressed("ui_toggle_sprout_register"):
+			_toggle_sprout_register()
+			var sr_viewport := get_viewport()
+			if sr_viewport != null:
+				sr_viewport.set_input_as_handled()
+			return
+		if event.is_action_pressed("ui_toggle_threats"):
+			var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
+			if threat_list != null:
+				threat_list.visible = not threat_list.visible
+				var threat_viewport := get_viewport()
+				if threat_viewport != null:
+					threat_viewport.set_input_as_handled()
 
 func update_hud(next_name: String, remaining: int) -> void:
 	if is_instance_valid(hud):
