@@ -6,6 +6,7 @@ const LAYER_LIFE := 2
 const LAYER_FX := 3
 
 const SPROUT_REGISTER_SCENE := preload("res://scenes/battle/BattlePicker.tscn")
+const TILE_CHOICE_WINDOW_SCENE := preload("res://scenes/ui/TileChoiceWindow.tscn")
 
 @export var width := 16 : set = set_width
 @export var height := 12 : set = set_height
@@ -31,6 +32,9 @@ var rules: PlacementRules = PlacementRules.new()
 var turn := 0
 var _cell_metadata: Dictionary = {}
 var _sprout_picker: BattlePicker = null
+var _tile_choice_window: TileChoiceWindow = null
+var _special_queue: Array[String] = []
+var _placing_special: String = ""
 
 func _get_resource_manager() -> Node:
 	return get_node_or_null("/root/ResourceManager")
@@ -117,10 +121,10 @@ func _ensure_toggle_cluster_fx_action() -> void:
                         InputMap.action_add_event(action, event)
 
 func _ensure_sprout_picker() -> void:
-	if is_instance_valid(_sprout_picker):
-			return
-	if SPROUT_REGISTER_SCENE == null:
-			return
+        if is_instance_valid(_sprout_picker):
+                        return
+        if SPROUT_REGISTER_SCENE == null:
+                        return
 	var picker_instance := SPROUT_REGISTER_SCENE.instantiate()
 	if picker_instance == null:
 			return
@@ -131,8 +135,19 @@ func _ensure_sprout_picker() -> void:
 	var parent: Node = get_tree().current_scene
 	if parent == null:
 			parent = get_tree().root
-	parent.add_child(picker)
-	_sprout_picker = picker
+        parent.add_child(picker)
+        _sprout_picker = picker
+
+func _ensure_tile_choice_window() -> void:
+        if is_instance_valid(_tile_choice_window):
+                return
+        if TILE_CHOICE_WINDOW_SCENE == null:
+                return
+        var instance := TILE_CHOICE_WINDOW_SCENE.instantiate()
+        if instance == null:
+                return
+        add_child(instance)
+        _tile_choice_window = instance as TileChoiceWindow
 
 func _toggle_sprout_register() -> void:
 	_ensure_sprout_picker()
@@ -438,47 +453,96 @@ func draw_debug_grid() -> void:
 			grid.add_child(marker)
 
 func can_place_at(cell: Vector2i) -> bool:
-	if DeckManager.peek().is_empty():
-		return false
-	return rules.can_place(self, cell)
+        if not _placing_special.is_empty():
+                return rules.can_place(self, cell)
+        if DeckManager.peek().is_empty():
+                return false
+        return rules.can_place(self, cell)
 
 func attempt_place_at(cell: Vector2i) -> void:
-	if not can_place_at(cell):
-		return
-	place_current_tile(cell)
+        if not can_place_at(cell):
+                return
+        place_current_tile(cell)
 
 func place_current_tile(cell: Vector2i) -> void:
-	if DeckManager.next_tile_id.is_empty():
-		return
-	if not rules.can_place(self, cell):
-		return
-	var tile_id: String = DeckManager.next_tile_id
-	var category: String = id_to_category(tile_id)
-	if category.is_empty():
-		return
-	set_cell_named(LAYER_LIFE, cell, category)
-	set_cell_tile_id(LAYER_LIFE, cell, tile_id)
-	rules.mark_occupied(cell)
-	turn += 1
-	DeckManager.draw_one()
-	update_hud(DeckManager.peek_name(), DeckManager.remaining())
-	if is_instance_valid(cursor):
-		cursor.update_highlight_state()
-	var growth_manager: Node = get_node_or_null("/root/GrowthManager")
-	if growth_manager != null and growth_manager.has_method("request_growth_update"):
-		growth_manager.request_growth_update(turn)
-	var resource_manager: Node = _get_resource_manager()
-	if resource_manager != null:
-		resource_manager.emit_signal("resources_changed")
-	var turn_engine: Node = _get_turn_engine()
-	if turn_engine != null:
-		turn_engine.call("advance_one_turn")
-	else:
-		var game_singleton: Object = null
-		if Engine.has_singleton("Game"):
-			game_singleton = Engine.get_singleton("Game")
-		if game_singleton != null and game_singleton.has_method("advance_one_turn"):
-			game_singleton.call("advance_one_turn")
+        if not _placing_special.is_empty():
+                if not rules.can_place(self, cell):
+                        return
+                var special_id := _placing_special
+                if special_id.is_empty():
+                        return
+                if _place_tile(cell, special_id, false):
+                        _placing_special = ""
+                        _dequeue_next_special()
+                return
+
+        if DeckManager.next_tile_id.is_empty():
+                return
+        if not rules.can_place(self, cell):
+                return
+        var tile_id: String = DeckManager.next_tile_id
+        if tile_id.is_empty():
+                return
+        _place_tile(cell, tile_id, true)
+
+func _place_tile(cell: Vector2i, tile_id: String, draw_from_deck: bool) -> bool:
+        var category: String = id_to_category(tile_id)
+        if category.is_empty():
+                return false
+        set_cell_named(LAYER_LIFE, cell, category)
+        set_cell_tile_id(LAYER_LIFE, cell, tile_id)
+        rules.mark_occupied(cell)
+        _finalize_tile_placement(draw_from_deck)
+        return true
+
+func _finalize_tile_placement(draw_from_deck: bool) -> void:
+        turn += 1
+        if draw_from_deck:
+                DeckManager.draw_one()
+                update_hud(DeckManager.peek_name(), DeckManager.remaining())
+        else:
+                _update_hud()
+        if is_instance_valid(cursor):
+                cursor.update_highlight_state()
+        var growth_manager: Node = get_node_or_null("/root/GrowthManager")
+        if growth_manager != null and growth_manager.has_method("request_growth_update"):
+                growth_manager.request_growth_update(turn)
+        var resource_manager: Node = _get_resource_manager()
+        if resource_manager != null:
+                resource_manager.emit_signal("resources_changed")
+        _advance_turn()
+
+func _on_special_now(tile_id: String) -> void:
+        _special_queue.append(String(tile_id))
+        if _placing_special.is_empty():
+                _dequeue_next_special()
+
+func _dequeue_next_special() -> void:
+        if _special_queue.is_empty():
+                _placing_special = ""
+                _update_hud()
+                if is_instance_valid(cursor):
+                        cursor.update_highlight_state()
+                return
+        var next_id_variant = _special_queue.pop_front()
+        _placing_special = String(next_id_variant)
+        _update_hud()
+        if is_instance_valid(cursor):
+                cursor.update_highlight_state()
+
+func _advance_turn() -> void:
+        var turn_engine: Node = _get_turn_engine()
+        if turn_engine != null:
+                turn_engine.call("advance_one_turn")
+                return
+        var game_singleton: Object = null
+        if Engine.has_singleton("Game"):
+                game_singleton = Engine.get_singleton("Game")
+        if game_singleton != null and game_singleton.has_method("advance_one_turn"):
+                game_singleton.call("advance_one_turn")
+
+func _on_totem_tier_changed(_tier_value: int) -> void:
+        _update_hud()
 
 func world_to_map(p: Vector2) -> Vector2i:
 	return world_to_cell(p)
@@ -489,13 +553,23 @@ func _setup_hud() -> void:
 		_update_resource_panel()
 
 func _bind_sprout_registry() -> void:
-		var sprout_registry: Node = get_node_or_null("/root/SproutRegistry")
-		if sprout_registry == null:
-				return
-		if not sprout_registry.is_connected("error_msg", Callable(self, "_on_sprout_error")):
-				sprout_registry.connect("error_msg", Callable(self, "_on_sprout_error"))
-		if not sprout_registry.is_connected("sprout_leveled", Callable(self, "_on_sprout_leveled")):
-				sprout_registry.connect("sprout_leveled", Callable(self, "_on_sprout_leveled"))
+                var sprout_registry: Node = get_node_or_null("/root/SproutRegistry")
+                if sprout_registry == null:
+                                return
+                if not sprout_registry.is_connected("error_msg", Callable(self, "_on_sprout_error")):
+                                sprout_registry.connect("error_msg", Callable(self, "_on_sprout_error"))
+                if not sprout_registry.is_connected("sprout_leveled", Callable(self, "_on_sprout_leveled")):
+                                sprout_registry.connect("sprout_leveled", Callable(self, "_on_sprout_leveled"))
+
+func _bind_tile_gen() -> void:
+        if TileGen == null:
+                return
+        TileGen.bind_world(self)
+        if not TileGen.is_connected("special_to_place_now", Callable(self, "_on_special_now")):
+                TileGen.connect("special_to_place_now", Callable(self, "_on_special_now"))
+        if not TileGen.is_connected("totem_tier_changed", Callable(self, "_on_totem_tier_changed")):
+                TileGen.connect("totem_tier_changed", Callable(self, "_on_totem_tier_changed"))
+        _ensure_tile_choice_window()
 
 func _on_sprout_error(text: String) -> void:
 		if has_node("HUD/DeckLabel"):
@@ -538,10 +612,10 @@ func update_hud(next_name: String, remaining: int) -> void:
 	_update_resource_panel()
 
 func _update_hud() -> void:
-	if not is_instance_valid(hud):
-		return
-	var tile_id: String = DeckManager.peek()
-	var remaining: int = DeckManager.remaining()
+        if not is_instance_valid(hud):
+                return
+        var tile_id: String = DeckManager.peek()
+        var remaining: int = DeckManager.remaining()
 	var display_name: String = "-"
 	if not tile_id.is_empty():
 		var tile_name: String = DeckManager.peek_name()
@@ -550,16 +624,36 @@ func _update_hud() -> void:
 			display_name = tile_name
 		else:
 			display_name = "%s (%s)" % [tile_name, category]
-	hud.text = _build_hud_text(display_name, remaining)
-	_update_resource_panel()
+        hud.text = _build_hud_text(display_name, remaining)
+        _update_resource_panel()
 
 func _build_hud_text(next_name: String, remaining: int) -> String:
-		var text := "Next: %s | Deck: %d" % [next_name, remaining]
-		text += "\nOvergrowth: %d | Groves: %d" % [_count_cells_named("overgrowth"), _count_cells_named("grove")]
-		var resource_manager: Node = _get_resource_manager()
-		if resource_manager != null:
-				text += "\nSoul Seeds: %d" % [int(resource_manager.get("soul_seeds"))]
-		return text
+        var lines: Array[String] = []
+        lines.append("Next: %s | Deck: %d" % [next_name, remaining])
+        var totem_line := _totem_status_line()
+        if not totem_line.is_empty():
+                lines.append(totem_line)
+        if not _placing_special.is_empty():
+                var display_name := id_to_name(_placing_special)
+                if display_name.is_empty():
+                        display_name = _placing_special
+                lines.append("Place SPECIAL: %s" % display_name)
+        lines.append("Overgrowth: %d | Groves: %d" % [_count_cells_named("overgrowth"), _count_cells_named("grove")])
+        var resource_manager: Node = _get_resource_manager()
+        if resource_manager != null:
+                var soul_variant = resource_manager.get("soul_seeds")
+                lines.append("Soul Seeds: %d" % [int(soul_variant)])
+        return "\n".join(lines)
+
+func _totem_status_line() -> String:
+        if TileGen == null:
+                return ""
+        var parts: Array[String] = []
+        parts.append("Totem Tier: %d" % TileGen.get_tier())
+        var next_turn := TileGen.get_next_choice_turn()
+        if next_turn > 0:
+                parts.append("Next Pack Turn: %d" % next_turn)
+        return " | ".join(parts)
 
 func _update_resource_panel() -> void:
 	if not is_instance_valid(resources_panel):
