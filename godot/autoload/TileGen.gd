@@ -1,4 +1,3 @@
-
 extends Node
 
 signal tile_choice_ready(choices: Array)
@@ -18,6 +17,7 @@ var _special_forced_place: bool = true
 var _last_picks: Array = []
 var _turn_source: Node = null
 var _last_choice_turn: int = 0
+
 
 func _ready() -> void:
 	_totems = DataLite.load_json_array("res://data/totems.json")
@@ -39,14 +39,17 @@ func _ready() -> void:
 		if not _turn_source.is_connected("phase_started", Callable(self, "_on_phase_started")):
 			_turn_source.connect("phase_started", Callable(self, "_on_phase_started"))
 
+
 func bind_world(world: Node) -> void:
 	_world = world
+
 
 func _locate_turn_source() -> Node:
 	var turn_node: Node = get_node_or_null("/root/TurnEngine")
 	if turn_node == null:
 		turn_node = get_node_or_null("/root/Game")
 	return turn_node
+
 
 func _load_totem(id: String) -> void:
 	var totem_def := _get_totem_def(id)
@@ -57,6 +60,7 @@ func _load_totem(id: String) -> void:
 	_choice_def = choices_variant if choices_variant is Array else []
 	_special_forced_place = bool(gen.get("special_forced_place", true))
 
+
 func set_totem(id: String, tier: int = 1) -> void:
 	_totem_id = id
 	_load_totem(id)
@@ -64,11 +68,14 @@ func set_totem(id: String, tier: int = 1) -> void:
 	_tier = clamp(tier, 1, max_tier)
 	emit_signal("totem_tier_changed", _tier)
 
+
 func get_tier() -> int:
 	return _tier
 
+
 func get_interval() -> int:
 	return _interval
+
 
 func get_next_choice_turn() -> int:
 	var interval := _interval
@@ -84,6 +91,7 @@ func get_next_choice_turn() -> int:
 		return current_turn + interval
 	return current_turn + (interval - mod)
 
+
 func _on_phase_started(phase_name: String) -> void:
 	if phase_name != "tile_gen":
 		return
@@ -97,6 +105,7 @@ func _on_phase_started(phase_name: String) -> void:
 	if turn % _interval != 0:
 		return
 	_roll_and_emit_choices(turn)
+
 
 func _roll_and_emit_choices(turn: int) -> void:
 	var bag: Array[String] = []
@@ -123,7 +132,7 @@ func _roll_and_emit_choices(turn: int) -> void:
 			break
 		if seen.has(pack_id):
 			continue
-		var pack_variant = _packs_by_id.get(pack_id, null)
+		var pack_variant: Variant = _packs_by_id.get(pack_id, null)
 		if not (pack_variant is Dictionary):
 			continue
 		var pack: Dictionary = (pack_variant as Dictionary).duplicate(true)
@@ -136,6 +145,7 @@ func _roll_and_emit_choices(turn: int) -> void:
 	_last_choice_turn = turn
 	emit_signal("tile_choice_ready", _last_picks)
 
+
 func choose_index(i: int) -> void:
 	if i < 0 or i >= _last_picks.size():
 		return
@@ -147,11 +157,13 @@ func choose_index(i: int) -> void:
 	emit_signal("tile_choice_ready", [])
 	_inject_pack(pack)
 
+
 func skip() -> void:
 	if _last_picks.is_empty():
 		return
 	_last_picks.clear()
 	emit_signal("tile_choice_ready", [])
+
 
 func _inject_pack(pack: Dictionary) -> void:
 	var tiles_variant: Variant = pack.get("tiles", [])
@@ -167,20 +179,23 @@ func _inject_pack(pack: Dictionary) -> void:
 		for special_variant in specials:
 			emit_signal("special_to_place_now", String(special_variant))
 
+
 func _update_world_hud() -> void:
 	if _world == null:
 		return
 	if _world.has_method("update_hud"):
 		_world.call("update_hud", DeckManager.peek_name(), DeckManager.remaining())
 
+
 func can_evolve() -> bool:
 	return _tier < _get_max_tier()
+
 
 func next_evolve_cost() -> int:
 	if not can_evolve():
 		return -1
-	var evolution := _get_totem_def(_totem_id).get("evolution", {})
-	var evo_dict: Dictionary = evolution if evolution is Dictionary else {}
+	var evolution_variant: Variant = _get_totem_def(_totem_id).get("evolution", {})
+	var evo_dict: Dictionary = evolution_variant if evolution_variant is Dictionary else {}
 	var costs_variant: Variant = evo_dict.get("life_essence_costs", [])
 	var costs: Array = costs_variant if costs_variant is Array else []
 	var next_tier := _tier + 1
@@ -188,6 +203,7 @@ func next_evolve_cost() -> int:
 	if costs.is_empty():
 		return -1
 	return int(costs[index])
+
 
 func can_afford_next_evolve() -> bool:
 	var cost := next_evolve_cost()
@@ -199,6 +215,7 @@ func can_afford_next_evolve() -> bool:
 	if not resource_manager.has_method("get_amount"):
 		return false
 	return int(resource_manager.call("get_amount", "life")) >= cost
+
 
 func evolve() -> bool:
 	if not can_evolve():
@@ -215,6 +232,7 @@ func evolve() -> bool:
 	emit_signal("totem_tier_changed", _tier)
 	return true
 
+
 func _get_totem_def(id: String) -> Dictionary:
 	for entry_variant in _totems:
 		if not (entry_variant is Dictionary):
@@ -224,10 +242,12 @@ func _get_totem_def(id: String) -> Dictionary:
 			return entry
 	return {}
 
+
 func _get_max_tier() -> int:
-	var evolution := _get_totem_def(_totem_id).get("evolution", {})
-	var evo_dict: Dictionary = evolution if evolution is Dictionary else {}
+	var evolution_variant: Variant = _get_totem_def(_totem_id).get("evolution", {})
+	var evo_dict: Dictionary = evolution_variant if evolution_variant is Dictionary else {}
 	return int(evo_dict.get("tier_max", 5))
+
 
 func _get_turn_count() -> int:
 	if _turn_source == null:
@@ -247,6 +267,7 @@ func _get_turn_count() -> int:
 		if typeof(world_turn) == TYPE_FLOAT:
 			return int(world_turn)
 	return 0
+
 
 func _get_resource_manager() -> Node:
 	return get_node_or_null("/root/ResourceManager")
