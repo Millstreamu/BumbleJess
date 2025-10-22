@@ -186,10 +186,10 @@ func _ensure_cluster_fx_tile(cl_id: int) -> String:
 		return String(_fx_name_for_cluster[cl_id])
 	var name := "fx_cluster_%d" % cl_id
 	var col := _cluster_color(cl_id)
-        if _world != null and _world.has_method("tileset_add_named_color"):
-                _world.tileset_add_named_color(name, col)
-        _fx_name_for_cluster[cl_id] = name
-        return name
+	if _world != null and _world.has_method("tileset_add_named_color"):
+		_world.tileset_add_named_color(name, col)
+	_fx_name_for_cluster[cl_id] = name
+	return name
 
 
 func _reapply_threat_fx() -> void:
