@@ -57,24 +57,25 @@ func _ready() -> void:
 			growth_manager.connect("grove_spawned", Callable(sprout_registry, "on_grove_spawned"))
 	_bind_resource_manager()
 	_bind_sprout_registry()
-	var decay_manager: Node = get_node_or_null("/root/DecayManager")
-	if decay_manager != null and decay_manager.has_method("bind_world"):
-			decay_manager.call("bind_world", self)
-	_ensure_toggle_threats_action()
-	_ensure_toggle_sprout_register_action()
-	var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
-	if threat_list != null:
-		threat_list.visible = false
+        var decay_manager: Node = get_node_or_null("/root/DecayManager")
+        if decay_manager != null and decay_manager.has_method("bind_world"):
+                        decay_manager.call("bind_world", self)
+        _ensure_toggle_threats_action()
+        _ensure_toggle_sprout_register_action()
+        _ensure_toggle_cluster_fx_action()
+        var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
+        if threat_list != null:
+                threat_list.visible = false
 	_is_ready = true
 	draw_debug_grid()
 	_setup_hud()
 	_update_hud()
 
 func _ensure_toggle_threats_action() -> void:
-	var action := "ui_toggle_threats"
-	if not InputMap.has_action(action):
-			InputMap.add_action(action)
-	var has_event := false
+        var action := "ui_toggle_threats"
+        if not InputMap.has_action(action):
+                        InputMap.add_action(action)
+        var has_event := false
 	for existing_event in InputMap.action_get_events(action):
 			if existing_event is InputEventKey and existing_event.physical_keycode == Key.KEY_T:
 					has_event = true
@@ -83,11 +84,11 @@ func _ensure_toggle_threats_action() -> void:
 			var event := InputEventKey.new()
 			event.physical_keycode = Key.KEY_T
 			event.keycode = Key.KEY_T
-			InputMap.action_add_event(action, event)
+                        InputMap.action_add_event(action, event)
 
 func _ensure_toggle_sprout_register_action() -> void:
-	var action := "ui_toggle_sprout_register"
-	if not InputMap.has_action(action):
+        var action := "ui_toggle_sprout_register"
+        if not InputMap.has_action(action):
 			InputMap.add_action(action)
 	var has_event := false
 	for existing_event in InputMap.action_get_events(action):
@@ -97,8 +98,23 @@ func _ensure_toggle_sprout_register_action() -> void:
 	if not has_event:
 			var event := InputEventKey.new()
 			event.physical_keycode = Key.KEY_TAB
-			event.keycode = Key.KEY_TAB
-			InputMap.action_add_event(action, event)
+                        event.keycode = Key.KEY_TAB
+                        InputMap.action_add_event(action, event)
+
+func _ensure_toggle_cluster_fx_action() -> void:
+        var action := "ui_toggle_cluster_fx"
+        if not InputMap.has_action(action):
+                        InputMap.add_action(action)
+        var has_event := false
+        for existing_event in InputMap.action_get_events(action):
+                        if existing_event is InputEventKey and existing_event.physical_keycode == Key.KEY_Y:
+                                        has_event = true
+                                        break
+        if not has_event:
+                        var event := InputEventKey.new()
+                        event.physical_keycode = Key.KEY_Y
+                        event.keycode = Key.KEY_Y
+                        InputMap.action_add_event(action, event)
 
 func _ensure_sprout_picker() -> void:
 	if is_instance_valid(_sprout_picker):
@@ -169,10 +185,10 @@ func _ensure_layers() -> void:
 	hexmap.set_layer_z_index(LAYER_FX, 10)
 
 func _build_tileset() -> void:
-	if hexmap == null:
-		return
-	var names_to_colors: Dictionary = {
-		"empty": Color(0, 0, 0, 0),
+        if hexmap == null:
+                return
+        var names_to_colors: Dictionary = {
+                "empty": Color(0, 0, 0, 0),
 		"totem": Color(0.2, 0.85, 0.4, 1),
 		"decay": Color(0.6, 0.2, 0.8, 1),
 		"harvest": Color(0.15, 0.5, 0.2, 1),
@@ -192,12 +208,20 @@ func _build_tileset() -> void:
 	}
 	tiles_name_to_id = TileSetBuilder.build_named_hex_tiles(hexmap, names_to_colors, tile_px)
 	var id_meta: Variant = hexmap.get_meta("tiles_id_to_name") if hexmap.has_meta("tiles_id_to_name") else {}
-	tiles_id_to_name = id_meta if id_meta is Dictionary else {}
-	_ensure_hex_config()
+        tiles_id_to_name = id_meta if id_meta is Dictionary else {}
+        _ensure_hex_config()
+
+func tileset_add_named_color(name: String, color: Color) -> void:
+        if Engine.has_singleton("TileSetBuilder") and TileSetBuilder.has_method("add_color_tile"):
+                TileSetBuilder.add_color_tile(name, color)
+                rebind_tileset()
+
+func rebind_tileset() -> void:
+        _build_tileset()
 
 func set_fx(cell: Vector2i, fx_name: String) -> void:
-	if hexmap == null:
-		return
+        if hexmap == null:
+                return
 	if tiles_name_to_id.is_empty():
 		_build_tileset()
 	if not tiles_name_to_id.has(fx_name):
@@ -252,14 +276,17 @@ func clear_tiles() -> void:
 	origin_cell = Vector2i.ZERO
 
 func set_origin_cell(c: Vector2i) -> void:
-	origin_cell = clamp_cell(c)
-	rules.set_origin(origin_cell)
-	if is_instance_valid(cursor):
-		cursor.move_to(origin_cell)
-	_update_hud()
+        origin_cell = clamp_cell(c)
+        rules.set_origin(origin_cell)
+        if is_instance_valid(cursor):
+                cursor.move_to(origin_cell)
+        _update_hud()
+
+func get_origin_cell() -> Vector2i:
+        return origin_cell
 
 func clamp_cell(c: Vector2i) -> Vector2i:
-	return HexUtil.clamp_cell(c, width, height)
+        return HexUtil.clamp_cell(c, width, height)
 
 func neighbors_even_q(c: Vector2i) -> Array[Vector2i]:
 	return HexUtil.neighbors_even_q(c, width, height)
@@ -481,19 +508,29 @@ func _on_sprout_leveled(uid: String, lvl: int) -> void:
 				label.text += "\n[SPR] " + uid + " → Lv" + str(lvl)
 
 func _unhandled_input(event: InputEvent) -> void:
-		if event.is_action_pressed("ui_toggle_sprout_register"):
-			_toggle_sprout_register()
-			var sr_viewport := get_viewport()
-			if sr_viewport != null:
-				sr_viewport.set_input_as_handled()
-			return
-		if event.is_action_pressed("ui_toggle_threats"):
-			var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
-			if threat_list != null:
-				threat_list.visible = not threat_list.visible
-				var threat_viewport := get_viewport()
-				if threat_viewport != null:
-					threat_viewport.set_input_as_handled()
+        if event.is_action_pressed("ui_toggle_sprout_register"):
+                _toggle_sprout_register()
+                var sr_viewport := get_viewport()
+                if sr_viewport != null:
+                        sr_viewport.set_input_as_handled()
+                return
+        if event.is_action_pressed("ui_toggle_threats"):
+                var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
+                if threat_list != null:
+                        threat_list.visible = not threat_list.visible
+                        var threat_viewport := get_viewport()
+                        if threat_viewport != null:
+                                threat_viewport.set_input_as_handled()
+        if event.is_action_pressed("ui_toggle_cluster_fx"):
+                var decay_manager: Node = get_node_or_null("/root/DecayManager")
+                if decay_manager != null:
+                        var current_state := bool(decay_manager.get("debug_show_clusters"))
+                        decay_manager.set("debug_show_clusters", not current_state)
+                        if decay_manager.has_method("_refresh_cluster_fx_overlay"):
+                                decay_manager.call("_refresh_cluster_fx_overlay")
+                var fx_viewport := get_viewport()
+                if fx_viewport != null:
+                        fx_viewport.set_input_as_handled()
 
 func update_hud(next_name: String, remaining: int) -> void:
 	if is_instance_valid(hud):
