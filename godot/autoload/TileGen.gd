@@ -108,16 +108,16 @@ func _on_phase_started(phase_name: String) -> void:
 
 
 func _roll_and_emit_choices(turn: int) -> void:
-	var bag: Array[String] = []
+        var bag: Array[String] = []
 	for choice_variant in _choice_def:
 		if not (choice_variant is Dictionary):
 			continue
-		var choice: Dictionary = choice_variant
-		var pack_id := String(choice.get("pack_id", ""))
-		if pack_id.is_empty():
-			continue
-		var weight := max(0, int(choice.get("weight", 1)))
-		var min_tier := int(choice.get("min_tier", 1))
+                var choice: Dictionary = choice_variant
+                var pack_id := String(choice.get("pack_id", ""))
+                if pack_id.is_empty():
+                        continue
+                var weight: int = max(0, int(choice.get("weight", 1)))
+                var min_tier := int(choice.get("min_tier", 1))
 		if _tier < min_tier:
 			continue
 		for _i in range(weight):
@@ -198,8 +198,8 @@ func next_evolve_cost() -> int:
 	var evo_dict: Dictionary = evolution_variant if evolution_variant is Dictionary else {}
 	var costs_variant: Variant = evo_dict.get("life_essence_costs", [])
 	var costs: Array = costs_variant if costs_variant is Array else []
-	var next_tier := _tier + 1
-	var index := clamp(next_tier - 1, 0, max(costs.size() - 1, 0))
+        var next_tier := _tier + 1
+        var index: int = clamp(next_tier - 1, 0, max(costs.size() - 1, 0))
 	if costs.is_empty():
 		return -1
 	return int(costs[index])
@@ -260,10 +260,10 @@ func _get_turn_count() -> int:
 		return int(value)
 	if typeof(value) == TYPE_FLOAT:
 		return int(value)
-	if _world != null and _world.has_method("get"):
-		var world_turn := _world.get("turn")
-		if typeof(world_turn) == TYPE_INT:
-			return int(world_turn)
+        if _world != null and _world.has_method("get"):
+                var world_turn: Variant = _world.get("turn")
+                if typeof(world_turn) == TYPE_INT:
+                        return int(world_turn)
 		if typeof(world_turn) == TYPE_FLOAT:
 			return int(world_turn)
 	return 0
