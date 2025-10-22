@@ -1,13 +1,50 @@
 [
   {
-	"id": "sprout.woodling",
-	"name": "Woodling",
-	"base_stats": {
-	  "hp": 35,
-	  "attack": 12,
-	  "attack_speed": 1.0
-	},
-	"attack_id": "atk.thorn_bolt",
-	"passive_ids": []
+        "id": "sprout.woodling",
+        "name": "Woodling",
+        "base_stats": {
+          "hp": 35,
+          "attack": 12,
+          "attack_speed": 1.0
+        },
+        "growth": {
+          "hp_per_level": 4,
+          "attack_per_level": 1,
+          "aspeed_per_level": 0.02
+        },
+        "attack_id": "atk.thorn_bolt",
+        "passive_ids": []
+  },
+  {
+        "id": "sprout.sprite",
+        "name": "Sprite",
+        "base_stats": {
+          "hp": 24,
+          "attack": 8,
+          "attack_speed": 1.3
+        },
+        "growth": {
+          "hp_per_level": 3,
+          "attack_per_level": 2,
+          "aspeed_per_level": 0.04
+        },
+        "attack_id": "atk.glimmer_dart",
+        "passive_ids": []
+  },
+  {
+        "id": "sprout.grumbler",
+        "name": "Grumbler",
+        "base_stats": {
+          "hp": 42,
+          "attack": 10,
+          "attack_speed": 0.9
+        },
+        "growth": {
+          "hp_per_level": 5,
+          "attack_per_level": 1,
+          "aspeed_per_level": 0.03
+        },
+        "attack_id": "atk.root_quake",
+        "passive_ids": []
   }
 ]
