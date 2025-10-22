@@ -1,1 +1,20 @@
-{}
+[
+  {
+    "id": "totem.heartwood",
+    "name": "Heartwood",
+    "tile_gen": {
+      "interval_turns": 3,
+      "choices": [
+        { "pack_id": "pack.harvest_growth", "weight": 5, "min_tier": 1 },
+        { "pack_id": "pack.refine_channel", "weight": 3, "min_tier": 1 },
+        { "pack_id": "pack.build_guard", "weight": 3, "min_tier": 1 },
+        { "pack_id": "pack.special.single", "weight": 1, "min_tier": 2 }
+      ],
+      "special_forced_place": true
+    },
+    "evolution": {
+      "tier_max": 5,
+      "life_essence_costs": [0, 5, 10, 15, 20]
+    }
+  }
+]
