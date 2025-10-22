@@ -194,13 +194,13 @@ func _refresh_cluster_fx_overlay() -> void:
 		return
 	_world.clear_all_fx()
 	if debug_show_clusters:
-		for cluster in _clusters:
-			if cluster == null:
-				continue
-			var fx_name := _ensure_cluster_fx_tile(cluster.id)
-				for cluster_hash in cluster.tiles.keys():
-					var cell: Vector2i = _cell_from_hash(int(cluster_hash))
-					_world.set_fx(cell, fx_name)
+                for cluster in _clusters:
+                        if cluster == null:
+                                continue
+                        var fx_name := _ensure_cluster_fx_tile(cluster.id)
+                        for cluster_hash in cluster.tiles.keys():
+                                var cell: Vector2i = _cell_from_hash(int(cluster_hash))
+                                _world.set_fx(cell, fx_name)
 	_reapply_threat_fx()
 
 
