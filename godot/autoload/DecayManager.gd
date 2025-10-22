@@ -194,13 +194,13 @@ func _refresh_cluster_fx_overlay() -> void:
 		return
 	_world.clear_all_fx()
 	if debug_show_clusters:
-                for cluster in _clusters:
-                        if cluster == null:
-                                continue
-                        var fx_name := _ensure_cluster_fx_tile(cluster.id)
-                        for cluster_hash in cluster.tiles.keys():
-                                var cell: Vector2i = _cell_from_hash(int(cluster_hash))
-                                _world.set_fx(cell, fx_name)
+				for cluster in _clusters:
+						if cluster == null:
+								continue
+						var fx_name := _ensure_cluster_fx_tile(cluster.id)
+						for cluster_hash in cluster.tiles.keys():
+								var cell: Vector2i = _cell_from_hash(int(cluster_hash))
+								_world.set_fx(cell, fx_name)
 	_reapply_threat_fx()
 
 
@@ -269,16 +269,16 @@ func _scan_clusters() -> void:
 			if not _is_decay(c):
 				_clear_cluster_metadata(c)
 				continue
-						var cell_hash_value := _cell_hash(c)
-						if visited.has(cell_hash_value):
-								continue
+				var cell_hash_value := _cell_hash(c)
+				if visited.has(cell_hash_value):
+					continue
 			var cluster_id := _get_cluster_id_from_metadata(c)
 			if cluster_id <= 0:
 				cluster_id = _next_cluster_id
 				_next_cluster_id += 1
 			var cluster := Cluster.new(cluster_id, c)
 			var queue: Array[Vector2i] = [c]
-						visited[cell_hash_value] = true
+			visited[cell_hash_value] = true
 			while not queue.is_empty():
 				var current: Vector2i = queue.pop_back()
 				var current_hash := _cell_hash(current)
