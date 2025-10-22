@@ -1,26 +1,448 @@
 [
-  {
-	"id": "atk.thorn_bolt",
-	"name": "Thorn Bolt",
-	"cooldown_sec": 1.5,
-	"effects": [
-	  {
-		"type": "damage",
-		"amount": 6
-	  }
-	],
-	"target_row": "front"
-  },
-  {
-	"id": "atk.smog_bite",
-	"name": "Smog Bite",
-	"cooldown_sec": 1.8,
-	"effects": [
-	  {
-		"type": "damage",
-		"amount": 5
-	  }
-	],
-	"target_row": "front"
-  }
+    {
+        "id": "amber_shard",
+        "display_name": "Amber Shard",
+        "tier": "med",
+        "pattern": "splash_small",
+        "power": 1.0,
+        "cooldown": 0,
+        "applies": [],
+        "grants": [
+            {
+                "type": "guard",
+                "chance": 1.0
+            }
+        ],
+        "notes": "On kill: self gains Guard (2). Splash 40% to neighbors."
+    },
+    {
+        "id": "ashbloom_burst",
+        "display_name": "Ashbloom Burst",
+        "tier": "low",
+        "pattern": "front_all",
+        "power": 0.7,
+        "cooldown": 0,
+        "applies": [
+            {
+                "type": "poison",
+                "chance": 1.0,
+                "stacks": 1
+            }
+        ],
+        "grants": [],
+        "notes": "Applies 1 Poison stack to each front enemy."
+    },
+    {
+        "id": "bark_bolt",
+        "display_name": "Bark Bolt",
+        "tier": "med",
+        "pattern": "col_line",
+        "power": 1.0,
+        "cooldown": 0,
+        "applies": [
+            {
+                "type": "sunder",
+                "chance": 0.3
+            }
+        ],
+        "grants": [],
+        "notes": "Column strike; may Sunder."
+    },
+    {
+        "id": "bramble_net",
+        "display_name": "Bramble Net",
+        "tier": "low",
+        "pattern": "front_single",
+        "power": 0.0,
+        "cooldown": 1,
+        "applies": [
+            {
+                "type": "slow",
+                "chance": 1.0
+            },
+            {
+                "type": "cripple",
+                "chance": 1.0
+            }
+        ],
+        "grants": [],
+        "notes": "Control move: no damage; applies Slow + Cripple."
+    },
+    {
+        "id": "cairn_shot",
+        "display_name": "Rootline",
+        "tier": "high",
+        "pattern": "col_line",
+        "power": 1.3,
+        "cooldown": 1,
+        "applies": [],
+        "grants": [],
+        "notes": "Pierces to back if front dies."
+    },
+    {
+        "id": "chime_flurry",
+        "display_name": "Chime Drift",
+        "tier": "low",
+        "pattern": "back_all",
+        "power": 0.7,
+        "cooldown": 0,
+        "applies": [
+            {
+                "type": "haze",
+                "chance": 1.0
+            }
+        ],
+        "grants": [],
+        "notes": "Back row accuracy disruption from chimes."
+    },
+    {
+        "id": "echo_snap",
+        "display_name": "Pulse Snap",
+        "tier": "med",
+        "pattern": "any_single",
+        "power": 1.0,
+        "cooldown": 0,
+        "applies": [
+            {
+                "type": "haze",
+                "chance": 0.5
+            }
+        ],
+        "grants": [
+            {
+                "type": "focus",
+                "chance": 1.0
+            }
+        ],
+        "notes": "If used after a spell, +15% dmg. On crit: 50% to inflict Haze; self gains Focus (2)."
+    },
+    {
+        "id": "fungal_bloom",
+        "display_name": "Fungal Bloom",
+        "tier": "low",
+        "pattern": "splash_small",
+        "power": 0.7,
+        "cooldown": 1,
+        "applies": [
+            {
+                "type": "poison",
+                "chance": 1.0,
+                "stacks": 1
+            }
+        ],
+        "grants": [],
+        "notes": "Target + neighbors get Poison (1 stack). Max 3 stacks."
+    },
+    {
+        "id": "grass_sweep",
+        "display_name": "Grass Sweep",
+        "tier": "low",
+        "pattern": "front_all",
+        "power": 0.7,
+        "cooldown": 0,
+        "applies": [],
+        "grants": [],
+        "notes": "Light arc across front row."
+    },
+    {
+        "id": "grove_edge",
+        "display_name": "Wild Edge",
+        "tier": "med",
+        "pattern": "any_single",
+        "power": 1.0,
+        "cooldown": 0,
+        "applies": [],
+        "grants": [],
+        "notes": "+30% dmg if target <35% HP."
+    },
+    {
+        "id": "grove_tremor",
+        "display_name": "Grove Tremor",
+        "tier": "med",
+        "pattern": "arc_front",
+        "power": 1.0,
+        "cooldown": 2,
+        "applies": [
+            {
+                "type": "stagger",
+                "chance": 0.2
+            }
+        ],
+        "grants": [],
+        "notes": "Shakes up to 3 front foes; Stagger chance."
+    },
+    {
+        "id": "mire_dart",
+        "display_name": "Mire Dart",
+        "tier": "low",
+        "pattern": "row_pair",
+        "power": 0.7,
+        "cooldown": 0,
+        "applies": [
+            {
+                "type": "slow",
+                "chance": 0.2
+            }
+        ],
+        "grants": [],
+        "notes": "Two adjacent in same row; chance to Slow."
+    },
+    {
+        "id": "mist_needle",
+        "display_name": "Mist Needle",
+        "tier": "low",
+        "pattern": "back_single",
+        "power": 0.7,
+        "cooldown": 0,
+        "applies": [
+            {
+                "type": "sunder",
+                "chance": 0.3
+            }
+        ],
+        "grants": [],
+        "notes": "+20% vs shielded; dispel 1 Guard; often Sunders."
+    },
+    {
+        "id": "moonseed_drizzle",
+        "display_name": "Seed Drizzle",
+        "tier": "low",
+        "pattern": "back_all",
+        "power": 0.7,
+        "cooldown": 0,
+        "applies": [
+            {
+                "type": "slow",
+                "chance": 0.1
+            }
+        ],
+        "grants": [],
+        "notes": "Soft rain on rear; slight Slow chance."
+    },
+    {
+        "id": "moonveil_pin",
+        "display_name": "Veil Pin",
+        "tier": "med",
+        "pattern": "back_single",
+        "power": 1.0,
+        "cooldown": 1,
+        "applies": [
+            {
+                "type": "slow",
+                "chance": 1.0
+            }
+        ],
+        "grants": [],
+        "notes": "Ignores cover; guaranteed Slow (1 turn)."
+    },
+    {
+        "id": "mycel_thread",
+        "display_name": "Spore Thread",
+        "tier": "low",
+        "pattern": "any_single",
+        "power": 0.7,
+        "cooldown": 0,
+        "applies": [
+            {
+                "type": "sunder",
+                "chance": 0.2
+            }
+        ],
+        "grants": [],
+        "notes": "Chains to up to 2 more targets at -25% power; Sunder on first."
+    },
+    {
+        "id": "pebble_sling",
+        "display_name": "Stone Toss",
+        "tier": "low",
+        "pattern": "any_single",
+        "power": 0.7,
+        "cooldown": 0,
+        "applies": [],
+        "grants": [],
+        "notes": "+10% crit vs back row (implement as move passive)."
+    },
+    {
+        "id": "rippling_reed",
+        "display_name": "Reed Lash",
+        "tier": "med",
+        "pattern": "any_single",
+        "power": 1.0,
+        "cooldown": 0,
+        "applies": [],
+        "grants": [],
+        "notes": "+25% dmg if target already acted this turn."
+    },
+    {
+        "id": "root_lash",
+        "display_name": "Root Lash",
+        "tier": "med",
+        "pattern": "front_single",
+        "power": 1.0,
+        "cooldown": 0,
+        "applies": [],
+        "grants": [],
+        "notes": "Solid frontline hit."
+    },
+    {
+        "id": "root_rake",
+        "display_name": "Root Rake",
+        "tier": "low",
+        "pattern": "front_single",
+        "power": 0.7,
+        "cooldown": 0,
+        "applies": [],
+        "grants": [],
+        "notes": "Filler; +10% crit baked in."
+    },
+    {
+        "id": "sap_spike",
+        "display_name": "Sap Spike",
+        "tier": "med",
+        "pattern": "front_single",
+        "power": 1.0,
+        "cooldown": 0,
+        "applies": [
+            {
+                "type": "sunder",
+                "chance": 0.2
+            }
+        ],
+        "grants": [],
+        "notes": "Ignores 20% armor; small Sunder chance."
+    },
+    {
+        "id": "spirit_sunder",
+        "display_name": "Totem Sunder",
+        "tier": "high",
+        "pattern": "any_single",
+        "power": 1.3,
+        "cooldown": 3,
+        "applies": [
+            {
+                "type": "wither",
+                "chance": 1.0
+            }
+        ],
+        "grants": [],
+        "notes": "Consumes 1 Life Essence to apply Wither."
+    },
+    {
+        "id": "spore_puff",
+        "display_name": "Spore Puff",
+        "tier": "low",
+        "pattern": "back_single",
+        "power": 0.7,
+        "cooldown": 0,
+        "applies": [
+            {
+                "type": "haze",
+                "chance": 0.15
+            }
+        ],
+        "grants": [],
+        "notes": "Back-row poke; accuracy haze."
+    },
+    {
+        "id": "stone_pulse",
+        "display_name": "Stone Pulse",
+        "tier": "med",
+        "pattern": "col_line",
+        "power": 1.0,
+        "cooldown": 0,
+        "applies": [],
+        "grants": [
+            {
+                "type": "fortify",
+                "chance": 0.3
+            }
+        ],
+        "notes": "+2% power per owned Grotto (cap +30%). 30% chance self gains Fortify (2)."
+    },
+    {
+        "id": "thorn_prick",
+        "display_name": "Thorn Jab",
+        "tier": "low",
+        "pattern": "front_single",
+        "power": 0.7,
+        "cooldown": 0,
+        "applies": [
+            {
+                "type": "wither",
+                "chance": 0.1
+            }
+        ],
+        "grants": [],
+        "notes": "Quick jab; small chance to Wither."
+    },
+    {
+        "id": "thicket_press",
+        "display_name": "Thicket Press",
+        "tier": "med",
+        "pattern": "front_all",
+        "power": 1.0,
+        "cooldown": 1,
+        "applies": [
+            {
+                "type": "cripple",
+                "chance": 0.25
+            }
+        ],
+        "grants": [],
+        "notes": "Heavy crush; remove 1 positive buff on hit."
+    },
+    {
+        "id": "totem_echo",
+        "display_name": "Totem Echo",
+        "tier": "med",
+        "pattern": "any_single",
+        "power": 1.0,
+        "cooldown": 1,
+        "applies": [],
+        "grants": [],
+        "notes": "Within 3 hexes of Totem: copy 30% damage to a random second target."
+    },
+    {
+        "id": "vein_pierce",
+        "display_name": "Vein Pierce",
+        "tier": "med",
+        "pattern": "col_line",
+        "power": 1.0,
+        "cooldown": 1,
+        "applies": [
+            {
+                "type": "sunder",
+                "chance": 1.0
+            }
+        ],
+        "grants": [],
+        "notes": "Guaranteed Sunder on column."
+    },
+    {
+        "id": "vine_fork",
+        "display_name": "Vine Whip",
+        "tier": "low",
+        "pattern": "fork_3",
+        "power": 0.7,
+        "cooldown": 0,
+        "applies": [],
+        "grants": [],
+        "notes": "Forking lash; side targets at 75% power."
+    },
+    {
+        "id": "wolfstone_howl",
+        "display_name": "Feral Call",
+        "tier": "low",
+        "pattern": "front_all",
+        "power": 0.7,
+        "cooldown": 1,
+        "applies": [
+            {
+                "type": "weaken",
+                "chance": 1.0
+            }
+        ],
+        "grants": [],
+        "notes": "-20% ATK to front row."
+    }
 ]
