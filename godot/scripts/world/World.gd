@@ -228,14 +228,14 @@ func _ensure_layers() -> void:
 
 
 func _build_tileset() -> void:
-        if hexmap == null:
-                return
-        var names_to_colors: Dictionary = {
-                "empty": Color(0, 0, 0, 0),
-                "totem": Color(0.2, 0.85, 0.4, 1),
-                "decay": Color(0.6, 0.2, 0.8, 1),
-                "harvest": Color(0.15, 0.5, 0.2, 1),
-                "build": Color(0.5, 0.35, 0.2, 1),
+		if hexmap == null:
+				return
+		var names_to_colors: Dictionary = {
+				"empty": Color(0, 0, 0, 0),
+				"totem": Color(0.2, 0.85, 0.4, 1),
+				"decay": Color(0.6, 0.2, 0.8, 1),
+				"harvest": Color(0.15, 0.5, 0.2, 1),
+				"build": Color(0.5, 0.35, 0.2, 1),
 		"refine": Color(0.2, 0.4, 0.9, 1),
 		"storage": Color(0.55, 0.55, 0.55, 1),
 		"guard": Color(0.85, 0.75, 0.2, 1),
@@ -246,26 +246,26 @@ func _build_tileset() -> void:
 		"fx_nature": Color(0.2, 0.85, 0.4, 0.4),
 		"fx_earth": Color(0.6, 0.45, 0.25, 0.4),
 		"fx_water": Color(0.2, 0.45, 0.95, 0.4),
-                "fx_seed": Color(0.95, 0.8, 0.2, 0.45),
-                "fx_threat": Color(0.9, 0.2, 0.2, 0.35),
-        }
-        for extra_name in _extra_tile_colors.keys():
-                var extra_color_variant: Variant = _extra_tile_colors[extra_name]
-                if extra_color_variant is Color:
-                        names_to_colors[extra_name] = extra_color_variant
-        tiles_name_to_id = TileSetBuilder.build_named_hex_tiles(hexmap, names_to_colors, tile_px)
-        var id_meta: Variant = (
-                hexmap.get_meta("tiles_id_to_name") if hexmap.has_meta("tiles_id_to_name") else {}
-        )
-        tiles_id_to_name = id_meta if id_meta is Dictionary else {}
-        _ensure_hex_config()
+				"fx_seed": Color(0.95, 0.8, 0.2, 0.45),
+				"fx_threat": Color(0.9, 0.2, 0.2, 0.35),
+		}
+		for extra_name in _extra_tile_colors.keys():
+				var extra_color_variant: Variant = _extra_tile_colors[extra_name]
+				if extra_color_variant is Color:
+						names_to_colors[extra_name] = extra_color_variant
+		tiles_name_to_id = TileSetBuilder.build_named_hex_tiles(hexmap, names_to_colors, tile_px)
+		var id_meta: Variant = (
+				hexmap.get_meta("tiles_id_to_name") if hexmap.has_meta("tiles_id_to_name") else {}
+		)
+		tiles_id_to_name = id_meta if id_meta is Dictionary else {}
+		_ensure_hex_config()
 
 
 func tileset_add_named_color(tile_name: String, color: Color) -> void:
-        if tile_name.is_empty():
-                return
-        _extra_tile_colors[tile_name] = color
-        _build_tileset()
+		if tile_name.is_empty():
+				return
+		_extra_tile_colors[tile_name] = color
+		_build_tileset()
 
 
 func rebind_tileset() -> void:
