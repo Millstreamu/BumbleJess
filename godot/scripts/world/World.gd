@@ -261,10 +261,10 @@ func _build_tileset() -> void:
         _ensure_hex_config()
 
 
-func tileset_add_named_color(name: String, color: Color) -> void:
-        if name.is_empty():
+func tileset_add_named_color(tile_name: String, color: Color) -> void:
+        if tile_name.is_empty():
                 return
-        _extra_tile_colors[name] = color
+        _extra_tile_colors[tile_name] = color
         _build_tileset()
 
 
