@@ -11,14 +11,12 @@ var _db_by_id: Dictionary = {}
 var _roster: Array[Dictionary] = []
 var _uid_counter: int = 1
 var _last_selection: Array[Dictionary] = []
+var _rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
 	_load_db()
 	_load_persisted_roster()
-	if _roster.is_empty():
-		add_to_roster("sprout.woodling", 1)
-		add_to_roster("sprout.woodling", 2)
-		add_to_roster("sprout.woodling", 3)
+	_rng.randomize()
 
 func _load_db() -> void:
 	_db_by_id.clear()
@@ -204,7 +202,14 @@ func short_stats_label(id: String, level: int) -> String:
 	]
 
 func on_grove_spawned(_cell: Vector2i) -> void:
-	pass
+	if _db_by_id.is_empty():
+		return
+	var ids: Array = _db_by_id.keys()
+	if ids.is_empty():
+		return
+	var chosen_index: int = _rng.randi_range(0, ids.size() - 1)
+	var chosen_id: String = String(ids[chosen_index])
+	add_to_roster(chosen_id, 1)
 
 func _find_roster_index(uid: String) -> int:
 	for i in range(_roster.size()):
