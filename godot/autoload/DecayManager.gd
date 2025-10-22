@@ -74,10 +74,10 @@ func _cell_hash(c: Vector2i) -> int:
 	return c.y * _world.width + c.x
 
 
-func _cell_from_hash(hash: int) -> Vector2i:
-	if _world == null or _world.width <= 0:
-		return Vector2i.ZERO
-	return Vector2i(hash % _world.width, hash / _world.width)
+func _cell_from_hash(cell_hash_value: int) -> Vector2i:
+        if _world == null or _world.width <= 0:
+                return Vector2i.ZERO
+        return Vector2i(cell_hash_value % _world.width, cell_hash_value / _world.width)
 
 
 func _is_decay(c: Vector2i) -> bool:
@@ -103,44 +103,28 @@ func _get_hexmap() -> TileMap:
 
 
 func _set_cluster_metadata(c: Vector2i, cluster_id: int) -> void:
-	var hexmap := _get_hexmap()
-	if hexmap == null:
-		return
-	var existing: Variant = hexmap.get_cell_metadata(_world.LAYER_OBJECTS, c)
-	var data: Dictionary = existing if existing is Dictionary else {}
-	data["cluster_id"] = cluster_id
-	hexmap.set_cell_metadata(_world.LAYER_OBJECTS, c, data)
+        if _world == null:
+                return
+        _world.set_cell_meta(_world.LAYER_OBJECTS, c, "cluster_id", cluster_id)
 
 
 func _clear_cluster_metadata(c: Vector2i) -> void:
-	var hexmap := _get_hexmap()
-	if hexmap == null:
-		return
-	var existing: Variant = hexmap.get_cell_metadata(_world.LAYER_OBJECTS, c)
-	if existing == null:
-		return
-	if existing is Dictionary:
-		var data: Dictionary = existing
-		if data.has("cluster_id"):
-			data.erase("cluster_id")
-		if data.is_empty():
-			hexmap.set_cell_metadata(_world.LAYER_OBJECTS, c, null)
-		else:
-			hexmap.set_cell_metadata(_world.LAYER_OBJECTS, c, data)
-	else:
-		hexmap.set_cell_metadata(_world.LAYER_OBJECTS, c, null)
+        if _world == null:
+                return
+        _world.set_cell_meta(_world.LAYER_OBJECTS, c, "cluster_id", null)
 
 
 func _get_cluster_id_from_metadata(c: Vector2i) -> int:
-	var hexmap := _get_hexmap()
-	if hexmap == null:
-		return 0
-	var existing: Variant = hexmap.get_cell_metadata(_world.LAYER_OBJECTS, c)
-	if existing is Dictionary and existing.has("cluster_id"):
-		return int(existing["cluster_id"])
-	if typeof(existing) == TYPE_INT:
-		return int(existing)
-	return 0
+        if _world == null:
+                return 0
+        var existing := _world.get_cell_meta(_world.LAYER_OBJECTS, c, "cluster_id")
+        if typeof(existing) == TYPE_INT:
+                return int(existing)
+        if typeof(existing) == TYPE_STRING:
+                var as_string := String(existing)
+                if not as_string.is_empty():
+                        return as_string.to_int()
+        return 0
 
 
 func _prune_cluster_frontier(cluster: Cluster) -> void:
@@ -161,10 +145,10 @@ func _prune_cluster_frontier(cluster: Cluster) -> void:
 
 
 func _rebuild_cluster_frontier(cluster: Cluster) -> void:
-	cluster.frontier.clear()
-	for hash in cluster.tiles.keys():
-		var cell: Vector2i = _cell_from_hash(int(hash))
-		for neighbor in _world.neighbors_even_q(cell):
+        cluster.frontier.clear()
+        for cluster_hash in cluster.tiles.keys():
+                var cell: Vector2i = _cell_from_hash(int(cluster_hash))
+                for neighbor in _world.neighbors_even_q(cell):
 			if _is_blocked_for_decay(neighbor):
 				continue
 			if _is_decay(neighbor):
@@ -182,14 +166,14 @@ func _mark_clusters_dirty() -> void:
 
 
 func _ensure_cluster_fx_tile(cl_id: int) -> String:
-	if _fx_name_for_cluster.has(cl_id):
-		return String(_fx_name_for_cluster[cl_id])
-	var name := "fx_cluster_%d" % cl_id
-	var col := _cluster_color(cl_id)
-	if _world != null and _world.has_method("tileset_add_named_color"):
-		_world.tileset_add_named_color(name, col)
-	_fx_name_for_cluster[cl_id] = name
-	return name
+        if _fx_name_for_cluster.has(cl_id):
+                return String(_fx_name_for_cluster[cl_id])
+        var fx_name := "fx_cluster_%d" % cl_id
+        var col := _cluster_color(cl_id)
+        if _world != null and _world.has_method("tileset_add_named_color"):
+                _world.tileset_add_named_color(fx_name, col)
+        _fx_name_for_cluster[cl_id] = fx_name
+        return fx_name
 
 
 func _reapply_threat_fx() -> void:
@@ -214,9 +198,9 @@ func _refresh_cluster_fx_overlay() -> void:
 			if cluster == null:
 				continue
 			var fx_name := _ensure_cluster_fx_tile(cluster.id)
-			for hash in cluster.tiles.keys():
-				var cell: Vector2i = _cell_from_hash(int(hash))
-				_world.set_fx(cell, fx_name)
+                for cluster_hash in cluster.tiles.keys():
+                        var cell: Vector2i = _cell_from_hash(int(cluster_hash))
+                        _world.set_fx(cell, fx_name)
 	_reapply_threat_fx()
 
 
@@ -285,16 +269,16 @@ func _scan_clusters() -> void:
 			if not _is_decay(c):
 				_clear_cluster_metadata(c)
 				continue
-			var hash := _cell_hash(c)
-			if visited.has(hash):
-				continue
+                        var cell_hash_value := _cell_hash(c)
+                        if visited.has(cell_hash_value):
+                                continue
 			var cluster_id := _get_cluster_id_from_metadata(c)
 			if cluster_id <= 0:
 				cluster_id = _next_cluster_id
 				_next_cluster_id += 1
 			var cluster := Cluster.new(cluster_id, c)
 			var queue: Array[Vector2i] = [c]
-			visited[hash] = true
+                        visited[cell_hash_value] = true
 			while not queue.is_empty():
 				var current: Vector2i = queue.pop_back()
 				var current_hash := _cell_hash(current)
