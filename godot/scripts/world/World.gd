@@ -736,7 +736,7 @@ func _totem_status_line() -> String:
 		return ""
 	var parts: Array[String] = []
 	parts.append("Totem Tier: %d" % TileGen.get_tier())
-	var next_turn := TileGen.get_next_choice_turn()
+	var next_turn: int = TileGen.get_next_choice_turn()
 	if next_turn > 0:
 		parts.append("Next Pack Turn: %d" % next_turn)
 	return " | ".join(parts)

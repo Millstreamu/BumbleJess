@@ -131,10 +131,10 @@ func _refresh_tier_display() -> void:
 		evolve_btn.disabled = true
 		evolve_btn.text = "Evolve"
 		return
-	var tier := TileGen.get_tier()
+	var tier: int = TileGen.get_tier()
 	tier_label.text = "Tier %d" % tier
 	if TileGen.can_evolve():
-		var cost := TileGen.next_evolve_cost()
+		var cost: int = TileGen.next_evolve_cost()
 		if cost > 0:
 			evolve_btn.text = "Evolve (%d Life)" % cost
 		else:
