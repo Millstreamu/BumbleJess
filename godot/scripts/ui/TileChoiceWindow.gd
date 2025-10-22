@@ -1,14 +1,14 @@
-
-extends CanvasLayer
 class_name TileChoiceWindow
+extends CanvasLayer
+
+var _choices: Array = []
+var _resource_manager: Node = null
 
 @onready var choices_box: HBoxContainer = $"Frame/Content/Choices"
 @onready var tier_label: Label = $"Frame/Content/Bottom/TierLabel"
 @onready var evolve_btn: Button = $"Frame/Content/Bottom/EvolveBtn"
 @onready var close_btn: Button = $"Frame/Content/Bottom/CloseBtn"
 
-var _choices: Array = []
-var _resource_manager: Node = null
 
 func _ready() -> void:
 	visible = false
@@ -20,9 +20,15 @@ func _ready() -> void:
 	evolve_btn.pressed.connect(_on_evolve_pressed)
 	close_btn.pressed.connect(_on_skip_pressed)
 	_resource_manager = get_node_or_null("/root/ResourceManager")
-	if _resource_manager != null and not _resource_manager.is_connected("resources_changed", Callable(self, "_on_resources_changed")):
+	if (
+		_resource_manager != null
+		and not _resource_manager.is_connected(
+			"resources_changed", Callable(self, "_on_resources_changed")
+		)
+	):
 		_resource_manager.connect("resources_changed", Callable(self, "_on_resources_changed"))
 	_refresh_tier_display()
+
 
 func _on_choice_ready(choices: Array) -> void:
 	_choices.clear()
@@ -37,11 +43,14 @@ func _on_choice_ready(choices: Array) -> void:
 	_refresh_tier_display()
 	visible = true
 
+
 func _on_tier_changed(_tier: int) -> void:
 	_refresh_tier_display()
 
+
 func _on_resources_changed() -> void:
 	_refresh_tier_display()
+
 
 func _on_evolve_pressed() -> void:
 	if TileGen == null:
@@ -49,10 +58,12 @@ func _on_evolve_pressed() -> void:
 	if TileGen.evolve():
 		_refresh_tier_display()
 
+
 func _on_skip_pressed() -> void:
 	if TileGen != null:
 		TileGen.skip()
 	visible = false
+
 
 func _rebuild_choices() -> void:
 	_clear_choices_ui()
@@ -78,14 +89,14 @@ func _rebuild_choices() -> void:
 		details.fit_content = true
 		details.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		var lines: Array[String] = []
-		var tiles_variant := pack.get("tiles", [])
+		var tiles_variant: Variant = pack.get("tiles", [])
 		if tiles_variant is Array and not (tiles_variant as Array).is_empty():
 			var tile_ids: Array = tiles_variant
 			var tile_strings: Array[String] = []
 			for tile_entry in tile_ids:
 				tile_strings.append(String(tile_entry))
 			lines.append("[b]Tiles[/b]: " + ", ".join(tile_strings))
-		var specials_variant := pack.get("special", [])
+		var specials_variant: Variant = pack.get("special", [])
 		if specials_variant is Array and not (specials_variant as Array).is_empty():
 			var special_ids: Array = specials_variant
 			var special_strings: Array[String] = []
@@ -99,17 +110,20 @@ func _rebuild_choices() -> void:
 		select_btn.text = "Select"
 		select_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var button_index := index
-		select_btn.pressed.connect(func() -> void:
-			if TileGen != null:
-				TileGen.choose_index(button_index)
-			visible = false
+		select_btn.pressed.connect(
+			func() -> void:
+				if TileGen != null:
+					TileGen.choose_index(button_index)
+				visible = false
 		)
 		column.add_child(select_btn)
 		choices_box.add_child(column)
 
+
 func _clear_choices_ui() -> void:
 	for child in choices_box.get_children():
 		child.queue_free()
+
 
 func _refresh_tier_display() -> void:
 	if TileGen == null:
