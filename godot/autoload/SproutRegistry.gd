@@ -271,4 +271,3 @@ func _sanitize_roster_entry(entry: Dictionary) -> Dictionary:
 		"nickname": nickname,
 		"meta": meta,
 	}
-

@@ -414,4 +414,3 @@ func _finish(state: String) -> void:
 		"target_cell": encounter.get("target", Vector2i.ZERO),
 	}
 	emit_signal("battle_finished", result)
-
