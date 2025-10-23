@@ -407,10 +407,11 @@ func _finish(state: String) -> void:
 	_refresh_ui()
 	var victory: bool = state == "victory"
 	var rewards: Dictionary = {"life": LIFE_REWARD if victory else 0}
-	var result: Dictionary = {
-		"victory": victory,
-		"outcome": state,
-		"rewards": rewards,
-		"target_cell": encounter.get("target", Vector2i.ZERO),
-	}
-	emit_signal("battle_finished", result)
+        var result: Dictionary = {
+                "victory": victory,
+                "outcome": state,
+                "rewards": rewards,
+                "target_cell": encounter.get("target", Vector2i.ZERO),
+                "attacker_cell": encounter.get("attacker", Vector2i.ZERO),
+        }
+        emit_signal("battle_finished", result)
