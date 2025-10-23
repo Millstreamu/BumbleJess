@@ -194,9 +194,7 @@ func _handle_special_growth() -> void:
 					for neighbor in _world.neighbors_even_q(cell):
 						if converted >= count:
 							break
-												var neighbor_name: String = _world.get_cell_name(
-														_world.LAYER_LIFE, neighbor
-												)
+						var neighbor_name: String = _world.get_cell_name(_world.LAYER_LIFE, neighbor)
 						if not (neighbor_name.is_empty() or neighbor_name == "empty"):
 							continue
 						_world.set_cell_named(_world.LAYER_LIFE, neighbor, "overgrowth")
@@ -237,11 +235,11 @@ func _hash_cell(cell: Vector2i, width: int) -> int:
 	return cell.y * width + cell.x
 
 func _unhash_cell(cell_hash: int, width: int) -> Vector2i:
-		if width <= 0:
-				return Vector2i.ZERO
-		var x := cell_hash % width
-		var y := int(floor(float(cell_hash) / float(width)))
-		return Vector2i(x, y)
+	if width <= 0:
+		return Vector2i.ZERO
+	var x := cell_hash % width
+	var y := int(floor(float(cell_hash) / float(width)))
+	return Vector2i(x, y)
 
 func _connect_world_signal() -> void:
 	var world_node: Node = _world
