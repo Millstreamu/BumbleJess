@@ -36,6 +36,8 @@ var _clusters: Array = []
 var _clusters_dirty := true
 var _next_cluster_id := 1
 var _fx_name_for_cluster := {}
+var _protected_cells := {}
+var _tile_rules_cache: Dictionary = {}
 
 
 func _is_guard(c: Vector2i) -> bool:
@@ -87,14 +89,69 @@ func _is_decay(c: Vector2i) -> bool:
 
 
 func _is_blocked_for_decay(c: Vector2i) -> bool:
-        if _world == null:
-                return true
-        var object_name: String = _world.get_cell_name(_world.LAYER_OBJECTS, c)
-        if not (object_name.is_empty() or object_name == "empty"):
-                return true
-        if _is_guard(c):
-                return true
-        return false
+	if _world == null:
+		return true
+	if _protected_cells.has(_cell_hash(c)):
+		return true
+	var object_name: String = _world.get_cell_name(_world.LAYER_OBJECTS, c)
+	if not (object_name.is_empty() or object_name == "empty"):
+		return true
+	if _is_guard(c):
+		return true
+	return false
+
+
+func _recompute_mirror_pool_protection() -> void:
+	_protected_cells.clear()
+	if _world == null:
+		return
+	var width := int(_world.width)
+	var height := int(_world.height)
+	if width <= 0 or height <= 0:
+		return
+	var seen := {}
+	for y in range(height):
+		for x in range(width):
+			var cell := Vector2i(x, y)
+			var hash := _cell_hash(cell)
+			if seen.has(hash):
+				continue
+			var tile_id := String(_world.get_cell_tile_id(_world.LAYER_LIFE, cell))
+			if tile_id.is_empty() or not tile_id.begins_with("tile.veil.mirror_pool"):
+				seen[hash] = true
+				continue
+			var component: Array[Vector2i] = []
+			var queue: Array[Vector2i] = [cell]
+			while not queue.is_empty():
+				var current: Vector2i = queue.pop_back()
+				var current_hash := _cell_hash(current)
+				if seen.has(current_hash):
+					continue
+				var current_id := String(
+					_world.get_cell_tile_id(_world.LAYER_LIFE, current)
+				)
+				if current_id.is_empty() or not current_id.begins_with("tile.veil.mirror_pool"):
+					seen[current_hash] = true
+					continue
+				seen[current_hash] = true
+				component.append(current)
+				for neighbor in _world.neighbors_even_q(current):
+					var neighbor_hash := _cell_hash(neighbor)
+					if seen.has(neighbor_hash):
+						continue
+					queue.append(neighbor)
+			if component.is_empty():
+				continue
+			var required_size := 0
+			for mp_cell in component:
+				var mp_id := String(_world.get_cell_tile_id(_world.LAYER_LIFE, mp_cell))
+				var rules := _rules_for_tile(mp_id)
+				var threshold := int(rules.get("cluster_invulnerable_if_size_at_least", 0))
+				if threshold > required_size:
+					required_size = threshold
+			if required_size > 0 and component.size() >= required_size:
+				for mp_cell in component:
+					_protected_cells[_cell_hash(mp_cell)] = true
 
 
 func _get_hexmap() -> TileMap:
@@ -329,6 +386,7 @@ func _scan_clusters() -> void:
 			to_remove.append(key)
 	for key in to_remove:
 		_fx_name_for_cluster.erase(key)
+	_recompute_mirror_pool_protection()
 	_refresh_cluster_fx_overlay()
 
 
@@ -355,11 +413,15 @@ func _ready() -> void:
 
 
 func bind_world(world: Node) -> void:
-		if _world != null and _world != world:
-				_clear_all_threats()
-		_world = world
-		_refresh_threat_list()
-		rescan_clusters()
+	if _world != null and _world != world:
+		_clear_all_threats()
+	_world = world
+	_refresh_threat_list()
+	rescan_clusters()
+	_recompute_mirror_pool_protection()
+	if _world != null and _world.has_signal("tile_placed"):
+		if not _world.is_connected("tile_placed", Callable(self, "_on_world_tile_placed")):
+			_world.connect("tile_placed", Callable(self, "_on_world_tile_placed"))
 
 
 func _on_turn_started(turn: int) -> void:
@@ -436,6 +498,7 @@ func _spread_clusters_if_due() -> void:
 
 		cluster.last_spread_turn = _turn
 
+	_recompute_mirror_pool_protection()
 	_refresh_cluster_fx_overlay()
 
 
@@ -505,14 +568,14 @@ func _clear_threat(c: Vector2i) -> void:
 
 
 func _tick_and_trigger_battles() -> void:
-        var to_trigger: Array[Vector2i] = []
-        var to_clear: Array[Vector2i] = []
-        for key in _threats.keys():
-                var record: Dictionary = _threats[key]
-                var cell: Vector2i = record.get("cell", Vector2i.ZERO)
-                if _world == null:
-                        to_clear.append(cell)
-                        continue
+	var to_trigger: Array[Vector2i] = []
+	var to_clear: Array[Vector2i] = []
+	for key in _threats.keys():
+		var record: Dictionary = _threats[key]
+		var cell: Vector2i = record.get("cell", Vector2i.ZERO)
+		if _world == null:
+			to_clear.append(cell)
+			continue
 
 		var attacker_cell: Vector2i = record.get("attacker", Vector2i.ZERO)
 		var target_life_name: String = _world.get_cell_name(_world.LAYER_LIFE, cell)
@@ -521,21 +584,21 @@ func _tick_and_trigger_battles() -> void:
 			attacker_name = _world.get_cell_name(_world.LAYER_OBJECTS, attacker_cell)
 
 		var target_defended: bool = target_life_name == "" or target_life_name == "guard"
-                var attacker_gone := attacker_cell != Vector2i.ZERO and attacker_name != "decay"
-                if target_defended or attacker_gone:
-                        to_clear.append(cell)
-                        continue
+		var attacker_gone := attacker_cell != Vector2i.ZERO and attacker_name != "decay"
+		if target_defended or attacker_gone:
+			to_clear.append(cell)
+			continue
 
-                var next_turns := int(record.get("turns", 0)) - 1
-                if next_turns <= 0:
-                        to_trigger.append(cell)
-                else:
-                        _update_threat(cell, next_turns)
-        for cell in to_clear:
-                _clear_threat(cell)
-        for cell in to_trigger:
-                _trigger_battle(cell)
-        _refresh_threat_list()
+		var next_turns := int(record.get("turns", 0)) - 1
+		if next_turns <= 0:
+			to_trigger.append(cell)
+		else:
+			_update_threat(cell, next_turns)
+	for cell in to_clear:
+		_clear_threat(cell)
+	for cell in to_trigger:
+		_trigger_battle(cell)
+	_refresh_threat_list()
 
 
 func _start_new_threats_up_to_limit() -> void:
@@ -557,6 +620,8 @@ func _start_new_threats_up_to_limit() -> void:
 								if seen.has(key):
 										continue
 								if _world.get_cell_name(_world.LAYER_LIFE, n) == "":
+										continue
+								if _protected_cells.has(_cell_hash(n)):
 										continue
 								if _is_guard(n):
 										continue
@@ -604,16 +669,44 @@ func _apply_battle_outcome(cell: Vector2i, victory: bool, attacker_cell: Vector2
 			_world.set_cell_named(_world.LAYER_OBJECTS, decay_cell, "empty")
 			_clear_cluster_metadata(decay_cell)
 	else:
+		if _protected_cells.has(_cell_hash(cell)):
+			return
 		if _world.get_cell_name(_world.LAYER_LIFE, cell) != "guard":
 			_world.set_cell_named(_world.LAYER_LIFE, cell, "empty")
 		_world.set_cell_named(_world.LAYER_OBJECTS, cell, "decay")
 		for neighbor in _world.neighbors_even_q(cell):
+			if _protected_cells.has(_cell_hash(neighbor)):
+				continue
 			var life_name: String = _world.get_cell_name(_world.LAYER_LIFE, neighbor)
 			if life_name != "" and life_name != "guard":
 				_world.set_cell_named(_world.LAYER_LIFE, neighbor, "empty")
 				_world.set_cell_named(_world.LAYER_OBJECTS, neighbor, "decay")
 	emit_signal("threat_resolved", cell, victory)
 	rescan_clusters()
+
+func _on_world_tile_placed(tile_id: String, _cell: Vector2i) -> void:
+	if tile_id.begins_with("tile.veil.mirror_pool"):
+		_recompute_mirror_pool_protection()
+
+func _rules_for_tile(tile_id: String) -> Dictionary:
+	if tile_id.is_empty():
+		return {}
+	if _tile_rules_cache.is_empty():
+		var entries: Array = DataLite.load_json_array("res://data/tiles.json")
+		for entry_variant in entries:
+			if not (entry_variant is Dictionary):
+				continue
+			var entry: Dictionary = entry_variant
+			var entry_id := String(entry.get("id", ""))
+			if entry_id.is_empty():
+				continue
+			var rules_variant: Variant = entry.get("rules", {})
+			if rules_variant is Dictionary:
+				_tile_rules_cache[entry_id] = (rules_variant as Dictionary)
+			else:
+				_tile_rules_cache[entry_id] = {}
+	var found_variant: Variant = _tile_rules_cache.get(tile_id, {})
+	return found_variant if found_variant is Dictionary else {}
 
 
 func _clear_all_threats() -> void:

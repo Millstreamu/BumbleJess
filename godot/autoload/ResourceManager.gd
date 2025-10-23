@@ -202,6 +202,36 @@ func _recompute_capacity() -> void:
 				if amount == 0:
 					continue
 				capacity[res] = int(capacity.get(res, 0)) + amount
+			if cat == "upgrade":
+				var totem_bonus_variant: Variant = r.get(
+					"capacity_global_bonus_if_adjacent_to_totem", {}
+				)
+				var totem_bonus: Dictionary = (
+					totem_bonus_variant if totem_bonus_variant is Dictionary else {}
+				)
+				if not totem_bonus.is_empty():
+					var touches_totem := false
+					for neighbor in _world.neighbors_even_q(cell):
+						if _world.get_cell_name(_world.LAYER_OBJECTS, neighbor) == "totem":
+							touches_totem = true
+							break
+					if touches_totem:
+						for res in totem_bonus.keys():
+							var add_value: int = int(totem_bonus[res])
+							if add_value == 0:
+								continue
+							capacity[res] = int(capacity.get(res, 0)) + add_value
+
+			var flat_bonus_variant: Variant = r.get("capacity_global_bonus", {})
+			var flat_bonus: Dictionary = (
+				flat_bonus_variant if flat_bonus_variant is Dictionary else {}
+			)
+			if not flat_bonus.is_empty():
+				for res in flat_bonus.keys():
+					var bonus_value: int = int(flat_bonus[res])
+					if bonus_value == 0:
+						continue
+					capacity[res] = int(capacity.get(res, 0)) + bonus_value
 
 	for y in range(height):
 		for x in range(width):
@@ -272,9 +302,42 @@ func _produce_resources() -> void:
 				total += per * count
 			if total > 0:
 				amounts["nature"] = clamp(int(amounts.get("nature", 0)) + total, 0, int(capacity.get("nature", 0)))
-				var nature_fx: Array = fx.get("fx_nature", [])
-				nature_fx.append(cell)
+				var nature_fx_variant: Variant = fx.get("fx_nature", [])
+				var nature_fx: Array = nature_fx_variant if nature_fx_variant is Array else []
+				if not nature_fx.has(cell):
+					nature_fx.append(cell)
 				fx["fx_nature"] = nature_fx
+
+			var per_turn: int = int(r.get("nature_per_turn", 0))
+			if per_turn > 0:
+				var blocked_variant: Variant = r.get("blocked_if_adjacent_any", [])
+				var blocked_list: Array = (
+					blocked_variant if blocked_variant is Array else []
+				)
+				if blocked_variant is PackedStringArray:
+					blocked_list = Array(blocked_variant)
+				var blocked := false
+				for neighbor in _world.neighbors_even_q(cell):
+					var neighbor_cat: String = _world.get_cell_name(
+						_world.LAYER_LIFE, neighbor
+					)
+					if blocked_list.has(neighbor_cat):
+						blocked = true
+						break
+				if not blocked:
+					var cap_value: int = int(capacity.get("nature", 0))
+					amounts["nature"] = clamp(
+						int(amounts.get("nature", 0)) + per_turn,
+						0,
+						cap_value,
+					)
+					var bloom_fx_variant: Variant = fx.get("fx_nature", [])
+					var bloom_fx: Array = (
+						bloom_fx_variant if bloom_fx_variant is Array else []
+					)
+					if not bloom_fx.has(cell):
+						bloom_fx.append(cell)
+					fx["fx_nature"] = bloom_fx
 
 	for y in range(height):
 		for x in range(width):
@@ -306,9 +369,46 @@ func _produce_resources() -> void:
 				produce_now = (_turn_counter % mult) == 0
 			if produce_now:
 				amounts["earth"] = clamp(int(amounts.get("earth", 0)) + per_turn, 0, int(capacity.get("earth", 0)))
-				var earth_fx: Array = fx.get("fx_earth", [])
-				earth_fx.append(cell)
+				var earth_fx_variant: Variant = fx.get("fx_earth", [])
+				var earth_fx: Array = earth_fx_variant if earth_fx_variant is Array else []
+				if not earth_fx.has(cell):
+					earth_fx.append(cell)
 				fx["fx_earth"] = earth_fx
+
+			var extra_every: int = int(r.get("earth_every_turns", 0))
+			if extra_every < 0:
+				extra_every = abs(extra_every)
+			if extra_every > 0 and (_turn_counter % max(extra_every, 1)) == 0:
+				var needs_variant: Variant = r.get("requires_adjacent_any", [])
+				var needs: Array = needs_variant if needs_variant is Array else []
+				if needs_variant is PackedStringArray:
+					needs = Array(needs_variant)
+				elif typeof(needs_variant) == TYPE_STRING:
+					needs = [String(needs_variant)]
+				if needs.is_empty():
+					needs = ["guard", "root"]
+				var ok := false
+				for neighbor in _world.neighbors_even_q(cell):
+					var neighbor_cat: String = _world.get_cell_name(
+						_world.LAYER_LIFE, neighbor
+					)
+					if needs.has(neighbor_cat):
+						ok = true
+						break
+				if ok:
+					var cap_value: int = int(capacity.get("earth", 0))
+					amounts["earth"] = clamp(
+						int(amounts.get("earth", 0)) + 1,
+						0,
+						cap_value,
+					)
+					var vein_fx_variant: Variant = fx.get("fx_earth", [])
+					var vein_fx: Array = (
+						vein_fx_variant if vein_fx_variant is Array else []
+					)
+					if not vein_fx.has(cell):
+						vein_fx.append(cell)
+					fx["fx_earth"] = vein_fx
 
 	for y in range(height):
 		for x in range(width):
@@ -352,9 +452,45 @@ func _produce_resources() -> void:
 				amounts[k] = clamp(int(amounts.get(k, 0)) + value, 0, cap_value)
 				produced_any = true
 			if produced_any:
-				var water_fx: Array = fx.get("fx_water", [])
-				water_fx.append(cell)
+				var water_fx_variant: Variant = fx.get("fx_water", [])
+				var water_fx: Array = water_fx_variant if water_fx_variant is Array else []
+				if not water_fx.has(cell):
+					water_fx.append(cell)
 				fx["fx_water"] = water_fx
+
+			if bool(r.get("per_unique_adjacent_categories", false)):
+				var every_special: int = int(r.get("water_every_turns", every))
+				if every_special <= 0:
+					every_special = 1
+				if (_turn_counter % every_special) == 0:
+					var unique: Dictionary = {}
+					for neighbor in _world.neighbors_even_q(cell):
+						var neighbor_cat := _world.get_cell_name(
+							_world.LAYER_LIFE, neighbor
+						)
+						if neighbor_cat.is_empty():
+							continue
+						unique[neighbor_cat] = true
+					var gain := unique.size()
+					var max_gain: int = int(r.get("max_per_tick", 3))
+					if max_gain > 0:
+						gain = min(gain, max_gain)
+					else:
+						gain = 0
+					if gain > 0:
+						var cap_value: int = int(capacity.get("water", 0))
+						amounts["water"] = clamp(
+							int(amounts.get("water", 0)) + gain,
+							0,
+							cap_value,
+						)
+						var span_fx_variant: Variant = fx.get("fx_water", [])
+						var span_fx: Array = (
+							span_fx_variant if span_fx_variant is Array else []
+						)
+						if not span_fx.has(cell):
+							span_fx.append(cell)
+						fx["fx_water"] = span_fx
 
 	for y in range(height):
 		for x in range(width):
