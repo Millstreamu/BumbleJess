@@ -101,10 +101,14 @@ func _sync_selection_with_roster(sel: Array) -> Array:
 
 func _build_roster() -> void:
 	_clear_children(roster_grid)
+	var selected_lookup := _selected_uid_lookup()
 	for i in range(_roster.size()):
 		if _roster[i] is not Dictionary:
 			continue
 		var entry: Dictionary = _roster[i]
+		var uid := String(entry.get("uid", ""))
+		if not uid.is_empty() and selected_lookup.has(uid):
+			continue
 		var card := _make_card(entry, i)
 		roster_grid.add_child(card)
 
@@ -140,6 +144,7 @@ func _build_selected() -> void:
 			slot.text = "%s\nUID: %s\n(click to remove)" % [_slot_label(entry), display_uid]
 			slot.pressed.connect(func() -> void:
 				_selected.remove_at(slot_index)
+				_build_roster()
 				_build_selected()
 				_refresh_state()
 			)
@@ -185,6 +190,7 @@ func _try_add(roster_index: int) -> void:
 				if existing_index != -1:
 						_selected.remove_at(existing_index)
 		_selected.append(entry.duplicate(true))
+		_build_roster()
 		_build_selected()
 		_refresh_state()
 
@@ -207,6 +213,17 @@ func _slot_label(entry: Dictionary) -> String:
 func _refresh_state() -> void:
 	confirm_btn.disabled = _selected.is_empty()
 	info_label.text = "Pick up to %d | Chosen: %d" % [MAX_SELECTION, _selected.size()]
+
+func _selected_uid_lookup() -> Dictionary:
+	var result: Dictionary = {}
+	for entry_variant in _selected:
+		if entry_variant is Dictionary:
+			var entry: Dictionary = entry_variant
+			var uid := String(entry.get("uid", ""))
+			if uid.is_empty():
+				continue
+			result[uid] = true
+	return result
 
 func _on_confirm() -> void:
 	_selected = _sanitize_selection(_selected)
