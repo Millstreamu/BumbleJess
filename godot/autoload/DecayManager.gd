@@ -53,6 +53,12 @@ func _threat_color(turns: int) -> Color:
 	return color
 
 
+func _attacker_indicator_color(turns: int) -> Color:
+	if turns <= 1:
+		return Color(1, 0.2, 0.2)
+	return Color(1, 0.6, 0.0)
+
+
 func _origin_cell() -> Vector2i:
 	if _world == null:
 		return Vector2i.ZERO
@@ -456,6 +462,7 @@ func _add_threat(c: Vector2i, turns: int, attacker_cell: Vector2i = Vector2i.ZER
 		_world.set_fx(c, "fx_threat")
 		var hud := _world.get_node_or_null("ThreatHUD")
 		var label: Label = null
+		var attacker_label: Label = null
 		if hud != null:
 				label = Label.new()
 				label.text = str(turns)
@@ -464,11 +471,20 @@ func _add_threat(c: Vector2i, turns: int, attacker_cell: Vector2i = Vector2i.ZER
 				var pos: Vector2 = _world.world_pos_of_cell(c)
 				label.position = pos + Vector2(-8, -8)
 				hud.add_child(label)
+				if attacker_cell != Vector2i.ZERO and _is_decay(attacker_cell):
+						attacker_label = Label.new()
+						attacker_label.text = "!"
+						attacker_label.add_theme_font_size_override("font_size", 24)
+						attacker_label.add_theme_color_override("font_color", _attacker_indicator_color(turns))
+						attacker_label.z_index = 1
+						attacker_label.position = _world.world_pos_of_cell(attacker_cell) + Vector2(-12, -12)
+						hud.add_child(attacker_label)
 		_threats[key] = {
 				"cell": c,
 				"turns": turns,
 				"attacker": attacker_cell,
 				"label": label,
+				"attacker_label": attacker_label,
 		}
 		emit_signal("threat_started", c, turns)
 		_refresh_threat_list()
@@ -485,6 +501,9 @@ func _update_threat(c: Vector2i, turns: int) -> void:
 	if is_instance_valid(label):
 		label.text = str(turns)
 		label.add_theme_color_override("font_color", _threat_color(turns))
+	var attacker_label: Label = record.get("attacker_label")
+	if is_instance_valid(attacker_label):
+		attacker_label.add_theme_color_override("font_color", _attacker_indicator_color(turns))
 	emit_signal("threat_updated", c, turns)
 	_refresh_threat_list()
 
@@ -497,6 +516,9 @@ func _clear_threat(c: Vector2i) -> void:
 	var label: Label = record.get("label")
 	if is_instance_valid(label):
 		label.queue_free()
+	var attacker_label: Label = record.get("attacker_label")
+	if is_instance_valid(attacker_label):
+		attacker_label.queue_free()
 	if _world != null:
 		_world.clear_fx(record.get("cell", c))
 	_threats.erase(key)
@@ -526,7 +548,12 @@ func _tick_and_trigger_battles() -> void:
                         to_clear.append(cell)
                         continue
 
-                var next_turns := int(record.get("turns", 0)) - 1
+                var current_turns := int(record.get("turns", 0))
+                var attacker_label: Label = record.get("attacker_label")
+                if is_instance_valid(attacker_label):
+                        attacker_label.add_theme_color_override("font_color", _attacker_indicator_color(current_turns))
+
+                var next_turns := current_turns - 1
                 if next_turns <= 0:
                         to_trigger.append(cell)
                 else:
