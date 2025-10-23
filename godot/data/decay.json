@@ -1,5 +1,5 @@
 {
   "max_attacks_per_turn": 1,
-  "totem_spread_interval_turns": 8,
+  "totem_spread_interval_turns": 1,
   "attack_countdown_turns": 3
 }

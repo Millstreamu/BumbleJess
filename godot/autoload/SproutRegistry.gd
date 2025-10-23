@@ -5,7 +5,7 @@ signal sprout_leveled(sprout_uid: String, new_level: int)
 signal error_msg(text: String)
 
 const MAX_SELECTION := 6
-const SAVE_PATH := "user://sprouts_roster.json"
+const SAVE_PATH := "res://data/sprouts_roster.json"
 
 var _db_by_id: Dictionary = {}
 var _roster: Array[Dictionary] = []
