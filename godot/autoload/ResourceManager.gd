@@ -464,10 +464,10 @@ func _produce_resources() -> void:
 					every_special = 1
 				if (_turn_counter % every_special) == 0:
 					var unique: Dictionary = {}
-					for neighbor in _world.neighbors_even_q(cell):
-						var neighbor_cat := _world.get_cell_name(
-							_world.LAYER_LIFE, neighbor
-						)
+                                        for neighbor in _world.neighbors_even_q(cell):
+                                                var neighbor_cat: String = _world.get_cell_name(
+                                                        _world.LAYER_LIFE, neighbor
+                                                )
 						if neighbor_cat.is_empty():
 							continue
 						unique[neighbor_cat] = true
