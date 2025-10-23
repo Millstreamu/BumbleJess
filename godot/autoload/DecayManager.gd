@@ -255,6 +255,11 @@ func _scan_clusters() -> void:
 	var width := int(_world.width)
 	var height := int(_world.height)
 	var max_existing_id := 0
+	var prior_totems: Dictionary = {}
+	for cluster in _clusters:
+		if cluster == null:
+			continue
+		prior_totems[cluster.id] = cluster.totem_cell
 	for y in range(height):
 		for x in range(width):
 			var c := Vector2i(x, y)
@@ -282,13 +287,24 @@ func _scan_clusters() -> void:
 				cluster_id = _next_cluster_id
 				_next_cluster_id += 1
 			var cluster := Cluster.new(cluster_id, c)
+			var stored_totem_variant: Variant = prior_totems.get(cluster_id, null)
+			var cluster_totem := c
+			var has_known_totem := false
+			if stored_totem_variant is Vector2i:
+				var stored_totem: Vector2i = stored_totem_variant
+				if _is_decay(stored_totem):
+					cluster_totem = stored_totem
+					has_known_totem = true
 			var queue: Array[Vector2i] = [c]
 			visited[cell_hash_value] = true
+			var contains_totem := false
 			while not queue.is_empty():
 				var current: Vector2i = queue.pop_back()
 				var current_hash := _cell_hash(current)
 				cluster.tiles[current_hash] = true
 				_set_cluster_metadata(current, cluster.id)
+				if current == cluster_totem:
+					contains_totem = true
 				for neighbor in _world.neighbors_even_q(current):
 					if _is_decay(neighbor):
 						var n_hash := _cell_hash(neighbor)
@@ -297,6 +313,13 @@ func _scan_clusters() -> void:
 							queue.append(neighbor)
 					elif not _is_blocked_for_decay(neighbor):
 						cluster.frontier[_cell_hash(neighbor)] = neighbor
+			if has_known_totem and not contains_totem:
+				for cluster_hash in cluster.tiles.keys():
+					var cell_to_clear: Vector2i = _cell_from_hash(int(cluster_hash))
+					_world.set_cell_named(_world.LAYER_OBJECTS, cell_to_clear, "empty")
+					_clear_cluster_metadata(cell_to_clear)
+				continue
+			cluster.totem_cell = cluster_totem
 			_clusters.append(cluster)
 			present_cluster_ids[cluster.id] = true
 	var to_remove: Array = []
