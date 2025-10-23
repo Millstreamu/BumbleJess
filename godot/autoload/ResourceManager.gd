@@ -458,39 +458,40 @@ func _produce_resources() -> void:
 					water_fx.append(cell)
 				fx["fx_water"] = water_fx
 
-			if bool(r.get("per_unique_adjacent_categories", false)):
-				var every_special: int = int(r.get("water_every_turns", every))
-				if every_special <= 0:
-					every_special = 1
-				if (_turn_counter % every_special) == 0:
-					var unique: Dictionary = {}
-										for neighbor in _world.neighbors_even_q(cell):
-												var neighbor_cat: String = _world.get_cell_name(
-														_world.LAYER_LIFE, neighbor
-												)
-						if neighbor_cat.is_empty():
-							continue
-						unique[neighbor_cat] = true
-					var gain := unique.size()
-					var max_gain: int = int(r.get("max_per_tick", 3))
-					if max_gain > 0:
-						gain = min(gain, max_gain)
-					else:
-						gain = 0
-					if gain > 0:
-						var cap_value: int = int(capacity.get("water", 0))
-						amounts["water"] = clamp(
-							int(amounts.get("water", 0)) + gain,
-							0,
-							cap_value,
-						)
-						var span_fx_variant: Variant = fx.get("fx_water", [])
-						var span_fx: Array = (
-							span_fx_variant if span_fx_variant is Array else []
-						)
-						if not span_fx.has(cell):
-							span_fx.append(cell)
-						fx["fx_water"] = span_fx
+                        if bool(r.get("per_unique_adjacent_categories", false)):
+                                var every_special: int = int(r.get("water_every_turns", every))
+                                if every_special <= 0:
+                                        every_special = 1
+                                if (_turn_counter % every_special) == 0:
+                                        var unique: Dictionary = {}
+                                        for neighbor in _world.neighbors_even_q(cell):
+                                                var neighbor_cat: String = _world.get_cell_name(
+                                                        _world.LAYER_LIFE,
+                                                        neighbor,
+                                                )
+                                                if neighbor_cat.is_empty():
+                                                        continue
+                                                unique[neighbor_cat] = true
+                                        var gain := unique.size()
+                                        var max_gain: int = int(r.get("max_per_tick", 3))
+                                        if max_gain > 0:
+                                                gain = min(gain, max_gain)
+                                        else:
+                                                gain = 0
+                                        if gain > 0:
+                                                var cap_value: int = int(capacity.get("water", 0))
+                                                amounts["water"] = clamp(
+                                                        int(amounts.get("water", 0)) + gain,
+                                                        0,
+                                                        cap_value,
+                                                )
+                                                var span_fx_variant: Variant = fx.get("fx_water", [])
+                                                var span_fx: Array = (
+                                                        span_fx_variant if span_fx_variant is Array else []
+                                                )
+                                                if not span_fx.has(cell):
+                                                        span_fx.append(cell)
+                                                fx["fx_water"] = span_fx
 
 	for y in range(height):
 		for x in range(width):
