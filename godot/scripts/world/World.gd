@@ -1,5 +1,7 @@
 extends Node2D
 
+signal tile_placed(tile_id: String, cell: Vector2i)
+
 const LAYER_GROUND := 0
 const LAYER_OBJECTS := 1
 const LAYER_LIFE := 2
@@ -27,6 +29,7 @@ var _tile_choice_window: TileChoiceWindow = null
 var _special_queue: Array[String] = []
 var _placing_special: String = ""
 var _extra_tile_colors: Dictionary[String, Color] = {}
+var _tile_rules_cache: Dictionary = {}
 
 @onready var hexmap: TileMap = $HexMap
 @onready var cursor: Node = $Cursor
@@ -90,6 +93,8 @@ func _ready() -> void:
 	draw_debug_grid()
 	_setup_hud()
 	_update_hud()
+	if not is_connected("tile_placed", Callable(self, "_on_tile_placed")):
+		connect("tile_placed", Callable(self, "_on_tile_placed"))
 
 
 func _ensure_toggle_threats_action() -> void:
@@ -562,6 +567,7 @@ func _place_tile(cell: Vector2i, tile_id: String, draw_from_deck: bool) -> bool:
 		return false
 	set_cell_named(LAYER_LIFE, cell, category)
 	set_cell_tile_id(LAYER_LIFE, cell, tile_id)
+	emit_signal("tile_placed", tile_id, cell)
 	rules.mark_occupied(cell)
 	_finalize_tile_placement(draw_from_deck)
 	return true
@@ -849,3 +855,79 @@ func _count_cells_named(tile_name: String) -> int:
 			if get_cell_name(LAYER_LIFE, Vector2i(x, y)) == tile_name:
 				total += 1
 	return total
+
+func _on_tile_placed(tile_id: String, cell: Vector2i) -> void:
+	var rule_set := _rules_for_tile(tile_id)
+	if rule_set.is_empty():
+		return
+
+	var on_place_variant: Variant = rule_set.get("on_place", {})
+	if on_place_variant is Dictionary:
+		var on_place: Dictionary = on_place_variant
+		if on_place.has("spawn_sprouts"):
+			var count := int(on_place.get("spawn_sprouts", 0))
+			if count < 0:
+				count = 0
+			var bonus_variant: Variant = on_place.get("bonus_if_adjacent_at_least", {})
+			if count > 0 and bonus_variant is Dictionary:
+				var bonus: Dictionary = bonus_variant
+				var need_cat := ""
+				var need := 0
+				var extra := int(bonus.get("extra", 0))
+				for key in bonus.keys():
+					if key == "extra":
+						continue
+					need_cat = String(key)
+					need = int(bonus[key])
+					break
+				if not need_cat.is_empty() and need > 0 and extra != 0:
+					var adjacent := 0
+					for n in neighbors_even_q(cell):
+						if get_cell_name(LAYER_LIFE, n) == need_cat:
+							adjacent += 1
+					if adjacent >= need:
+						count += extra
+			if count > 0:
+				_add_sprouts_to_roster(count)
+
+		if bool(on_place.get("cleanse_adjacent_decay", false)):
+			for n in neighbors_even_q(cell):
+				if get_cell_name(LAYER_OBJECTS, n) == "decay":
+					set_cell_named(LAYER_OBJECTS, n, "empty")
+
+
+func _add_sprouts_to_roster(count: int) -> void:
+	if count <= 0:
+		return
+	var registry_node: Node = get_node_or_null("/root/SproutRegistry")
+	if registry_node != null and registry_node.has_method("add_to_roster"):
+		for i in range(count):
+			registry_node.call("add_to_roster", "sprout.woodling", 1)
+		return
+	if Engine.has_singleton("SproutRegistry"):
+		var singleton := Engine.get_singleton("SproutRegistry")
+		if singleton != null and singleton.has_method("add_to_roster"):
+			for i in range(count):
+				singleton.call("add_to_roster", "sprout.woodling", 1)
+			return
+
+
+func _rules_for_tile(tile_id: String) -> Dictionary:
+	if tile_id.is_empty():
+		return {}
+	if _tile_rules_cache.is_empty():
+		var entries: Array = DataLite.load_json_array("res://data/tiles.json")
+		for entry_variant in entries:
+			if not (entry_variant is Dictionary):
+				continue
+			var entry: Dictionary = entry_variant
+			var entry_id := String(entry.get("id", ""))
+			if entry_id.is_empty():
+				continue
+			var rules_variant: Variant = entry.get("rules", {})
+			if rules_variant is Dictionary:
+				_tile_rules_cache[entry_id] = (rules_variant as Dictionary)
+			else:
+				_tile_rules_cache[entry_id] = {}
+	var found_variant: Variant = _tile_rules_cache.get(tile_id, {})
+	return found_variant if found_variant is Dictionary else {}
