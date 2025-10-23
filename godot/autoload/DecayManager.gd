@@ -514,13 +514,13 @@ func _tick_and_trigger_battles() -> void:
                         to_clear.append(cell)
                         continue
 
-                var attacker_cell: Vector2i = record.get("attacker", Vector2i.ZERO)
-                var target_life_name := _world.get_cell_name(_world.LAYER_LIFE, cell)
-                var attacker_name := ""
-                if attacker_cell != Vector2i.ZERO:
-                        attacker_name = _world.get_cell_name(_world.LAYER_OBJECTS, attacker_cell)
+		var attacker_cell: Vector2i = record.get("attacker", Vector2i.ZERO)
+		var target_life_name: String = _world.get_cell_name(_world.LAYER_LIFE, cell)
+		var attacker_name := ""
+		if attacker_cell != Vector2i.ZERO:
+			attacker_name = _world.get_cell_name(_world.LAYER_OBJECTS, attacker_cell)
 
-                var target_defended := target_life_name == "" or target_life_name == "guard"
+		var target_defended: bool = target_life_name == "" or target_life_name == "guard"
                 var attacker_gone := attacker_cell != Vector2i.ZERO and attacker_name != "decay"
                 if target_defended or attacker_gone:
                         to_clear.append(cell)
