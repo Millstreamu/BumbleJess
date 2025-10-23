@@ -169,35 +169,35 @@ func _current_soul_seeds() -> int:
 	return int(resource_manager.get("soul_seeds"))
 
 func _try_add(roster_index: int) -> void:
-        if roster_index < 0 or roster_index >= _roster.size():
-                return
-        var entry_value = _roster[roster_index]
-        if entry_value is not Dictionary:
-                return
-        var entry: Dictionary = entry_value
-        var uid := String(entry.get("uid", ""))
-        var existing_index := -1
-        if not uid.is_empty():
-                existing_index = _find_selected_index(uid)
-        if existing_index == -1 and _selected.size() >= MAX_SELECTION:
-                return
-        if not uid.is_empty():
-                if existing_index != -1:
-                        _selected.remove_at(existing_index)
-        _selected.append(entry.duplicate(true))
-        _build_selected()
-        _refresh_state()
+		if roster_index < 0 or roster_index >= _roster.size():
+				return
+		var entry_value = _roster[roster_index]
+		if entry_value is not Dictionary:
+				return
+		var entry: Dictionary = entry_value
+		var uid := String(entry.get("uid", ""))
+		var existing_index := -1
+		if not uid.is_empty():
+				existing_index = _find_selected_index(uid)
+		if existing_index == -1 and _selected.size() >= MAX_SELECTION:
+				return
+		if not uid.is_empty():
+				if existing_index != -1:
+						_selected.remove_at(existing_index)
+		_selected.append(entry.duplicate(true))
+		_build_selected()
+		_refresh_state()
 
 func _find_selected_index(uid: String) -> int:
-        if uid.is_empty():
-                return -1
-        for i in range(_selected.size()):
-                var entry_variant: Variant = _selected[i]
-                if entry_variant is Dictionary:
-                        var entry: Dictionary = entry_variant
-                        if String(entry.get("uid", "")) == uid:
-                                return i
-        return -1
+		if uid.is_empty():
+				return -1
+		for i in range(_selected.size()):
+				var entry_variant: Variant = _selected[i]
+				if entry_variant is Dictionary:
+						var entry: Dictionary = entry_variant
+						if String(entry.get("uid", "")) == uid:
+								return i
+		return -1
 
 func _slot_label(entry: Dictionary) -> String:
 	var id := String(entry.get("id", "sprout.woodling"))
