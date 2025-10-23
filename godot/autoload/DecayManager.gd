@@ -629,50 +629,50 @@ func _tick_and_trigger_battles() -> void:
 
 
 func _start_new_threats_up_to_limit() -> void:
-		var max_per_turn := int(cfg.get("max_attacks_per_turn", 3))
-		if max_per_turn <= 0:
-				return
-		var started := 0
-		var seen: Dictionary = {}
-		var countdown := int(cfg.get("attack_countdown_turns", 3))
-		for y in range(_world.height):
-				for x in range(_world.width):
-						var c := Vector2i(x, y)
-						if _world.get_cell_name(_world.LAYER_OBJECTS, c) != "decay":
-								continue
-						for n in _world.neighbors_even_q(c):
-								if started >= max_per_turn:
-										return
-								var key := _threat_key(n)
-								if seen.has(key):
-										continue
-								if _world.get_cell_name(_world.LAYER_LIFE, n) == "":
-										continue
-								if _protected_cells.has(_cell_hash(n)):
-										continue
-								if _is_guard(n):
-										continue
-								if _has_threat(n):
-										continue
-								_add_threat(n, countdown, c)
-								seen[key] = true
-								started += 1
+        var max_per_turn := int(cfg.get("max_attacks_per_turn", 3))
+        if max_per_turn <= 0:
+                return
+        var started := 0
+        var seen: Dictionary = {}
+        var countdown := int(cfg.get("attack_countdown_turns", 3))
+        for y in range(_world.height):
+                for x in range(_world.width):
+                        var c := Vector2i(x, y)
+                        if _world.get_cell_name(_world.LAYER_OBJECTS, c) != "decay":
+                                continue
+                        for n in _world.neighbors_even_q(c):
+                                if started >= max_per_turn:
+                                        return
+                                var key := _threat_key(n)
+                                if seen.has(key):
+                                        continue
+                                if _world.get_cell_name(_world.LAYER_LIFE, n) == "":
+                                        continue
+                                if _protected_cells.has(_cell_hash(n)):
+                                        continue
+                                if _is_guard(n):
+                                        continue
+                                if _has_threat(n):
+                                        continue
+                                _add_threat(n, countdown, c)
+                                seen[key] = true
+                                started += 1
 
 
 func _trigger_battle(target_cell: Vector2i) -> void:
-		var attacker_cell := Vector2i.ZERO
-		var key := _threat_key(target_cell)
-		if _threats.has(key):
-				var record: Dictionary = _threats[key]
-				var attacker_variant: Variant = record.get("attacker")
-				if attacker_variant is Vector2i:
-						attacker_cell = attacker_variant
-		_clear_threat(target_cell)
-		var encounter := {
-				"target": target_cell,
-				"attacker": attacker_cell,
-		}
-		BattleManager.open_battle(encounter, Callable(self, "_on_battle_finished"))
+        var attacker_cell := Vector2i.ZERO
+        var key := _threat_key(target_cell)
+        if _threats.has(key):
+                var record: Dictionary = _threats[key]
+                var attacker_variant: Variant = record.get("attacker")
+                if attacker_variant is Vector2i:
+                        attacker_cell = attacker_variant
+        _clear_threat(target_cell)
+        var encounter := {
+                "target": target_cell,
+                "attacker": attacker_cell,
+        }
+        BattleManager.open_battle(encounter, Callable(self, "_on_battle_finished"))
 
 
 func _on_battle_finished(result: Dictionary) -> void:
