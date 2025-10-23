@@ -6,9 +6,14 @@
 script/source = "extends Control
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
-	var map_id: String = str(ProjectSettings.get_setting(\"application/config/starting_map_id\", \"map.demo_001\"))
-	MapSeeder.load_map(map_id, $World)
+        set_anchors_preset(Control.PRESET_FULL_RECT)
+        var map_id: String = str(ProjectSettings.get_setting(\"application/config/starting_map_id\", \"map.demo_001\"))
+        _prepare_new_game(map_id)
+        MapSeeder.load_map(map_id, $World)
+
+func _prepare_new_game(map_id: String) -> void:
+        if SproutRegistry != null and SproutRegistry.has_method(\"refresh_for_new_game\"):
+                SproutRegistry.refresh_for_new_game(map_id)
 "
 
 [node name="Main" type="Control"]
