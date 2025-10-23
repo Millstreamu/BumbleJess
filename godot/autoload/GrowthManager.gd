@@ -194,9 +194,9 @@ func _handle_special_growth() -> void:
 					for neighbor in _world.neighbors_even_q(cell):
 						if converted >= count:
 							break
-                                                var neighbor_name: String = _world.get_cell_name(
-                                                        _world.LAYER_LIFE, neighbor
-                                                )
+												var neighbor_name: String = _world.get_cell_name(
+														_world.LAYER_LIFE, neighbor
+												)
 						if not (neighbor_name.is_empty() or neighbor_name == "empty"):
 							continue
 						_world.set_cell_named(_world.LAYER_LIFE, neighbor, "overgrowth")

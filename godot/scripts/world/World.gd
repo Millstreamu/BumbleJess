@@ -375,27 +375,27 @@ func world_to_cell(p: Vector2) -> Vector2i:
 
 
 func set_cell_named(layer: int, c: Vector2i, tile_name: String) -> void:
-        if hexmap == null:
-                return
-        if tile_name.is_empty() or tile_name == "empty":
-                hexmap.erase_cell(layer, c)
-                if layer == LAYER_LIFE:
-                        clear_cell_tile_id(layer, c)
-                _clear_cell_meta(layer, c)
-                return
-        if tiles_name_to_id.is_empty():
-                _build_tileset()
-        if not tiles_name_to_id.has(tile_name):
-                return
-        var tile_info: Dictionary = tiles_name_to_id[tile_name]
-        var src_id: int = int(tile_info.get("source_id", -1))
-        var atlas_value: Variant = tile_info.get("atlas_coords", Vector2i.ZERO)
-        var atlas_coords: Vector2i = atlas_value if atlas_value is Vector2i else Vector2i.ZERO
-        if src_id < 0:
-                return
-        hexmap.set_cell(layer, c, src_id, atlas_coords)
-        if layer == LAYER_LIFE:
-                clear_cell_tile_id(layer, c)
+		if hexmap == null:
+				return
+		if tile_name.is_empty() or tile_name == "empty":
+				hexmap.erase_cell(layer, c)
+				if layer == LAYER_LIFE:
+						clear_cell_tile_id(layer, c)
+				_clear_cell_meta(layer, c)
+				return
+		if tiles_name_to_id.is_empty():
+				_build_tileset()
+		if not tiles_name_to_id.has(tile_name):
+				return
+		var tile_info: Dictionary = tiles_name_to_id[tile_name]
+		var src_id: int = int(tile_info.get("source_id", -1))
+		var atlas_value: Variant = tile_info.get("atlas_coords", Vector2i.ZERO)
+		var atlas_coords: Vector2i = atlas_value if atlas_value is Vector2i else Vector2i.ZERO
+		if src_id < 0:
+				return
+		hexmap.set_cell(layer, c, src_id, atlas_coords)
+		if layer == LAYER_LIFE:
+				clear_cell_tile_id(layer, c)
 
 
 func set_cell_meta(layer: int, c: Vector2i, key: String, value) -> void:
