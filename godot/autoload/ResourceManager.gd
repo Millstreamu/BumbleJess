@@ -457,7 +457,6 @@ func _produce_resources() -> void:
 				if not water_fx.has(cell):
 					water_fx.append(cell)
 				fx["fx_water"] = water_fx
-
                         if bool(r.get("per_unique_adjacent_categories", false)):
                                 var every_special: int = int(r.get("water_every_turns", every))
                                 if every_special <= 0:
@@ -492,7 +491,6 @@ func _produce_resources() -> void:
                                                 if not span_fx.has(cell):
                                                         span_fx.append(cell)
                                                 fx["fx_water"] = span_fx
-
 	for y in range(height):
 		for x in range(width):
 			var cell := Vector2i(x, y)
