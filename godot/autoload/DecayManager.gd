@@ -505,18 +505,37 @@ func _clear_threat(c: Vector2i) -> void:
 
 
 func _tick_and_trigger_battles() -> void:
-	var to_trigger: Array[Vector2i] = []
-	for key in _threats.keys():
-		var record: Dictionary = _threats[key]
-		var cell: Vector2i = record.get("cell", Vector2i.ZERO)
-		var next_turns := int(record.get("turns", 0)) - 1
-		if next_turns <= 0:
-			to_trigger.append(cell)
-		else:
-			_update_threat(cell, next_turns)
-	for cell in to_trigger:
-		_trigger_battle(cell)
-	_refresh_threat_list()
+        var to_trigger: Array[Vector2i] = []
+        var to_clear: Array[Vector2i] = []
+        for key in _threats.keys():
+                var record: Dictionary = _threats[key]
+                var cell: Vector2i = record.get("cell", Vector2i.ZERO)
+                if _world == null:
+                        to_clear.append(cell)
+                        continue
+
+                var attacker_cell: Vector2i = record.get("attacker", Vector2i.ZERO)
+                var target_life_name := _world.get_cell_name(_world.LAYER_LIFE, cell)
+                var attacker_name := ""
+                if attacker_cell != Vector2i.ZERO:
+                        attacker_name = _world.get_cell_name(_world.LAYER_OBJECTS, attacker_cell)
+
+                var target_defended := target_life_name == "" or target_life_name == "guard"
+                var attacker_gone := attacker_cell != Vector2i.ZERO and attacker_name != "decay"
+                if target_defended or attacker_gone:
+                        to_clear.append(cell)
+                        continue
+
+                var next_turns := int(record.get("turns", 0)) - 1
+                if next_turns <= 0:
+                        to_trigger.append(cell)
+                else:
+                        _update_threat(cell, next_turns)
+        for cell in to_clear:
+                _clear_threat(cell)
+        for cell in to_trigger:
+                _trigger_battle(cell)
+        _refresh_threat_list()
 
 
 func _start_new_threats_up_to_limit() -> void:
