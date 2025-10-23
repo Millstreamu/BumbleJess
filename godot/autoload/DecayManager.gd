@@ -162,12 +162,17 @@ func _ensure_clusters_scanned() -> void:
 
 
 func _mark_clusters_dirty() -> void:
-	_clusters_dirty = true
+        _clusters_dirty = true
+
+
+func rescan_clusters() -> void:
+        _mark_clusters_dirty()
+        _scan_clusters()
 
 
 func _ensure_cluster_fx_tile(cl_id: int) -> String:
-	if _fx_name_for_cluster.has(cl_id):
-		return String(_fx_name_for_cluster[cl_id])
+        if _fx_name_for_cluster.has(cl_id):
+                return String(_fx_name_for_cluster[cl_id])
 	var fx_name := "fx_cluster_%d" % cl_id
 	var col := _cluster_color(cl_id)
 	if _world != null and _world.has_method("tileset_add_named_color"):
@@ -326,12 +331,11 @@ func _ready() -> void:
 
 
 func bind_world(world: Node) -> void:
-	if _world != null and _world != world:
-		_clear_all_threats()
-	_world = world
-	_refresh_threat_list()
-	_mark_clusters_dirty()
-	_scan_clusters()
+        if _world != null and _world != world:
+                _clear_all_threats()
+        _world = world
+        _refresh_threat_list()
+        rescan_clusters()
 
 
 func _on_turn_started(turn: int) -> void:
@@ -565,9 +569,8 @@ func _apply_battle_outcome(cell: Vector2i, victory: bool, attacker_cell: Vector2
 				if life_name != "" and life_name != "guard":
 					_world.set_cell_named(_world.LAYER_LIFE, neighbor, "empty")
 					_world.set_cell_named(_world.LAYER_OBJECTS, neighbor, "decay")
-	emit_signal("threat_resolved", cell, victory)
-	_mark_clusters_dirty()
-	_scan_clusters()
+        emit_signal("threat_resolved", cell, victory)
+        rescan_clusters()
 
 
 func _clear_all_threats() -> void:
