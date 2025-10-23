@@ -115,9 +115,9 @@ func _clear_cluster_metadata(c: Vector2i) -> void:
 
 
 func _get_cluster_id_from_metadata(c: Vector2i) -> int:
-	if _world == null:
-		return 0
-	var existing := _world.get_cell_meta(_world.LAYER_OBJECTS, c, "cluster_id")
+        if _world == null:
+                return 0
+        var existing: Variant = _world.get_cell_meta(_world.LAYER_OBJECTS, c, "cluster_id")
 	if typeof(existing) == TYPE_INT:
 		return int(existing)
 	if typeof(existing) == TYPE_STRING:
@@ -193,14 +193,14 @@ func _refresh_cluster_fx_overlay() -> void:
 	if _world == null:
 		return
 	_world.clear_all_fx()
-	if debug_show_clusters:
-				for cluster in _clusters:
-						if cluster == null:
-								continue
-						var fx_name := _ensure_cluster_fx_tile(cluster.id)
-						for cluster_hash in cluster.tiles.keys():
-								var cell: Vector2i = _cell_from_hash(int(cluster_hash))
-								_world.set_fx(cell, fx_name)
+        if debug_show_clusters:
+                for cluster in _clusters:
+                        if cluster == null:
+                                continue
+                        var fx_name := _ensure_cluster_fx_tile(cluster.id)
+                        for cluster_hash in cluster.tiles.keys():
+                                var cell: Vector2i = _cell_from_hash(int(cluster_hash))
+                                _world.set_fx(cell, fx_name)
 	_reapply_threat_fx()
 
 
@@ -263,15 +263,15 @@ func _scan_clusters() -> void:
 	else:
 		_next_cluster_id = max_existing_id + 1
 	var present_cluster_ids: Dictionary = {}
-	for y in range(height):
-		for x in range(width):
-			var c := Vector2i(x, y)
-			if not _is_decay(c):
-				_clear_cluster_metadata(c)
-				continue
-				var cell_hash_value := _cell_hash(c)
-				if visited.has(cell_hash_value):
-					continue
+        for y in range(height):
+                for x in range(width):
+                        var c := Vector2i(x, y)
+                        if not _is_decay(c):
+                                _clear_cluster_metadata(c)
+                                continue
+                        var cell_hash_value := _cell_hash(c)
+                        if visited.has(cell_hash_value):
+                                continue
 			var cluster_id := _get_cluster_id_from_metadata(c)
 			if cluster_id <= 0:
 				cluster_id = _next_cluster_id
