@@ -17,11 +17,12 @@ var _roster: Array = []
 var _selected: Array = []
 
 func _ready() -> void:
-	visible = false
-	confirm_btn.pressed.connect(_on_confirm)
-	cancel_btn.pressed.connect(_on_cancel)
-	_bind_sprout_registry()
-	_bind_resource_manager()
+        process_mode = Node.PROCESS_MODE_ALWAYS
+        visible = false
+        confirm_btn.pressed.connect(_on_confirm)
+        cancel_btn.pressed.connect(_on_cancel)
+        _bind_sprout_registry()
+        _bind_resource_manager()
 
 func open() -> void:
 	visible = true
