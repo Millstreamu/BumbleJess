@@ -87,13 +87,14 @@ func _is_decay(c: Vector2i) -> bool:
 
 
 func _is_blocked_for_decay(c: Vector2i) -> bool:
-	if _world == null:
-		return true
-	if _world.get_cell_name(_world.LAYER_OBJECTS, c) != "":
-		return true
-	if _is_guard(c):
-		return true
-	return false
+        if _world == null:
+                return true
+        var object_name := _world.get_cell_name(_world.LAYER_OBJECTS, c)
+        if not (object_name.is_empty() or object_name == "empty"):
+                return true
+        if _is_guard(c):
+                return true
+        return false
 
 
 func _get_hexmap() -> TileMap:
