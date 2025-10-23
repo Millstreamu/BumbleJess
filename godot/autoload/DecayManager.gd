@@ -162,17 +162,17 @@ func _ensure_clusters_scanned() -> void:
 
 
 func _mark_clusters_dirty() -> void:
-        _clusters_dirty = true
+		_clusters_dirty = true
 
 
 func rescan_clusters() -> void:
-        _mark_clusters_dirty()
-        _scan_clusters()
+		_mark_clusters_dirty()
+		_scan_clusters()
 
 
 func _ensure_cluster_fx_tile(cl_id: int) -> String:
-        if _fx_name_for_cluster.has(cl_id):
-                return String(_fx_name_for_cluster[cl_id])
+		if _fx_name_for_cluster.has(cl_id):
+				return String(_fx_name_for_cluster[cl_id])
 	var fx_name := "fx_cluster_%d" % cl_id
 	var col := _cluster_color(cl_id)
 	if _world != null and _world.has_method("tileset_add_named_color"):
@@ -331,11 +331,11 @@ func _ready() -> void:
 
 
 func bind_world(world: Node) -> void:
-        if _world != null and _world != world:
-                _clear_all_threats()
-        _world = world
-        _refresh_threat_list()
-        rescan_clusters()
+		if _world != null and _world != world:
+				_clear_all_threats()
+		_world = world
+		_refresh_threat_list()
+		rescan_clusters()
 
 
 func _on_turn_started(turn: int) -> void:
@@ -424,30 +424,30 @@ func _has_threat(c: Vector2i) -> bool:
 
 
 func _add_threat(c: Vector2i, turns: int, attacker_cell: Vector2i = Vector2i.ZERO) -> void:
-        var key := _threat_key(c)
-        if _is_guard(c):
-                return
-        if _threats.has(key):
-                return
+		var key := _threat_key(c)
+		if _is_guard(c):
+				return
+		if _threats.has(key):
+				return
 	_world.set_fx(c, "fx_threat")
 	var hud := _world.get_node_or_null("ThreatHUD")
 	var label: Label = null
-        if hud != null:
-                label = Label.new()
-                label.text = str(turns)
-                label.add_theme_color_override("font_color", _threat_color(turns))
-                label.add_theme_font_size_override("font_size", 16)
-                var pos: Vector2 = _world.world_pos_of_cell(c)
-                label.position = pos + Vector2(-8, -8)
-                hud.add_child(label)
-        _threats[key] = {
-                "cell": c,
-                "turns": turns,
-                "attacker": attacker_cell,
-                "label": label,
-        }
-        emit_signal("threat_started", c, turns)
-        _refresh_threat_list()
+		if hud != null:
+				label = Label.new()
+				label.text = str(turns)
+				label.add_theme_color_override("font_color", _threat_color(turns))
+				label.add_theme_font_size_override("font_size", 16)
+				var pos: Vector2 = _world.world_pos_of_cell(c)
+				label.position = pos + Vector2(-8, -8)
+				hud.add_child(label)
+		_threats[key] = {
+				"cell": c,
+				"turns": turns,
+				"attacker": attacker_cell,
+				"label": label,
+		}
+		emit_signal("threat_started", c, turns)
+		_refresh_threat_list()
 
 
 func _update_threat(c: Vector2i, turns: int) -> void:
@@ -519,58 +519,58 @@ func _start_new_threats_up_to_limit() -> void:
 					continue
 				if _has_threat(n):
 					continue
-                                _add_threat(n, countdown, c)
-                                seen[key] = true
-                                started += 1
+								_add_threat(n, countdown, c)
+								seen[key] = true
+								started += 1
 
 
 func _trigger_battle(target_cell: Vector2i) -> void:
-        var attacker_cell := Vector2i.ZERO
-        var key := _threat_key(target_cell)
-        if _threats.has(key):
-                var record: Dictionary = _threats[key]
-                var attacker_variant: Variant = record.get("attacker")
-                if attacker_variant is Vector2i:
-                        attacker_cell = attacker_variant
-        _clear_threat(target_cell)
-        var encounter := {
-                "target": target_cell,
-                "attacker": attacker_cell,
-        }
-        BattleManager.open_battle(encounter, Callable(self, "_on_battle_finished"))
+		var attacker_cell := Vector2i.ZERO
+		var key := _threat_key(target_cell)
+		if _threats.has(key):
+				var record: Dictionary = _threats[key]
+				var attacker_variant: Variant = record.get("attacker")
+				if attacker_variant is Vector2i:
+						attacker_cell = attacker_variant
+		_clear_threat(target_cell)
+		var encounter := {
+				"target": target_cell,
+				"attacker": attacker_cell,
+		}
+		BattleManager.open_battle(encounter, Callable(self, "_on_battle_finished"))
 
 
 func _on_battle_finished(result: Dictionary) -> void:
-        var cell: Vector2i = result.get("target_cell", Vector2i.ZERO)
-        var victory := bool(result.get("victory", true))
-        var attacker_cell: Vector2i = result.get("attacker_cell", Vector2i.ZERO)
-        _apply_battle_outcome(cell, victory, attacker_cell)
+		var cell: Vector2i = result.get("target_cell", Vector2i.ZERO)
+		var victory := bool(result.get("victory", true))
+		var attacker_cell: Vector2i = result.get("attacker_cell", Vector2i.ZERO)
+		_apply_battle_outcome(cell, victory, attacker_cell)
 
 
 func _apply_battle_outcome(cell: Vector2i, victory: bool, attacker_cell: Vector2i = Vector2i.ZERO) -> void:
-        if _world == null:
-                return
-        if victory:
-                var resource_manager := get_node_or_null("/root/ResourceManager")
-                if resource_manager != null and resource_manager.has_method("add_life"):
-                        resource_manager.call("add_life", 3)
-                var decay_cell := attacker_cell
-                if _world.get_cell_name(_world.LAYER_OBJECTS, decay_cell) != "decay":
-                        decay_cell = cell
-                if _world.get_cell_name(_world.LAYER_OBJECTS, decay_cell) == "decay":
-                        _world.set_cell_named(_world.LAYER_OBJECTS, decay_cell, "empty")
-                        _clear_cluster_metadata(decay_cell)
-        else:
-                if _world.get_cell_name(_world.LAYER_LIFE, cell) != "guard":
-                        _world.set_cell_named(_world.LAYER_LIFE, cell, "empty")
+		if _world == null:
+				return
+		if victory:
+				var resource_manager := get_node_or_null("/root/ResourceManager")
+				if resource_manager != null and resource_manager.has_method("add_life"):
+						resource_manager.call("add_life", 3)
+				var decay_cell := attacker_cell
+				if _world.get_cell_name(_world.LAYER_OBJECTS, decay_cell) != "decay":
+						decay_cell = cell
+				if _world.get_cell_name(_world.LAYER_OBJECTS, decay_cell) == "decay":
+						_world.set_cell_named(_world.LAYER_OBJECTS, decay_cell, "empty")
+						_clear_cluster_metadata(decay_cell)
+		else:
+				if _world.get_cell_name(_world.LAYER_LIFE, cell) != "guard":
+						_world.set_cell_named(_world.LAYER_LIFE, cell, "empty")
 			_world.set_cell_named(_world.LAYER_OBJECTS, cell, "decay")
 			for neighbor in _world.neighbors_even_q(cell):
 				var life_name: String = _world.get_cell_name(_world.LAYER_LIFE, neighbor)
 				if life_name != "" and life_name != "guard":
 					_world.set_cell_named(_world.LAYER_LIFE, neighbor, "empty")
 					_world.set_cell_named(_world.LAYER_OBJECTS, neighbor, "decay")
-        emit_signal("threat_resolved", cell, victory)
-        rescan_clusters()
+		emit_signal("threat_resolved", cell, victory)
+		rescan_clusters()
 
 
 func _clear_all_threats() -> void:

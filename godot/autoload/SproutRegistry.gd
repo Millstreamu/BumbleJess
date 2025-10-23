@@ -15,51 +15,51 @@ var _last_selection: Array[Dictionary] = []
 var _rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
-        _load_db()
-        _load_persisted_roster()
-        _rng.randomize()
+		_load_db()
+		_load_persisted_roster()
+		_rng.randomize()
 
 func refresh_for_new_game(map_id: String = "") -> void:
-        if _db_by_id.is_empty():
-                _load_db()
-        var seed_entries: Array[Dictionary] = _load_seed_entries(map_id)
-        if seed_entries.is_empty():
-                seed_entries = _load_seed_entries("")
-        _apply_roster_seed(seed_entries)
+		if _db_by_id.is_empty():
+				_load_db()
+		var seed_entries: Array[Dictionary] = _load_seed_entries(map_id)
+		if seed_entries.is_empty():
+				seed_entries = _load_seed_entries("")
+		_apply_roster_seed(seed_entries)
 
 func _load_seed_entries(map_id: String) -> Array[Dictionary]:
-        var paths: Array[String] = []
-        if not map_id.is_empty():
-                paths.append("res://sprouts/seeds/%s.json" % map_id)
-                paths.append("res://sprouts/seeds/%s_seed.json" % map_id)
-                var sanitized_map_id := map_id.replace("map.", "")
-                if sanitized_map_id != map_id:
-                        paths.append("res://sprouts/seeds/%s.json" % sanitized_map_id)
-                        paths.append("res://sprouts/seeds/%s_seed.json" % sanitized_map_id)
-        paths.append(TEMPLATE_PATH)
-        for path in paths:
-                if not FileAccess.file_exists(path):
-                        continue
-                var arr: Array = DataLite.load_json_array(path)
-                var result: Array[Dictionary] = []
-                for entry_variant in arr:
-                        if entry_variant is Dictionary:
-                                result.append(entry_variant)
-                if not result.is_empty():
-                        return result
-        return []
+		var paths: Array[String] = []
+		if not map_id.is_empty():
+				paths.append("res://sprouts/seeds/%s.json" % map_id)
+				paths.append("res://sprouts/seeds/%s_seed.json" % map_id)
+				var sanitized_map_id := map_id.replace("map.", "")
+				if sanitized_map_id != map_id:
+						paths.append("res://sprouts/seeds/%s.json" % sanitized_map_id)
+						paths.append("res://sprouts/seeds/%s_seed.json" % sanitized_map_id)
+		paths.append(TEMPLATE_PATH)
+		for path in paths:
+				if not FileAccess.file_exists(path):
+						continue
+				var arr: Array = DataLite.load_json_array(path)
+				var result: Array[Dictionary] = []
+				for entry_variant in arr:
+						if entry_variant is Dictionary:
+								result.append(entry_variant)
+				if not result.is_empty():
+						return result
+		return []
 
 func _apply_roster_seed(entries: Array[Dictionary]) -> void:
-        _roster.clear()
-        _last_selection.clear()
-        _uid_counter = 1
-        for entry in entries:
-                var entry_dict := entry.duplicate(true)
-                entry_dict.erase("uid")
-                var sanitized := _sanitize_roster_entry(entry_dict)
-                _roster.append(sanitized)
-        _save_persisted_roster()
-        emit_signal("roster_changed")
+		_roster.clear()
+		_last_selection.clear()
+		_uid_counter = 1
+		for entry in entries:
+				var entry_dict := entry.duplicate(true)
+				entry_dict.erase("uid")
+				var sanitized := _sanitize_roster_entry(entry_dict)
+				_roster.append(sanitized)
+		_save_persisted_roster()
+		emit_signal("roster_changed")
 
 func _load_db() -> void:
 	_db_by_id.clear()
