@@ -162,21 +162,21 @@ func _ensure_clusters_scanned() -> void:
 
 
 func _mark_clusters_dirty() -> void:
-		_clusters_dirty = true
+        _clusters_dirty = true
 
 
 func rescan_clusters() -> void:
-		_mark_clusters_dirty()
-		_scan_clusters()
+        _mark_clusters_dirty()
+        _scan_clusters()
 
 
 func _ensure_cluster_fx_tile(cl_id: int) -> String:
-		if _fx_name_for_cluster.has(cl_id):
-				return String(_fx_name_for_cluster[cl_id])
-	var fx_name := "fx_cluster_%d" % cl_id
-	var col := _cluster_color(cl_id)
-	if _world != null and _world.has_method("tileset_add_named_color"):
-		_world.tileset_add_named_color(fx_name, col)
+        if _fx_name_for_cluster.has(cl_id):
+                return String(_fx_name_for_cluster[cl_id])
+        var fx_name := "fx_cluster_%d" % cl_id
+        var col := _cluster_color(cl_id)
+        if _world != null and _world.has_method("tileset_add_named_color"):
+                _world.tileset_add_named_color(fx_name, col)
 	_fx_name_for_cluster[cl_id] = fx_name
 	return fx_name
 

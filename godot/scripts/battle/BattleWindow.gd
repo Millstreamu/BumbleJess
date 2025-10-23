@@ -376,42 +376,42 @@ func _update_slot(slot: Node, unit: Dictionary) -> void:
 	if hp_bar:
 		var hp_max: float = max(1.0, float(unit.get("hp_max", 1)))
 		hp_bar.value = clamp(int((float(unit.get("hp", 0)) / hp_max) * 100.0), 0, 100)
-	var cd_bar: TextureProgressBar = slot.get_node_or_null("CD") as TextureProgressBar
-	if cd_bar:
-		var cd: float = max(0.01, float(unit.get("cd", 1.0)))
-		var cd_curr: float = clamp(float(unit.get("cd_curr", 0.0)) / cd, 0.0, 1.0)
-		cd_bar.value = int((1.0 - cd_curr) * 100.0)
+        var cd_bar: TextureProgressBar = slot.get_node_or_null("CD") as TextureProgressBar
+        if cd_bar:
+                var cd: float = max(0.01, float(unit.get("cd", 1.0)))
+                var cd_curr: float = clamp(float(unit.get("cd_curr", 0.0)) / cd, 0.0, 1.0)
+                cd_bar.value = int((1.0 - cd_curr) * 100.0)
 
 func _check_end() -> String:
-	var left_alive: bool = false
-	var right_alive: bool = false
-	for unit in left_units:
-		if unit.get("alive", false):
-			left_alive = true
-	for unit in right_units:
-		if unit.get("alive", false):
-			right_alive = true
-	if not left_alive and not right_alive:
-		return "draw"
-	if not left_alive:
-		return "defeat"
-	if not right_alive:
-		return "victory"
-	return ""
+        var left_alive: bool = false
+        var right_alive: bool = false
+        for unit in left_units:
+                if unit.get("alive", false):
+                        left_alive = true
+        for unit in right_units:
+                if unit.get("alive", false):
+                        right_alive = true
+        if not left_alive and not right_alive:
+                return "draw"
+        if not left_alive:
+                return "defeat"
+        if not right_alive:
+                return "victory"
+        return ""
 
 func _finish(state: String) -> void:
-	running = false
-	start_btn.disabled = true
-	close_btn.disabled = false
-	status_label.text = state.capitalize()
-	_refresh_ui()
-	var victory: bool = state == "victory"
-	var rewards: Dictionary = {"life": LIFE_REWARD if victory else 0}
-		var result: Dictionary = {
-				"victory": victory,
-				"outcome": state,
-				"rewards": rewards,
-				"target_cell": encounter.get("target", Vector2i.ZERO),
-				"attacker_cell": encounter.get("attacker", Vector2i.ZERO),
-		}
-		emit_signal("battle_finished", result)
+        running = false
+        start_btn.disabled = true
+        close_btn.disabled = false
+        status_label.text = state.capitalize()
+        _refresh_ui()
+        var victory: bool = state == "victory"
+        var rewards: Dictionary = {"life": LIFE_REWARD if victory else 0}
+        var result: Dictionary = {
+                "victory": victory,
+                "outcome": state,
+                "rewards": rewards,
+                "target_cell": encounter.get("target", Vector2i.ZERO),
+                "attacker_cell": encounter.get("attacker", Vector2i.ZERO),
+        }
+        emit_signal("battle_finished", result)
