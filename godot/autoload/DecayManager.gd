@@ -119,12 +119,12 @@ func _recompute_mirror_pool_protection() -> void:
 	for y in range(height):
 		for x in range(width):
 			var cell := Vector2i(x, y)
-			var hash := _cell_hash(cell)
-			if seen.has(hash):
+			var cell_hash := _cell_hash(cell)
+			if seen.has(cell_hash):
 				continue
 			var tile_id := String(_world.get_cell_tile_id(_world.LAYER_LIFE, cell))
 			if tile_id.is_empty() or not tile_id.begins_with("tile.veil.mirror_pool"):
-				seen[hash] = true
+				seen[cell_hash] = true
 				continue
 			var component: Array[Vector2i] = []
 			var queue: Array[Vector2i] = [cell]
