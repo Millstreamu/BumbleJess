@@ -135,7 +135,7 @@ func _make_card(entry: Dictionary, idx: int) -> Button:
         var display_name: String = SproutRegistry.get_sprout_name(id)
         if not uid.is_empty():
                 display_name = "%s [%s]" % [display_name, uid]
-        var stats_text := SproutRegistry.short_stats_label(id, level)
+        var stats_text: String = SproutRegistry.short_stats_label(id, level)
         var card_ui := card as SproutCardUI
         if card_ui:
                 card_ui.set_display_name(display_name)
