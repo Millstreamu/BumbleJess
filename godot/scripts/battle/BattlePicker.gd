@@ -169,56 +169,56 @@ func _build_selected() -> void:
 		slot.focus_mode = Control.FOCUS_NONE
 		slot.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		slot.size_flags_vertical = Control.SIZE_EXPAND_FILL
-			if i < _selected.size():
-				var entry: Dictionary = _selected[i]
-				var slot_index := i
-				var uid := String(entry.get("uid", ""))
-				var id := String(entry.get("id", "sprout.woodling"))
-				var level := int(entry.get("level", 1))
-				var display_uid := uid if not uid.is_empty() else "-"
-				slot.text = "%s\nUID: %s\n(click to remove)" % [_slot_label(entry), display_uid]
-				slot.pressed.connect(func() -> void:
-					_selected.remove_at(slot_index)
-					_build_roster()
-					_build_selected()
-					_refresh_state()
-				)
-				var upgrade_btn := Button.new()
-				upgrade_btn.focus_mode = Control.FOCUS_NONE
-				var level_cap := SproutRegistry.get_level_cap(id)
-				var can_upgrade := level < level_cap
-				if can_upgrade:
-					var cost_dict := SproutRegistry.get_upgrade_resource_cost(id, level, 1)
-					var cost_label := _format_resource_cost(cost_dict)
-					upgrade_btn.text = "+1 Lv (%s)" % cost_label
-					upgrade_btn.disabled = uid.is_empty() or not _can_afford_cost(cost_dict)
-					upgrade_btn.pressed.connect(func() -> void:
-						if uid.is_empty():
-							return
-						if SproutRegistry.level_up(uid, 1, false):
-							_refresh_from_registry()
-							_build_roster()
-							_build_selected()
-							_refresh_state()
-					)
-				else:
-					upgrade_btn.text = "Level Cap Reached"
-					upgrade_btn.disabled = true
-				slot.add_child(upgrade_btn)
-				var btn := Button.new()
-				btn.text = "+1 Lv (Soul Seed)"
-				btn.focus_mode = Control.FOCUS_NONE
-				btn.disabled = _current_soul_seeds() <= 0 or uid.is_empty() or level >= SproutRegistry.get_level_cap(id)
-				btn.pressed.connect(func() -> void:
+		if i < _selected.size():
+			var entry: Dictionary = _selected[i]
+			var slot_index := i
+			var uid := String(entry.get("uid", ""))
+			var id := String(entry.get("id", "sprout.woodling"))
+			var level := int(entry.get("level", 1))
+			var display_uid := uid if not uid.is_empty() else "-"
+			slot.text = "%s\nUID: %s\n(click to remove)" % [_slot_label(entry), display_uid]
+			slot.pressed.connect(func() -> void:
+				_selected.remove_at(slot_index)
+				_build_roster()
+				_build_selected()
+				_refresh_state()
+			)
+			var upgrade_btn := Button.new()
+			upgrade_btn.focus_mode = Control.FOCUS_NONE
+			var level_cap := SproutRegistry.get_level_cap(id)
+			var can_upgrade := level < level_cap
+			if can_upgrade:
+				var cost_dict := SproutRegistry.get_upgrade_resource_cost(id, level, 1)
+				var cost_label := _format_resource_cost(cost_dict)
+				upgrade_btn.text = "+1 Lv (%s)" % cost_label
+				upgrade_btn.disabled = uid.is_empty() or not _can_afford_cost(cost_dict)
+				upgrade_btn.pressed.connect(func() -> void:
 					if uid.is_empty():
 						return
-					if SproutRegistry.level_up(uid, 1, true):
+					if SproutRegistry.level_up(uid, 1, false):
 						_refresh_from_registry()
 						_build_roster()
 						_build_selected()
 						_refresh_state()
 				)
-				slot.add_child(btn)
+			else:
+				upgrade_btn.text = "Level Cap Reached"
+				upgrade_btn.disabled = true
+			slot.add_child(upgrade_btn)
+			var btn := Button.new()
+			btn.text = "+1 Lv (Soul Seed)"
+			btn.focus_mode = Control.FOCUS_NONE
+			btn.disabled = _current_soul_seeds() <= 0 or uid.is_empty() or level >= SproutRegistry.get_level_cap(id)
+			btn.pressed.connect(func() -> void:
+				if uid.is_empty():
+					return
+				if SproutRegistry.level_up(uid, 1, true):
+					_refresh_from_registry()
+					_build_roster()
+					_build_selected()
+					_refresh_state()
+			)
+			slot.add_child(btn)
 		else:
 			slot.text = "(empty)"
 			slot.disabled = true
