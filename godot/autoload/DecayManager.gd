@@ -517,40 +517,40 @@ func _has_threat(c: Vector2i) -> bool:
 
 
 func _add_threat(c: Vector2i, turns: int, attacker_cell: Vector2i = Vector2i.ZERO) -> void:
-        var key := _threat_key(c)
-        if _is_guard(c):
-                return
-        if _threats.has(key):
-                return
-        _world.set_fx(c, "fx_threat")
-        var hud := _world.get_node_or_null("ThreatHUD")
-        var label: Label = null
-        var attacker_label: Label = null
-        if hud != null:
-                label = Label.new()
-                label.text = str(turns)
-                label.add_theme_color_override("font_color", _threat_color(turns))
-                label.add_theme_font_size_override("font_size", 16)
-                var pos: Vector2 = _world.world_pos_of_cell(c)
-                label.position = pos + Vector2(-8, -8)
-                hud.add_child(label)
-                if attacker_cell != Vector2i.ZERO and _is_decay(attacker_cell):
-                        attacker_label = Label.new()
-                        attacker_label.text = "!"
-                        attacker_label.add_theme_font_size_override("font_size", 24)
-                        attacker_label.add_theme_color_override("font_color", _attacker_indicator_color(turns))
-                        attacker_label.z_index = 1
-                        attacker_label.position = _world.world_pos_of_cell(attacker_cell) + Vector2(-12, -12)
-                        hud.add_child(attacker_label)
-        _threats[key] = {
-                "cell": c,
-                "turns": turns,
-                "attacker": attacker_cell,
-                "label": label,
-                "attacker_label": attacker_label,
-        }
-        emit_signal("threat_started", c, turns)
-        _refresh_threat_list()
+		var key := _threat_key(c)
+		if _is_guard(c):
+				return
+		if _threats.has(key):
+				return
+		_world.set_fx(c, "fx_threat")
+		var hud := _world.get_node_or_null("ThreatHUD")
+		var label: Label = null
+		var attacker_label: Label = null
+		if hud != null:
+				label = Label.new()
+				label.text = str(turns)
+				label.add_theme_color_override("font_color", _threat_color(turns))
+				label.add_theme_font_size_override("font_size", 16)
+				var pos: Vector2 = _world.world_pos_of_cell(c)
+				label.position = pos + Vector2(-8, -8)
+				hud.add_child(label)
+				if attacker_cell != Vector2i.ZERO and _is_decay(attacker_cell):
+						attacker_label = Label.new()
+						attacker_label.text = "!"
+						attacker_label.add_theme_font_size_override("font_size", 24)
+						attacker_label.add_theme_color_override("font_color", _attacker_indicator_color(turns))
+						attacker_label.z_index = 1
+						attacker_label.position = _world.world_pos_of_cell(attacker_cell) + Vector2(-12, -12)
+						hud.add_child(attacker_label)
+		_threats[key] = {
+				"cell": c,
+				"turns": turns,
+				"attacker": attacker_cell,
+				"label": label,
+				"attacker_label": attacker_label,
+		}
+		emit_signal("threat_started", c, turns)
+		_refresh_threat_list()
 
 
 func _update_threat(c: Vector2i, turns: int) -> void:
@@ -590,96 +590,96 @@ func _clear_threat(c: Vector2i) -> void:
 
 
 func _tick_and_trigger_battles() -> void:
-        var to_trigger: Array[Vector2i] = []
-        var to_clear: Array[Vector2i] = []
-        for key in _threats.keys():
-                var record: Dictionary = _threats[key]
-                var cell: Vector2i = record.get("cell", Vector2i.ZERO)
-                if _world == null:
-                        to_clear.append(cell)
-                        continue
+		var to_trigger: Array[Vector2i] = []
+		var to_clear: Array[Vector2i] = []
+		for key in _threats.keys():
+				var record: Dictionary = _threats[key]
+				var cell: Vector2i = record.get("cell", Vector2i.ZERO)
+				if _world == null:
+						to_clear.append(cell)
+						continue
 
-                var attacker_cell: Vector2i = record.get("attacker", Vector2i.ZERO)
-                var target_life_name: String = _world.get_cell_name(_world.LAYER_LIFE, cell)
-                var attacker_name := ""
-                if attacker_cell != Vector2i.ZERO:
-                        attacker_name = _world.get_cell_name(_world.LAYER_OBJECTS, attacker_cell)
+				var attacker_cell: Vector2i = record.get("attacker", Vector2i.ZERO)
+				var target_life_name: String = _world.get_cell_name(_world.LAYER_LIFE, cell)
+				var attacker_name := ""
+				if attacker_cell != Vector2i.ZERO:
+						attacker_name = _world.get_cell_name(_world.LAYER_OBJECTS, attacker_cell)
 
-                var target_defended: bool = target_life_name == "" or target_life_name == "guard"
-                var attacker_gone := attacker_cell != Vector2i.ZERO and attacker_name != "decay"
-                if target_defended or attacker_gone:
-                        to_clear.append(cell)
-                        continue
+				var target_defended: bool = target_life_name == "" or target_life_name == "guard"
+				var attacker_gone := attacker_cell != Vector2i.ZERO and attacker_name != "decay"
+				if target_defended or attacker_gone:
+						to_clear.append(cell)
+						continue
 
-                var current_turns := int(record.get("turns", 0))
-                var attacker_label: Label = record.get("attacker_label")
-                if is_instance_valid(attacker_label):
-                        attacker_label.add_theme_color_override("font_color", _attacker_indicator_color(current_turns))
+				var current_turns := int(record.get("turns", 0))
+				var attacker_label: Label = record.get("attacker_label")
+				if is_instance_valid(attacker_label):
+						attacker_label.add_theme_color_override("font_color", _attacker_indicator_color(current_turns))
 
-                var next_turns := current_turns - 1
-                if next_turns <= 0:
-                        to_trigger.append(cell)
-                else:
-                        _update_threat(cell, next_turns)
-        for cell in to_clear:
-                _clear_threat(cell)
-        for cell in to_trigger:
-                _trigger_battle(cell)
-        _refresh_threat_list()
+				var next_turns := current_turns - 1
+				if next_turns <= 0:
+						to_trigger.append(cell)
+				else:
+						_update_threat(cell, next_turns)
+		for cell in to_clear:
+				_clear_threat(cell)
+		for cell in to_trigger:
+				_trigger_battle(cell)
+		_refresh_threat_list()
 
 
 func _start_new_threats_up_to_limit() -> void:
-        var max_per_turn := int(cfg.get("max_attacks_per_turn", 3))
-        if max_per_turn <= 0:
-                return
-        var started := 0
-        var seen: Dictionary = {}
-        var countdown := int(cfg.get("attack_countdown_turns", 3))
-        for y in range(_world.height):
-                for x in range(_world.width):
-                        var c := Vector2i(x, y)
-                        if _world.get_cell_name(_world.LAYER_OBJECTS, c) != "decay":
-                                continue
-                        for n in _world.neighbors_even_q(c):
-                                if started >= max_per_turn:
-                                        return
-                                var key := _threat_key(n)
-                                if seen.has(key):
-                                        continue
-                                if _world.get_cell_name(_world.LAYER_LIFE, n) == "":
-                                        continue
-                                if _protected_cells.has(_cell_hash(n)):
-                                        continue
-                                if _is_guard(n):
-                                        continue
-                                if _has_threat(n):
-                                        continue
-                                _add_threat(n, countdown, c)
-                                seen[key] = true
-                                started += 1
+		var max_per_turn := int(cfg.get("max_attacks_per_turn", 3))
+		if max_per_turn <= 0:
+				return
+		var started := 0
+		var seen: Dictionary = {}
+		var countdown := int(cfg.get("attack_countdown_turns", 3))
+		for y in range(_world.height):
+				for x in range(_world.width):
+						var c := Vector2i(x, y)
+						if _world.get_cell_name(_world.LAYER_OBJECTS, c) != "decay":
+								continue
+						for n in _world.neighbors_even_q(c):
+								if started >= max_per_turn:
+										return
+								var key := _threat_key(n)
+								if seen.has(key):
+										continue
+								if _world.get_cell_name(_world.LAYER_LIFE, n) == "":
+										continue
+								if _protected_cells.has(_cell_hash(n)):
+										continue
+								if _is_guard(n):
+										continue
+								if _has_threat(n):
+										continue
+								_add_threat(n, countdown, c)
+								seen[key] = true
+								started += 1
 
 
 func _trigger_battle(target_cell: Vector2i) -> void:
-        var attacker_cell := Vector2i.ZERO
-        var key := _threat_key(target_cell)
-        if _threats.has(key):
-                var record: Dictionary = _threats[key]
-                var attacker_variant: Variant = record.get("attacker")
-                if attacker_variant is Vector2i:
-                        attacker_cell = attacker_variant
-        _clear_threat(target_cell)
-        var encounter := {
-                "target": target_cell,
-                "attacker": attacker_cell,
-        }
-        BattleManager.open_battle(encounter, Callable(self, "_on_battle_finished"))
+		var attacker_cell := Vector2i.ZERO
+		var key := _threat_key(target_cell)
+		if _threats.has(key):
+				var record: Dictionary = _threats[key]
+				var attacker_variant: Variant = record.get("attacker")
+				if attacker_variant is Vector2i:
+						attacker_cell = attacker_variant
+		_clear_threat(target_cell)
+		var encounter := {
+				"target": target_cell,
+				"attacker": attacker_cell,
+		}
+		BattleManager.open_battle(encounter, Callable(self, "_on_battle_finished"))
 
 
 func _on_battle_finished(result: Dictionary) -> void:
-        var cell: Vector2i = result.get("target_cell", Vector2i.ZERO)
-        var victory := bool(result.get("victory", true))
-        var attacker_cell: Vector2i = result.get("attacker_cell", Vector2i.ZERO)
-        _apply_battle_outcome(cell, victory, attacker_cell)
+		var cell: Vector2i = result.get("target_cell", Vector2i.ZERO)
+		var victory := bool(result.get("victory", true))
+		var attacker_cell: Vector2i = result.get("attacker_cell", Vector2i.ZERO)
+		_apply_battle_outcome(cell, victory, attacker_cell)
 
 
 func _apply_battle_outcome(cell: Vector2i, victory: bool, attacker_cell: Vector2i = Vector2i.ZERO) -> void:
