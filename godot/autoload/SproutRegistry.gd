@@ -14,10 +14,14 @@ var _uid_counter: int = 1
 var _last_selection: Array[Dictionary] = []
 var _rng := RandomNumberGenerator.new()
 
+func _ensure_db_loaded() -> void:
+        if _db_by_id.is_empty():
+                _load_db()
+
 func _ready() -> void:
-		_load_db()
-		_load_persisted_roster()
-		_rng.randomize()
+                _load_db()
+                _load_persisted_roster()
+                _rng.randomize()
 
 func refresh_for_new_game(map_id: String = "") -> void:
 		if _db_by_id.is_empty():
@@ -100,10 +104,10 @@ func _save_persisted_roster() -> void:
 	file.store_string(JSON.stringify(_roster, "\t"))
 
 func get_roster() -> Array:
-	var result: Array = []
-	for entry in _roster:
-		result.append(entry.duplicate(true))
-	return result
+        var result: Array = []
+        for entry in _roster:
+                result.append(entry.duplicate(true))
+        return result
 
 func get_entry_by_uid(uid: String) -> Dictionary:
 	var idx := _find_roster_index(uid)
@@ -112,19 +116,21 @@ func get_entry_by_uid(uid: String) -> Dictionary:
 	return _roster[idx].duplicate(true)
 
 func get_by_id(id: String) -> Dictionary:
-	if not _db_by_id.has(id):
-		return {}
-	var def_variant: Variant = _db_by_id[id]
-	if def_variant is Dictionary:
-		return Dictionary(def_variant).duplicate(true)
-	return {}
+        _ensure_db_loaded()
+        if not _db_by_id.has(id):
+                return {}
+        var def_variant: Variant = _db_by_id[id]
+        if def_variant is Dictionary:
+                return Dictionary(def_variant).duplicate(true)
+        return {}
 
 func add_to_roster(id: String, level: int = 1, nickname: String = "") -> Dictionary:
-	if not _db_by_id.has(id):
-		emit_signal("error_msg", "Unknown sprout id: " + id)
-		return {}
-	var entry: Dictionary = {
-		"uid": _new_uid(),
+        _ensure_db_loaded()
+        if not _db_by_id.has(id):
+                emit_signal("error_msg", "Unknown sprout id: " + id)
+                return {}
+        var entry: Dictionary = {
+                "uid": _new_uid(),
 		"id": id,
 		"level": clamp(level, 1, get_level_cap(id)),
 		"nickname": nickname,
@@ -166,13 +172,17 @@ func pick_for_battle(n: int) -> Array:
 	return result
 
 func compute_stats(id: String, level: int) -> Dictionary:
-	if not _db_by_id.has(id):
-		return {}
-	var sprout: Dictionary = _db_by_id[id]
-	var base_stats_variant: Variant = sprout.get("base_stats", {})
-	var growth_variant: Variant = sprout.get("growth", {})
-	var base_stats: Dictionary = base_stats_variant if base_stats_variant is Dictionary else {}
-	var growth: Dictionary = growth_variant if growth_variant is Dictionary else {}
+        _ensure_db_loaded()
+        if not _db_by_id.has(id):
+                return {}
+        var sprout_variant: Variant = _db_by_id[id]
+        if not (sprout_variant is Dictionary):
+                return {}
+        var sprout: Dictionary = sprout_variant
+        var base_stats_variant: Variant = sprout.get("base_stats", {})
+        var growth_variant: Variant = sprout.get("growth", {})
+        var base_stats: Dictionary = base_stats_variant if base_stats_variant is Dictionary else {}
+        var growth: Dictionary = growth_variant if growth_variant is Dictionary else {}
 	var levels_above_one: int = max(0, level - 1)
 	var hp: int = int(base_stats.get("hp", 30)) + levels_above_one * int(growth.get("hp_per_level", 3))
 	var atk: int = int(base_stats.get("attack", 6)) + levels_above_one * int(growth.get("attack_per_level", 1))
@@ -184,19 +194,46 @@ func compute_stats(id: String, level: int) -> Dictionary:
 	}
 
 func get_sprout_name(id: String) -> String:
-	return String(_db_by_id.get(id, {}).get("name", "Sprout"))
+        _ensure_db_loaded()
+        if not _db_by_id.has(id):
+                return "Sprout"
+        var sprout_variant: Variant = _db_by_id[id]
+        if sprout_variant is Dictionary:
+                var sprout_dict: Dictionary = sprout_variant
+                return String(sprout_dict.get("name", "Sprout"))
+        return "Sprout"
 
 func get_attack_id(id: String) -> String:
-	return String(_db_by_id.get(id, {}).get("attack_id", ""))
+        _ensure_db_loaded()
+        if not _db_by_id.has(id):
+                return ""
+        var sprout_variant: Variant = _db_by_id[id]
+        if sprout_variant is Dictionary:
+                var sprout_dict: Dictionary = sprout_variant
+                return String(sprout_dict.get("attack_id", ""))
+        return ""
 
 func get_passives(id: String) -> Array:
-	var passives_variant: Variant = _db_by_id.get(id, {}).get("passive_ids", [])
-	if passives_variant is Array:
-		return Array(passives_variant)
-	return []
+        _ensure_db_loaded()
+        if not _db_by_id.has(id):
+                return []
+        var entry_variant: Variant = _db_by_id[id]
+        if entry_variant is Dictionary:
+                var entry_dict: Dictionary = entry_variant
+                var passives_variant: Variant = entry_dict.get("passive_ids", [])
+                if passives_variant is Array:
+                        return Array(passives_variant)
+        return []
 
 func get_level_cap(id: String) -> int:
-	return int(_db_by_id.get(id, {}).get("level_cap", 99))
+        _ensure_db_loaded()
+        if not _db_by_id.has(id):
+                return 99
+        var entry_variant: Variant = _db_by_id[id]
+        if entry_variant is Dictionary:
+                var entry_dict: Dictionary = entry_variant
+                return int(entry_dict.get("level_cap", 99))
+        return 99
 
 func level_up(uid: String, levels: int = 1) -> bool:
 	var idx := _find_roster_index(uid)
@@ -301,11 +338,12 @@ func _sync_last_selection_with_roster() -> void:
 	_last_selection = synced
 
 func _sanitize_roster_entry(entry: Dictionary) -> Dictionary:
-	var id: String = String(entry.get("id", "sprout.woodling"))
-	if not _db_by_id.has(id):
-		return {
-			"uid": entry.get("uid", _new_uid()),
-			"id": "sprout.woodling",
+        _ensure_db_loaded()
+        var id: String = String(entry.get("id", "sprout.woodling"))
+        if not _db_by_id.has(id):
+                return {
+                        "uid": entry.get("uid", _new_uid()),
+                        "id": "sprout.woodling",
 			"level": 1,
 			"nickname": String(entry.get("nickname", "")),
 			"meta": entry.get("meta", {}),
