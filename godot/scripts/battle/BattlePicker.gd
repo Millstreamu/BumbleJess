@@ -5,6 +5,7 @@ signal selection_done(selection: Array)
 signal cancelled()
 
 const MAX_SELECTION := 6
+const RESOURCE_ORDER := ["nature", "earth", "water"]
 
 @export var sprout_card_scene: PackedScene = preload("res://scenes/battle/SproutCard.tscn")
 @export var roster_grid_path: NodePath
@@ -21,6 +22,7 @@ const MAX_SELECTION := 6
 
 var _roster: Array = []
 var _selected: Array = []
+var _resource_manager: Node = null
 
 func _ready() -> void:
 		process_mode = Node.PROCESS_MODE_ALWAYS
@@ -50,11 +52,14 @@ func _bind_sprout_registry() -> void:
 				sprout_registry.connect("roster_changed", Callable(self, "_on_registry_roster_changed"))
 
 func _bind_resource_manager() -> void:
-		var resource_manager: Node = get_node_or_null("/root/ResourceManager")
-		if resource_manager == null:
-				return
-		if not resource_manager.is_connected("item_changed", Callable(self, "_on_resource_item_changed")):
-				resource_manager.connect("item_changed", Callable(self, "_on_resource_item_changed"))
+                var resource_manager: Node = get_node_or_null("/root/ResourceManager")
+                if resource_manager == null:
+                                return
+                _resource_manager = resource_manager
+                if not resource_manager.is_connected("item_changed", Callable(self, "_on_resource_item_changed")):
+                                resource_manager.connect("item_changed", Callable(self, "_on_resource_item_changed"))
+                if not resource_manager.is_connected("resources_changed", Callable(self, "_on_resources_changed")):
+                                resource_manager.connect("resources_changed", Callable(self, "_on_resources_changed"))
 
 func _on_registry_roster_changed() -> void:
 		_refresh_from_registry()
@@ -63,9 +68,12 @@ func _on_registry_roster_changed() -> void:
 		_refresh_state()
 
 func _on_resource_item_changed(item: String) -> void:
-		if item != "soul_seeds":
-				return
-		_build_selected()
+                if item != "soul_seeds":
+                                return
+                _build_selected()
+
+func _on_resources_changed() -> void:
+                _build_selected()
 
 func _refresh_from_registry(load_selection: bool = false) -> void:
 		_roster = SproutRegistry.get_roster()
@@ -161,42 +169,109 @@ func _build_selected() -> void:
 				slot.focus_mode = Control.FOCUS_NONE
 				slot.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 				slot.size_flags_vertical = Control.SIZE_EXPAND_FILL
-				if i < _selected.size():
-						var entry: Dictionary = _selected[i]
-						var slot_index := i
-						var uid := String(entry.get("uid", ""))
-						var display_uid := uid if not uid.is_empty() else "-"
-						slot.text = "%s\nUID: %s\n(click to remove)" % [_slot_label(entry), display_uid]
-						slot.pressed.connect(func() -> void:
-								_selected.remove_at(slot_index)
-								_build_roster()
-								_build_selected()
-								_refresh_state()
-						)
-						var btn := Button.new()
-						btn.text = "+1 Lv (1 Seed)"
-						btn.focus_mode = Control.FOCUS_NONE
-						btn.disabled = _current_soul_seeds() <= 0 or uid.is_empty()
-						btn.pressed.connect(func() -> void:
-								if uid.is_empty():
-										return
-								if SproutRegistry.level_up(uid, 1):
-										_refresh_from_registry()
-										_build_roster()
-										_build_selected()
-										_refresh_state()
-						)
-						slot.add_child(btn)
+                                if i < _selected.size():
+                                                var entry: Dictionary = _selected[i]
+                                                var slot_index := i
+                                                var uid := String(entry.get("uid", ""))
+                                                var id := String(entry.get("id", "sprout.woodling"))
+                                                var level := int(entry.get("level", 1))
+                                                var display_uid := uid if not uid.is_empty() else "-"
+                                                slot.text = "%s\nUID: %s\n(click to remove)" % [_slot_label(entry), display_uid]
+                                                slot.pressed.connect(func() -> void:
+                                                                _selected.remove_at(slot_index)
+                                                                _build_roster()
+                                                                _build_selected()
+                                                                _refresh_state()
+                                                )
+                                                var upgrade_btn := Button.new()
+                                                upgrade_btn.focus_mode = Control.FOCUS_NONE
+                                                var level_cap := SproutRegistry.get_level_cap(id)
+                                                var can_upgrade := level < level_cap
+                                                if can_upgrade:
+                                                                var cost_dict := SproutRegistry.get_upgrade_resource_cost(id, level, 1)
+                                                                var cost_label := _format_resource_cost(cost_dict)
+                                                                upgrade_btn.text = "+1 Lv (%s)" % cost_label
+                                                                upgrade_btn.disabled = uid.is_empty() or not _can_afford_cost(cost_dict)
+                                                                upgrade_btn.pressed.connect(func() -> void:
+                                                                                if uid.is_empty():
+                                                                                                return
+                                                                                if SproutRegistry.level_up(uid, 1, false):
+                                                                                                _refresh_from_registry()
+                                                                                                _build_roster()
+                                                                                                _build_selected()
+                                                                                                _refresh_state()
+                                                                )
+                                                else:
+                                                                upgrade_btn.text = "Level Cap Reached"
+                                                                upgrade_btn.disabled = true
+                                                slot.add_child(upgrade_btn)
+                                                var btn := Button.new()
+                                                btn.text = "+1 Lv (Soul Seed)"
+                                                btn.focus_mode = Control.FOCUS_NONE
+                                                btn.disabled = _current_soul_seeds() <= 0 or uid.is_empty() or level >= SproutRegistry.get_level_cap(id)
+                                                btn.pressed.connect(func() -> void:
+                                                                if uid.is_empty():
+                                                                                return
+                                                                if SproutRegistry.level_up(uid, 1, true):
+                                                                                _refresh_from_registry()
+                                                                                _build_roster()
+                                                                                _build_selected()
+                                                                                _refresh_state()
+                                                )
+                                                slot.add_child(btn)
 				else:
 						slot.text = "(empty)"
 						slot.disabled = true
 				selected_grid.add_child(slot)
 
 func _current_soul_seeds() -> int:
-		var resource_manager: Node = get_node_or_null("/root/ResourceManager")
-		if resource_manager == null:
-				return 0
-		return int(resource_manager.get("soul_seeds"))
+                if _resource_manager == null:
+                                _resource_manager = get_node_or_null("/root/ResourceManager")
+                if _resource_manager == null:
+                                return 0
+                return int(_resource_manager.get("soul_seeds"))
+
+func _resource_amount(kind: String) -> int:
+                if _resource_manager == null:
+                                _resource_manager = get_node_or_null("/root/ResourceManager")
+                if _resource_manager == null:
+                                return 0
+                if _resource_manager.has_method("get_amount"):
+                                return int(_resource_manager.call("get_amount", kind))
+                return int(_resource_manager.get(kind))
+
+func _can_afford_cost(cost: Dictionary) -> bool:
+                if cost.is_empty():
+                                return true
+                for key in cost.keys():
+                                var amount: int = int(cost[key])
+                                if amount <= 0:
+                                                continue
+                                if _resource_amount(key) < amount:
+                                                return false
+                return true
+
+func _format_resource_cost(cost: Dictionary) -> String:
+                if cost.is_empty():
+                                return "Free"
+                var parts: Array[String] = []
+                for res in RESOURCE_ORDER:
+                                if not cost.has(res):
+                                                continue
+                                var amount: int = int(cost[res])
+                                if amount <= 0:
+                                                continue
+                                parts.append("%s x%d" % [res.capitalize(), amount])
+                for key in cost.keys():
+                                if RESOURCE_ORDER.has(key):
+                                                continue
+                                var extra_amount: int = int(cost[key])
+                                if extra_amount <= 0:
+                                                continue
+                                parts.append("%s x%d" % [String(key).capitalize(), extra_amount])
+                if parts.is_empty():
+                                return "Free"
+                return ", ".join(parts)
 
 func _try_add(roster_index: int) -> void:
 				if roster_index < 0 or roster_index >= _roster.size():
