@@ -1,8 +1,13 @@
-[gd_scene format=3 uid="uid://dnafpbc4b0xx1"]
+[gd_scene load_steps=2 format=3 uid="uid://dnafpbc4b0xx1"]
+
+[ext_resource type="Script" path="res://scripts/battle/SproutCard.gd" id="1"]
 
 [node name="SproutCard" type="Button"]
 custom_minimum_size = Vector2(200, 90)
 size_flags_horizontal = 3
+script = ExtResource("1")
+name_label_path = NodePath("Name")
+stats_label_path = NodePath("Stats")
 
 [node name="Name" type="Label" parent="."]
 layout_mode = 0

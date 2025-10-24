@@ -6,6 +6,11 @@
 visible = false
 layer = 6
 script = ExtResource("1")
+roster_grid_path = NodePath("Frame/Layout/Left/ScrollContainer/RosterGrid")
+selected_grid_path = NodePath("Frame/Layout/Right/SelectedGrid")
+confirm_btn_path = NodePath("Frame/Layout/Middle/ConfirmBtn")
+cancel_btn_path = NodePath("Frame/Layout/Middle/CancelBtn")
+info_label_path = NodePath("Frame/Layout/Middle/Info")
 
 [node name="Backdrop" type="ColorRect" parent="."]
 layout_mode = 1
