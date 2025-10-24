@@ -1,7 +1,6 @@
 [
-  { "id": "pack.harvest_growth", "tiles": ["tile.harvest.default", "tile.harvest.default", "tile.build.default"] },
-  { "id": "pack.refine_channel", "tiles": ["tile.refine.default", "tile.harvest.default"] },
   { "id": "pack.build_guard", "tiles": ["tile.build.default", "tile.guard.default"] },
-  { "id": "pack.special.single", "special": ["tile.upgrade.default", "tile.chanting.default"] },
-  { "id": "pack.refine_channel", "special": ["tile.totem.echo_pillar"] }
+  { "id": "pack.harvest_growth", "tiles": ["tile.harvest.default", "tile.harvest.default", "tile.build.default"] },
+  { "id": "pack.refine_channel", "tiles": ["tile.refine.default", "tile.harvest.default"], "special": ["tile.totem.echo_pillar"] },
+  { "id": "pack.special.single", "special": ["tile.upgrade.default", "tile.chanting.default"] }
 ]
