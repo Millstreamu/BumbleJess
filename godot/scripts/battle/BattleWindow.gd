@@ -4,13 +4,22 @@ class_name BattleWindow
 signal battle_finished(result: Dictionary)
 signal window_closed
 
-@onready var sprout_grid: GridContainer = $"Frame/Layout/LeftCol/SproutGrid"
-@onready var decay_grid: GridContainer = $"Frame/Layout/RightCol/DecayGrid"
-@onready var status_label: Label = $"Frame/Layout/MidCol/StatusLabel"
-@onready var select_btn: Button = $"Frame/Layout/MidCol/SelectBtn"
-@onready var start_btn: Button = $"Frame/Layout/MidCol/StartButton"
-@onready var close_btn: Button = $"Frame/Layout/MidCol/CloseButton"
-@onready var time_bar: ProgressBar = $"Frame/Layout/MidCol/TimeBar"
+@export var sprout_grid_path: NodePath
+@export var decay_grid_path: NodePath
+@export var status_label_path: NodePath
+@export var select_btn_path: NodePath
+@export var start_btn_path: NodePath
+@export var close_btn_path: NodePath
+@export var time_bar_path: NodePath
+@export var unit_slot_scene: PackedScene = preload("res://scenes/battle/UnitSlot.tscn")
+
+@onready var sprout_grid: GridContainer = _resolve_node(sprout_grid_path) as GridContainer
+@onready var decay_grid: GridContainer = _resolve_node(decay_grid_path) as GridContainer
+@onready var status_label: Label = _resolve_node(status_label_path) as Label
+@onready var select_btn: Button = _resolve_node(select_btn_path) as Button
+@onready var start_btn: Button = _resolve_node(start_btn_path) as Button
+@onready var close_btn: Button = _resolve_node(close_btn_path) as Button
+@onready var time_bar: ProgressBar = _resolve_node(time_bar_path) as ProgressBar
 
 var encounter: Dictionary = {}
 var on_finish: Callable = Callable()
@@ -25,44 +34,50 @@ var _picker: BattlePicker
 
 const SLOT_COUNT := 6
 const FRONT_INDICES: Array[int] = [0, 1, 2]
-const UNIT_SLOT_SCENE := preload("res://scenes/battle/UnitSlot.tscn")
 const LIFE_REWARD := 3
 
 func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_WHEN_PAUSED
-	set_process(true)
-	start_btn.pressed.connect(_on_start_pressed)
-	close_btn.pressed.connect(_on_close_pressed)
-	select_btn.pressed.connect(_on_select_pressed)
-	hide()
+        process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+        set_process(true)
+        if start_btn:
+                start_btn.pressed.connect(_on_start_pressed)
+        if close_btn:
+                close_btn.pressed.connect(_on_close_pressed)
+        if select_btn:
+                select_btn.pressed.connect(_on_select_pressed)
+        hide()
 
 func open(enc: Dictionary, finish_cb: Callable) -> void:
-	encounter = enc
-	on_finish = finish_cb
-	running = false
-	elapsed = 0.0
-	time_bar.min_value = 0
-	time_bar.max_value = 100
-	time_bar.value = 0
-	status_label.text = "Ready"
-	selected_team = _clamp_selection(SproutRegistry.get_last_selection())
-	_update_team_ready_ui()
-	close_btn.disabled = true
-	_build_teams()
-	_populate_ui()
-	_refresh_ui()
-	show()
+        encounter = enc
+        on_finish = finish_cb
+        running = false
+        elapsed = 0.0
+        if time_bar:
+                time_bar.min_value = 0
+                time_bar.max_value = 100
+                time_bar.value = 0
+        if status_label:
+                status_label.text = "Ready"
+        selected_team = _clamp_selection(SproutRegistry.get_last_selection())
+        _update_team_ready_ui()
+        if close_btn:
+                close_btn.disabled = true
+        _build_teams()
+        _populate_ui()
+        _refresh_ui()
+        show()
 
 func _process(delta: float) -> void:
 	if not visible:
 		return
-	if not running:
-		return
-	elapsed += delta
-	time_bar.value = clamp(int((elapsed / time_limit) * 100.0), 0, 100)
-	_tick_cooldowns(delta)
-	_auto_attacks()
-	_refresh_ui()
+        if not running:
+                return
+        elapsed += delta
+        if time_bar:
+                time_bar.value = clamp(int((elapsed / time_limit) * 100.0), 0, 100)
+        _tick_cooldowns(delta)
+        _auto_attacks()
+        _refresh_ui()
 	var state: String = _check_end()
 	if state != "":
 		_finish(state)
@@ -70,22 +85,27 @@ func _process(delta: float) -> void:
 		_finish("timeout")
 
 func _on_start_pressed() -> void:
-	running = true
-	start_btn.disabled = true
-	status_label.text = "Battle…"
+        running = true
+        if start_btn:
+                start_btn.disabled = true
+        if status_label:
+                status_label.text = "Battle…"
 
 func _on_close_pressed() -> void:
 	hide()
 	emit_signal("window_closed")
 
 func _update_team_ready_ui() -> void:
-	if running:
-		return
-	if selected_team.is_empty():
-		status_label.text = "Select a team"
-	else:
-		status_label.text = "Team ready (%d)" % selected_team.size()
-	start_btn.disabled = _should_disable_start()
+        if running:
+                return
+        if selected_team.is_empty():
+                if status_label:
+                        status_label.text = "Select a team"
+        else:
+                if status_label:
+                        status_label.text = "Team ready (%d)" % selected_team.size()
+        if start_btn:
+                start_btn.disabled = _should_disable_start()
 
 func _should_disable_start() -> bool:
 	if selected_team.size() > 0:
@@ -159,32 +179,44 @@ func _build_teams() -> void:
 				right_units.append(_make_decay_unit(difficulty_scale, attack_defs))
 
 func _populate_ui() -> void:
-	_clear_children(sprout_grid)
-	_clear_children(decay_grid)
-	for i in range(SLOT_COUNT):
-		sprout_grid.add_child(_make_slot_ui(left_units, i))
-		decay_grid.add_child(_make_slot_ui(right_units, i))
+        if sprout_grid == null or decay_grid == null:
+                return
+        _clear_children(sprout_grid)
+        _clear_children(decay_grid)
+        for i in range(SLOT_COUNT):
+                sprout_grid.add_child(_make_slot_ui(left_units, i))
+                decay_grid.add_child(_make_slot_ui(right_units, i))
 
 func _clear_children(container: Node) -> void:
-	for child in container.get_children():
-		child.queue_free()
+        if container == null:
+                return
+        for child in container.get_children():
+                child.queue_free()
 
 func _make_slot_ui(team: Array, idx: int) -> Control:
-	var slot: Control = UNIT_SLOT_SCENE.instantiate()
-	var unit: Dictionary = team[idx]
-	var name_label: Label = slot.get_node("Name") as Label
-	name_label.text = unit.get("name", "Empty")
-	var hp_bar: TextureProgressBar = slot.get_node("HP") as TextureProgressBar
-	hp_bar.min_value = 0
-	hp_bar.max_value = 100
-	hp_bar.value = 100 if unit.get("alive", false) else 0
-	var cd_bar: TextureProgressBar = slot.get_node("CD") as TextureProgressBar
-	cd_bar.min_value = 0
-	cd_bar.max_value = 100
-	cd_bar.value = 0
-	var pop_label: Label = slot.get_node("DmgPop")
-	pop_label.text = ""
-	pop_label.modulate.a = 0.0
+        var slot: Control
+        if unit_slot_scene:
+                slot = unit_slot_scene.instantiate() as Control
+        if slot == null:
+                slot = Control.new()
+        var unit: Dictionary = team[idx]
+        var name_label: Label = slot.get_node_or_null("Name") as Label
+        if name_label:
+                name_label.text = unit.get("name", "Empty")
+        var hp_bar: TextureProgressBar = slot.get_node_or_null("HP") as TextureProgressBar
+        if hp_bar:
+                hp_bar.min_value = 0
+                hp_bar.max_value = 100
+                hp_bar.value = 100 if unit.get("alive", false) else 0
+        var cd_bar: TextureProgressBar = slot.get_node_or_null("CD") as TextureProgressBar
+        if cd_bar:
+                cd_bar.min_value = 0
+                cd_bar.max_value = 100
+                cd_bar.value = 0
+        var pop_label: Label = slot.get_node_or_null("DmgPop")
+        if pop_label:
+                pop_label.text = ""
+                pop_label.modulate.a = 0.0
 	slot.set_meta("team_side", unit.get("side", ""))
 	slot.set_meta("unit_index", idx)
 	return slot
@@ -355,13 +387,19 @@ func _pop_text(slot_ui: Node, text: String) -> void:
 	tween.tween_property(label, "modulate:a", 0.0, 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 func _refresh_ui() -> void:
-	for i in range(SLOT_COUNT):
-		var left_unit: Dictionary = left_units[i]
-		var slot: Node = sprout_grid.get_child(i)
-		_update_slot(slot, left_unit)
-		var right_unit: Dictionary = right_units[i]
-		var right_slot: Node = decay_grid.get_child(i)
-		_update_slot(right_slot, right_unit)
+        if sprout_grid == null or decay_grid == null:
+                return
+        for i in range(SLOT_COUNT):
+                var left_unit: Dictionary = left_units[i]
+                var slot: Node = null
+                if i < sprout_grid.get_child_count():
+                        slot = sprout_grid.get_child(i)
+                _update_slot(slot, left_unit)
+                var right_unit: Dictionary = right_units[i]
+                var right_slot: Node = null
+                if i < decay_grid.get_child_count():
+                        right_slot = decay_grid.get_child(i)
+                _update_slot(right_slot, right_unit)
 
 func _update_slot(slot: Node, unit: Dictionary) -> void:
 	if slot == null:
@@ -400,18 +438,26 @@ func _check_end() -> String:
 		return ""
 
 func _finish(state: String) -> void:
-		running = false
-		start_btn.disabled = true
-		close_btn.disabled = false
-		status_label.text = state.capitalize()
-		_refresh_ui()
-		var victory: bool = state == "victory"
-		var rewards: Dictionary = {"life": LIFE_REWARD if victory else 0}
-		var result: Dictionary = {
-				"victory": victory,
-				"outcome": state,
-				"rewards": rewards,
-				"target_cell": encounter.get("target", Vector2i.ZERO),
-				"attacker_cell": encounter.get("attacker", Vector2i.ZERO),
-		}
-		emit_signal("battle_finished", result)
+                running = false
+                if start_btn:
+                                start_btn.disabled = true
+                if close_btn:
+                                close_btn.disabled = false
+                if status_label:
+                                status_label.text = state.capitalize()
+                _refresh_ui()
+                var victory: bool = state == "victory"
+                var rewards: Dictionary = {"life": LIFE_REWARD if victory else 0}
+                var result: Dictionary = {
+                                "victory": victory,
+                                "outcome": state,
+                                "rewards": rewards,
+                                "target_cell": encounter.get("target", Vector2i.ZERO),
+                                "attacker_cell": encounter.get("attacker", Vector2i.ZERO),
+                }
+                emit_signal("battle_finished", result)
+
+func _resolve_node(path: NodePath) -> Node:
+        if path.is_empty():
+                return null
+        return get_node_or_null(path)

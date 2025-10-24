@@ -7,6 +7,13 @@
 layer = 5
 visible = false
 script = ExtResource("1")
+sprout_grid_path = NodePath("Frame/Layout/LeftCol/SproutGrid")
+decay_grid_path = NodePath("Frame/Layout/RightCol/DecayGrid")
+status_label_path = NodePath("Frame/Layout/MidCol/StatusLabel")
+select_btn_path = NodePath("Frame/Layout/MidCol/SelectBtn")
+start_btn_path = NodePath("Frame/Layout/MidCol/StartButton")
+close_btn_path = NodePath("Frame/Layout/MidCol/CloseButton")
+time_bar_path = NodePath("Frame/Layout/MidCol/TimeBar")
 
 [node name="Backdrop" type="ColorRect" parent="."]
 anchors_preset = 15
