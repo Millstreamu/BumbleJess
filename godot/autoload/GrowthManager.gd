@@ -204,18 +204,18 @@ func _handle_special_growth() -> void:
 								neighbor,
 								"tile.overgrowth.default",
 							)
-						var hash := _hash_cell(neighbor, width)
-						_overgrowth_born[hash] = _turn
-						converted += 1
+                                                var neighbor_hash := _hash_cell(neighbor, width)
+                                                _overgrowth_born[neighbor_hash] = _turn
+                                                converted += 1
 
 			if rules.has("decay_after_turns"):
 				var required := int(rules.get("decay_after_turns", 0))
 				if required <= 0:
 					continue
-				var hash := _hash_cell(cell, width)
-				var born := int(_born_turn.get(hash, _turn))
-				var age := _turn - born
-				if age >= required:
+                                var cell_hash := _hash_cell(cell, width)
+                                var born := int(_born_turn.get(cell_hash, _turn))
+                                var age := _turn - born
+                                if age >= required:
 					var into := String(rules.get("decay_into", "overgrowth"))
 					if into.is_empty():
 						into = "overgrowth"
@@ -226,10 +226,10 @@ func _handle_special_growth() -> void:
 							cell,
 							"tile.%s.default" % into,
 						)
-					if into == "overgrowth":
-						var over_hash := _hash_cell(cell, width)
-						_overgrowth_born[over_hash] = _turn
-					_born_turn.erase(hash)
+                                        if into == "overgrowth":
+                                                var overgrowth_hash := _hash_cell(cell, width)
+                                                _overgrowth_born[overgrowth_hash] = _turn
+                                        _born_turn.erase(cell_hash)
 
 func _hash_cell(cell: Vector2i, width: int) -> int:
 	return cell.y * width + cell.x
@@ -254,14 +254,14 @@ func _connect_world_signal() -> void:
 	if not world_node.is_connected("tile_placed", Callable(self, "_on_tile_placed")):
 		world_node.connect("tile_placed", Callable(self, "_on_tile_placed"))
 
-func _on_tile_placed(tile_id: String, cell: Vector2i) -> void:
-	if _world == null:
-		return
-	var width: int = _world.width
-	if width <= 0:
-		return
-	var hash := _hash_cell(cell, width)
-	_born_turn[hash] = _turn
+func _on_tile_placed(_tile_id: String, cell: Vector2i) -> void:
+        if _world == null:
+                return
+        var width: int = _world.width
+        if width <= 0:
+                return
+        var cell_hash := _hash_cell(cell, width)
+        _born_turn[cell_hash] = _turn
 
 func _rules_for(tile_id: String) -> Dictionary:
 	if tile_id.is_empty():
