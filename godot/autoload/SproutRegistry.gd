@@ -16,11 +16,11 @@ var _rng := RandomNumberGenerator.new()
 var _upgrade_costs_by_id: Dictionary = {}
 
 const DEFAULT_UPGRADE_COSTS := [
-                {
-                                "nature": 1,
-                                "earth": 1,
-                                "water": 1,
-                },
+				{
+								"nature": 1,
+								"earth": 1,
+								"water": 1,
+				},
 ]
 
 func _ensure_db_loaded() -> void:
@@ -75,19 +75,19 @@ func _apply_roster_seed(entries: Array[Dictionary]) -> void:
 		emit_signal("roster_changed")
 
 func _load_db() -> void:
-                _db_by_id.clear()
-                _upgrade_costs_by_id.clear()
-                var entries: Array = DataLite.load_json_array("res://data/sprouts.json")
-                for entry_variant in entries:
-                                if entry_variant is Dictionary:
-                                                var entry: Dictionary = entry_variant.duplicate(true)
-                                                var sid: String = String(entry.get("id", ""))
-                                                if sid.is_empty():
-                                                                continue
-                                                var upgrade_costs := _sanitize_upgrade_costs(entry)
-                                                entry["upgrade_costs"] = upgrade_costs.duplicate(true)
-                                                _db_by_id[sid] = entry
-                                                _upgrade_costs_by_id[sid] = upgrade_costs
+				_db_by_id.clear()
+				_upgrade_costs_by_id.clear()
+				var entries: Array = DataLite.load_json_array("res://data/sprouts.json")
+				for entry_variant in entries:
+								if entry_variant is Dictionary:
+												var entry: Dictionary = entry_variant.duplicate(true)
+												var sid: String = String(entry.get("id", ""))
+												if sid.is_empty():
+																continue
+												var upgrade_costs := _sanitize_upgrade_costs(entry)
+												entry["upgrade_costs"] = upgrade_costs.duplicate(true)
+												_db_by_id[sid] = entry
+												_upgrade_costs_by_id[sid] = upgrade_costs
 
 func _load_persisted_roster() -> void:
 		_roster.clear()
@@ -138,10 +138,10 @@ func get_by_id(id: String) -> Dictionary:
 		return {}
 
 func add_to_roster(id: String, level: int = 1, nickname: String = "") -> Dictionary:
-                _ensure_db_loaded()
-                if not _db_by_id.has(id):
-                                emit_signal("error_msg", "Unknown sprout id: " + id)
-                                return {}
+				_ensure_db_loaded()
+				if not _db_by_id.has(id):
+								emit_signal("error_msg", "Unknown sprout id: " + id)
+								return {}
 		var entry: Dictionary = {
 				"uid": _new_uid(),
 				"id": id,
@@ -249,126 +249,126 @@ func get_level_cap(id: String) -> int:
 		return 99
 
 func level_up(uid: String, levels: int = 1, use_soul_seed: bool = false) -> bool:
-                var idx := _find_roster_index(uid)
-                if idx == -1:
-                                return false
-                var entry: Dictionary = _roster[idx]
-                var id: String = String(entry.get("id", ""))
-                var cap: int = get_level_cap(id)
-                var current_level: int = int(entry.get("level", 1))
-                if current_level >= cap:
-                                emit_signal("error_msg", "Already at level cap.")
-                                return false
-                levels = max(1, levels)
-                var target_level: int = min(current_level + levels, cap)
-                var delta: int = target_level - current_level
-                if delta <= 0:
-                                return false
-                var resource_manager: Node = get_node_or_null("/root/ResourceManager")
-                if resource_manager == null:
-                                emit_signal("error_msg", "ResourceManager missing.")
-                                return false
-                if use_soul_seed:
-                                var seeds_needed: int = delta
-                                if int(resource_manager.get("soul_seeds")) < seeds_needed:
-                                                emit_signal("error_msg", "Not enough Soul Seeds.")
-                                                return false
-                                if resource_manager.has_method("add_soul_seed"):
-                                                resource_manager.call("add_soul_seed", -seeds_needed)
-                                else:
-                                                emit_signal("error_msg", "Cannot spend Soul Seeds.")
-                                                return false
-                else:
-                                var cost: Dictionary = get_upgrade_resource_cost(id, current_level, delta)
-                                var shortages: Array[String] = []
-                                for res in cost.keys():
-                                                var needed: int = int(cost[res])
-                                                if needed <= 0:
-                                                                continue
-                                                var available: int = 0
-                                                if resource_manager.has_method("get_amount"):
-                                                                available = int(resource_manager.call("get_amount", res))
-                                                else:
-                                                                available = int(resource_manager.get(res))
-                                                if available < needed:
-                                                                shortages.append("%s (%d/%d)" % [res.capitalize(), available, needed])
-                                if not shortages.is_empty():
-                                                emit_signal("error_msg", "Not enough resources: " + ", ".join(shortages))
-                                                return false
-                                for res in cost.keys():
-                                                var spend_amount: int = int(cost[res])
-                                                if spend_amount <= 0:
-                                                                continue
-                                                if resource_manager.has_method("spend"):
-                                                                if not resource_manager.call("spend", res, spend_amount):
-                                                                                emit_signal("error_msg", "Cannot spend %s." % res.capitalize())
-                                                                                return false
-                                                else:
-                                                                emit_signal("error_msg", "Cannot spend %s." % res.capitalize())
-                                                                return false
-                entry["level"] = target_level
-                _roster[idx] = entry
-                _sync_last_selection_with_roster()
-                _save_persisted_roster()
-                emit_signal("sprout_leveled", String(entry.get("uid", "")), target_level)
-                emit_signal("roster_changed")
-                return true
+				var idx := _find_roster_index(uid)
+				if idx == -1:
+								return false
+				var entry: Dictionary = _roster[idx]
+				var id: String = String(entry.get("id", ""))
+				var cap: int = get_level_cap(id)
+				var current_level: int = int(entry.get("level", 1))
+				if current_level >= cap:
+								emit_signal("error_msg", "Already at level cap.")
+								return false
+				levels = max(1, levels)
+				var target_level: int = min(current_level + levels, cap)
+				var delta: int = target_level - current_level
+				if delta <= 0:
+								return false
+				var resource_manager: Node = get_node_or_null("/root/ResourceManager")
+				if resource_manager == null:
+								emit_signal("error_msg", "ResourceManager missing.")
+								return false
+				if use_soul_seed:
+								var seeds_needed: int = delta
+								if int(resource_manager.get("soul_seeds")) < seeds_needed:
+												emit_signal("error_msg", "Not enough Soul Seeds.")
+												return false
+								if resource_manager.has_method("add_soul_seed"):
+												resource_manager.call("add_soul_seed", -seeds_needed)
+								else:
+												emit_signal("error_msg", "Cannot spend Soul Seeds.")
+												return false
+				else:
+								var cost: Dictionary = get_upgrade_resource_cost(id, current_level, delta)
+								var shortages: Array[String] = []
+								for res in cost.keys():
+												var needed: int = int(cost[res])
+												if needed <= 0:
+																continue
+												var available: int = 0
+												if resource_manager.has_method("get_amount"):
+																available = int(resource_manager.call("get_amount", res))
+												else:
+																available = int(resource_manager.get(res))
+												if available < needed:
+																shortages.append("%s (%d/%d)" % [res.capitalize(), available, needed])
+								if not shortages.is_empty():
+												emit_signal("error_msg", "Not enough resources: " + ", ".join(shortages))
+												return false
+								for res in cost.keys():
+												var spend_amount: int = int(cost[res])
+												if spend_amount <= 0:
+																continue
+												if resource_manager.has_method("spend"):
+																if not resource_manager.call("spend", res, spend_amount):
+																				emit_signal("error_msg", "Cannot spend %s." % res.capitalize())
+																				return false
+												else:
+																emit_signal("error_msg", "Cannot spend %s." % res.capitalize())
+																return false
+				entry["level"] = target_level
+				_roster[idx] = entry
+				_sync_last_selection_with_roster()
+				_save_persisted_roster()
+				emit_signal("sprout_leveled", String(entry.get("uid", "")), target_level)
+				emit_signal("roster_changed")
+				return true
 
 func get_upgrade_resource_cost(id: String, current_level: int, levels: int = 1) -> Dictionary:
-                _ensure_db_loaded()
-                if not _db_by_id.has(id):
-                                return {}
-                if levels <= 0:
-                                return {}
-                var cap: int = get_level_cap(id)
-                if current_level >= cap:
-                                return {}
-                var max_levels: int = min(levels, cap - current_level)
-                var table: Array = _get_upgrade_cost_table(id)
-                if table.is_empty():
-                                return {}
-                var total: Dictionary = {}
-                for i in range(max_levels):
-                                var idx := clamp(current_level + i - 1, 0, table.size() - 1)
-                                var cost_variant: Variant = table[idx]
-                                if not (cost_variant is Dictionary):
-                                                continue
-                                var cost_step: Dictionary = cost_variant
-                                for key in cost_step.keys():
-                                                var amount: int = int(cost_step[key])
-                                                if amount < 0:
-                                                                continue
-                                                var resource: String = String(key)
-                                                total[resource] = int(total.get(resource, 0)) + amount
-                return total
+				_ensure_db_loaded()
+				if not _db_by_id.has(id):
+								return {}
+				if levels <= 0:
+								return {}
+				var cap: int = get_level_cap(id)
+				if current_level >= cap:
+								return {}
+				var max_levels: int = min(levels, cap - current_level)
+				var table: Array = _get_upgrade_cost_table(id)
+				if table.is_empty():
+								return {}
+				var total: Dictionary = {}
+				for i in range(max_levels):
+								var idx := clamp(current_level + i - 1, 0, table.size() - 1)
+								var cost_variant: Variant = table[idx]
+								if not (cost_variant is Dictionary):
+												continue
+								var cost_step: Dictionary = cost_variant
+								for key in cost_step.keys():
+												var amount: int = int(cost_step[key])
+												if amount < 0:
+																continue
+												var resource: String = String(key)
+												total[resource] = int(total.get(resource, 0)) + amount
+				return total
 
 func _get_upgrade_cost_table(id: String) -> Array:
-                if _upgrade_costs_by_id.has(id):
-                                var table_variant: Variant = _upgrade_costs_by_id[id]
-                                if table_variant is Array:
-                                                return Array(table_variant)
-                return DEFAULT_UPGRADE_COSTS.duplicate(true)
+				if _upgrade_costs_by_id.has(id):
+								var table_variant: Variant = _upgrade_costs_by_id[id]
+								if table_variant is Array:
+												return Array(table_variant)
+				return DEFAULT_UPGRADE_COSTS.duplicate(true)
 
 func _sanitize_upgrade_costs(entry: Dictionary) -> Array[Dictionary]:
-                var costs: Array[Dictionary] = []
-                var costs_variant: Variant = entry.get("upgrade_costs", [])
-                var raw_costs: Array = costs_variant if costs_variant is Array else []
-                for cost_variant in raw_costs:
-                                if not (cost_variant is Dictionary):
-                                                continue
-                                var cost_dict: Dictionary = cost_variant
-                                var sanitized: Dictionary = {}
-                                for key in cost_dict.keys():
-                                                var resource: String = String(key)
-                                                var value: int = int(cost_dict[key])
-                                                sanitized[resource] = max(value, 0)
-                                costs.append(sanitized)
-                if costs.is_empty():
-                                var defaults: Array = DEFAULT_UPGRADE_COSTS.duplicate(true)
-                                for default_cost_variant in defaults:
-                                                if default_cost_variant is Dictionary:
-                                                                costs.append(Dictionary(default_cost_variant))
-                return costs
+				var costs: Array[Dictionary] = []
+				var costs_variant: Variant = entry.get("upgrade_costs", [])
+				var raw_costs: Array = costs_variant if costs_variant is Array else []
+				for cost_variant in raw_costs:
+								if not (cost_variant is Dictionary):
+												continue
+								var cost_dict: Dictionary = cost_variant
+								var sanitized: Dictionary = {}
+								for key in cost_dict.keys():
+												var resource: String = String(key)
+												var value: int = int(cost_dict[key])
+												sanitized[resource] = max(value, 0)
+								costs.append(sanitized)
+				if costs.is_empty():
+								var defaults: Array = DEFAULT_UPGRADE_COSTS.duplicate(true)
+								for default_cost_variant in defaults:
+												if default_cost_variant is Dictionary:
+																costs.append(Dictionary(default_cost_variant))
+				return costs
 
 func short_stats_label(id: String, level: int) -> String:
 		var stats := compute_stats(id, level)
