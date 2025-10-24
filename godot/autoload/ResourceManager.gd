@@ -491,33 +491,34 @@ func _produce_resources() -> void:
                                                 if not span_fx.has(cell):
                                                         span_fx.append(cell)
                                                 fx["fx_water"] = span_fx
-	for y in range(height):
-		for x in range(width):
-			var cell := Vector2i(x, y)
-			var pair := _cell_id_and_cat(cell)
-			var id: String = pair[0]
-			var cat: String = pair[1]
-			if cat != "upgrade":
-				continue
-			var r: Dictionary = _rules_for(id, cat)
-			var every: int = int(r.get("soul_seed_every_turns", 3))
-			if every <= 0:
-				every = 1
-			if (_turn_counter % every) == 0:
-				add_soul_seed(1)
-				var seed_fx: Array = fx.get("fx_seed", [])
-				seed_fx.append(cell)
-				fx["fx_seed"] = seed_fx
 
-	var empty_keys: Array = []
-	for key in fx.keys():
-		var cells_variant: Variant = fx[key]
-		if cells_variant is Array:
-			if (cells_variant as Array).is_empty():
-				empty_keys.append(key)
-		else:
-			empty_keys.append(key)
-	for key in empty_keys:
-		fx.erase(key)
-	if not fx.is_empty():
-		emit_signal("produced_cells", fx)
+        for y in range(height):
+                for x in range(width):
+                        var cell := Vector2i(x, y)
+                        var pair := _cell_id_and_cat(cell)
+                        var id: String = pair[0]
+                        var cat: String = pair[1]
+                        if cat != "upgrade":
+                                continue
+                        var r: Dictionary = _rules_for(id, cat)
+                        var every: int = int(r.get("soul_seed_every_turns", 3))
+                        if every <= 0:
+                                every = 1
+                        if (_turn_counter % every) == 0:
+                                add_soul_seed(1)
+                                var seed_fx: Array = fx.get("fx_seed", [])
+                                seed_fx.append(cell)
+                                fx["fx_seed"] = seed_fx
+
+        var empty_keys: Array = []
+        for key in fx.keys():
+                var cells_variant: Variant = fx[key]
+                if cells_variant is Array:
+                        if (cells_variant as Array).is_empty():
+                                empty_keys.append(key)
+                else:
+                        empty_keys.append(key)
+        for key in empty_keys:
+                fx.erase(key)
+        if not fx.is_empty():
+                emit_signal("produced_cells", fx)
