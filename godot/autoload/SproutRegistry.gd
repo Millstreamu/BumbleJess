@@ -371,7 +371,7 @@ func _sanitize_upgrade_costs(entry: Dictionary) -> Array[Dictionary]:
 	return costs
 
 func short_stats_label(id: String, level: int) -> String:
-	var stats := compute_stats(id, level)
+	var stats: Dictionary = compute_stats(id, level)
 	return "Lv%d • HP %d • ATK %d • AS %.2f" % [
 		level,
 		int(stats.get("hp", 0)),
