@@ -64,89 +64,89 @@
 	"name": "Grove"
   },
   {
-        "id": "tile.overgrowth.default",
-        "category": "overgrowth",
-        "name": "Overgrowth"
+		"id": "tile.overgrowth.default",
+		"category": "overgrowth",
+		"name": "Overgrowth"
   },
   {
-        "id":"tile.nest.twin",
-        "category":"nest",
-        "name":"Twin Nest",
-        "rules":{
-          "on_place":{"spawn_sprouts":2,"bonus_if_adjacent_at_least":{"grove":3,"extra":1}}
-        }
+		"id":"tile.nest.twin",
+		"category":"nest",
+		"name":"Twin Nest",
+		"rules":{
+		  "on_place":{"spawn_sprouts":2,"bonus_if_adjacent_at_least":{"grove":3,"extra":1}}
+		}
   },
   {
-        "id":"tile.root.stone_vein",
-        "category":"build",
-        "name":"Stone Vein",
-        "rules":{
-          "earth_every_turns":3,
-          "requires_adjacent_any":["guard","root"]
-        }
+		"id":"tile.root.stone_vein",
+		"category":"build",
+		"name":"Stone Vein",
+		"rules":{
+		  "earth_every_turns":3,
+		  "requires_adjacent_any":["guard","root"]
+		}
   },
   {
-        "id":"tile.hollow.cleansing",
-        "category":"hollow",
-        "name":"Cleansing Hollow",
-        "rules":{
-          "on_place":{"cleanse_adjacent_decay":true}
-        }
+		"id":"tile.hollow.cleansing",
+		"category":"hollow",
+		"name":"Cleansing Hollow",
+		"rules":{
+		  "on_place":{"cleanse_adjacent_decay":true}
+		}
   },
   {
-        "id":"tile.bloom.lone",
-        "category":"harvest",
-        "name":"Lone Bloom",
-        "rules":{
-          "nature_per_turn":2,
-          "blocked_if_adjacent_any":["harvest","bloom"]
-        }
+		"id":"tile.bloom.lone",
+		"category":"harvest",
+		"name":"Lone Bloom",
+		"rules":{
+		  "nature_per_turn":2,
+		  "blocked_if_adjacent_any":["harvest","bloom"]
+		}
   },
   {
-        "id":"tile.veil.mirror_pool",
-        "category":"refine",
-        "name":"Mirror Pool",
-        "rules":{
-          "cluster_tag":"mirror_pool",
-          "cluster_invulnerable_if_size_at_least":5
-        }
+		"id":"tile.veil.mirror_pool",
+		"category":"refine",
+		"name":"Mirror Pool",
+		"rules":{
+		  "cluster_tag":"mirror_pool",
+		  "cluster_invulnerable_if_size_at_least":5
+		}
   },
   {
-        "id":"tile.totem.echo_pillar",
-        "category":"upgrade",
-        "name":"Echo Pillar",
-        "rules":{
-          "capacity_global_bonus_if_adjacent_to_totem":{"nature":5,"earth":5,"water":5}
-        }
+		"id":"tile.totem.echo_pillar",
+		"category":"upgrade",
+		"name":"Echo Pillar",
+		"rules":{
+		  "capacity_global_bonus_if_adjacent_to_totem":{"nature":5,"earth":5,"water":5}
+		}
   },
   {
-        "id":"tile.build.moss_terrace",
-        "category":"build",
-        "name":"Moss Terrace",
-        "rules":{
-          "overgrowth_every_turns":3,
-          "overgrowth_targets":"adjacent_empty",
-          "overgrowth_count":1
-        }
+		"id":"tile.build.moss_terrace",
+		"category":"build",
+		"name":"Moss Terrace",
+		"rules":{
+		  "overgrowth_every_turns":3,
+		  "overgrowth_targets":"adjacent_empty",
+		  "overgrowth_count":1
+		}
   },
   {
-        "id":"tile.refine.fungal_span",
-        "category":"refine",
-        "name":"Fungal Span",
-        "rules":{
-          "water_every_turns":2,
-          "per_unique_adjacent_categories":true,
-          "max_per_tick":3
-        }
+		"id":"tile.refine.fungal_span",
+		"category":"refine",
+		"name":"Fungal Span",
+		"rules":{
+		  "water_every_turns":2,
+		  "per_unique_adjacent_categories":true,
+		  "max_per_tick":3
+		}
   },
   {
-        "id":"tile.storage.seed_cache",
-        "category":"storage",
-        "name":"Seed Cache",
-        "rules":{
-          "capacity_global_bonus":{"nature":15,"earth":15,"water":15},
-          "decay_after_turns":10,
-          "decay_into":"overgrowth"
-        }
+		"id":"tile.storage.seed_cache",
+		"category":"storage",
+		"name":"Seed Cache",
+		"rules":{
+		  "capacity_global_bonus":{"nature":15,"earth":15,"water":15},
+		  "decay_after_turns":10,
+		  "decay_into":"overgrowth"
+		}
   }
 ]
