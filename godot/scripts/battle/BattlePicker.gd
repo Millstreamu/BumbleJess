@@ -185,10 +185,10 @@ func _build_selected() -> void:
 			)
 			var upgrade_btn := Button.new()
 			upgrade_btn.focus_mode = Control.FOCUS_NONE
-			var level_cap := SproutRegistry.get_level_cap(id)
-			var can_upgrade := level < level_cap
+			var level_cap: int = SproutRegistry.get_level_cap(id)
+			var can_upgrade: bool = level < level_cap
 			if can_upgrade:
-				var cost_dict := SproutRegistry.get_upgrade_resource_cost(id, level, 1)
+				var cost_dict: Dictionary = SproutRegistry.get_upgrade_resource_cost(id, level, 1)
 				var cost_label := _format_resource_cost(cost_dict)
 				upgrade_btn.text = "+1 Lv (%s)" % cost_label
 				upgrade_btn.disabled = uid.is_empty() or not _can_afford_cost(cost_dict)
