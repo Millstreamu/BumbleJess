@@ -1,6 +1,49 @@
 [
-  { "id": "pack.build_guard", "tiles": ["tile.build.default", "tile.guard.default"] },
-  { "id": "pack.harvest_growth", "tiles": ["tile.harvest.default", "tile.harvest.default", "tile.build.default"] },
-  { "id": "pack.refine_channel", "tiles": ["tile.refine.default", "tile.harvest.default"], "special": ["tile.totem.echo_pillar"] },
-  { "id": "pack.special.single", "special": ["tile.upgrade.default", "tile.chanting.default"] }
+  {
+    "id": "pack.build_guard",
+    "tiles": [
+      "tile.build.default",
+      "tile.guard.default"
+    ]
+  },
+  {
+    "id": "pack.harvest_growth",
+    "tiles": [
+      "cat:harvest",
+      "cat:harvest",
+      "cat:build"
+    ]
+  },
+  {
+    "id": "pack.refine_channel",
+    "tiles": [
+      "tile.refine.default",
+      "cat:harvest"
+    ],
+    "special": [
+      "tile.totem.echo_pillar"
+    ]
+  },
+  {
+    "id": "pack.special.single",
+    "special": [
+      "tile.upgrade.default",
+      "tile.chanting.default"
+    ]
+  },
+  {
+    "id": "pack.player_growth_small",
+    "tiles": [
+      "cat:harvest",
+      "cat:harvest",
+      "cat:build"
+    ]
+  },
+  {
+    "id": "pack.totem_fixed_heavy",
+    "tiles": [
+      "tile.guard.default",
+      "tile.refine.default"
+    ]
+  }
 ]

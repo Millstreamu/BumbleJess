@@ -1,152 +1,281 @@
 [
   {
-	"id": "tile.harvest.default",
-	"category": "harvest",
-	"name": "Harvest",
-	"rules": {
-	  "capacity_base": {"nature": 5},
-	  "nature_per_adjacent": {"grove": 1}
-	}
+    "id": "tile.harvest.default",
+    "category": "harvest",
+    "name": "Harvest",
+    "rules": {
+      "capacity_base": {
+        "nature": 5
+      },
+      "nature_per_adjacent": {
+        "grove": 1
+      }
+    }
   },
   {
-	"id": "tile.build.default",
-	"category": "build",
-	"name": "Build",
-	"rules": {
-	  "capacity_base": {"earth": 5},
-	  "earth_per_turn": 1,
-	  "slow_if_adjacent_any": ["harvest"],
-	  "slow_multiplier": 2
-	}
+    "id": "tile.build.default",
+    "category": "build",
+    "name": "Build",
+    "rules": {
+      "capacity_base": {
+        "earth": 5
+      },
+      "earth_per_turn": 1,
+      "slow_if_adjacent_any": [
+        "harvest"
+      ],
+      "slow_multiplier": 2
+    }
   },
   {
-	"id": "tile.refine.default",
-	"category": "refine",
-	"name": "Refine",
-	"rules": {
-	  "capacity_base": {"water": 5},
-	  "refine_every_turns": 2,
-	  "consume": {"nature": 1, "earth": 1},
-	  "produce": {"water": 1}
-	}
+    "id": "tile.refine.default",
+    "category": "refine",
+    "name": "Refine",
+    "rules": {
+      "capacity_base": {
+        "water": 5
+      },
+      "refine_every_turns": 2,
+      "consume": {
+        "nature": 1,
+        "earth": 1
+      },
+      "produce": {
+        "water": 1
+      }
+    }
   },
   {
-	"id": "tile.storage.default",
-	"category": "storage",
-	"name": "Storage",
-	"rules": {
-	  "capacity_aura_adjacent": {
-		"harvest": {"nature": 5},
-		"build": {"earth": 5},
-		"refine": {"water": 5}
-	  }
-	}
+    "id": "tile.storage.default",
+    "category": "storage",
+    "name": "Storage",
+    "rules": {
+      "capacity_aura_adjacent": {
+        "harvest": {
+          "nature": 5
+        },
+        "build": {
+          "earth": 5
+        },
+        "refine": {
+          "water": 5
+        }
+      }
+    }
   },
   {
-	"id": "tile.guard.default",
-	"category": "guard",
-	"name": "Guard"
+    "id": "tile.guard.default",
+    "category": "guard",
+    "name": "Guard"
   },
   {
-	"id": "tile.upgrade.default",
-	"category": "upgrade",
-	"name": "Upgrade",
-	"rules": {"soul_seed_every_turns": 3}
+    "id": "tile.upgrade.default",
+    "category": "upgrade",
+    "name": "Upgrade",
+    "rules": {
+      "soul_seed_every_turns": 3
+    }
   },
   {
-	"id": "tile.chanting.default",
-	"category": "chanting",
-	"name": "Chanting"
+    "id": "tile.chanting.default",
+    "category": "chanting",
+    "name": "Chanting"
   },
   {
-	"id": "tile.grove.default",
-	"category": "grove",
-	"name": "Grove"
+    "id": "tile.grove.default",
+    "category": "grove",
+    "name": "Grove"
   },
   {
-		"id": "tile.overgrowth.default",
-		"category": "overgrowth",
-		"name": "Overgrowth"
+    "id": "tile.overgrowth.default",
+    "category": "overgrowth",
+    "name": "Overgrowth"
   },
   {
-		"id":"tile.nest.twin",
-		"category":"nest",
-		"name":"Twin Nest",
-		"rules":{
-		  "on_place":{"spawn_sprouts":2,"bonus_if_adjacent_at_least":{"grove":3,"extra":1}}
-		}
+    "id": "tile.nest.twin",
+    "category": "nest",
+    "name": "Twin Nest",
+    "rules": {
+      "on_place": {
+        "spawn_sprouts": 2,
+        "bonus_if_adjacent_at_least": {
+          "grove": 3,
+          "extra": 1
+        }
+      }
+    }
   },
   {
-		"id":"tile.root.stone_vein",
-		"category":"build",
-		"name":"Stone Vein",
-		"rules":{
-		  "earth_every_turns":3,
-		  "requires_adjacent_any":["guard","root"]
-		}
+    "id": "tile.root.stone_vein",
+    "category": "build",
+    "name": "Stone Vein",
+    "rules": {
+      "earth_every_turns": 3,
+      "requires_adjacent_any": [
+        "guard",
+        "root"
+      ]
+    }
   },
   {
-		"id":"tile.hollow.cleansing",
-		"category":"hollow",
-		"name":"Cleansing Hollow",
-		"rules":{
-		  "on_place":{"cleanse_adjacent_decay":true}
-		}
+    "id": "tile.hollow.cleansing",
+    "category": "hollow",
+    "name": "Cleansing Hollow",
+    "rules": {
+      "on_place": {
+        "cleanse_adjacent_decay": true
+      }
+    }
   },
   {
-		"id":"tile.bloom.lone",
-		"category":"harvest",
-		"name":"Lone Bloom",
-		"rules":{
-		  "nature_per_turn":2,
-		  "blocked_if_adjacent_any":["harvest","bloom"]
-		}
+    "id": "tile.bloom.lone",
+    "category": "harvest",
+    "name": "Lone Bloom",
+    "rules": {
+      "nature_per_turn": 2,
+      "blocked_if_adjacent_any": [
+        "harvest",
+        "bloom"
+      ]
+    }
   },
   {
-		"id":"tile.veil.mirror_pool",
-		"category":"refine",
-		"name":"Mirror Pool",
-		"rules":{
-		  "cluster_tag":"mirror_pool",
-		  "cluster_invulnerable_if_size_at_least":5
-		}
+    "id": "tile.veil.mirror_pool",
+    "category": "refine",
+    "name": "Mirror Pool",
+    "rules": {
+      "cluster_tag": "mirror_pool",
+      "cluster_invulnerable_if_size_at_least": 5
+    }
   },
   {
-		"id":"tile.totem.echo_pillar",
-		"category":"upgrade",
-		"name":"Echo Pillar",
-		"rules":{
-		  "capacity_global_bonus_if_adjacent_to_totem":{"nature":5,"earth":5,"water":5}
-		}
+    "id": "tile.totem.echo_pillar",
+    "category": "upgrade",
+    "name": "Echo Pillar",
+    "rules": {
+      "capacity_global_bonus_if_adjacent_to_totem": {
+        "nature": 5,
+        "earth": 5,
+        "water": 5
+      }
+    }
   },
   {
-		"id":"tile.build.moss_terrace",
-		"category":"build",
-		"name":"Moss Terrace",
-		"rules":{
-		  "overgrowth_every_turns":3,
-		  "overgrowth_targets":"adjacent_empty",
-		  "overgrowth_count":1
-		}
+    "id": "tile.build.moss_terrace",
+    "category": "build",
+    "name": "Moss Terrace",
+    "rules": {
+      "overgrowth_every_turns": 3,
+      "overgrowth_targets": "adjacent_empty",
+      "overgrowth_count": 1
+    }
   },
   {
-		"id":"tile.refine.fungal_span",
-		"category":"refine",
-		"name":"Fungal Span",
-		"rules":{
-		  "water_every_turns":2,
-		  "per_unique_adjacent_categories":true,
-		  "max_per_tick":3
-		}
+    "id": "tile.refine.fungal_span",
+    "category": "refine",
+    "name": "Fungal Span",
+    "rules": {
+      "water_every_turns": 2,
+      "per_unique_adjacent_categories": true,
+      "max_per_tick": 3
+    }
   },
   {
-		"id":"tile.storage.seed_cache",
-		"category":"storage",
-		"name":"Seed Cache",
-		"rules":{
-		  "capacity_global_bonus":{"nature":15,"earth":15,"water":15},
-		  "decay_after_turns":10,
-		  "decay_into":"overgrowth"
-		}
+    "id": "tile.storage.seed_cache",
+    "category": "storage",
+    "name": "Seed Cache",
+    "rules": {
+      "capacity_global_bonus": {
+        "nature": 15,
+        "earth": 15,
+        "water": 15
+      },
+      "decay_after_turns": 10,
+      "decay_into": "overgrowth"
+    }
+  },
+  {
+    "id": "tile.harvest.rich_soil",
+    "category": "harvest",
+    "name": "Rich Soil",
+    "rules": {
+      "nature_per_adjacent": {
+        "grove": 2,
+        "harvest": 1
+      },
+      "capacity_base": {
+        "nature": 4
+      }
+    }
+  },
+  {
+    "id": "tile.guard.bulwark",
+    "category": "guard",
+    "name": "Bulwark",
+    "rules": {
+      "block_damage_per_turn": 2,
+      "requires_adjacent_any": [
+        "build",
+        "upgrade"
+      ]
+    }
+  },
+  {
+    "id": "tile.guard.sporewall",
+    "category": "guard",
+    "name": "Sporewall",
+    "rules": {
+      "on_place": {
+        "spawn_sprouts": 1
+      },
+      "capacity_base": {
+        "earth": 6
+      }
+    }
+  },
+  {
+    "id": "tile.storage.root_cellar",
+    "category": "storage",
+    "name": "Root Cellar",
+    "rules": {
+      "capacity_global_bonus": {
+        "nature": 10,
+        "earth": 10
+      },
+      "decay_after_turns": 12,
+      "decay_into": "overgrowth"
+    }
+  },
+  {
+    "id": "tile.upgrade.mindspire",
+    "category": "upgrade",
+    "name": "Mindspire",
+    "rules": {
+      "soul_seed_every_turns": 2,
+      "requires_adjacent_any": [
+        "upgrade",
+        "chanting"
+      ]
+    }
+  },
+  {
+    "id": "tile.chanting.harmonic_echo",
+    "category": "chanting",
+    "name": "Harmonic Echo",
+    "rules": {
+      "chanting_bonus_if_adjacent": {
+        "upgrade": 1,
+        "storage": 1
+      }
+    }
+  },
+  {
+    "id": "tile.chanting.star_choir",
+    "category": "chanting",
+    "name": "Star Choir",
+    "rules": {
+      "chant_per_turn": 1,
+      "nature_global_bonus": 1
+    }
   }
 ]
