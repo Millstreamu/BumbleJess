@@ -51,6 +51,20 @@ func _locate_turn_source() -> Node:
 	return turn_node
 
 
+func _resolve_pack_tiles(raw_tiles: Array) -> Array[String]:
+        var resolved: Array[String] = []
+        for entry in raw_tiles:
+                var token := String(entry)
+                if token.begins_with("cat:"):
+                        var cat := token.substr(4)
+                        var selected_id := RunConfig.get_selection(cat)
+                        if selected_id.is_empty():
+                                continue
+                        resolved.append(selected_id)
+                else:
+                        resolved.append(token)
+        return resolved
+
 func _load_totem(id: String) -> void:
 	var totem_def := _get_totem_def(id)
 	var gen_variant: Variant = totem_def.get("tile_gen", {})
@@ -166,19 +180,20 @@ func skip() -> void:
 
 
 func _inject_pack(pack: Dictionary) -> void:
-	var tiles_variant: Variant = pack.get("tiles", [])
-	var specials_variant: Variant = pack.get("special", [])
-	var tiles: Array = tiles_variant if tiles_variant is Array else []
-	var specials: Array = specials_variant if specials_variant is Array else []
-	if not tiles.is_empty():
-		for tile_variant in tiles:
-			DeckManager.deck.append(String(tile_variant))
-		DeckManager.shuffle()
-	_update_world_hud()
-	if _special_forced_place and not specials.is_empty():
-		for special_variant in specials:
-			emit_signal("special_to_place_now", String(special_variant))
-
+        var tiles_variant: Variant = pack.get("tiles", [])
+        var specials_variant: Variant = pack.get("special", [])
+        var tiles: Array = tiles_variant if tiles_variant is Array else []
+        var specials: Array = specials_variant if specials_variant is Array else []
+        var resolved_tiles := _resolve_pack_tiles(tiles)
+        var resolved_specials := _resolve_pack_tiles(specials)
+        if not resolved_tiles.is_empty():
+                for tile_id in resolved_tiles:
+                        DeckManager.deck.append(String(tile_id))
+                DeckManager.shuffle()
+        _update_world_hud()
+        if _special_forced_place and not resolved_specials.is_empty():
+                for special_id in resolved_specials:
+                        emit_signal("special_to_place_now", String(special_id))
 
 func _update_world_hud() -> void:
 	if _world == null:

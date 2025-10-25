@@ -1,13 +1,11 @@
 {
-  "counts": {
-	"harvest": 8,
-	"build": 6,
-	"refine": 4,
-	"guard": 4,
-	"storage": 3,
-	"upgrade": 3,
-	"chanting": 1
-  },
-  "target_size": 30,
-  "fill_with": "harvest"
+  "start_ratios": {
+        "harvest": 8,
+        "build": 6,
+        "refine": 4,
+        "guard": 4,
+        "storage": 3,
+        "upgrade": 3,
+        "chanting": 2
+  }
 }

@@ -1,0 +1,78 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/PreRunDraft.gd" id="1"]
+
+[node name="PreRunDraft" type="CanvasLayer"]
+visible = false
+layer = 50
+script = ExtResource("1")
+
+[node name="Backdrop" type="ColorRect" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+color = Color(0, 0, 0, 0.35)
+mouse_filter = 2
+
+[node name="Frame" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -512.0
+offset_top = -320.0
+offset_right = 512.0
+offset_bottom = 320.0
+
+[node name="VBox" type="VBoxContainer" parent="Frame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = -16.0
+size_flags_horizontal = Control.SIZE_EXPAND_FILL
+size_flags_vertical = Control.SIZE_EXPAND_FILL
+
+[node name="Top" type="HBoxContainer" parent="Frame/VBox"]
+size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+[node name="Title" type="Label" parent="Frame/VBox/Top"]
+text = "Choose Your Variants (pick 1 of 3 per category)"
+size_flags_horizontal = Control.SIZE_EXPAND_FILL
+horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+
+[node name="Tabs" type="TabContainer" parent="Frame/VBox"]
+name = "Tabs"
+size_flags_horizontal = Control.SIZE_EXPAND_FILL
+size_flags_vertical = Control.SIZE_EXPAND_FILL
+
+[node name="Bottom" type="HBoxContainer" parent="Frame/VBox"]
+size_flags_horizontal = Control.SIZE_EXPAND_FILL
+alignment = BoxContainer.ALIGNMENT_CENTER
+
+[node name="RerollBtn" type="Button" parent="Frame/VBox/Bottom"]
+text = "Reroll current tab"
+
+[node name="Spacer" type="Control" parent="Frame/VBox/Bottom"]
+size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+[node name="ConfirmBtn" type="Button" parent="Frame/VBox/Bottom"]
+text = "Confirm"
+disabled = true
+
+[node name="CancelBtn" type="Button" parent="Frame/VBox/Bottom"]
+text = "Cancel"
