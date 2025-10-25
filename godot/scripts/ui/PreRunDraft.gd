@@ -13,7 +13,7 @@ const CATEGORIES := [
         "chanting"
 ]
 
-const CARD_SCENE := preload("res://scenes/ui/VariantCard.tscn")
+const CARD_SCENE: PackedScene = preload("res://scenes/ui/VariantCard.tscn")
 
 @onready var tabs: TabContainer = $"Frame/VBox/Tabs"
 @onready var confirm_btn: Button = $"Frame/VBox/Bottom/ConfirmBtn"
@@ -130,14 +130,14 @@ func _rebuild_cards(cat: String) -> void:
                 if not (tile_variant is Dictionary):
                         continue
                 var tile: Dictionary = tile_variant
-                var card := CARD_SCENE.instantiate()
-                if card == null:
+                var card_instance: Node = CARD_SCENE.instantiate()
+                if card_instance == null:
                         continue
                 var tile_id := String(tile.get("id", ""))
                 var display_name := String(tile.get("name", tile_id))
-                var button := card as Button
+                var button := card_instance as Button
                 if button == null:
-                        card.queue_free()
+                        card_instance.queue_free()
                         continue
                 button.set_meta("tile_id", tile_id)
                 var name_label := button.get_node_or_null("Name") as Label
@@ -178,7 +178,7 @@ func _summarize_rules(rules_variant: Variant) -> String:
                 return "—"
         var lines: Array[String] = []
         for key in rules.keys():
-                var value := rules[key]
+                var value: Variant = rules[key]
                 lines.append("%s: %s" % [str(key), JSON.stringify(value)])
         return "\n".join(lines)
 
