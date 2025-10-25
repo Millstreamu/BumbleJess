@@ -10,38 +10,38 @@ const PRE_RUN_DRAFT_SCENE := preload(\"res://scenes/ui/PreRunDraft.tscn\")
 var _draft_ui: PreRunDraft = null
 
 func _ready() -> void:
-                set_anchors_preset(Control.PRESET_FULL_RECT)
-                var map_id: String = str(ProjectSettings.get_setting(\"application/config/starting_map_id\", \"map.demo_001\"))
-                RunConfig.map_id = map_id
-                _prepare_new_game(map_id)
-                MapSeeder.load_map(map_id, $World)
-                _ensure_pre_run_draft()
-                if _draft_ui != null:
-                                _draft_ui.open()
+				set_anchors_preset(Control.PRESET_FULL_RECT)
+				var map_id: String = str(ProjectSettings.get_setting(\"application/config/starting_map_id\", \"map.demo_001\"))
+				RunConfig.map_id = map_id
+				_prepare_new_game(map_id)
+				MapSeeder.load_map(map_id, $World)
+				_ensure_pre_run_draft()
+				if _draft_ui != null:
+								_draft_ui.open()
 
 func _prepare_new_game(map_id: String) -> void:
-                if SproutRegistry != null and SproutRegistry.has_method(\"refresh_for_new_game\"):
-                                SproutRegistry.refresh_for_new_game(map_id)
+				if SproutRegistry != null and SproutRegistry.has_method(\"refresh_for_new_game\"):
+								SproutRegistry.refresh_for_new_game(map_id)
 
 func _ensure_pre_run_draft() -> void:
-                if is_instance_valid(_draft_ui):
-                                return
-                if PRE_RUN_DRAFT_SCENE == null:
-                                return
-                var instance := PRE_RUN_DRAFT_SCENE.instantiate()
-                if instance == null:
-                                return
-                add_child(instance)
-                _draft_ui = instance as PreRunDraft
-                if _draft_ui == null:
-                                instance.queue_free()
-                                return
-                _draft_ui.draft_done.connect(_on_draft_done)
+				if is_instance_valid(_draft_ui):
+								return
+				if PRE_RUN_DRAFT_SCENE == null:
+								return
+				var instance := PRE_RUN_DRAFT_SCENE.instantiate()
+				if instance == null:
+								return
+				add_child(instance)
+				_draft_ui = instance as PreRunDraft
+				if _draft_ui == null:
+								instance.queue_free()
+								return
+				_draft_ui.draft_done.connect(_on_draft_done)
 
 func _on_draft_done() -> void:
-                var world := $World
-                if world != null and world.has_method(\"update_hud\"):
-                                world.call(\"update_hud\", DeckManager.peek_name(), DeckManager.remaining())
+				var world := $World
+				if world != null and world.has_method(\"update_hud\"):
+								world.call(\"update_hud\", DeckManager.peek_name(), DeckManager.remaining())
 "
 
 [node name="Main" type="Control"]
