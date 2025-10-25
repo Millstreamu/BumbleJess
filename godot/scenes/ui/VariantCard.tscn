@@ -2,8 +2,8 @@
 
 [node name="VariantCard" type="Button"]
 custom_minimum_size = Vector2(280, 180)
-focus_mode = Control.FOCUS_NONE
-mouse_filter = Control.MOUSE_FILTER_STOP
+focus_mode = 0
+mouse_filter = 2
 
 [node name="Name" type="Label" parent="."]
 layout_mode = 1
@@ -14,7 +14,7 @@ anchor_right = 0.0
 anchor_bottom = 0.0
 offset_left = 12.0
 offset_top = 12.0
-size_flags_horizontal = Control.SIZE_EXPAND_FILL
+size_flags_horizontal = 3
 
 [node name="Rules" type="RichTextLabel" parent="."]
 layout_mode = 1
@@ -40,6 +40,6 @@ anchor_right = 1.0
 anchor_bottom = 0.0
 offset_left = -80.0
 offset_top = 12.0
-horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+horizontal_alignment = 2
 text = "Chosen"
 visible = false
