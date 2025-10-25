@@ -329,7 +329,7 @@ func get_upgrade_resource_cost(id: String, current_level: int, levels: int = 1) 
 		return {}
 	var total: Dictionary = {}
 	for i in range(max_levels):
-		var idx := clamp(current_level + i - 1, 0, table.size() - 1)
+		var idx: int = clamp(current_level + i - 1, 0, table.size() - 1)
 		var cost_variant: Variant = table[idx]
 		if not (cost_variant is Dictionary):
 			continue
