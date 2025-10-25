@@ -16,8 +16,8 @@ config/features=PackedStringArray("4.4")
 config/starting_map_id="map.demo_001"
 
 [autoload]
-RunConfig="*res://autoload/RunConfig.gd"
 
+RunConfig="*res://autoload/RunConfig.gd"
 DataLite="*res://autoload/DataLite.gd"
 DeckManager="*res://autoload/DeckManager.gd"
 BattleManager="*res://autoload/BattleManager.gd"
