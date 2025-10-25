@@ -13,7 +13,9 @@ const CATEGORIES := [
 		"chanting"
 ]
 
-const CARD_SCENE: PackedScene = preload("res://scenes/ui/VariantCard.tscn")
+const CARD_SCENE_PATH := "res://scenes/ui/VariantCard.tscn"
+
+var _card_scene: PackedScene
 
 @onready var tabs: TabContainer = $"Frame/VBox/Tabs"
 @onready var confirm_btn: Button = $"Frame/VBox/Bottom/ConfirmBtn"
@@ -24,8 +26,11 @@ var _tiles_by_cat: Dictionary = {}
 var _choices: Dictionary = {}
 
 func _ready() -> void:
-		visible = false
-		cancel_btn.pressed.connect(_on_cancel)
+                _card_scene = load(CARD_SCENE_PATH)
+                if _card_scene == null:
+                                push_error("Unable to load variant card scene at %s" % CARD_SCENE_PATH)
+                visible = false
+                cancel_btn.pressed.connect(_on_cancel)
 		confirm_btn.pressed.connect(_on_confirm)
 		reroll_btn.pressed.connect(_on_reroll_current)
 		if not RunConfig.is_connected("selections_changed", Callable(self, "_refresh_confirm")):
@@ -130,7 +135,9 @@ func _rebuild_cards(cat: String) -> void:
 				if not (tile_variant is Dictionary):
 						continue
 				var tile: Dictionary = tile_variant
-				var card_instance: Node = CARD_SCENE.instantiate()
+                                if _card_scene == null:
+                                                return
+                                var card_instance: Node = _card_scene.instantiate()
 				if card_instance == null:
 						continue
 				var tile_id := String(tile.get("id", ""))
