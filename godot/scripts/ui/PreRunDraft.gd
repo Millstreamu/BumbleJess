@@ -27,7 +27,7 @@ var _tiles_by_cat: Dictionary = {}
 var _choices: Dictionary = {}
 
 func _ready() -> void:
-	pause_mode = Node.PAUSE_MODE_PROCESS
+	process_mode = Node.PROCESS_MODE_WHEN_PAUSED
 	_card_scene = load(CARD_SCENE_PATH)
 	if _card_scene == null:
 		push_error("Unable to load variant card scene at %s" % CARD_SCENE_PATH)
