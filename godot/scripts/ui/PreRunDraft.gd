@@ -16,6 +16,7 @@ const CATEGORIES := [
 const CARD_SCENE_PATH := "res://scenes/ui/VariantCard.tscn"
 
 var _card_scene: PackedScene
+var _tree_was_paused := false
 
 @onready var tabs: TabContainer = $"Frame/VBox/Tabs"
 @onready var confirm_btn: Button = $"Frame/VBox/Bottom/ConfirmBtn"
@@ -26,6 +27,7 @@ var _tiles_by_cat: Dictionary = {}
 var _choices: Dictionary = {}
 
 func _ready() -> void:
+	pause_mode = Node.PAUSE_MODE_PROCESS
 	_card_scene = load(CARD_SCENE_PATH)
 	if _card_scene == null:
 		push_error("Unable to load variant card scene at %s" % CARD_SCENE_PATH)
@@ -45,10 +47,12 @@ func open() -> void:
 	_roll_all()
 	_refresh_confirm()
 	tabs.current_tab = 0
+	_tree_was_paused = get_tree().paused
+	get_tree().paused = true
 	visible = true
 
 func _on_cancel() -> void:
-	visible = false
+	_close()
 
 func _load_tiles() -> void:
 	_tiles_by_cat.clear()
@@ -203,7 +207,6 @@ func _refresh_confirm() -> void:
 func _on_confirm() -> void:
 	if not RunConfig.all_categories_selected():
 		return
-	visible = false
 	DeckManager.build_starting_deck_from_ratios("res://data/deck.json", RunConfig.selected_variants)
 	if DeckManager.deck.size() > 0:
 		DeckManager.shuffle()
@@ -212,3 +215,10 @@ func _on_confirm() -> void:
 		DeckManager.next_tile_id = ""
 	RunConfig.mark_ready()
 	emit_signal("draft_done")
+	_close()
+
+func _close() -> void:
+	visible = false
+	if get_tree() == null:
+		return
+	get_tree().paused = _tree_was_paused
