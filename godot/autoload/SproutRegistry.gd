@@ -333,7 +333,7 @@ func get_upgrade_resource_cost(id: String, current_level: int, levels: int = 1) 
 		var cost_variant: Variant = table[idx]
 		if not (cost_variant is Dictionary):
 			continue
-                var cost_step: Dictionary = cost_variant as Dictionary
+		var cost_step: Dictionary = cost_variant as Dictionary
 		for key in cost_step.keys():
 			var amount: int = int(cost_step[key])
 			if amount < 0:
