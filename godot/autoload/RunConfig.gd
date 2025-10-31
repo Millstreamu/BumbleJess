@@ -101,16 +101,40 @@ func mark_ready() -> void:
         emit_signal("run_ready")
 
 func add_core_tile(id: String) -> void:
-        if id.is_empty():
+        var tid := String(id)
+        if tid.is_empty():
                 return
-        if core_tiles.has(id):
+        if not core_tiles.has(tid):
+                core_tiles.append(tid)
+        emit_signal("selections_changed")
+
+func remove_core_tile(id: String) -> void:
+        var tid := String(id)
+        if tid.is_empty():
                 return
-        core_tiles.append(id)
+        if core_tiles.has(tid):
+                core_tiles.erase(tid)
+        emit_signal("selections_changed")
+
+func set_core_tiles(ids: Array) -> void:
+        var sanitized: Array[String] = []
+        for entry in ids:
+                if typeof(entry) != TYPE_STRING:
+                        continue
+                var tid := String(entry)
+                if tid.is_empty():
+                        continue
+                if sanitized.has(tid):
+                        continue
+                sanitized.append(tid)
+        core_tiles = sanitized
+        emit_signal("selections_changed")
 
 func has_core_tile(id: String) -> bool:
-        if id.is_empty():
+        var tid := String(id)
+        if tid.is_empty():
                 return false
-        return core_tiles.has(id)
+        return core_tiles.has(tid)
 
 func _resolve_key(cat: String) -> String:
         var canonical_key := CategoryMap.canonical(cat)

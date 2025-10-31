@@ -74,6 +74,8 @@ func _ensure_pre_run_draft() -> void:
         )
 
 func _on_setup_finished(_totem_id: String, _sprout_ids: Array) -> void:
+        if RunConfig.core_tiles.size() > 0:
+                DeckManager.build_deck_from_core("res://data/deck.json", RunConfig.core_tiles)
         if _draft_ui != null:
                 _draft_ui.open()
 
