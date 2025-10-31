@@ -1,0 +1,28 @@
+[gd_scene load_steps=2 format=3 uid="uid://commune_window"]
+
+[ext_resource type="Script" path="res://scripts/ui/CommuneWindow.gd" id="1"]
+
+[node name="CommuneWindow" type="CanvasLayer"]
+script = ExtResource("1")
+layer = 10
+
+[node name="Panel" type="Panel" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -440.0
+offset_top = -120.0
+offset_right = 440.0
+offset_bottom = 120.0
+
+[node name="Row" type="HBoxContainer" parent="Panel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = -16.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 16

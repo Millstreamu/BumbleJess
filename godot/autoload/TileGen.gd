@@ -198,8 +198,8 @@ func _inject_pack(pack: Dictionary) -> void:
 func _update_world_hud() -> void:
 	if _world == null:
 		return
-	if _world.has_method("update_hud"):
-		_world.call("update_hud", DeckManager.peek_name(), DeckManager.remaining())
+        if _world.has_method("update_hud"):
+                _world.call("update_hud")
 
 
 func can_evolve() -> bool:
