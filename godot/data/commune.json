@@ -1,0 +1,10 @@
+{
+  "offer_count": 3,
+  "unique_chance_base": 0.05,
+  "bias": {
+    "core_tile_weight": 3.0,
+    "totem_weight_mult": 1.0,
+    "recent_dupe_penalty": -2.5,
+    "category_soft_cap": 0.6
+  }
+}

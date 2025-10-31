@@ -8,7 +8,6 @@ const LAYER_LIFE := 2
 const LAYER_FX := 3
 
 const SPROUT_REGISTER_SCENE := preload("res://scenes/battle/BattlePicker.tscn")
-const TILE_CHOICE_WINDOW_SCENE := preload("res://scenes/ui/TileChoiceWindow.tscn")
 
 @export var width := 16:
 	set = set_width
@@ -25,7 +24,6 @@ var rules: PlacementRules = PlacementRules.new()
 var turn := 0
 var _cell_metadata: Dictionary = {}
 var _sprout_picker: BattlePicker = null
-var _tile_choice_window: TileChoiceWindow = null
 var _special_queue: Array[String] = []
 var _placing_special: String = ""
 var _extra_tile_colors: Dictionary[String, Color] = {}
@@ -78,11 +76,12 @@ func _ready() -> void:
 		):
 			growth_manager.connect("grove_spawned", Callable(sprout_registry, "on_grove_spawned"))
 	_bind_resource_manager()
-	_bind_sprout_registry()
-	_bind_tile_gen()
-	var decay_manager: Node = get_node_or_null("/root/DecayManager")
-	if decay_manager != null and decay_manager.has_method("bind_world"):
-		decay_manager.call("bind_world", self)
+        _bind_sprout_registry()
+        _bind_tile_gen()
+        _bind_commune_manager()
+        var decay_manager: Node = get_node_or_null("/root/DecayManager")
+        if decay_manager != null and decay_manager.has_method("bind_world"):
+                decay_manager.call("bind_world", self)
 	_ensure_toggle_threats_action()
 	_ensure_toggle_sprout_register_action()
 	_ensure_toggle_cluster_fx_action()
@@ -164,23 +163,11 @@ func _ensure_sprout_picker() -> void:
 	_sprout_picker = picker
 
 
-func _ensure_tile_choice_window() -> void:
-	if is_instance_valid(_tile_choice_window):
-		return
-	if TILE_CHOICE_WINDOW_SCENE == null:
-		return
-	var instance := TILE_CHOICE_WINDOW_SCENE.instantiate()
-	if instance == null:
-		return
-	add_child(instance)
-	_tile_choice_window = instance as TileChoiceWindow
-
-
 func _toggle_sprout_register() -> void:
-	_ensure_sprout_picker()
-	if not is_instance_valid(_sprout_picker):
-		return
-	if _sprout_picker.visible:
+        _ensure_sprout_picker()
+        if not is_instance_valid(_sprout_picker):
+                return
+        if _sprout_picker.visible:
 		_sprout_picker.close()
 	else:
 		_sprout_picker.open()
@@ -547,11 +534,13 @@ func draw_debug_grid() -> void:
 
 
 func can_place_at(cell: Vector2i) -> bool:
-	if not _placing_special.is_empty():
-		return rules.can_place(self, cell)
-	if DeckManager.peek().is_empty():
-		return false
-	return rules.can_place(self, cell)
+        if not _placing_special.is_empty():
+                return rules.can_place(self, cell)
+        if typeof(CommuneManager) == TYPE_NIL:
+                return false
+        if not CommuneManager.has_current_tile():
+                return false
+        return rules.can_place(self, cell)
 
 
 func attempt_place_at(cell: Vector2i) -> void:
@@ -561,28 +550,34 @@ func attempt_place_at(cell: Vector2i) -> void:
 
 
 func place_current_tile(cell: Vector2i) -> void:
-	if not _placing_special.is_empty():
-		if not rules.can_place(self, cell):
-			return
-		var special_id := _placing_special
-		if special_id.is_empty():
-			return
-		if _place_tile(cell, special_id, false):
-			_placing_special = ""
-			_dequeue_next_special()
-		return
+        if not _placing_special.is_empty():
+                if not rules.can_place(self, cell):
+                        return
+                var special_id := _placing_special
+                if special_id.is_empty():
+                        return
+                if _place_tile(cell, special_id):
+                        _placing_special = ""
+                        _dequeue_special()
+                        _advance_turn()
+                return
 
-	if DeckManager.next_tile_id.is_empty():
-		return
-	if not rules.can_place(self, cell):
-		return
-	var tile_id: String = DeckManager.next_tile_id
-	if tile_id.is_empty():
-		return
-	_place_tile(cell, tile_id, true)
+        if typeof(CommuneManager) == TYPE_NIL:
+                return
+        if not CommuneManager.has_current_tile():
+                return
+        if not rules.can_place(self, cell):
+                return
+        var tile_id: String = CommuneManager.get_current_tile_id()
+        if tile_id.is_empty():
+                return
+        if not _place_tile(cell, tile_id):
+                return
+        CommuneManager.consume_current_tile()
+        _advance_turn()
 
 
-func _place_tile(cell: Vector2i, tile_id: String, draw_from_deck: bool) -> bool:
+func _place_tile(cell: Vector2i, tile_id: String) -> bool:
         var category: String = id_to_category(tile_id)
         if category.is_empty():
                 return false
@@ -614,46 +609,48 @@ func _place_tile(cell: Vector2i, tile_id: String, draw_from_deck: bool) -> bool:
         set_cell_tile_id(LAYER_LIFE, cell, tile_id)
         emit_signal("tile_placed", tile_id, cell)
         rules.mark_occupied(cell)
-        _finalize_tile_placement(draw_from_deck)
+        _finalize_tile_placement()
         return true
 
 
-func _finalize_tile_placement(draw_from_deck: bool) -> void:
-	turn += 1
-	if draw_from_deck:
-		DeckManager.draw_one()
-		update_hud(DeckManager.peek_name(), DeckManager.remaining())
-	else:
-		_update_hud()
-	if is_instance_valid(cursor):
-		cursor.update_highlight_state()
-	var growth_manager: Node = get_node_or_null("/root/GrowthManager")
-	if growth_manager != null and growth_manager.has_method("request_growth_update"):
-		growth_manager.request_growth_update(turn)
-	var resource_manager: Node = _get_resource_manager()
-	if resource_manager != null:
-		resource_manager.emit_signal("resources_changed")
-	_advance_turn()
+func _finalize_tile_placement() -> void:
+        turn += 1
+        _update_hud()
+        if is_instance_valid(cursor):
+                cursor.update_highlight_state()
+        var growth_manager: Node = get_node_or_null("/root/GrowthManager")
+        if growth_manager != null and growth_manager.has_method("request_growth_update"):
+                growth_manager.request_growth_update(turn)
+        var resource_manager: Node = _get_resource_manager()
+        if resource_manager != null:
+                resource_manager.emit_signal("resources_changed")
+
+
+func enqueue_special(tile_id: String) -> void:
+        var id := String(tile_id)
+        if id.is_empty():
+                return
+        _special_queue.append(id)
+        if _placing_special.is_empty():
+                _dequeue_special()
 
 
 func _on_special_now(tile_id: String) -> void:
-	_special_queue.append(String(tile_id))
-	if _placing_special.is_empty():
-		_dequeue_next_special()
+        enqueue_special(tile_id)
 
 
-func _dequeue_next_special() -> void:
-	if _special_queue.is_empty():
-		_placing_special = ""
-		_update_hud()
-		if is_instance_valid(cursor):
-			cursor.update_highlight_state()
-		return
-	var next_id_variant = _special_queue.pop_front()
-	_placing_special = String(next_id_variant)
-	_update_hud()
-	if is_instance_valid(cursor):
-		cursor.update_highlight_state()
+func _dequeue_special() -> void:
+        if _special_queue.is_empty():
+                _placing_special = ""
+                _update_hud()
+                if is_instance_valid(cursor):
+                        cursor.update_highlight_state()
+                return
+        var next_id_variant = _special_queue.pop_front()
+        _placing_special = String(next_id_variant)
+        _update_hud()
+        if is_instance_valid(cursor):
+                cursor.update_highlight_state()
 
 
 func _advance_turn() -> void:
@@ -677,9 +674,9 @@ func world_to_map(p: Vector2) -> Vector2i:
 
 
 func _setup_hud() -> void:
-	if is_instance_valid(hud):
-		hud.text = _build_hud_text("-", 0)
-	_update_resource_panel()
+        if is_instance_valid(hud):
+                hud.text = _build_hud_text()
+        _update_resource_panel()
 
 
 func _bind_sprout_registry() -> void:
@@ -693,33 +690,55 @@ func _bind_sprout_registry() -> void:
 
 
 func _bind_tile_gen() -> void:
-	if TileGen == null:
-		return
-	TileGen.bind_world(self)
-	if not TileGen.is_connected("special_to_place_now", Callable(self, "_on_special_now")):
-		TileGen.connect("special_to_place_now", Callable(self, "_on_special_now"))
-	if not TileGen.is_connected("totem_tier_changed", Callable(self, "_on_totem_tier_changed")):
-		TileGen.connect("totem_tier_changed", Callable(self, "_on_totem_tier_changed"))
-	_ensure_tile_choice_window()
+        if TileGen == null:
+                return
+        TileGen.bind_world(self)
+        if not TileGen.is_connected("special_to_place_now", Callable(self, "_on_special_now")):
+                TileGen.connect("special_to_place_now", Callable(self, "_on_special_now"))
+        if not TileGen.is_connected("totem_tier_changed", Callable(self, "_on_totem_tier_changed")):
+                TileGen.connect("totem_tier_changed", Callable(self, "_on_totem_tier_changed"))
+
+
+func _bind_commune_manager() -> void:
+        if typeof(CommuneManager) == TYPE_NIL:
+                return
+        if not CommuneManager.offer_ready.is_connected(_on_commune_offer):
+                CommuneManager.offer_ready.connect(_on_commune_offer)
+        if not CommuneManager.chosen.is_connected(_on_commune_chosen):
+                CommuneManager.chosen.connect(_on_commune_chosen)
+        if not CommuneManager.cleared.is_connected(_on_commune_cleared):
+                CommuneManager.cleared.connect(_on_commune_cleared)
 
 
 func _on_sprout_error(text: String) -> void:
-	if has_node("HUD/DeckLabel"):
-		var label: Label = $HUD/DeckLabel
-		label.text += "\n[SPR] " + text
+        if has_node("HUD/DeckLabel"):
+                var label: Label = $HUD/DeckLabel
+                label.text += "\n[SPR] " + text
 
 
 func _on_sprout_leveled(uid: String, lvl: int) -> void:
-	if has_node("HUD/DeckLabel"):
-		var label: Label = $HUD/DeckLabel
-		label.text += "\n[SPR] " + uid + " → Lv" + str(lvl)
+        if has_node("HUD/DeckLabel"):
+                var label: Label = $HUD/DeckLabel
+                label.text += "\n[SPR] " + uid + " → Lv" + str(lvl)
+
+
+func _on_commune_offer(_choices: Array) -> void:
+        _update_hud()
+
+
+func _on_commune_chosen(_tile_id: String) -> void:
+        _update_hud()
+
+
+func _on_commune_cleared() -> void:
+        _update_hud()
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_toggle_sprout_register"):
-		_toggle_sprout_register()
-		var sr_viewport := get_viewport()
-		if sr_viewport != null:
+        if event.is_action_pressed("ui_toggle_sprout_register"):
+                _toggle_sprout_register()
+                var sr_viewport := get_viewport()
+                if sr_viewport != null:
 			sr_viewport.set_input_as_handled()
 		return
 	if event.is_action_pressed("ui_toggle_threats"):
@@ -741,47 +760,57 @@ func _unhandled_input(event: InputEvent) -> void:
 			fx_viewport.set_input_as_handled()
 
 
-func update_hud(next_name: String, remaining: int) -> void:
-	if is_instance_valid(hud):
-		hud.text = _build_hud_text(next_name, remaining)
-	_update_resource_panel()
+func update_hud(_next_name: String = "", _remaining: int = 0) -> void:
+        _update_hud()
 
 
 func _update_hud() -> void:
-	if not is_instance_valid(hud):
-		return
-	var tile_id: String = DeckManager.peek()
-        var remaining: int = DeckManager.remaining()
-        var display_name: String = "-"
-        if not tile_id.is_empty():
-                var tile_name: String = DeckManager.peek_name()
-                var category: String = DeckManager.peek_category()
-                if category.is_empty():
-                        display_name = tile_name
-                else:
-                        var canonical_cat := CategoryMap.canonical(category)
-                        var display_cat := CategoryMap.display_name(canonical_cat)
-                        display_name = "%s (%s)" % [tile_name, display_cat]
-        hud.text = _build_hud_text(display_name, remaining)
+        if not is_instance_valid(hud):
+                return
+        hud.text = _build_hud_text()
         _update_resource_panel()
 
 
-func _build_hud_text(next_name: String, remaining: int) -> String:
-	var lines: Array[String] = []
-	lines.append("Next: %s | Deck: %d" % [next_name, remaining])
-	var totem_line := _totem_status_line()
-	if not totem_line.is_empty():
-		lines.append(totem_line)
-	if not _placing_special.is_empty():
-		var display_name := id_to_name(_placing_special)
-		if display_name.is_empty():
-			display_name = _placing_special
-		lines.append("Place SPECIAL: %s" % display_name)
-	lines.append(
-		(
-			"Overgrowth: %d | Groves: %d"
-			% [_count_cells_named("overgrowth"), _count_cells_named("grove")]
-		)
+func _build_hud_text() -> String:
+        var lines: Array[String] = []
+        var current_line := ""
+        var deck := DeckManager if typeof(DeckManager) != TYPE_NIL else null
+        if not _placing_special.is_empty():
+                var display_name := id_to_name(_placing_special)
+                if display_name.is_empty():
+                        display_name = _placing_special
+                current_line = "Current: SPECIAL - %s" % display_name
+        elif typeof(CommuneManager) != TYPE_NIL and CommuneManager.has_current_tile():
+                var tile_id := CommuneManager.get_current_tile_id()
+                var display := id_to_name(tile_id)
+                if display.is_empty():
+                        display = tile_id
+                var cat := ""
+                if deck != null:
+                        cat = deck.get_tile_category(tile_id)
+                if not cat.is_empty():
+                        var canon := CategoryMap.canonical(cat)
+                        var cat_display := CategoryMap.display_name(canon)
+                        if not cat_display.is_empty():
+                                display = "%s (%s)" % [display, cat_display]
+                current_line = "Current: %s" % display
+        else:
+                current_line = "Current: Choose from the Commune"
+        lines.append(current_line)
+        var rc := RunConfig if typeof(RunConfig) != TYPE_NIL else null
+        if rc != null and not rc.last_pick_id.is_empty():
+                var last_name := id_to_name(rc.last_pick_id)
+                if last_name.is_empty():
+                        last_name = rc.last_pick_id
+                lines.append("Last Pick: %s" % last_name)
+        var totem_line := _totem_status_line()
+        if not totem_line.is_empty():
+                lines.append(totem_line)
+        lines.append(
+                (
+                        "Overgrowth: %d | Groves: %d"
+                        % [_count_cells_named("overgrowth"), _count_cells_named("grove")]
+                )
 	)
 	var resource_manager: Node = _get_resource_manager()
 	if resource_manager != null:
@@ -791,14 +820,9 @@ func _build_hud_text(next_name: String, remaining: int) -> String:
 
 
 func _totem_status_line() -> String:
-	if TileGen == null:
-		return ""
-	var parts: Array[String] = []
-	parts.append("Totem Tier: %d" % TileGen.get_tier())
-	var next_turn: int = TileGen.get_next_choice_turn()
-	if next_turn > 0:
-		parts.append("Next Pack Turn: %d" % next_turn)
-	return " | ".join(parts)
+        if TileGen == null:
+                return ""
+        return "Totem Tier: %d" % TileGen.get_tier()
 
 
 func _update_resource_panel() -> void:

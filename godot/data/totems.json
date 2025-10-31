@@ -1,11 +1,25 @@
 [
   {
-	"id": "totem.heartwood",
-	"name": "Heartwood",
-	"tile_gen": {
-	  "interval_turns": 3,
-	  "choices": [
-		{ "pack_id": "pack.harvest_growth", "weight": 5, "min_tier": 1 },
+        "id": "totem.heartwood",
+        "name": "Heartwood",
+        "commune_weights": {
+          "categories": {
+            "Nature": 1.2,
+            "Earth": 1.0,
+            "Water": 1.0,
+            "Nest": 0.9,
+            "Mystic": 0.9,
+            "Aggression": 1.0
+          },
+          "tags": {
+            "forest": 1.1,
+            "grove": 1.1
+          }
+        },
+        "tile_gen": {
+          "interval_turns": 3,
+          "choices": [
+                { "pack_id": "pack.harvest_growth", "weight": 5, "min_tier": 1 },
 		{ "pack_id": "pack.refine_channel", "weight": 3, "min_tier": 1 },
 		{ "pack_id": "pack.build_guard", "weight": 3, "min_tier": 1 },
 		{ "pack_id": "pack.special.single", "weight": 1, "min_tier": 2 }

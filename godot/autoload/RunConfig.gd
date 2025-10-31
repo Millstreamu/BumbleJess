@@ -30,6 +30,8 @@ var selected_variants := {
 
 var totem_id := "totem.heartwood"
 var map_id := "map.demo_001"
+var core_tiles: Array[String] = []
+var last_pick_id: String = ""
 
 
 func set_selection(cat: String, tile_id: String) -> void:
@@ -63,10 +65,24 @@ func clear_for_new_run() -> void:
                 var legacy_key := _legacy_for(canonical_key)
                 selected_variants[legacy_key] = ""
         selected_variants["chanting"] = ""
+        core_tiles.clear()
+        last_pick_id = ""
         emit_signal("selections_changed")
 
 func mark_ready() -> void:
         emit_signal("run_ready")
+
+func add_core_tile(id: String) -> void:
+        if id.is_empty():
+                return
+        if core_tiles.has(id):
+                return
+        core_tiles.append(id)
+
+func has_core_tile(id: String) -> bool:
+        if id.is_empty():
+                return false
+        return core_tiles.has(id)
 
 func _resolve_key(cat: String) -> String:
         var canonical_key := CategoryMap.canonical(cat)

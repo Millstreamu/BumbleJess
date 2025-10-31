@@ -30,6 +30,7 @@ GrowthManager="*res://autoload/GrowthManager.gd"
 MapSeeder="*res://autoload/MapSeeder.gd"
 SproutRegistry="*res://autoload/SproutRegistry.gd"
 TileGen="*res://autoload/TileGen.gd"
+CommuneManager="*res://autoload/CommuneManager.gd"
 
 [input]
 
