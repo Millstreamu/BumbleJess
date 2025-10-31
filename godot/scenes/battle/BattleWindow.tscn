@@ -1,11 +1,10 @@
 [gd_scene load_steps=3 format=3 uid="uid://u6l7ru6pv8ys"]
 
 [ext_resource type="Script" uid="uid://c2e2bbnlangg0" path="res://scripts/battle/BattleWindow.gd" id="1"]
-[ext_resource type="PackedScene" path="res://scenes/battle/UnitSlot.tscn" id="2"]
+[ext_resource type="PackedScene" uid="uid://ckxbup56wn158" path="res://scenes/battle/UnitSlot.tscn" id="2"]
 
 [node name="BattleWindow" type="CanvasLayer"]
 layer = 5
-visible = false
 script = ExtResource("1")
 sprout_grid_path = NodePath("Frame/Layout/LeftCol/SproutGrid")
 decay_grid_path = NodePath("Frame/Layout/RightCol/DecayGrid")
@@ -57,28 +56,34 @@ layout_mode = 2
 text = "Sprouts"
 
 [node name="SproutGrid" type="GridContainer" parent="Frame/Layout/LeftCol"]
-custom_minimum_size = Vector2(360, 320)
+custom_minimum_size = Vector2(360, 360)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 columns = 3
 
 [node name="SproutSlot1" parent="Frame/Layout/LeftCol/SproutGrid" instance=ExtResource("2")]
+custom_minimum_size = Vector2(120, 120)
 layout_mode = 2
 
 [node name="SproutSlot2" parent="Frame/Layout/LeftCol/SproutGrid" instance=ExtResource("2")]
+custom_minimum_size = Vector2(120, 120)
 layout_mode = 2
 
 [node name="SproutSlot3" parent="Frame/Layout/LeftCol/SproutGrid" instance=ExtResource("2")]
+custom_minimum_size = Vector2(120, 120)
 layout_mode = 2
 
 [node name="SproutSlot4" parent="Frame/Layout/LeftCol/SproutGrid" instance=ExtResource("2")]
+custom_minimum_size = Vector2(120, 120)
 layout_mode = 2
 
 [node name="SproutSlot5" parent="Frame/Layout/LeftCol/SproutGrid" instance=ExtResource("2")]
+custom_minimum_size = Vector2(120, 120)
 layout_mode = 2
 
 [node name="SproutSlot6" parent="Frame/Layout/LeftCol/SproutGrid" instance=ExtResource("2")]
+custom_minimum_size = Vector2(120, 120)
 layout_mode = 2
 
 [node name="MidCol" type="VBoxContainer" parent="Frame/Layout"]
