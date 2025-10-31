@@ -1,0 +1,12 @@
+{
+  "max_core": 10,
+  "seed_with_categories": [
+    "Nature",
+    "Earth",
+    "Water",
+    "Nest",
+    "Mystic",
+    "Aggression"
+  ],
+  "prefer_unique": false
+}

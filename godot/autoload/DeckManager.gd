@@ -45,6 +45,53 @@ func build_starting_deck_from_ratios(path: String, selected: Dictionary) -> void
                 for _i in range(count):
                         deck.append(chosen_id)
 
+func build_deck_from_core(path: String, selected_core: Array[String]) -> void:
+        next_tile_id = ""
+        deck.clear()
+        _rebuild_tile_catalog()
+        var conf: Dictionary = DataLite.load_json_dict(path)
+        var ratios_variant: Variant = conf.get("start_ratios", conf.get("counts", {}))
+        var ratios: Dictionary = ratios_variant if ratios_variant is Dictionary else {}
+        if ratios.is_empty():
+                return
+        var cat_pick: Dictionary = {}
+        for cat_key in ratios.keys():
+                var cat_str := String(cat_key)
+                var canonical_cat := CategoryMap.canonical(cat_str)
+                var chosen := ""
+                if typeof(selected_core) == TYPE_ARRAY:
+                        for entry in selected_core:
+                                if typeof(entry) != TYPE_STRING:
+                                        continue
+                                var cid := String(entry)
+                                if cid.is_empty():
+                                        continue
+                                var core_cat := String(id_to_canonical.get(cid, ""))
+                                if core_cat.is_empty():
+                                        core_cat = CategoryMap.canonical(String(id_to_category.get(cid, "")))
+                                if canonical_cat.is_empty():
+                                        if core_cat.is_empty():
+                                                chosen = cid
+                                                break
+                                elif core_cat == canonical_cat:
+                                        chosen = cid
+                                        break
+                if chosen.is_empty():
+                        var fallback_cat := canonical_cat if not canonical_cat.is_empty() else cat_str
+                        chosen = _first_id_for_category(fallback_cat)
+                cat_pick[cat_key] = chosen
+        for cat_key in ratios.keys():
+                var count := int(ratios[cat_key])
+                if count <= 0:
+                        continue
+                var pick := String(cat_pick.get(cat_key, ""))
+                if pick.is_empty():
+                        continue
+                for _i in range(count):
+                        deck.append(pick)
+        shuffle()
+        draw_one()
+
 func shuffle() -> void:
         for i in range(deck.size() - 1, 0, -1):
                 var j: int = rng.randi_range(0, i)

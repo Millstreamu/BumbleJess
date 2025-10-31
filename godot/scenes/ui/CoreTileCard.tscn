@@ -1,0 +1,49 @@
+[gd_scene load_steps=2 format=3]
+
+[node name="CoreTileCard" type="Button"]
+custom_minimum_size = Vector2(220, 160)
+size_flags_horizontal = Control.SIZE_EXPAND_FILL
+size_flags_vertical = Control.SIZE_FILL
+clip_text = false
+
+[node name="Content" type="VBoxContainer" parent="."]
+anchors_preset = Control.PRESET_FULL_RECT
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = -12.0
+size_flags_horizontal = Control.SIZE_EXPAND_FILL
+size_flags_vertical = Control.SIZE_EXPAND_FILL
+
+[node name="Header" type="HBoxContainer" parent="Content"]
+size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+[node name="Name" type="Label" parent="Content/Header"]
+text = "Tile Name"
+size_flags_horizontal = Control.SIZE_EXPAND_FILL
+clip_text = true
+
+[node name="Cat" type="Label" parent="Content/Header"]
+text = "Category"
+horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+size_flags_horizontal = Control.SIZE_FILL
+size_flags_stretch_ratio = 0.4
+
+[node name="Summary" type="RichTextLabel" parent="Content"]
+size_flags_horizontal = Control.SIZE_EXPAND_FILL
+size_flags_vertical = Control.SIZE_EXPAND_FILL
+bbcode_enabled = true
+scroll_active = false
+fit_content_height = true
+autowrap_mode = TextServer.AUTOWRAP_WORD
+text = "—"
+
+[node name="Chosen" type="Label" parent="."]
+anchors_preset = Control.PRESET_TOP_LEFT
+offset_left = 12.0
+offset_top = 12.0
+text = "✓"
+visible = false
+

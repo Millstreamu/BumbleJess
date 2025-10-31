@@ -120,6 +120,21 @@ func _build_weighted_pool() -> Array:
                                         base *= pow(tag_bias, mult_t)
                 if rc != null and rc.has_core_tile(id):
                         base += core_w
+                if rc != null:
+                        var any_core_same_cat := false
+                        if typeof(DataDB) != TYPE_NIL and DataDB.has_method("get_category_for_id"):
+                                for core_id in rc.core_tiles:
+                                        if typeof(core_id) != TYPE_STRING:
+                                                continue
+                                        var cid := String(core_id)
+                                        if cid.is_empty():
+                                                continue
+                                        var core_cat := CategoryMap.canonical(DataDB.get_category_for_id(cid))
+                                        if core_cat == cat:
+                                                any_core_same_cat = true
+                                                break
+                        if any_core_same_cat:
+                                base *= 1.10
                 if rc != null and rc.last_pick_id == id:
                         base = max(0.1, base + dupe_pen)
                 var history_total := _history_ids.size()
