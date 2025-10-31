@@ -11,11 +11,18 @@ signal resources_changed()
 signal item_changed(item: String)
 signal produced_cells(cells_by_fx: Dictionary)
 
+const FX_KEY_BY_RESOURCE := {
+        "nature": "fx_nature",
+        "earth": "fx_earth",
+        "water": "fx_water",
+        "soul_seed": "fx_seed",
+}
+
 var amounts := {
-	"nature": 0,
-	"earth": 0,
-	"water": 0,
-	"life": 0,
+        "nature": 0,
+        "earth": 0,
+        "water": 0,
+        "life": 0,
 }
 
 var capacity := {
@@ -126,7 +133,10 @@ func _load_tile_rules() -> void:
 			if id.is_empty():
 				continue
                 var category: String = String(entry.get("category", ""))
-                _category_by_id[id] = CategoryMap.canonical(category)
+                var canonical_category := String(DataDB.get_category_for_id(id))
+                if canonical_category.is_empty():
+                        canonical_category = CategoryMap.canonical(category)
+                _category_by_id[id] = canonical_category
 			var rules_variant: Variant = entry.get("rules", {})
 			var rules: Dictionary = rules_variant if rules_variant is Dictionary else {}
 			_rules_by_id[id] = rules
@@ -178,9 +188,19 @@ func _cell_id_and_cat(c: Vector2i) -> Array:
 			meta = _world.get_cell_meta(_world.LAYER_LIFE, c, "id")
 		if typeof(meta) == TYPE_STRING:
 			id = meta
-        var cat: String = _world.get_cell_name(_world.LAYER_LIFE, c)
+        var cat: String = ""
+        if _world.has_method("get_cell_meta"):
+                var meta_cat = _world.get_cell_meta(_world.LAYER_LIFE, c, "category")
+                if typeof(meta_cat) == TYPE_STRING:
+                        cat = String(meta_cat)
+        if cat.is_empty():
+                cat = _world.get_cell_name(_world.LAYER_LIFE, c)
         if not id.is_empty():
-                cat = String(_category_by_id.get(id, cat))
+                var cached_cat: Variant = _category_by_id.get(id, null)
+                if typeof(cached_cat) == TYPE_STRING and String(cached_cat) != cat:
+                        cat = String(cached_cat)
+                elif cat.is_empty():
+                        cat = String(DataDB.get_category_for_id(id))
         cat = CategoryMap.canonical(cat)
         return [id, cat]
 
@@ -282,20 +302,24 @@ func _produce_resources() -> void:
 		return
 	var width := int(_world.width)
 	var height := int(_world.height)
-	var fx := {
-		"fx_nature": [],
-		"fx_earth": [],
-		"fx_water": [],
-		"fx_seed": [],
-	}
+        var fx := {
+                "fx_nature": [],
+                "fx_earth": [],
+                "fx_water": [],
+                "fx_seed": [],
+        }
+
+        var skip_cells := _produce_resources_v31_outputs_and_synergies(fx)
 
         for y in range(height):
                 for x in range(width):
-			var cell := Vector2i(x, y)
-			var pair := _cell_id_and_cat(cell)
-			var id: String = pair[0]
-			var cat: String = pair[1]
+                        var cell := Vector2i(x, y)
+                        var pair := _cell_id_and_cat(cell)
+                        var id: String = pair[0]
+                        var cat: String = pair[1]
                         if cat != CAT_NATURE:
+                                continue
+                        if skip_cells.has(cell):
                                 continue
                         var r: Dictionary = _rules_for(id, cat)
                         var per_adj: Dictionary = _canonicalize_dict_keys(
@@ -350,13 +374,15 @@ func _produce_resources() -> void:
 						bloom_fx.append(cell)
 					fx["fx_nature"] = bloom_fx
 
-	for y in range(height):
-		for x in range(width):
-			var cell := Vector2i(x, y)
-			var pair := _cell_id_and_cat(cell)
-			var id: String = pair[0]
-			var cat: String = pair[1]
+        for y in range(height):
+                for x in range(width):
+                        var cell := Vector2i(x, y)
+                        var pair := _cell_id_and_cat(cell)
+                        var id: String = pair[0]
+                        var cat: String = pair[1]
                         if cat != CAT_EARTH:
+                                continue
+                        if skip_cells.has(cell):
                                 continue
 			var r: Dictionary = _rules_for(id, cat)
 			var per_turn: int = int(r.get("earth_per_turn", 1))
@@ -415,13 +441,15 @@ func _produce_resources() -> void:
 						vein_fx.append(cell)
 					fx["fx_earth"] = vein_fx
 
-	for y in range(height):
-		for x in range(width):
-			var cell := Vector2i(x, y)
-			var pair := _cell_id_and_cat(cell)
-			var id: String = pair[0]
-			var cat: String = pair[1]
+        for y in range(height):
+                for x in range(width):
+                        var cell := Vector2i(x, y)
+                        var pair := _cell_id_and_cat(cell)
+                        var id: String = pair[0]
+                        var cat: String = pair[1]
                         if cat != CAT_WATER:
+                                continue
+                        if skip_cells.has(cell):
                                 continue
 			var r: Dictionary = _rules_for(id, cat)
 			var every: int = int(r.get("refine_every_turns", 2))
@@ -501,13 +529,15 @@ func _produce_resources() -> void:
 							span_fx.append(cell)
 						fx["fx_water"] = span_fx
 
-	for y in range(height):
-		for x in range(width):
-			var cell := Vector2i(x, y)
-			var pair := _cell_id_and_cat(cell)
-			var id: String = pair[0]
-			var cat: String = pair[1]
+        for y in range(height):
+                for x in range(width):
+                        var cell := Vector2i(x, y)
+                        var pair := _cell_id_and_cat(cell)
+                        var id: String = pair[0]
+                        var cat: String = pair[1]
                         if cat != CAT_MYSTIC:
+                                continue
+                        if skip_cells.has(cell):
                                 continue
 			var r: Dictionary = _rules_for(id, cat)
 			var every: int = int(r.get("soul_seed_every_turns", 3))
@@ -531,6 +561,157 @@ func _produce_resources() -> void:
 		fx.erase(key)
         if not fx.is_empty():
                 emit_signal("produced_cells", fx)
+
+func _produce_resources_v31_outputs_and_synergies(fx: Dictionary) -> Dictionary:
+        var skip_cells: Dictionary = {}
+        if _world == null:
+                return skip_cells
+        var width := int(_world.width)
+        var height := int(_world.height)
+        for y in range(height):
+                for x in range(width):
+                        var cell := Vector2i(x, y)
+                        var pair := _cell_id_and_cat(cell)
+                        var id: String = pair[0]
+                        if id.is_empty():
+                                continue
+                        var tile_def := DataDB.get_tile_def(id)
+                        if tile_def.is_empty():
+                                continue
+                        var outputs_variant: Variant = tile_def.get("outputs", {})
+                        var outputs: Dictionary = outputs_variant if outputs_variant is Dictionary else {}
+                        if not outputs.is_empty():
+                                skip_cells[cell] = true
+                                for res in outputs.keys():
+                                        var amount: int = int(outputs[res])
+                                        if amount == 0:
+                                                continue
+                                        _add_resource(res, amount, cell, fx)
+                        var synergies_variant: Variant = tile_def.get("synergies", [])
+                        var synergies: Array = []
+                        if synergies_variant is Array:
+                                synergies = synergies_variant
+                        elif synergies_variant is PackedStringArray:
+                                synergies = Array(synergies_variant)
+                        if synergies.is_empty():
+                                continue
+                        for raw_entry in synergies:
+                                if not (raw_entry is Dictionary):
+                                        continue
+                                var entry: Dictionary = raw_entry
+                                var tag := String(entry.get("tag", "")).strip_edges()
+                                if tag.is_empty():
+                                        continue
+                                var bonus_variant: Variant = entry.get("bonus", {})
+                                if not (bonus_variant is Dictionary):
+                                        continue
+                                var bonus: Dictionary = bonus_variant
+                                if bonus.is_empty():
+                                        continue
+                                var adjacent := bool(entry.get("adjacent", true))
+                                var count := 0
+                                if adjacent:
+                                        count = _count_adjacent_with_tag(cell, tag)
+                                else:
+                                        count = 1
+                                if count <= 0:
+                                        continue
+                                for res in bonus.keys():
+                                        var bonus_value: int = int(bonus[res])
+                                        if bonus_value == 0:
+                                                continue
+                                        _add_resource(res, bonus_value * count, cell, fx)
+        return skip_cells
+
+func _count_adjacent_with_tag(cell: Vector2i, tag: String) -> int:
+        if _world == null:
+                return 0
+        var normalized_tag := String(tag).strip_edges()
+        if normalized_tag.is_empty():
+                return 0
+        var lower_tag := normalized_tag.to_lower()
+        var canonical_tag := CategoryMap.canonical(normalized_tag)
+        var count := 0
+        for neighbor in _world.neighbors_even_q(cell):
+                var neighbor_id := ""
+                var neighbor_tags: Array = []
+                if _world.has_method("get_cell_meta"):
+                        var tags_variant = _world.get_cell_meta(_world.LAYER_LIFE, neighbor, "tags")
+                        if tags_variant is PackedStringArray:
+                                neighbor_tags = Array(tags_variant)
+                        elif tags_variant is Array:
+                                neighbor_tags = tags_variant
+                        var id_variant = _world.get_cell_meta(_world.LAYER_LIFE, neighbor, "id")
+                        if typeof(id_variant) == TYPE_STRING:
+                                neighbor_id = String(id_variant)
+                if neighbor_id.is_empty() and _world.has_method("get_cell_tile_id"):
+                        neighbor_id = String(_world.get_cell_tile_id(_world.LAYER_LIFE, neighbor))
+                if neighbor_tags.is_empty() and not neighbor_id.is_empty():
+                        neighbor_tags = DataDB.get_tags_for_id(neighbor_id)
+                var matched := false
+                for neighbor_tag in neighbor_tags:
+                        var tag_str := String(neighbor_tag)
+                        if tag_str.is_empty():
+                                continue
+                        if tag_str == normalized_tag or tag_str.to_lower() == lower_tag:
+                                matched = true
+                                break
+                if not matched:
+                        var neighbor_cat := ""
+                        if _world.has_method("get_cell_meta"):
+                                var meta_cat = _world.get_cell_meta(_world.LAYER_LIFE, neighbor, "category")
+                                if typeof(meta_cat) == TYPE_STRING:
+                                        neighbor_cat = String(meta_cat)
+                        if neighbor_cat.is_empty() and not neighbor_id.is_empty():
+                                neighbor_cat = String(DataDB.get_category_for_id(neighbor_id))
+                        var canonical_neighbor := CategoryMap.canonical(neighbor_cat)
+                        if not canonical_tag.is_empty() and canonical_neighbor == canonical_tag:
+                                matched = true
+                        elif neighbor_cat.to_lower() == lower_tag:
+                                matched = true
+                if matched:
+                        count += 1
+        return count
+
+func _add_resource(kind: String, amount: int, cell: Vector2i, fx: Dictionary) -> void:
+        if amount == 0:
+                return
+        if kind == "soul_seed":
+                if amount != 0:
+                        add_soul_seed(amount)
+                        _mark_fx_cell(fx, kind, cell)
+                return
+        if not amounts.has(kind):
+                amounts[kind] = 0
+        if not capacity.has(kind):
+                capacity[kind] = 0
+        var current := int(amounts.get(kind, 0))
+        var next_value := current + amount
+        if kind != "life":
+                var cap_value := int(capacity.get(kind, 0))
+                next_value = clamp(next_value, 0, cap_value)
+        else:
+                next_value = max(next_value, 0)
+        var actual_gain := next_value - current
+        amounts[kind] = next_value
+        if actual_gain == 0:
+                return
+        _mark_fx_cell(fx, kind, cell)
+
+func _mark_fx_cell(fx: Dictionary, resource: String, cell: Vector2i) -> void:
+        var fx_key := _fx_key_for_resource(resource)
+        if fx_key.is_empty():
+                return
+        var fx_variant: Variant = fx.get(fx_key, [])
+        var fx_array: Array = fx_variant if fx_variant is Array else []
+        if not fx_array.has(cell):
+                fx_array.append(cell)
+        fx[fx_key] = fx_array
+
+func _fx_key_for_resource(resource: String) -> String:
+        if FX_KEY_BY_RESOURCE.has(resource):
+                return String(FX_KEY_BY_RESOURCE[resource])
+        return ""
 
 func _canonicalize_array(values: Variant) -> Array:
         var result: Array = []

@@ -1,8 +1,16 @@
 [
   {
     "id": "tile.harvest.default",
-    "category": "harvest",
+    "category": "Nature",
     "name": "Harvest",
+    "tags": [
+      "nature",
+      "harvest"
+    ],
+    "outputs": {},
+    "synergies": [],
+    "can_generate_overgrowth": false,
+    "unique": false,
     "rules": {
       "capacity_base": {
         "nature": 5
@@ -14,8 +22,16 @@
   },
   {
     "id": "tile.build.default",
-    "category": "build",
+    "category": "Earth",
     "name": "Build",
+    "tags": [
+      "earth",
+      "build"
+    ],
+    "outputs": {},
+    "synergies": [],
+    "can_generate_overgrowth": false,
+    "unique": false,
     "rules": {
       "capacity_base": {
         "earth": 5
@@ -29,8 +45,16 @@
   },
   {
     "id": "tile.refine.default",
-    "category": "refine",
+    "category": "Water",
     "name": "Refine",
+    "tags": [
+      "water",
+      "refine"
+    ],
+    "outputs": {},
+    "synergies": [],
+    "can_generate_overgrowth": false,
+    "unique": false,
     "rules": {
       "capacity_base": {
         "water": 5
@@ -47,8 +71,16 @@
   },
   {
     "id": "tile.storage.default",
-    "category": "storage",
+    "category": "Nest",
     "name": "Storage",
+    "tags": [
+      "nest",
+      "storage"
+    ],
+    "outputs": {},
+    "synergies": [],
+    "can_generate_overgrowth": false,
+    "unique": false,
     "rules": {
       "capacity_aura_adjacent": {
         "harvest": {
@@ -65,36 +97,84 @@
   },
   {
     "id": "tile.guard.default",
-    "category": "guard",
-    "name": "Guard"
+    "category": "Aggression",
+    "name": "Guard",
+    "tags": [
+      "aggression",
+      "guard"
+    ],
+    "outputs": {},
+    "synergies": [],
+    "can_generate_overgrowth": false,
+    "unique": false
   },
   {
     "id": "tile.upgrade.default",
-    "category": "upgrade",
+    "category": "Mystic",
     "name": "Upgrade",
+    "tags": [
+      "mystic",
+      "upgrade"
+    ],
+    "outputs": {},
+    "synergies": [],
+    "can_generate_overgrowth": false,
+    "unique": false,
     "rules": {
       "soul_seed_every_turns": 3
     }
   },
   {
     "id": "tile.chanting.default",
-    "category": "chanting",
-    "name": "Chanting"
+    "category": "Mystic",
+    "name": "Chanting",
+    "tags": [
+      "mystic",
+      "chanting"
+    ],
+    "outputs": {},
+    "synergies": [],
+    "can_generate_overgrowth": false,
+    "unique": false
   },
   {
     "id": "tile.grove.default",
     "category": "grove",
-    "name": "Grove"
+    "name": "Grove",
+    "tags": [
+      "grove",
+      "nature"
+    ],
+    "outputs": {},
+    "synergies": [],
+    "can_generate_overgrowth": false,
+    "unique": false
   },
   {
     "id": "tile.overgrowth.default",
     "category": "overgrowth",
-    "name": "Overgrowth"
+    "name": "Overgrowth",
+    "tags": [
+      "overgrowth",
+      "nature"
+    ],
+    "outputs": {},
+    "synergies": [],
+    "can_generate_overgrowth": true,
+    "unique": false
   },
   {
     "id": "tile.nest.twin",
-    "category": "nest",
+    "category": "Nest",
     "name": "Twin Nest",
+    "tags": [
+      "nest",
+      "twin"
+    ],
+    "outputs": {},
+    "synergies": [],
+    "can_generate_overgrowth": false,
+    "unique": true,
     "rules": {
       "on_place": {
         "spawn_sprouts": 2,
@@ -107,8 +187,17 @@
   },
   {
     "id": "tile.root.stone_vein",
-    "category": "build",
+    "category": "Earth",
     "name": "Stone Vein",
+    "tags": [
+      "earth",
+      "build",
+      "root"
+    ],
+    "outputs": {},
+    "synergies": [],
+    "can_generate_overgrowth": false,
+    "unique": false,
     "rules": {
       "earth_every_turns": 3,
       "requires_adjacent_any": [
@@ -121,6 +210,13 @@
     "id": "tile.hollow.cleansing",
     "category": "hollow",
     "name": "Cleansing Hollow",
+    "tags": [
+      "hollow"
+    ],
+    "outputs": {},
+    "synergies": [],
+    "can_generate_overgrowth": false,
+    "unique": false,
     "rules": {
       "on_place": {
         "cleanse_adjacent_decay": true
@@ -129,8 +225,25 @@
   },
   {
     "id": "tile.bloom.lone",
-    "category": "harvest",
+    "category": "Nature",
     "name": "Lone Bloom",
+    "tags": [
+      "nature",
+      "harvest",
+      "bloom"
+    ],
+    "outputs": {},
+    "synergies": [
+      {
+        "tag": "grove",
+        "bonus": {
+          "nature": 1
+        },
+        "adjacent": true
+      }
+    ],
+    "can_generate_overgrowth": false,
+    "unique": false,
     "rules": {
       "nature_per_turn": 2,
       "blocked_if_adjacent_any": [
@@ -141,8 +254,27 @@
   },
   {
     "id": "tile.veil.mirror_pool",
-    "category": "refine",
+    "category": "Water",
     "name": "Mirror Pool",
+    "tags": [
+      "water",
+      "refine",
+      "pool"
+    ],
+    "outputs": {
+      "water": 0
+    },
+    "synergies": [
+      {
+        "tag": "nature",
+        "bonus": {
+          "water": 1
+        },
+        "adjacent": true
+      }
+    ],
+    "can_generate_overgrowth": false,
+    "unique": false,
     "rules": {
       "cluster_tag": "mirror_pool",
       "cluster_invulnerable_if_size_at_least": 5
@@ -150,8 +282,17 @@
   },
   {
     "id": "tile.totem.echo_pillar",
-    "category": "upgrade",
+    "category": "Mystic",
     "name": "Echo Pillar",
+    "tags": [
+      "mystic",
+      "upgrade",
+      "totem"
+    ],
+    "outputs": {},
+    "synergies": [],
+    "can_generate_overgrowth": false,
+    "unique": false,
     "rules": {
       "capacity_global_bonus_if_adjacent_to_totem": {
         "nature": 5,
@@ -162,8 +303,20 @@
   },
   {
     "id": "tile.build.moss_terrace",
-    "category": "build",
+    "category": "Earth",
     "name": "Moss Terrace",
+    "tags": [
+      "earth",
+      "build",
+      "moss",
+      "terrace"
+    ],
+    "outputs": {
+      "earth": 1
+    },
+    "synergies": [],
+    "can_generate_overgrowth": true,
+    "unique": false,
     "rules": {
       "overgrowth_every_turns": 3,
       "overgrowth_targets": "adjacent_empty",
@@ -172,8 +325,17 @@
   },
   {
     "id": "tile.refine.fungal_span",
-    "category": "refine",
+    "category": "Water",
     "name": "Fungal Span",
+    "tags": [
+      "water",
+      "refine",
+      "fungal"
+    ],
+    "outputs": {},
+    "synergies": [],
+    "can_generate_overgrowth": false,
+    "unique": false,
     "rules": {
       "water_every_turns": 2,
       "per_unique_adjacent_categories": true,
@@ -182,8 +344,16 @@
   },
   {
     "id": "tile.storage.seed_cache",
-    "category": "storage",
+    "category": "Nest",
     "name": "Seed Cache",
+    "tags": [
+      "nest",
+      "storage"
+    ],
+    "outputs": {},
+    "synergies": [],
+    "can_generate_overgrowth": true,
+    "unique": false,
     "rules": {
       "capacity_global_bonus": {
         "nature": 15,
@@ -196,8 +366,17 @@
   },
   {
     "id": "tile.harvest.rich_soil",
-    "category": "harvest",
+    "category": "Nature",
     "name": "Rich Soil",
+    "tags": [
+      "nature",
+      "harvest",
+      "soil"
+    ],
+    "outputs": {},
+    "synergies": [],
+    "can_generate_overgrowth": false,
+    "unique": false,
     "rules": {
       "nature_per_adjacent": {
         "grove": 2,
@@ -210,8 +389,17 @@
   },
   {
     "id": "tile.guard.bulwark",
-    "category": "guard",
+    "category": "Aggression",
     "name": "Bulwark",
+    "tags": [
+      "aggression",
+      "guard",
+      "bulwark"
+    ],
+    "outputs": {},
+    "synergies": [],
+    "can_generate_overgrowth": false,
+    "unique": false,
     "rules": {
       "block_damage_per_turn": 2,
       "requires_adjacent_any": [
@@ -222,8 +410,17 @@
   },
   {
     "id": "tile.guard.sporewall",
-    "category": "guard",
+    "category": "Aggression",
     "name": "Sporewall",
+    "tags": [
+      "aggression",
+      "guard",
+      "spore"
+    ],
+    "outputs": {},
+    "synergies": [],
+    "can_generate_overgrowth": false,
+    "unique": false,
     "rules": {
       "on_place": {
         "spawn_sprouts": 1
@@ -235,8 +432,17 @@
   },
   {
     "id": "tile.storage.root_cellar",
-    "category": "storage",
+    "category": "Nest",
     "name": "Root Cellar",
+    "tags": [
+      "nest",
+      "storage",
+      "root"
+    ],
+    "outputs": {},
+    "synergies": [],
+    "can_generate_overgrowth": true,
+    "unique": false,
     "rules": {
       "capacity_global_bonus": {
         "nature": 10,
@@ -248,8 +454,17 @@
   },
   {
     "id": "tile.upgrade.mindspire",
-    "category": "upgrade",
+    "category": "Mystic",
     "name": "Mindspire",
+    "tags": [
+      "mystic",
+      "upgrade",
+      "mindspire"
+    ],
+    "outputs": {},
+    "synergies": [],
+    "can_generate_overgrowth": false,
+    "unique": false,
     "rules": {
       "soul_seed_every_turns": 2,
       "requires_adjacent_any": [
@@ -260,8 +475,17 @@
   },
   {
     "id": "tile.chanting.harmonic_echo",
-    "category": "chanting",
+    "category": "Mystic",
     "name": "Harmonic Echo",
+    "tags": [
+      "mystic",
+      "chanting",
+      "echo"
+    ],
+    "outputs": {},
+    "synergies": [],
+    "can_generate_overgrowth": false,
+    "unique": false,
     "rules": {
       "chanting_bonus_if_adjacent": {
         "upgrade": 1,
@@ -271,11 +495,44 @@
   },
   {
     "id": "tile.chanting.star_choir",
-    "category": "chanting",
+    "category": "Mystic",
     "name": "Star Choir",
+    "tags": [
+      "mystic",
+      "chanting",
+      "choir"
+    ],
+    "outputs": {},
+    "synergies": [],
+    "can_generate_overgrowth": false,
+    "unique": false,
     "rules": {
       "chant_per_turn": 1,
       "nature_global_bonus": 1
     }
+  },
+  {
+    "id": "tile.whispering_pine_forest",
+    "category": "Nature",
+    "name": "Whispering Pine Forest",
+    "tags": [
+      "nature",
+      "forest"
+    ],
+    "outputs": {
+      "nature": 2
+    },
+    "synergies": [
+      {
+        "tag": "forest",
+        "bonus": {
+          "nature": 1
+        },
+        "adjacent": true
+      }
+    ],
+    "can_generate_overgrowth": false,
+    "unique": false,
+    "rules": {}
   }
 ]

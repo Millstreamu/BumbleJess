@@ -443,7 +443,25 @@ func get_cell_meta(layer: int, c: Vector2i, key: String):
 
 
 func set_cell_tile_id(layer: int, c: Vector2i, id: String) -> void:
-	set_cell_meta(layer, c, "id", id)
+        if id.is_empty():
+                set_cell_meta(layer, c, "id", null)
+                if layer == LAYER_LIFE:
+                        set_cell_meta(layer, c, "tags", null)
+                        set_cell_meta(layer, c, "category", null)
+                return
+        set_cell_meta(layer, c, "id", id)
+        if layer != LAYER_LIFE:
+                return
+        var tags: Array = []
+        if typeof(DataDB) != TYPE_NIL and DataDB.has_method("get_tags_for_id"):
+                tags = DataDB.get_tags_for_id(id)
+        set_cell_meta(layer, c, "tags", tags)
+        var canonical_category := ""
+        if typeof(DataDB) != TYPE_NIL and DataDB.has_method("get_category_for_id"):
+                canonical_category = String(DataDB.get_category_for_id(id))
+        if canonical_category.is_empty():
+                canonical_category = CategoryMap.normalize_from_tile_id(id)
+        set_cell_meta(layer, c, "category", canonical_category)
 
 
 func get_cell_tile_id(layer: int, c: Vector2i) -> String:
@@ -479,9 +497,12 @@ func get_cell_name(layer: int, c: Vector2i) -> String:
 
 
 func clear_cell_tile_id(layer: int, c: Vector2i) -> void:
-	if hexmap == null:
-		return
-	set_cell_meta(layer, c, "id", null)
+        if hexmap == null:
+                return
+        set_cell_meta(layer, c, "id", null)
+        if layer == LAYER_LIFE:
+                set_cell_meta(layer, c, "tags", null)
+                set_cell_meta(layer, c, "category", null)
 
 
 func is_empty(layer: int, c: Vector2i) -> bool:
@@ -562,15 +583,39 @@ func place_current_tile(cell: Vector2i) -> void:
 
 
 func _place_tile(cell: Vector2i, tile_id: String, draw_from_deck: bool) -> bool:
-	var category: String = id_to_category(tile_id)
-	if category.is_empty():
-		return false
-	set_cell_named(LAYER_LIFE, cell, category)
-	set_cell_tile_id(LAYER_LIFE, cell, tile_id)
-	emit_signal("tile_placed", tile_id, cell)
-	rules.mark_occupied(cell)
-	_finalize_tile_placement(draw_from_deck)
-	return true
+        var category: String = id_to_category(tile_id)
+        if category.is_empty():
+                return false
+        var tile_name := category
+        var legacy_name := CategoryMap.legacy(category)
+        if not legacy_name.is_empty():
+                tile_name = legacy_name
+        var tags: Array = []
+        if typeof(DataDB) != TYPE_NIL and DataDB.has_method("get_tags_for_id"):
+                tags = DataDB.get_tags_for_id(tile_id)
+        var preferred_names: Array = [
+                "harvest",
+                "build",
+                "refine",
+                "storage",
+                "guard",
+                "upgrade",
+                "chanting",
+                "grove",
+                "overgrowth",
+        ]
+        for candidate in preferred_names:
+                if tags.has(candidate):
+                        tile_name = candidate
+                        break
+        if not tile_name.is_empty():
+                tile_name = String(tile_name).to_lower()
+        set_cell_named(LAYER_LIFE, cell, tile_name)
+        set_cell_tile_id(LAYER_LIFE, cell, tile_id)
+        emit_signal("tile_placed", tile_id, cell)
+        rules.mark_occupied(cell)
+        _finalize_tile_placement(draw_from_deck)
+        return true
 
 
 func _finalize_tile_placement(draw_from_deck: bool) -> void:
