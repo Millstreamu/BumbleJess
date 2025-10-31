@@ -44,12 +44,12 @@ func _ready() -> void:
 	_refresh_confirm()
 
 func open() -> void:
-	RunConfig.clear_for_new_run()
-	_roll_all()
-	_refresh_confirm()
-	tabs.current_tab = 0
-	_tree_was_paused = get_tree().paused
-	get_tree().paused = true
+        RunConfig.clear_draft_selections()
+        _roll_all()
+        _refresh_confirm()
+        tabs.current_tab = 0
+        _tree_was_paused = get_tree().paused
+        get_tree().paused = true
 	visible = true
 
 func _on_cancel() -> void:
