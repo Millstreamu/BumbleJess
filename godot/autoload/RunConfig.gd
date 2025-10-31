@@ -28,9 +28,10 @@ var selected_variants := {
         "chanting": "",
 }
 
-var totem_id := "totem.heartwood"
+var totem_id := ""
 var map_id := "map.demo_001"
 var core_tiles: Array[String] = []
+var spawn_sprout_ids: Array[String] = []
 var last_pick_id: String = ""
 
 
@@ -59,15 +60,42 @@ func all_categories_selected() -> bool:
                         return false
         return true
 
+func set_totem(id: String) -> void:
+        var sanitized := String(id)
+        totem_id = sanitized
+        emit_signal("selections_changed")
+        if not sanitized.is_empty() and Engine.has_singleton("TileGen"):
+                TileGen.set_totem(sanitized)
+
+func set_spawn_sprouts(ids: Array) -> void:
+        var sanitized: Array[String] = []
+        for entry in ids:
+                if typeof(entry) == TYPE_STRING:
+                        var sid := String(entry)
+                        if sid.is_empty():
+                                continue
+                        sanitized.append(sid)
+        spawn_sprout_ids = sanitized
+        emit_signal("selections_changed")
+
+func clear_draft_selections() -> void:
+        _reset_selection_tables()
+        emit_signal("selections_changed")
+
 func clear_for_new_run() -> void:
+        _reset_selection_tables()
+        core_tiles.clear()
+        spawn_sprout_ids.clear()
+        totem_id = ""
+        last_pick_id = ""
+        emit_signal("selections_changed")
+
+func _reset_selection_tables() -> void:
         for canonical_key in CANONICAL_KEYS:
                 selected_variants[canonical_key] = ""
                 var legacy_key := _legacy_for(canonical_key)
                 selected_variants[legacy_key] = ""
         selected_variants["chanting"] = ""
-        core_tiles.clear()
-        last_pick_id = ""
-        emit_signal("selections_changed")
 
 func mark_ready() -> void:
         emit_signal("run_ready")

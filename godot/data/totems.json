@@ -2,6 +2,8 @@
   {
         "id": "totem.heartwood",
         "name": "Heartwood",
+        "desc": "Gentle growth bias",
+        "icon": "res://assets/ui/totems/heartwood.png",
         "commune_weights": {
           "categories": {
             "Nature": 1.2,

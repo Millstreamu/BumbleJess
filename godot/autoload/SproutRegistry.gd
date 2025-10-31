@@ -380,14 +380,36 @@ func short_stats_label(id: String, level: int) -> String:
 	]
 
 func on_grove_spawned(_cell: Vector2i) -> void:
-	if _db_by_id.is_empty():
-		return
-	var ids: Array = _db_by_id.keys()
-	if ids.is_empty():
-		return
-	var chosen_index: int = _rng.randi_range(0, ids.size() - 1)
-	var chosen_id: String = String(ids[chosen_index])
-	add_to_roster(chosen_id, 1)
+        _ensure_db_loaded()
+        if _db_by_id.is_empty():
+                return
+        var pool: Array[String] = []
+        if Engine.has_singleton("RunConfig"):
+                var rc_pool: Array = RunConfig.spawn_sprout_ids
+                for entry in rc_pool:
+                        if typeof(entry) != TYPE_STRING:
+                                continue
+                        var sid := String(entry)
+                        if sid.is_empty():
+                                continue
+                        if not _db_by_id.has(sid):
+                                continue
+                        pool.append(sid)
+        var chosen_id := ""
+        if not pool.is_empty():
+                var chosen_index := _rng.randi_range(0, pool.size() - 1)
+                chosen_id = String(pool[chosen_index])
+        elif _db_by_id.has("sprout.woodling"):
+                chosen_id = "sprout.woodling"
+        else:
+                var ids: Array = _db_by_id.keys()
+                if ids.is_empty():
+                        return
+                var fallback_index: int = _rng.randi_range(0, ids.size() - 1)
+                chosen_id = String(ids[fallback_index])
+        if chosen_id.is_empty():
+                return
+        add_to_roster(chosen_id, 1)
 
 func _find_roster_index(uid: String) -> int:
 	for i in range(_roster.size()):
