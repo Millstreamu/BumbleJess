@@ -706,17 +706,19 @@ func _update_hud() -> void:
 	if not is_instance_valid(hud):
 		return
 	var tile_id: String = DeckManager.peek()
-	var remaining: int = DeckManager.remaining()
-	var display_name: String = "-"
-	if not tile_id.is_empty():
-		var tile_name: String = DeckManager.peek_name()
-		var category: String = DeckManager.peek_category()
-		if category.is_empty():
-			display_name = tile_name
-		else:
-			display_name = "%s (%s)" % [tile_name, category]
-	hud.text = _build_hud_text(display_name, remaining)
-	_update_resource_panel()
+        var remaining: int = DeckManager.remaining()
+        var display_name: String = "-"
+        if not tile_id.is_empty():
+                var tile_name: String = DeckManager.peek_name()
+                var category: String = DeckManager.peek_category()
+                if category.is_empty():
+                        display_name = tile_name
+                else:
+                        var canonical_cat := CategoryMap.canonical(category)
+                        var display_cat := CategoryMap.display_name(canonical_cat)
+                        display_name = "%s (%s)" % [tile_name, display_cat]
+        hud.text = _build_hud_text(display_name, remaining)
+        _update_resource_panel()
 
 
 func _build_hud_text(next_name: String, remaining: int) -> String:

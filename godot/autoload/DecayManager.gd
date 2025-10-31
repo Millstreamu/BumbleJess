@@ -40,10 +40,15 @@ var _protected_cells := {}
 var _tile_rules_cache: Dictionary = {}
 
 
+const CAT_AGGRESSION := "Aggression"
+
 func _is_guard(c: Vector2i) -> bool:
-	if _world == null:
-		return false
-	return _world.get_cell_name(_world.LAYER_LIFE, c) == "guard"
+        if _world == null:
+                return false
+        var life_name := String(_world.get_cell_name(_world.LAYER_LIFE, c))
+        if life_name.is_empty():
+                return false
+        return CategoryMap.canonical(life_name) == CAT_AGGRESSION
 
 
 func _threat_color(turns: int) -> Color:
@@ -605,7 +610,8 @@ func _tick_and_trigger_battles() -> void:
 				if attacker_cell != Vector2i.ZERO:
 						attacker_name = _world.get_cell_name(_world.LAYER_OBJECTS, attacker_cell)
 
-				var target_defended: bool = target_life_name == "" or target_life_name == "guard"
+                                var target_canonical := CategoryMap.canonical(target_life_name)
+                                var target_defended: bool = target_canonical == "" or target_canonical == CAT_AGGRESSION
 				var attacker_gone := attacker_cell != Vector2i.ZERO and attacker_name != "decay"
 				if target_defended or attacker_gone:
 						to_clear.append(cell)
@@ -698,16 +704,20 @@ func _apply_battle_outcome(cell: Vector2i, victory: bool, attacker_cell: Vector2
 	else:
 		if _protected_cells.has(_cell_hash(cell)):
 			return
-		if _world.get_cell_name(_world.LAYER_LIFE, cell) != "guard":
-			_world.set_cell_named(_world.LAYER_LIFE, cell, "empty")
+                var defender_name := CategoryMap.canonical(
+                        String(_world.get_cell_name(_world.LAYER_LIFE, cell))
+                )
+                if defender_name != CAT_AGGRESSION:
+                        _world.set_cell_named(_world.LAYER_LIFE, cell, "empty")
 		_world.set_cell_named(_world.LAYER_OBJECTS, cell, "decay")
 		for neighbor in _world.neighbors_even_q(cell):
 			if _protected_cells.has(_cell_hash(neighbor)):
 				continue
-			var life_name: String = _world.get_cell_name(_world.LAYER_LIFE, neighbor)
-			if life_name != "" and life_name != "guard":
-				_world.set_cell_named(_world.LAYER_LIFE, neighbor, "empty")
-				_world.set_cell_named(_world.LAYER_OBJECTS, neighbor, "decay")
+                        var life_name: String = _world.get_cell_name(_world.LAYER_LIFE, neighbor)
+                        var canonical_life := CategoryMap.canonical(life_name)
+                        if canonical_life != "" and canonical_life != CAT_AGGRESSION:
+                                _world.set_cell_named(_world.LAYER_LIFE, neighbor, "empty")
+                                _world.set_cell_named(_world.LAYER_OBJECTS, neighbor, "decay")
 	emit_signal("threat_resolved", cell, victory)
 	rescan_clusters()
 

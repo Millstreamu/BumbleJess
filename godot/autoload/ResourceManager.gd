@@ -1,5 +1,12 @@
 extends Node
 
+const CAT_NATURE := "Nature"
+const CAT_EARTH := "Earth"
+const CAT_WATER := "Water"
+const CAT_NEST := "Nest"
+const CAT_AGGRESSION := "Aggression"
+const CAT_MYSTIC := "Mystic"
+
 signal resources_changed()
 signal item_changed(item: String)
 signal produced_cells(cells_by_fx: Dictionary)
@@ -26,32 +33,32 @@ var _tiles: Array = []
 var _rules_by_id: Dictionary = {}
 var _category_by_id: Dictionary = {}
 var _defaults_by_category := {
-	"harvest": {
-		"capacity_base": {"nature": 5},
-		"nature_per_adjacent": {"grove": 1},
-	},
-	"build": {
-		"capacity_base": {"earth": 5},
-		"earth_per_turn": 1,
-		"slow_if_adjacent_any": ["harvest"],
-		"slow_multiplier": 2,
-	},
-	"refine": {
-		"capacity_base": {"water": 5},
-		"refine_every_turns": 2,
-		"consume": {"nature": 1, "earth": 1},
-		"produce": {"water": 1},
-	},
-	"storage": {
-		"capacity_aura_adjacent": {
-			"harvest": {"nature": 5},
-			"build": {"earth": 5},
-			"refine": {"water": 5},
-		},
-	},
-	"upgrade": {
-		"soul_seed_every_turns": 3,
-	},
+        CAT_NATURE: {
+                "capacity_base": {"nature": 5},
+                "nature_per_adjacent": {"grove": 1},
+        },
+        CAT_EARTH: {
+                "capacity_base": {"earth": 5},
+                "earth_per_turn": 1,
+                "slow_if_adjacent_any": [CAT_NATURE],
+                "slow_multiplier": 2,
+        },
+        CAT_WATER: {
+                "capacity_base": {"water": 5},
+                "refine_every_turns": 2,
+                "consume": {"nature": 1, "earth": 1},
+                "produce": {"water": 1},
+        },
+        CAT_NEST: {
+                "capacity_aura_adjacent": {
+                        CAT_NATURE: {"nature": 5},
+                        CAT_EARTH: {"earth": 5},
+                        CAT_WATER: {"water": 5},
+                },
+        },
+        CAT_MYSTIC: {
+                "soul_seed_every_turns": 3,
+        },
 }
 
 func _ready() -> void:
@@ -118,8 +125,8 @@ func _load_tile_rules() -> void:
 			var id: String = String(entry.get("id", ""))
 			if id.is_empty():
 				continue
-			var category: String = String(entry.get("category", ""))
-			_category_by_id[id] = category
+                var category: String = String(entry.get("category", ""))
+                _category_by_id[id] = CategoryMap.canonical(category)
 			var rules_variant: Variant = entry.get("rules", {})
 			var rules: Dictionary = rules_variant if rules_variant is Dictionary else {}
 			_rules_by_id[id] = rules
@@ -171,10 +178,11 @@ func _cell_id_and_cat(c: Vector2i) -> Array:
 			meta = _world.get_cell_meta(_world.LAYER_LIFE, c, "id")
 		if typeof(meta) == TYPE_STRING:
 			id = meta
-	var cat: String = _world.get_cell_name(_world.LAYER_LIFE, c)
-	if not id.is_empty():
-		cat = String(_category_by_id.get(id, cat))
-	return [id, cat]
+        var cat: String = _world.get_cell_name(_world.LAYER_LIFE, c)
+        if not id.is_empty():
+                cat = String(_category_by_id.get(id, cat))
+        cat = CategoryMap.canonical(cat)
+        return [id, cat]
 
 func _recompute_capacity() -> void:
 	for key in capacity.keys():
@@ -202,7 +210,7 @@ func _recompute_capacity() -> void:
 				if amount == 0:
 					continue
 				capacity[res] = int(capacity.get(res, 0)) + amount
-			if cat == "upgrade":
+                        if cat == CAT_MYSTIC:
 				var totem_bonus_variant: Variant = r.get(
 					"capacity_global_bonus_if_adjacent_to_totem", {}
 				)
@@ -241,15 +249,17 @@ func _recompute_capacity() -> void:
 			var cat: String = pair[1]
 			if cat.is_empty():
 				continue
-			var aura_variant: Variant = _rules_for(id, cat).get("capacity_aura_adjacent", {})
-			var aura: Dictionary = aura_variant if aura_variant is Dictionary else {}
-			if aura.is_empty():
-				continue
-			for neighbor in _world.neighbors_even_q(cell):
-				var neighbor_cat: String = _world.get_cell_name(_world.LAYER_LIFE, neighbor)
-				if neighbor_cat.is_empty():
-					continue
-				if not aura.has(neighbor_cat):
+                        var aura_variant: Variant = _rules_for(id, cat).get("capacity_aura_adjacent", {})
+                        var aura: Dictionary = _canonicalize_dict_keys(aura_variant)
+                        if aura.is_empty():
+                                continue
+                        for neighbor in _world.neighbors_even_q(cell):
+                                var neighbor_cat: String = CategoryMap.canonical(
+                                        String(_world.get_cell_name(_world.LAYER_LIFE, neighbor))
+                                )
+                                if neighbor_cat.is_empty():
+                                        continue
+                                if not aura.has(neighbor_cat):
 					continue
 				var add_variant: Variant = aura[neighbor_cat]
 				if not (add_variant is Dictionary):
@@ -279,26 +289,30 @@ func _produce_resources() -> void:
 		"fx_seed": [],
 	}
 
-	for y in range(height):
-		for x in range(width):
+        for y in range(height):
+                for x in range(width):
 			var cell := Vector2i(x, y)
 			var pair := _cell_id_and_cat(cell)
 			var id: String = pair[0]
 			var cat: String = pair[1]
-			if cat != "harvest":
-				continue
-			var r: Dictionary = _rules_for(id, cat)
-			var per_adj_variant: Variant = r.get("nature_per_adjacent", {})
-			var per_adj: Dictionary = per_adj_variant if per_adj_variant is Dictionary else {}
+                        if cat != CAT_NATURE:
+                                continue
+                        var r: Dictionary = _rules_for(id, cat)
+                        var per_adj: Dictionary = _canonicalize_dict_keys(
+                                r.get("nature_per_adjacent", {})
+                        )
 			var total := 0
 			for need_cat in per_adj.keys():
 				var per := int(per_adj[need_cat])
 				if per == 0:
 					continue
 				var count := 0
-				for neighbor in _world.neighbors_even_q(cell):
-					if _world.get_cell_name(_world.LAYER_LIFE, neighbor) == need_cat:
-						count += 1
+                                for neighbor in _world.neighbors_even_q(cell):
+                                        var neighbor_cat := CategoryMap.canonical(
+                                                String(_world.get_cell_name(_world.LAYER_LIFE, neighbor))
+                                        )
+                                        if neighbor_cat == need_cat:
+                                                count += 1
 				total += per * count
 			if total > 0:
 				amounts["nature"] = clamp(int(amounts.get("nature", 0)) + total, 0, int(capacity.get("nature", 0)))
@@ -308,20 +322,17 @@ func _produce_resources() -> void:
 					nature_fx.append(cell)
 				fx["fx_nature"] = nature_fx
 
-			var per_turn: int = int(r.get("nature_per_turn", 0))
-			if per_turn > 0:
-				var blocked_variant: Variant = r.get("blocked_if_adjacent_any", [])
-				var blocked_list: Array = (
-					blocked_variant if blocked_variant is Array else []
-				)
-				if blocked_variant is PackedStringArray:
-					blocked_list = Array(blocked_variant)
+                        var per_turn: int = int(r.get("nature_per_turn", 0))
+                        if per_turn > 0:
+                                var blocked_list: Array = _canonicalize_array(
+                                        r.get("blocked_if_adjacent_any", [])
+                                )
 				var blocked := false
-				for neighbor in _world.neighbors_even_q(cell):
-					var neighbor_cat: String = _world.get_cell_name(
-						_world.LAYER_LIFE, neighbor
-					)
-					if blocked_list.has(neighbor_cat):
+                                for neighbor in _world.neighbors_even_q(cell):
+                                        var neighbor_cat := CategoryMap.canonical(
+                                                String(_world.get_cell_name(_world.LAYER_LIFE, neighbor))
+                                        )
+                                        if blocked_list.has(neighbor_cat):
 						blocked = true
 						break
 				if not blocked:
@@ -345,25 +356,24 @@ func _produce_resources() -> void:
 			var pair := _cell_id_and_cat(cell)
 			var id: String = pair[0]
 			var cat: String = pair[1]
-			if cat != "build":
-				continue
+                        if cat != CAT_EARTH:
+                                continue
 			var r: Dictionary = _rules_for(id, cat)
 			var per_turn: int = int(r.get("earth_per_turn", 1))
 			if per_turn <= 0:
 				continue
-			var slows_variant: Variant = r.get("slow_if_adjacent_any", [])
-			var slows: Array = slows_variant if slows_variant is Array else []
-			if slows_variant is PackedStringArray:
-				slows = Array(slows_variant)
+                        var slows: Array = _canonicalize_array(r.get("slow_if_adjacent_any", []))
 			var mult: int = int(r.get("slow_multiplier", 2))
 			if mult <= 0:
 				mult = 1
 			var slowed := false
-			for neighbor in _world.neighbors_even_q(cell):
-				var neighbor_cat: String = _world.get_cell_name(_world.LAYER_LIFE, neighbor)
-				if slows.has(neighbor_cat):
-					slowed = true
-					break
+                        for neighbor in _world.neighbors_even_q(cell):
+                                var neighbor_cat := CategoryMap.canonical(
+                                        String(_world.get_cell_name(_world.LAYER_LIFE, neighbor))
+                                )
+                                if slows.has(neighbor_cat):
+                                        slowed = true
+                                        break
 			var produce_now := true
 			if slowed:
 				produce_now = (_turn_counter % mult) == 0
@@ -379,22 +389,17 @@ func _produce_resources() -> void:
 			if extra_every < 0:
 				extra_every = abs(extra_every)
 			if extra_every > 0 and (_turn_counter % max(extra_every, 1)) == 0:
-				var needs_variant: Variant = r.get("requires_adjacent_any", [])
-				var needs: Array = needs_variant if needs_variant is Array else []
-				if needs_variant is PackedStringArray:
-					needs = Array(needs_variant)
-				elif typeof(needs_variant) == TYPE_STRING:
-					needs = [String(needs_variant)]
-				if needs.is_empty():
-					needs = ["guard", "root"]
+                                var needs: Array = _canonicalize_array(r.get("requires_adjacent_any", []))
+                                if needs.is_empty():
+                                        needs = [CAT_AGGRESSION, "root"]
 				var ok := false
-				for neighbor in _world.neighbors_even_q(cell):
-					var neighbor_cat: String = _world.get_cell_name(
-						_world.LAYER_LIFE, neighbor
-					)
-					if needs.has(neighbor_cat):
-						ok = true
-						break
+                                for neighbor in _world.neighbors_even_q(cell):
+                                        var neighbor_cat := CategoryMap.canonical(
+                                                String(_world.get_cell_name(_world.LAYER_LIFE, neighbor))
+                                        )
+                                        if needs.has(neighbor_cat):
+                                                ok = true
+                                                break
 				if ok:
 					var cap_value: int = int(capacity.get("earth", 0))
 					amounts["earth"] = clamp(
@@ -416,8 +421,8 @@ func _produce_resources() -> void:
 			var pair := _cell_id_and_cat(cell)
 			var id: String = pair[0]
 			var cat: String = pair[1]
-			if cat != "refine":
-				continue
+                        if cat != CAT_WATER:
+                                continue
 			var r: Dictionary = _rules_for(id, cat)
 			var every: int = int(r.get("refine_every_turns", 2))
 			if every <= 0:
@@ -463,14 +468,18 @@ func _produce_resources() -> void:
 					every_special = 1
 				if (_turn_counter % every_special) == 0:
 					var unique: Dictionary = {}
-					for neighbor in _world.neighbors_even_q(cell):
-						var neighbor_cat: String = _world.get_cell_name(
-							_world.LAYER_LIFE,
-							neighbor,
-						)
-						if neighbor_cat.is_empty():
-							continue
-						unique[neighbor_cat] = true
+                                        for neighbor in _world.neighbors_even_q(cell):
+                                                var neighbor_cat := CategoryMap.canonical(
+                                                        String(
+                                                                _world.get_cell_name(
+                                                                        _world.LAYER_LIFE,
+                                                                        neighbor,
+                                                                )
+                                                        )
+                                                )
+                                                if neighbor_cat.is_empty():
+                                                        continue
+                                                unique[neighbor_cat] = true
 					var gain := unique.size()
 					var max_gain: int = int(r.get("max_per_tick", 3))
 					if max_gain > 0:
@@ -498,8 +507,8 @@ func _produce_resources() -> void:
 			var pair := _cell_id_and_cat(cell)
 			var id: String = pair[0]
 			var cat: String = pair[1]
-			if cat != "upgrade":
-				continue
+                        if cat != CAT_MYSTIC:
+                                continue
 			var r: Dictionary = _rules_for(id, cat)
 			var every: int = int(r.get("soul_seed_every_turns", 3))
 			if every <= 0:
@@ -520,5 +529,35 @@ func _produce_resources() -> void:
 			empty_keys.append(key)
 	for key in empty_keys:
 		fx.erase(key)
-	if not fx.is_empty():
-		emit_signal("produced_cells", fx)
+        if not fx.is_empty():
+                emit_signal("produced_cells", fx)
+
+func _canonicalize_array(values: Variant) -> Array:
+        var result: Array = []
+        var source := values
+        if source is PackedStringArray:
+                source = Array(source)
+        if source is Array:
+                for entry in source:
+                        var canonical_value := CategoryMap.canonical(String(entry))
+                        if canonical_value.is_empty():
+                                continue
+                        if not result.has(canonical_value):
+                                result.append(canonical_value)
+        elif typeof(source) == TYPE_STRING:
+                var single := CategoryMap.canonical(String(source))
+                if not single.is_empty():
+                        result.append(single)
+        return result
+
+func _canonicalize_dict_keys(dict_variant: Variant) -> Dictionary:
+        if not (dict_variant is Dictionary):
+                return {}
+        var original: Dictionary = dict_variant
+        var result: Dictionary = {}
+        for key in original.keys():
+                var canonical_key := CategoryMap.canonical(String(key))
+                if canonical_key.is_empty():
+                        continue
+                result[canonical_key] = original[key]
+        return result

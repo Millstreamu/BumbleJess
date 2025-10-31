@@ -7,6 +7,7 @@ var next_tile_id: String = ""
 var tiles_by_category: Dictionary = {}
 var tiles_by_id: Dictionary = {}
 var id_to_category: Dictionary = {}
+var id_to_canonical: Dictionary = {}
 var id_to_name: Dictionary = {}
 
 func _ready() -> void:
@@ -31,7 +32,12 @@ func build_starting_deck_from_ratios(path: String, selected: Dictionary) -> void
                 var count := int(ratios[cat])
                 if count <= 0:
                         continue
+                var canonical_cat := CategoryMap.canonical(cat)
                 var chosen_id := String(selected.get(cat, ""))
+                if chosen_id.is_empty():
+                        chosen_id = String(selected.get(canonical_cat, ""))
+                if chosen_id.is_empty() and canonical_cat == "Mystic":
+                        chosen_id = String(selected.get("chanting", ""))
                 if chosen_id.is_empty():
                         chosen_id = _first_id_for_category(cat)
                 if chosen_id.is_empty():
@@ -78,6 +84,14 @@ func get_tile_category(id: String) -> String:
         var info: Dictionary = info_variant if info_variant is Dictionary else {}
         return String(info.get("category", ""))
 
+func get_tile_canonical_category(id: String) -> String:
+        if id.is_empty():
+                return ""
+        var stored: Variant = id_to_canonical.get(id, null)
+        if typeof(stored) == TYPE_STRING:
+                return String(stored)
+        return CategoryMap.canonical(get_tile_category(id))
+
 func get_tile_name(id: String) -> String:
         var info_variant: Variant = tiles_by_id.get(id, {})
         var info: Dictionary = info_variant if info_variant is Dictionary else {}
@@ -87,6 +101,7 @@ func _rebuild_tile_catalog() -> void:
         tiles_by_category.clear()
         tiles_by_id.clear()
         id_to_category.clear()
+        id_to_canonical.clear()
         id_to_name.clear()
         var tiles_raw: Array = DataLite.load_json_array("res://data/tiles.json")
         for entry in tiles_raw:
@@ -97,24 +112,37 @@ func _rebuild_tile_catalog() -> void:
                 if id.is_empty():
                         continue
                 var category: String = String(tile.get("category", ""))
+                var canonical_cat: String = CategoryMap.canonical(category)
                 var tile_name: String = String(tile.get("name", id))
                 var info: Dictionary = {
                         "id": id,
                         "category": category,
                         "name": tile_name,
+                        "canonical_category": canonical_cat,
                 }
                 tiles_by_id[id] = info
                 id_to_category[id] = category
+                id_to_canonical[id] = canonical_cat
                 id_to_name[id] = tile_name
-                if not tiles_by_category.has(category):
-                        tiles_by_category[category] = []
-                var list: Array = tiles_by_category[category]
-                list.append(id)
-                tiles_by_category[category] = list
+                var canonical_key := canonical_cat if not canonical_cat.is_empty() else category
+                if not canonical_key.is_empty():
+                        var canonical_list_variant: Variant = tiles_by_category.get(canonical_key, [])
+                        var canonical_list: Array = canonical_list_variant if canonical_list_variant is Array else []
+                        canonical_list.append(id)
+                        tiles_by_category[canonical_key] = canonical_list
+                if canonical_key != category and not category.is_empty():
+                        var legacy_list_variant: Variant = tiles_by_category.get(category, [])
+                        var legacy_list: Array = legacy_list_variant if legacy_list_variant is Array else []
+                        legacy_list.append(id)
+                        tiles_by_category[category] = legacy_list
 
 func _first_id_for_category(cat: String) -> String:
-        var list_variant: Variant = tiles_by_category.get(cat, [])
+        var canonical_key := CategoryMap.canonical(cat)
+        var list_variant: Variant = tiles_by_category.get(canonical_key, [])
         var list: Array = list_variant if list_variant is Array else []
+        if list.is_empty() and canonical_key != cat:
+                list_variant = tiles_by_category.get(cat, [])
+                list = list_variant if list_variant is Array else []
         if list.is_empty():
                 return ""
         return String(list[0])

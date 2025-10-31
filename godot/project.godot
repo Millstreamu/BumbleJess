@@ -19,6 +19,7 @@ config/starting_map_id="map.demo_001"
 
 RunConfig="*res://autoload/RunConfig.gd"
 DataLite="*res://autoload/DataLite.gd"
+CategoryMap="*res://autoload/CategoryMap.gd"
 DeckManager="*res://autoload/DeckManager.gd"
 BattleManager="*res://autoload/BattleManager.gd"
 DecayManager="*res://autoload/DecayManager.gd"
