@@ -1,333 +1,267 @@
-# Sprouts — Design Document (Developer Summary + Full Design)
-
-## Developer Summary
-
-### Repository Layout
-
-```
-sprouts/
-├─ seeds/
-│  └─ demo_forest_seed.json
-godot/
-├─ project.godot
-├─ autoload/
-├─ data/
-├─ scenes/
-│  ├─ main.tscn
-│  ├─ world/
-│  ├─ battle/
-│  └─ ui/
-├─ scripts/
-│  ├─ world/
-│  ├─ tiles/
-│  ├─ battle/
-│  ├─ sprouts/
-│  └─ ui/
-├─ assets/
-├─ tests/
-└─ addons/
-ci/
-└─ github/
-```
-
-### Core Gameplay Overview
-* **Genre:** Turn-based forest regrowth roguelite
-* **Goal:** Restore the forest by placing life-giving tiles, nurturing Sprouts, and defeating Decay Totems.
-* **Core Loop:** Place → World Updates → Every 3 Turns: Totem Generates New Tiles → Manage Sprouts → Battle Decay.
-* **Victory:** All Decay Totems destroyed.
-* **Defeat:** Totem consumed by Decay or deck exhausted.
-
-### Key Systems at a Glance
-
-* **Tiles:** 7 primary categories (Harvest, Build, Refine, Storage, Guard, Upgrade, Chanting).
-
-  * Placed adjacent to existing tiles.
-  * Enclosed spaces become Overgrowth → Groves (spawns Sprouts).
-* **Totem:** Central life anchor; generates tile packs every 3 turns. Evolves with Life Essence.
-* **Sprouts:** Global roster; battle automatically, level via resources or Soul Seeds.
-* **Decay Totems:** Spread corruption every 3 turns and launch up to 3 attacks per global turn.
-* **Resources:** Nature, Earth, Water, and Life Essences used for evolution and upgrades.
-
-### Core Data Structure
-
-All systems are data-driven and reference content by ID for modular updates.
-
-| Module            | Description                                       |
-| ----------------- | ------------------------------------------------- |
-| **tiles.json**    | Tile types, adjacency rules, and pack definitions |
-| **totems.json**   | Totem data, upgrades, and generation behavior     |
-| **sprouts.json**  | Sprout IDs, stats, passives, attacks              |
-| **attacks.json**  | Cooldowns, target rules, effects                  |
-| **passives.json** | Trigger conditions and scaling                    |
-| **maps.json**     | World size, Totem/Decay positions                 |
-| **decay.json**    | Spread speed, aggression scaling                  |
-
-### Battle Summary
-
-* **Formation:** 6 units per side (3 front / 3 back).
-* **Mechanics:** Auto-attacks based on cooldown; passives trigger on hit/heal/death.
-* **End Condition:** One side fully defeated.
-* **Rewards:** Life Essence and possible Relic drops.
-* **No XP:** Sprouts only level via resources or Soul Seeds.
-
-### Design Goals & Balance Notes
-
-* Preserve 3-turn rhythm for clear pacing.
-* Focus on adjacency logic, visual feedback, and world readability.
-* Allow content expansion (tiles, attacks, variants) purely via data updates.
-* Support roguelite replayability through Totem and map seed variety.
-
----
-
-## Full Design Document
+## Sprouts — Design Document (v3.1)
 
 ### 1) High-Level Overview
 
-**Genre:** Turn-based forest regrowth roguelite
+**Genre:** Calm turn-based forest regrowth roguelite
 **Engine:** Godot 4.4.1 (2D, controller/keyboard only)
-**Core Fantasy:** Restore a fallen forest by nurturing life and holding back the Decay. Each tile placement advances time, allowing new growth, Sprout awakening, and strategic battles for survival.
+**Core Fantasy:** Restore a fallen forest by nurturing life through careful, deliberate tile placement. Summon Sprouts—living embodiments of renewal—to fight Decay, spread growth, and bring balance back to the world.
 
-#### Design Pillars
+#### Pillars
 
-* **Calm Strategy:** Every turn matters — no time pressure, only meaningful decisions.
-* **Readable Systems:** Clear, visual cause and effect with minimal hidden rules.
-* **Simple Inputs:** Arrows move, Space confirms, Z cancels, Tab/Start opens panels.
-
----
-
-### 2) Gameplay Loop
-
-**Start of Run**
-
-1. Choose a **Totem** (placement determined by map seed).
-2. For each tile category — Harvest, Build, Refine, Storage, Guard, Upgrade, and Chanting — pick one of three variant cards. These define that tile’s behavior for the run.
-3. A starting **Tile Deck** of 30 tiles is created (default: 8H/6B/4R/4G/3S/3U/1C) based on your chosen variants.
-
-**During Play**
-
-* Place one tile per turn, adjacent to existing tiles.
-* Turns advance: Overgrowth matures, Decay spreads, resources generate.
-* Every **3 turns**, the Totem generates new tile packs for selection.
-
-**Totem Tile Generation**
-
-* Every 3 turns, a **Tile Choice Window** opens.
-* Choose one of three **tile packs** (examples: 2 Harvest + 1 Build, 1 Refine + 1 Chanting, or a Special Tile).
-* The chosen pack is added to the deck and shuffled.
-* **Special Tiles** are **bonus additions** — they do not replace deck slots and must be placed immediately.
-
-**End Conditions**
-
-* **Victory:** All Decay Totems are destroyed.
-* **Defeat:** Your Totem is consumed by Decay or the deck is exhausted.
+* **Chill, not idle:** Each placement and choice advances the world one turn.
+* **Readable systems:** Everything has a visible, meaningful effect.
+* **One-input model:** Arrows move focus; Space confirms; Z backs out; Tab opens menus.
 
 ---
 
-### 3) Map & Structure
+### 2) Game Flow
 
-* The world is a **rectangular hex grid** with configurable width and height.
-* **Map seeds** determine Totem and Decay Totem positions.
-* All tiles must connect to the Totem’s network.
-* Enclosed spaces become **Overgrowth**, which turn into **Groves** after 3 turns.
-* Overgrowth touching Decay is instantly corrupted.
+**Run Start**
 
----
+1. **Choose a Totem** – Sets your passive bonuses, unique tile access, and playstyle.
+2. **Select 4 Sprout Types** – Defines your generatable Sprouts for that run.
 
-### 4) Data Architecture
+**Each Turn**
 
-All gameplay systems are **data-driven**, allowing modular content updates.
+1. **Commune (Start of Turn):** Choose one of three tiles (weighted by bias).
+2. **Player Phase:** Place a tile, optionally attack Decay tiles or Totems.
+3. **End Turn:** Press the Turn Button. Resolves world progression:
 
-| System       | File          | Description                                          |
-| ------------ | ------------- | ---------------------------------------------------- |
-| **Tiles**    | tiles.json    | Tile IDs, categories, variants, and pack definitions |
-| **Totems**   | totems.json   | IDs, auras, generation rules, upgrade data           |
-| **Sprouts**  | sprouts.json  | IDs, stats, growth curves, linked attacks/passives   |
-| **Attacks**  | attacks.json  | Targeting (front/back), cooldowns, effects           |
-| **Passives** | passives.json | Trigger logic, scaling, rarity                       |
-| **Maps**     | maps.json     | Grid size, seed data, Totem/Decay positions          |
-
----
-
-### 5) Resources & Ecology
-
-**Essences**
-
-* **Nature Essence:** Produced by Harvest tiles.
-* **Earth Essence:** Produced by Build tiles.
-* **Water Essence:** Created by Refine tiles.
-* **Life Essence:** Earned from battle victories; used to evolve Totems or activate world abilities.
-
-**Caps & Flow**
-
-* Base cap: 5 units per producing tile.
-* Harvest clusters: +10 global capacity per tile.
-* Storage tiles: +5 capacity to adjacent producers.
-
-**Usage**
-
-* Power Totem evolutions.
-* Upgrade Sprouts and abilities.
-* Activate large-scale spells or purifications.
-
----
-
-### 6) The Totem
-
-* Placement and traits are defined by map seed and database entry.
-* Generates tile packs every 3 turns.
-* Evolving the Totem increases pack rarity, Decay resistance, and adds passive world effects.
-* Losing the Totem ends the run.
-
----
-
-### 7) Growth & Mutation
-
-* Enclosed empty regions become **Overgrowth**, transforming into **Groves** after 3 turns to spawn Sprouts.
-* Overgrowth corrupted before maturity becomes Decay.
-* Adjacency may cause **mutations** (e.g., Grove + Harvest → Grove Thicket).
-
-**Turn Order**
-
-1. Growth (Overgrowth → Grove)
-2. Mutation checks
-3. Decay spread
-4. Resource generation
-5. Every 3 turns: Totem tile generation
-
----
-
-### 8) Tile Roles & Variants
-
-| Tile Type    | Function                                                                                                                                 |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| **Harvest**  | Generates Nature Essence per adjacent Grove; increases global capacity.                                                                  |
-| **Build**    | Produces Earth Essence **only when adjacent to a Guard or Storage tile**. If adjacent to a Harvest tile, production time is **doubled**. |
-| **Refine**   | Converts Nature + Earth → Water Essence every 2 turns.                                                                                   |
-| **Storage**  | Expands capacity of adjacent producers by +5.                                                                                            |
-| **Guard**    | Immune to Decay; provides safe placement zones. Mutated forms may gain adjacency effects.                                                |
-| **Upgrade**  | Produces **Soul Seeds**, items that instantly level up Sprouts without resource use.                                                     |
-| **Chanting** | Creates single-use spells through rituals.                                                                                               |
-| **Grove**    | Formed from Overgrowth; spawns a Sprout and boosts nearby tiles.                                                                         |
-
----
-
-### 9) The Sprout System
-
-* Sprouts are stored globally in the **Sprout Register**.
-* Each Sprout has:
-
-  * 1 **Attack Type**
-  * Up to 3 **Passives**
-  * **Level Cap:** 99
-* Leveling increases HP, Attack, and Attack Speed.
-* Level-up sources: resources or **Soul Seeds** (no XP from battles).
-* All stats, attacks, and passives are defined by ID in the database.
-
----
-
-### 10) Battle System
-
-**Structure**
-
-* Battles occur in a separate **Battle Window**.
-* Each side fields up to **six units** (3 front row, 3 back row).
-* Attacks specify **target row** (front or back) and **cooldown** (seconds).
-* Units auto-attack when their cooldowns complete.
-* Passives trigger under specific conditions.
-* Battle ends when one side is completely defeated.
-
-**Flow**
-
-1. Decay attacks a Life tile.
-2. Player selects up to six Sprouts from the Register.
-3. Combat resolves automatically.
-4. **Victory:** Decay tiles are destroyed, Sprouts return.
-   **Defeat:** Target and adjacent tiles become Decay.
-
-**Rewards**
-
-* **Victory:** Life Essence and possible Relic drops.
-* **Defeat:** Global Decay aggression increases.
-* Sprouts do **not** gain XP from battles.
-
----
-
-### 11) Threats & Corruption
-
-* **Decay Totems** spread corruption from preset positions.
-* Each converts one new tile every 3 turns.
-* Decay adjacent to Life tiles begins a 3-turn countdown to battle.
-* A maximum of **three Decay attacks** can occur globally per turn.
-* Destroying a Decay Totem purifies its nearby Decay tiles.
+   * Overgrowth → Grove transitions.
+   * Resource generation.
+   * Decay spreads and attacks up to 3 times sequentially.
+   * Sprouts and Smogs heal 5% HP.
+   * Totem passives trigger.
 
 **Victory:** All Decay Totems destroyed.
-**Defeat:** Totem consumed or all tiles placed.
+**Defeat:** Totem consumed by Decay or no valid placements remain.
 
 ---
 
-### 12) UI & Controls
+### 3) Tile System
 
-**Controls**
+Tiles are the foundation of world growth. Each has **type**, **tags**, **effects**, and **synergy rules**. All data-driven via `tiles.json`.
 
-* **Arrows:** Move cursor
-* **Space:** Confirm/place tile
-* **Z:** Cancel/back
-* **Tab:** Cycle panels (Resources, Sprouts, Deck, Abilities, Combat Log)
+#### 3.1 Tile Categories
 
-**Panels**
+##### **Nature Tiles** (Resource: Nature)
 
-* **Tile Deck:** Remaining tiles and upcoming draws.
-* **Resources:** Essence totals and generation rates.
-* **Sprout Register:** Sprout stats, passives, and level-up progress.
-* **Combat Log:** Battle outcomes and summaries.
+1. **Whispering Pine Forest** – Generates 2 Nature/turn. Adjacent to other *Forest* tiles → +1 Nature.
+2. **Lone Bloom** – Generates 1 Nature per adjacent *Grove*.
+3. **Moss Terrace** – Every 2 turns, spawns an Overgrowth tile in adjacent empty hexes.
 
-**Battle Window**
+* **Unique:** *Heartroot Grove* – On placement, generates 3 Groves instantly; one-time use.
 
-* Displays 3x2 formation, cooldown timers, HP bars, and triggered effects.
-* Ends with Victory/Defeat summary, rewards, and Soul Seed count.
+##### **Earth Tiles** (Resource: Earth)
+
+1. **Stone Vein** – Generates 1 Earth/turn; +1 per adjacent *Rocky* tile.
+2. **Root Bastion** – +5 defense to nearby tiles; produces 1 Earth/2 turns if touching *Nest* tile.
+3. **Mud Hollow** – If adjacent to *Water* tile, doubles Earth output.
+
+* **Unique:** *Earthen Core* – Boosts production of all Earth tiles globally by +25%.
+
+##### **Water Tiles** (Resource: Water)
+
+1. **Mirror Pool** – Produces 1 Water/2 turns. Doubles if touching *Nature* tile.
+2. **Rocky Outcrop** – Produces 1 Water if adjacent to any tile with `RIVER` tag.
+3. **Spring Nexus** – Generates 1 Water + 1 Nature every 3 turns.
+
+* **Unique:** *Tidal Heart* – Converts 1 Nature + 1 Earth → 2 Water every turn.
+
+##### **Nest Tiles** (Storage)
+
+1. **Treasure Nest** – Increases resource cap by +5 for all adjacent producers.
+2. **Hollow Burrow** – Allows Sprout healing +10% faster if nearby.
+3. **Mycelium Bed** – Converts 1 Nature → 1 Earth/2 turns.
+
+* **Unique:** *Warden’s Cradle* – Doubles storage of all touching tiles; cannot produce resources itself.
+
+##### **Mystic Tiles** (Soul Seed / Item Production)
+
+1. **Chanting Circle** – Produces 1 random item every 5 turns.
+2. **Soul Bloom** – Generates 1 Soul Seed every 8 turns.
+3. **Glowing Spire** – Boosts passive bonuses from equipped items by +10% globally.
+
+* **Unique:** *Elder Shrine* – Produces both 1 Soul Seed and 1 random item every 5 turns.
+
+##### **Aggression Tiles** (Decay Counter)
+
+1. **Thorn Watch** – After 4 turns adjacent to Decay, purifies 1 Decay tile.
+2. **Ironbark Front** – Nearby Sprouts in battle +5% HP.
+3. **Fungal Barricade** – Slows Decay spread by 1 turn radius.
+
+* **Unique:** *Wrath Grove* – Can be targeted to attack a Decay Totem; triggers an immediate battle.
+
+#### 3.2 Tile JSON Example
+
+```json
+{
+  "id": "tile.whispering_pine_forest",  // Unique identifier
+  "category": "Nature",
+  "tags": ["forest", "organic"],
+  "outputs": {"nature": 2},  // Produces 2 Nature per turn
+  "synergies": [
+    {"tag": "forest", "bonus": {"nature": +1}}  // +1 if touching another forest tile
+  ],
+  "can_generate_overgrowth": false,
+  "unique": null  // Not a unique tile
+}
+```
 
 ---
 
-### 13) Progression & Meta
+### 4) Overgrowth & Grove
 
-* Unlock new **Totems**, **Tile Variants**, **Sprouts**, **Attacks**, and **Passives** through progression.
-* **Relics** modify Totem generation, battle frequency, or environmental rules.
-* **Map seeds** control layout and difficulty scaling.
-* Unlocks persist via database flags tied to entity IDs.
-
----
-
-### 14) Balancing & Configs
-
-| System       | File          | Description                                    |
-| ------------ | ------------- | ---------------------------------------------- |
-| **Tiles**    | tiles.json    | Ratios, effects, adjacency rules               |
-| **Sprouts**  | sprouts.json  | Stat growth, rarity, scaling                   |
-| **Attacks**  | attacks.json  | Cooldowns, targeting, power                    |
-| **Passives** | passives.json | Trigger conditions, rarity                     |
-| **Decay**    | decay.json    | Spread rate, timers, aggression scaling        |
-| **Maps**     | maps.json     | Grid dimensions, seed layout, difficulty tiers |
-
-**Balance Goals**
-
-* Preserve the 3-turn rhythm: placement → world update → tile generation → battle.
-* Ensure tile synergies and cooldown speeds scale predictably.
-* Support content expansion through modular data.
+* Created by specific tiles (e.g., *Moss Terrace*) or enclosure.
+* After 3 turns → becomes a **Grove** and spawns one Sprout of your selected types.
+* Decay spreads easily through Overgrowth/Groves but does not destroy them instantly.
 
 ---
 
-### 15) Glossary
+### 5) Sprouts System
 
-* **Totem:** Generates tile packs and anchors the forest.
-* **Tile Pack:** Group of tiles added to the deck every 3 turns.
-* **Sprout Register:** Global list of all Sprouts.
-* **Guard Tile:** Immune tile providing permanent map stability.
-* **Soul Seed:** Item that levels up Sprouts instantly.
-* **Battle Window:** Separate arena for Decay battles.
-* **Front Row / Back Row:** Formation layout (3 per row).
-* **Attack Cooldown:** Time before an attack can repeat.
-* **Decay Totem:** Source of spreading corruption.
-* **Overgrowth / Grove:** Growth phases that generate new Sprouts.
-* **Essences:** Nature, Earth, Water, and Life — main resources.
-* **Relic:** Persistent meta modifier unlocked between runs.
-* **Map Seed:** Determines world layout and placements.
+Sprouts are semi-permanent units representing life energy. Chosen 4 types at start; new ones spawn from Groves.
+
+#### 5.1 Leveling & Resources
+
+* Each level requires **6 × n** resources (n = next level).
+* Example: L2=6, L3=12, L4=18, L5=24, L6=30.
+* Resource composition differs by Sprout type (e.g., 4 Nature + 2 Water, or 3 Nature + 3 Earth).
+* **Soul Seed** = 24 resource equivalent (used for quick leveling).
+
+#### 5.2 Equipment
+
+* 1 slot per Sprout.
+* Equippable outside or pre-battle only.
+* Effects can stack hybrid bonuses (e.g., +200% heal, +50% HP, −75% dmg).
+
+#### 5.3 Example Archetypes
+
+* **Grumbler:** High HP, low dmg.
+* **Amber Knight:** Medium HP, balanced dmg, minor regen.
+* **Moss Golem:** Low HP, support-oriented healing.
+
+#### 5.4 Sprout JSON Example
+
+```json
+{
+  "id": "sprout.grumbler",
+  "archetype": "tank",  // Informative only
+  "base_stats": {"hp": 100, "attack": 10, "speed": 1.0},
+  "growth_per_level": {"mult": 1.05},  // +5% per level
+  "level_caps": 99,
+  "level_costs": {"nature": 4, "water": 2},  // Leveling requires Nature/Water mix
+  "attack_id": "atk.slam",
+  "passive_ids": ["pas.stone_skin"],
+  "equip_slots": 1,
+  "permadeath": true
+}
+```
+
+---
+
+### 6) Battle System
+
+* 2×3 grid (Sprouts left, Smogs right).
+* Average fight: 60 seconds.
+* Each unit uses its `attack_id` (cooldown in seconds).
+* All attacks have row targeting (front/back) and cooldown.
+* Global modifiers: +1% HP or similar from certain tiles.
+
+**Synergies:**
+
+* Family bonuses (e.g., +1% dmg per “Trog” Sprout in battle).
+* Persistent HP damage across fights; 5% regen per world turn.
+
+---
+
+### 7) Totems
+
+Each Totem defines run theme, commune weighting, and passives. Upgraded via Life Essence.
+
+#### 7.1 Tier Table Example
+
+| Tier | Bonus                | Unique Tile Chance | Regen Bonus |
+| ---- | -------------------- | ------------------ | ----------- |
+| 1    | Base                 | 5%                 | 0%          |
+| 2    | +2 passive strength  | 10%                | +0.5%       |
+| 3    | +5 passive strength  | 15%                | +1%         |
+| 4    | +7 passive strength  | 20%                | +1.5%       |
+| 5    | +10 passive strength | 25%                | +2%         |
+
+#### 7.2 Totem JSON Example
+
+```json
+{
+  "id": "totem.heartseed",
+  "tier": 1,
+  "commune_interval_turns": 1,
+  "passives": ["pas.regen_small"],
+  "unique_tiles": ["tile.heartroot_grove"],
+  "upgrades": {
+    "cost": {"life": 5},
+    "effects": {"regen_bonus": "+0.5"}
+  }
+}
+```
+
+---
+
+### 8) Artefacts & Unlocks
+
+* 1 artefact per map (3 on large maps).
+* Hidden under the Shroud; revealed when a tile is placed on that hex.
+* Unlocks a new Sprout permanently in your **Sprout Library**.
+
+**Example Artefacts:**
+
+* **Ancient Husk:** “You uncover a slumbering guardian.” → Unlocks *Moss Golem.*
+* **Echo Seed:** “A crystal hums softly.” → Unlocks *Amber Knight.*
+* **Lost Shell:** “A fragment of life reawakens.” → Unlocks *Grumbler.*
+
+#### 8.1 Map JSON Example
+
+```json
+{
+  "id": "map.demo_01",
+  "grid": {"width": 32, "height": 24},
+  "seed": 12345,
+  "totem_pos": {"x": 8, "y": 12},
+  "decay_totems": [{"x": 26, "y": 6}],
+  "artefacts": [
+    {"x": 18, "y": 10, "reveals_sprout_id": "sprout.moss_golem"}
+  ]
+}
+```
+
+---
+
+### 9) Data Flow Overview
+
+```
+[GameLoader]
+   ↓ loads all JSONs
+[DataDB] — stores all definitions
+   ↓ provides to managers
+[MapSeeder] → creates Totem, Decay, Artefact hexes
+[CommuneManager] → handles weighted tile offers (Bias Algorithm)
+[TileManager] → handles placement, adjacency, overgrowth
+[BattleManager] → runs auto-battles, applies persistence
+[MetaManager] → tracks unlocks, Sprout Library
+```
+
+---
+
+### 10) Glossary
+
+* **Commune:** Start-of-turn Totem event offering tiles.
+* **Core Tiles:** Up to 10 primary tiles that bias Commune draws.
+* **Overgrowth:** Transitional tile that becomes Grove after 3 turns.
+* **Grove:** Life tile that spawns Sprouts.
+* **Soul Seeds:** Rare currency for leveling Sprouts.
+* **Artefact Hex:** Hidden map location revealing new Sprouts.
+* **Sprout Library:** Persistent collection of unlocked Sprouts.
+
+---
+
+*(End of v3.1 — expanded and annotated for implementation.)*
