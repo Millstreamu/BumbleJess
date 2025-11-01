@@ -8,6 +8,7 @@ const LAYER_LIFE := 2
 const LAYER_FX := 3
 
 const SPROUT_REGISTER_SCENE := preload("res://scenes/battle/BattlePicker.tscn")
+const ARTEFACT_REVEAL_SCENE := preload("res://scenes/ui/ArtefactReveal.tscn")
 
 @export var width := 16:
 	set = set_width
@@ -151,6 +152,7 @@ func _ready() -> void:
         _ensure_toggle_threats_action()
         _ensure_toggle_sprout_register_action()
         _ensure_toggle_cluster_fx_action()
+        _ensure_meta_debug_actions()
         var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
         if threat_list != null:
                 threat_list.visible = false
@@ -196,19 +198,50 @@ func _ensure_toggle_sprout_register_action() -> void:
 
 
 func _ensure_toggle_cluster_fx_action() -> void:
-	var action := "ui_toggle_cluster_fx"
-	if not InputMap.has_action(action):
-		InputMap.add_action(action)
-	var has_event := false
-	for existing_event in InputMap.action_get_events(action):
-		if existing_event is InputEventKey and existing_event.physical_keycode == Key.KEY_Y:
-			has_event = true
-			break
-	if not has_event:
-		var event := InputEventKey.new()
-		event.physical_keycode = Key.KEY_Y
-		event.keycode = Key.KEY_Y
-		InputMap.action_add_event(action, event)
+        var action := "ui_toggle_cluster_fx"
+        if not InputMap.has_action(action):
+                InputMap.add_action(action)
+        var has_event := false
+        for existing_event in InputMap.action_get_events(action):
+                if existing_event is InputEventKey and existing_event.physical_keycode == Key.KEY_Y:
+                        has_event = true
+                        break
+        if not has_event:
+                var event := InputEventKey.new()
+                event.physical_keycode = Key.KEY_Y
+                event.keycode = Key.KEY_Y
+                InputMap.action_add_event(action, event)
+
+
+func _ensure_meta_debug_actions() -> void:
+        _ensure_debug_action_with_key("debug_meta_list", Key.KEY_F6)
+        _ensure_debug_action_with_key("debug_meta_unlock_clipboard", Key.KEY_U, true, true)
+        _ensure_debug_action_with_key("debug_meta_lock_clipboard", Key.KEY_L, true, true)
+        _ensure_debug_action_with_key("debug_meta_wipe", Key.KEY_W, true, true)
+        _ensure_debug_action_with_key("debug_meta_unlock_all", Key.KEY_A, true, true)
+
+
+func _ensure_debug_action_with_key(action: String, keycode: Key, ctrl := false, alt := false, shift := false) -> void:
+        if not InputMap.has_action(action):
+                InputMap.add_action(action)
+        for existing_event in InputMap.action_get_events(action):
+                if not (existing_event is InputEventKey):
+                        continue
+                var event := existing_event as InputEventKey
+                if (
+                        event.physical_keycode == keycode
+                        and event.ctrl_pressed == ctrl
+                        and event.alt_pressed == alt
+                        and event.shift_pressed == shift
+                ):
+                        return
+        var new_event := InputEventKey.new()
+        new_event.physical_keycode = keycode
+        new_event.keycode = keycode
+        new_event.ctrl_pressed = ctrl
+        new_event.alt_pressed = alt
+        new_event.shift_pressed = shift
+        InputMap.action_add_event(action, new_event)
 
 
 func _ensure_sprout_picker() -> void:
@@ -819,25 +852,79 @@ func _unhandled_input(event: InputEvent) -> void:
                 _toggle_sprout_register()
                 var sr_viewport := get_viewport()
                 if sr_viewport != null:
-			sr_viewport.set_input_as_handled()
-		return
-	if event.is_action_pressed("ui_toggle_threats"):
-		var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
-		if threat_list != null:
-			threat_list.visible = not threat_list.visible
-			var threat_viewport := get_viewport()
-			if threat_viewport != null:
-				threat_viewport.set_input_as_handled()
-	if event.is_action_pressed("ui_toggle_cluster_fx"):
-		var decay_manager: Node = get_node_or_null("/root/DecayManager")
-		if decay_manager != null:
-			var current_state := bool(decay_manager.get("debug_show_clusters"))
-			decay_manager.set("debug_show_clusters", not current_state)
-			if decay_manager.has_method("_refresh_cluster_fx_overlay"):
-				decay_manager.call("_refresh_cluster_fx_overlay")
-		var fx_viewport := get_viewport()
-		if fx_viewport != null:
-			fx_viewport.set_input_as_handled()
+                        sr_viewport.set_input_as_handled()
+                return
+        if event.is_action_pressed("ui_toggle_threats"):
+                var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
+                if threat_list != null:
+                        threat_list.visible = not threat_list.visible
+                        var threat_viewport := get_viewport()
+                        if threat_viewport != null:
+                                threat_viewport.set_input_as_handled()
+        if event.is_action_pressed("ui_toggle_cluster_fx"):
+                var decay_manager: Node = get_node_or_null("/root/DecayManager")
+                if decay_manager != null:
+                        var current_state := bool(decay_manager.get("debug_show_clusters"))
+                        decay_manager.set("debug_show_clusters", not current_state)
+                        if decay_manager.has_method("_refresh_cluster_fx_overlay"):
+                                decay_manager.call("_refresh_cluster_fx_overlay")
+                var fx_viewport := get_viewport()
+                if fx_viewport != null:
+                        fx_viewport.set_input_as_handled()
+        if event.is_action_pressed("debug_meta_list"):
+                _handle_meta_debug_list()
+                return
+        if event.is_action_pressed("debug_meta_unlock_clipboard"):
+                _handle_meta_debug_unlock_from_clipboard()
+                return
+        if event.is_action_pressed("debug_meta_lock_clipboard"):
+                _handle_meta_debug_lock_from_clipboard()
+                return
+        if event.is_action_pressed("debug_meta_wipe"):
+                _handle_meta_debug_wipe()
+                return
+        if event.is_action_pressed("debug_meta_unlock_all"):
+                _handle_meta_debug_unlock_all()
+                return
+
+
+func _handle_meta_debug_list() -> void:
+        if not Engine.has_singleton("MetaManager"):
+                return
+        MetaManager.debug_list_unlocked()
+
+
+func _handle_meta_debug_unlock_from_clipboard() -> void:
+        var id := _clipboard_text()
+        if id.is_empty():
+                return
+        if Engine.has_singleton("MetaManager"):
+                MetaManager.debug_unlock_sprout(id)
+
+
+func _handle_meta_debug_lock_from_clipboard() -> void:
+        var id := _clipboard_text()
+        if id.is_empty():
+                return
+        if Engine.has_singleton("MetaManager"):
+                MetaManager.debug_lock_sprout(id)
+
+
+func _handle_meta_debug_wipe() -> void:
+        if Engine.has_singleton("MetaManager"):
+                MetaManager.debug_wipe_library()
+
+
+func _handle_meta_debug_unlock_all() -> void:
+        if Engine.has_singleton("MetaManager"):
+                MetaManager.debug_unlock_all()
+
+
+func _clipboard_text() -> String:
+        var raw := ""
+        if DisplayServer.has_feature(DisplayServer.FEATURE_CLIPBOARD):
+                raw = DisplayServer.clipboard_get()
+        return String(raw).strip_edges()
 
 
 func update_hud(_next_name: String = "", _remaining: int = 0) -> void:
@@ -1000,17 +1087,30 @@ func _on_produced_cells(cells_by_fx: Dictionary) -> void:
 
 
 func _count_cells_named(tile_name: String) -> int:
-	var total := 0
-	for y in range(height):
-		for x in range(width):
-			if get_cell_name(LAYER_LIFE, Vector2i(x, y)) == tile_name:
-				total += 1
-	return total
+        var total := 0
+        for y in range(height):
+                for x in range(width):
+                        if get_cell_name(LAYER_LIFE, Vector2i(x, y)) == tile_name:
+                                total += 1
+        return total
+
+func _check_artefact_reveal(cell: Vector2i) -> void:
+        var payload_variant := get_cell_meta(LAYER_OBJECTS, cell, "artefact")
+        if not (payload_variant is Dictionary):
+                if payload_variant != null:
+                        set_cell_meta(LAYER_OBJECTS, cell, "artefact", null)
+                return
+        var payload: Dictionary = payload_variant
+        if payload.is_empty():
+                set_cell_meta(LAYER_OBJECTS, cell, "artefact", null)
+                return
+        _reveal_artefact(cell, payload.duplicate(true))
 
 func _on_tile_placed(tile_id: String, cell: Vector2i) -> void:
-	var rule_set := _rules_for_tile(tile_id)
-	if rule_set.is_empty():
-		return
+        _check_artefact_reveal(cell)
+        var rule_set := _rules_for_tile(tile_id)
+        if rule_set.is_empty():
+                return
 
 	var on_place_variant: Variant = rule_set.get("on_place", {})
 	if on_place_variant is Dictionary:
@@ -1041,10 +1141,32 @@ func _on_tile_placed(tile_id: String, cell: Vector2i) -> void:
 			if count > 0:
 				_add_sprouts_to_roster(count)
 
-		if bool(on_place.get("cleanse_adjacent_decay", false)):
-			for n in neighbors_even_q(cell):
-				if get_cell_name(LAYER_OBJECTS, n) == "decay":
-					set_cell_named(LAYER_OBJECTS, n, "empty")
+                if bool(on_place.get("cleanse_adjacent_decay", false)):
+                        for n in neighbors_even_q(cell):
+                                if get_cell_name(LAYER_OBJECTS, n) == "decay":
+                                        set_cell_named(LAYER_OBJECTS, n, "empty")
+
+func _reveal_artefact(cell: Vector2i, payload: Dictionary) -> void:
+        set_cell_meta(LAYER_OBJECTS, cell, "artefact", null)
+        if get_cell_name(LAYER_OBJECTS, cell) != "":
+                set_cell_named(LAYER_OBJECTS, cell, "empty")
+        var sprout_id := String(payload.get("reveals_sprout_id", ""))
+        if Engine.has_singleton("MetaManager"):
+                MetaManager.unlock_sprout(sprout_id)
+        _show_artefact_modal(payload)
+
+func _show_artefact_modal(payload: Dictionary) -> void:
+        if ARTEFACT_REVEAL_SCENE == null:
+                return
+        var existing_modal := get_node_or_null("ArtefactReveal")
+        if existing_modal != null and existing_modal is Node:
+                existing_modal.queue_free()
+        var modal := ARTEFACT_REVEAL_SCENE.instantiate()
+        if modal == null:
+                return
+        add_child(modal)
+        if modal.has_method("open"):
+                modal.call_deferred("open", payload.duplicate(true))
 
 
 func _add_sprouts_to_roster(count: int) -> void:

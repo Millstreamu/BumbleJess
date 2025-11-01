@@ -61,6 +61,9 @@ func _ready() -> void:
         _build_core_filters()
         _rebuild_core_grid()
         _refresh_all()
+        if Engine.has_singleton("MetaManager"):
+                if not MetaManager.library_changed.is_connected(_on_sprout_library_changed):
+                        MetaManager.library_changed.connect(_on_sprout_library_changed)
 
 func open() -> void:
         _apply_existing_choices()
@@ -161,12 +164,11 @@ func _build_totem_grid() -> void:
 
 func _build_sprout_grid() -> void:
         _clear_children(sprout_grid)
+        var removed_locked := false
         for sprout_variant in _sprouts:
                 if not (sprout_variant is Dictionary):
                         continue
                 var sprout: Dictionary = sprout_variant
-                if _is_locked_sprout(sprout):
-                        continue
                 var sid := String(sprout.get("id", ""))
                 if sid.is_empty():
                         continue
@@ -186,11 +188,29 @@ func _build_sprout_grid() -> void:
                                 var tex := ResourceLoader.load(icon_path)
                                 if tex is Texture2D:
                                         icon_rect.texture = tex
+                var locked := _is_locked_sprout(sprout)
+                if locked and _chosen_sprouts.has(sid):
+                        _chosen_sprouts.erase(sid)
+                        removed_locked = true
+                button.disabled = locked
+                if locked:
+                        button.modulate = Color(1, 1, 1, 0.4)
+                        button.hint_tooltip = "Locked — find an artefact to unlock this sprout."
+                else:
+                        button.modulate = Color(1, 1, 1, 1)
+                        button.hint_tooltip = ""
                 button.pressed.connect(func():
                         _toggle_sprout(sid)
                 )
                 sprout_grid.add_child(button)
         _update_sprout_badges()
+        if removed_locked:
+                _refresh_all()
+
+func _on_sprout_library_changed() -> void:
+        _build_sprout_grid()
+        _update_sprout_badges()
+        _refresh_all()
 
 func _is_locked_sprout(sprout: Dictionary) -> bool:
         if not Engine.has_singleton("MetaManager"):
