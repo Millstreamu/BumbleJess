@@ -110,6 +110,3 @@ func _do_regen() -> void:
 
 func _do_totem_passives() -> void:
     emit_signal("totem_passives_started", turn_index)
-    var passive: Node = get_tree().root.get_node_or_null("PassiveSystem")
-    if passive != null and passive.has_method("tick_passives"):
-        passive.call("tick_passives", turn_index)

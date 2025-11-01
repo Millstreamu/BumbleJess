@@ -6,6 +6,7 @@ const MATURATION_TURNS := 3
 
 var _world: Node = null
 var _turn: int = 1
+var _growth_mult := 1.0
 var _overgrowth_born: Dictionary = {}
 var _tmp_reachable_from_edge: Dictionary = {}
 var _born_turn: Dictionary = {}
@@ -36,6 +37,10 @@ func request_growth_update(current_turn: int = -1) -> void:
         if current_turn >= 0:
                 _turn = max(current_turn, 1)
         _run_growth_cycle()
+
+func apply_growth_multiplier(mult: float) -> void:
+        _growth_mult *= mult
+        print("Growth speed multiplier:", _growth_mult)
 
 func _connect_turn_engine() -> void:
         var turn_engine: Node = _get_turn_engine()

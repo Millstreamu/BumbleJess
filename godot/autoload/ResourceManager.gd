@@ -39,6 +39,7 @@ var _turn_counter := 1
 var _tiles: Array = []
 var _rules_by_id: Dictionary = {}
 var _category_by_id: Dictionary = {}
+var _bonus_mults := {"nature": 1.0, "earth": 1.0, "water": 1.0}
 var _defaults_by_category := {
         CAT_NATURE: {
                 "capacity_base": {"nature": 5},
@@ -89,11 +90,22 @@ func add_life(val: int) -> void:
 	emit_signal("resources_changed")
 
 func add_soul_seed(val: int = 1) -> void:
-	soul_seeds = max(0, soul_seeds + val)
-	emit_signal("item_changed", "soul_seeds")
+        soul_seeds = max(0, soul_seeds + val)
+        emit_signal("item_changed", "soul_seeds")
+
+func apply_resource_bonus(kind: String, mult: float) -> void:
+        var key := String(kind)
+        if key.is_empty():
+                return
+        var current := float(_bonus_mults.get(key, 1.0))
+        var next_value := current * mult
+        if next_value <= 0.0:
+                next_value = 0.0
+        _bonus_mults[key] = next_value
+        print("Resource bonus for %s now x%.2f" % [key, next_value])
 
 func get_amount(kind: String) -> int:
-	return int(amounts.get(kind, 0))
+        return int(amounts.get(kind, 0))
 
 func get_capacity(kind: String) -> int:
 	return int(capacity.get(kind, 0))
@@ -326,10 +338,14 @@ func _recompute_capacity() -> void:
 		amounts[res] = clamp(int(amounts.get(res, 0)), 0, cap_value)
 
 func _produce_resources() -> void:
-	if _world == null:
-		return
-	var width := int(_world.width)
-	var height := int(_world.height)
+        if _world == null:
+                return
+        var width := int(_world.width)
+        var height := int(_world.height)
+        var tracked_resources: Array = []
+        for res_key in _bonus_mults.keys():
+                tracked_resources.append(String(res_key))
+        var baseline := _snapshot_resource_amounts(tracked_resources)
         var fx := {
                 "fx_nature": [],
                 "fx_earth": [],
@@ -549,13 +565,15 @@ func _produce_resources() -> void:
 							0,
 							cap_value,
 						)
-						var span_fx_variant: Variant = fx.get("fx_water", [])
-						var span_fx: Array = (
-							span_fx_variant if span_fx_variant is Array else []
-						)
-						if not span_fx.has(cell):
-							span_fx.append(cell)
-						fx["fx_water"] = span_fx
+                                                var span_fx_variant: Variant = fx.get("fx_water", [])
+                                                var span_fx: Array = (
+                                                        span_fx_variant if span_fx_variant is Array else []
+                                                )
+                                                if not span_fx.has(cell):
+                                                        span_fx.append(cell)
+                                                fx["fx_water"] = span_fx
+
+        _apply_resource_multipliers(baseline)
 
         for y in range(height):
                 for x in range(width):
@@ -589,6 +607,38 @@ func _produce_resources() -> void:
 		fx.erase(key)
         if not fx.is_empty():
                 emit_signal("produced_cells", fx)
+
+func _snapshot_resource_amounts(keys: Array) -> Dictionary:
+        var snapshot: Dictionary = {}
+        for key in keys:
+                var res := String(key)
+                if res.is_empty():
+                        continue
+                snapshot[res] = int(amounts.get(res, 0))
+        return snapshot
+
+func _apply_resource_multipliers(baseline: Dictionary) -> void:
+        if baseline.is_empty():
+                return
+        for key in baseline.keys():
+                var res := String(key)
+                if res.is_empty():
+                        continue
+                var previous := int(baseline.get(res, 0))
+                var current := int(amounts.get(res, previous))
+                var gained := current - previous
+                if gained <= 0:
+                        continue
+                var mult := float(_bonus_mults.get(res, 1.0))
+                if abs(mult - 1.0) < 0.0001:
+                        continue
+                var scaled_gain := int(round(gained * mult))
+                var cap_variant := capacity.get(res, null)
+                if cap_variant == null:
+                        amounts[res] = max(previous + scaled_gain, 0)
+                else:
+                        var cap_value := int(cap_variant)
+                        amounts[res] = clampi(previous + scaled_gain, 0, cap_value)
 
 func _produce_resources_v31_outputs_and_synergies(fx: Dictionary) -> Dictionary:
         var skip_cells: Dictionary = {}
