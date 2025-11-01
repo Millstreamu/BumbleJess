@@ -4,9 +4,18 @@
 	"grid": { "width": 16, "height": 12, "hex": "flat-top", "offset": "even-q", "tile_px": 128 },
 	"seed": 987654,
 	"totem": { "x": 8, "y": 6, "totem_id": "totem.heartwood" },
-	"decay_totems": [
-	  { "x": 3, "y": 2 },
-	  { "x": 13, "y": 9 }
-	]
+        "decay_totems": [
+          { "x": 3, "y": 2 },
+          { "x": 13, "y": 9 }
+        ],
+        "artefacts": [
+          {
+            "x": 8,
+            "y": 4,
+            "reveals_sprout_id": "sprout.moss_golem",
+            "title": "Ancient Husk",
+            "desc": "You uncover a slumbering guardian."
+          }
+        ]
   }
 ]

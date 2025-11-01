@@ -18,6 +18,7 @@ config/starting_map_id="map.demo_001"
 [autoload]
 
 RunConfig="*res://autoload/RunConfig.gd"
+MetaManager="*res://autoload/MetaManager.gd"
 DataLite="*res://autoload/DataLite.gd"
 CategoryMap="*res://autoload/CategoryMap.gd"
 DataDB="*res://autoload/DataDB.gd"
