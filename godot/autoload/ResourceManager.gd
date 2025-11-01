@@ -107,14 +107,11 @@ func spend(kind: String, val: int) -> bool:
 	emit_signal("resources_changed")
 	return true
 
-func _on_turn_started(turn: int) -> void:
-	_turn_counter = turn
-
-func _on_phase_started(phase_name: String) -> void:
-	if phase_name == "resources":
-		_recompute_capacity()
-		_produce_resources()
-		emit_signal("resources_changed")
+func tick_production_phase(turn: int) -> void:
+        _turn_counter = max(turn, 1)
+        _recompute_capacity()
+        _produce_resources()
+        emit_signal("resources_changed")
 
 func _on_battle_result(victory: bool, rewards: Dictionary) -> void:
 	if not victory:
@@ -142,17 +139,48 @@ func _load_tile_rules() -> void:
 			_rules_by_id[id] = rules
 
 func _connect_turn_engine() -> void:
-	var turn_engine: Node = get_node_or_null("/root/TurnEngine")
-	if turn_engine == null and Engine.has_singleton("Game"):
-		turn_engine = Engine.get_singleton("Game")
-	if turn_engine == null:
-		turn_engine = get_node_or_null("/root/Game")
-	if turn_engine == null:
-		return
-	if not turn_engine.is_connected("phase_started", Callable(self, "_on_phase_started")):
-		turn_engine.connect("phase_started", Callable(self, "_on_phase_started"))
-	if not turn_engine.is_connected("turn_started", Callable(self, "_on_turn_started")):
-		turn_engine.connect("turn_started", Callable(self, "_on_turn_started"))
+        var turn_engine: Node = _get_turn_engine()
+        if turn_engine == null:
+                return
+        if turn_engine.has_signal("run_started") and not turn_engine.is_connected(
+                "run_started", Callable(self, "_on_run_started")
+        ):
+                turn_engine.connect("run_started", Callable(self, "_on_run_started"))
+        if turn_engine.has_signal("turn_changed") and not turn_engine.is_connected(
+                "turn_changed", Callable(self, "_on_turn_changed")
+        ):
+                turn_engine.connect("turn_changed", Callable(self, "_on_turn_changed"))
+        _on_run_started()
+
+func _on_run_started() -> void:
+        var engine: Node = _get_turn_engine()
+        if engine == null:
+                _turn_counter = 1
+                return
+        var value: Variant = engine.get("turn_index")
+        if typeof(value) == TYPE_INT:
+                _turn_counter = max(int(value), 1)
+        else:
+                _turn_counter = 1
+
+func _on_turn_changed(turn: int) -> void:
+        _turn_counter = max(turn, 1)
+
+func _get_turn_engine() -> Node:
+        var turn_engine: Node = null
+        if Engine.has_singleton("TurnEngine"):
+                var singleton := Engine.get_singleton("TurnEngine")
+                if singleton is Node:
+                        turn_engine = singleton
+        if turn_engine == null:
+                turn_engine = get_node_or_null("/root/TurnEngine")
+        if turn_engine == null and Engine.has_singleton("Game"):
+                var game_singleton := Engine.get_singleton("Game")
+                if game_singleton is Node:
+                        turn_engine = game_singleton
+        if turn_engine == null:
+                turn_engine = get_node_or_null("/root/Game")
+        return turn_engine
 
 func _connect_battle_manager() -> void:
 	var battle_manager: Node = get_node_or_null("/root/BattleManager")

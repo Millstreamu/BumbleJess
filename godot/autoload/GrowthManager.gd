@@ -12,22 +12,8 @@ var _born_turn: Dictionary = {}
 var _tile_rules_cache: Dictionary = {}
 
 func _ready() -> void:
-	_bind_turn_events()
-	_connect_world_signal()
-
-func _bind_turn_events() -> void:
-	if has_node("/root/TurnEngine"):
-		var turn_engine: Node = get_node("/root/TurnEngine")
-		if not turn_engine.is_connected("turn_started", Callable(self, "_on_turn_started")):
-			turn_engine.connect("turn_started", Callable(self, "_on_turn_started"))
-		if not turn_engine.is_connected("phase_started", Callable(self, "_on_phase_started")):
-			turn_engine.connect("phase_started", Callable(self, "_on_phase_started"))
-	elif has_node("/root/Game"):
-		var game: Node = get_node("/root/Game")
-		if not game.is_connected("turn_started", Callable(self, "_on_turn_started")):
-			game.connect("turn_started", Callable(self, "_on_turn_started"))
-		if not game.is_connected("phase_started", Callable(self, "_on_phase_started")):
-			game.connect("phase_started", Callable(self, "_on_phase_started"))
+        _connect_turn_engine()
+        _connect_world_signal()
 
 func bind_world(world: Node) -> void:
 	_world = world
@@ -36,18 +22,64 @@ func bind_world(world: Node) -> void:
 	_born_turn.clear()
 	_connect_world_signal()
 
-func _on_turn_started(turn: int) -> void:
-	_turn = max(turn, 1)
-
-func _on_phase_started(phase_name: String) -> void:
-	if phase_name != "growth":
-		return
-	_run_growth_cycle()
+func tick_growth_phase(turn: int) -> void:
+        _turn = max(turn, 1)
+        _run_growth_cycle()
 
 func request_growth_update(current_turn: int = -1) -> void:
-	if current_turn >= 0:
-		_turn = max(current_turn, 1)
-	_run_growth_cycle()
+        if current_turn < 0:
+                var engine := _get_turn_engine()
+                if engine != null:
+                        var value: Variant = engine.get("turn_index")
+                        if typeof(value) == TYPE_INT:
+                                current_turn = int(value)
+        if current_turn >= 0:
+                _turn = max(current_turn, 1)
+        _run_growth_cycle()
+
+func _connect_turn_engine() -> void:
+        var turn_engine: Node = _get_turn_engine()
+        if turn_engine == null:
+                return
+        if turn_engine.has_signal("run_started") and not turn_engine.is_connected(
+                "run_started", Callable(self, "_on_run_started")
+        ):
+                turn_engine.connect("run_started", Callable(self, "_on_run_started"))
+        if turn_engine.has_signal("turn_changed") and not turn_engine.is_connected(
+                "turn_changed", Callable(self, "_on_turn_changed")
+        ):
+                turn_engine.connect("turn_changed", Callable(self, "_on_turn_changed"))
+        _on_run_started()
+
+func _on_run_started() -> void:
+        var engine := _get_turn_engine()
+        if engine == null:
+                _turn = 1
+                return
+        var value: Variant = engine.get("turn_index")
+        if typeof(value) == TYPE_INT:
+                _turn = max(int(value), 1)
+        else:
+                _turn = 1
+
+func _on_turn_changed(turn: int) -> void:
+        _turn = max(turn, 1)
+
+func _get_turn_engine() -> Node:
+        var turn_engine: Node = null
+        if Engine.has_singleton("TurnEngine"):
+                var singleton := Engine.get_singleton("TurnEngine")
+                if singleton is Node:
+                        turn_engine = singleton
+        if turn_engine == null:
+                turn_engine = get_node_or_null("/root/TurnEngine")
+        if turn_engine == null and Engine.has_singleton("Game"):
+                var game_singleton := Engine.get_singleton("Game")
+                if game_singleton is Node:
+                        turn_engine = game_singleton
+        if turn_engine == null:
+                turn_engine = get_node_or_null("/root/Game")
+        return turn_engine
 
 func _run_growth_cycle() -> void:
 	_recompute_overgrowth()

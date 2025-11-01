@@ -223,6 +223,13 @@ func choose(tile_id: String) -> void:
                 rc.last_pick_id = tile_id
         _record_pick(tile_id)
         emit_signal("chosen", tile_id)
+        var turn_engine: Node = null
+        if Engine.has_singleton("TurnEngine"):
+                turn_engine = Engine.get_singleton("TurnEngine")
+        if turn_engine == null:
+                turn_engine = get_node_or_null("/root/TurnEngine")
+        if turn_engine != null and turn_engine.has_method("notify_commune_choice_made"):
+                turn_engine.call("notify_commune_choice_made")
         var def_variant: Variant = _id_to_def.get(tile_id, {})
         var def: Dictionary = def_variant if def_variant is Dictionary else {}
         var force_now := bool(def.get("force_immediate", false))
