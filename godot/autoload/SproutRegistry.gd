@@ -6,7 +6,7 @@ signal error_msg(text: String)
 signal roster_regenerated(percent: float)
 
 const MAX_SELECTION := 6
-const TEMPLATE_PATH := "res://data/sprouts_roster.json"
+const TEMPLATE_PATH := "res://sprouts/seeds/default_roster.json"
 const SAVE_PATH := "user://sprouts_roster.json"
 
 var _db_by_id: Dictionary = {}

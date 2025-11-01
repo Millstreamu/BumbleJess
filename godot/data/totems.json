@@ -3,7 +3,7 @@
         "id": "totem.heartwood",
         "name": "Heartwood",
         "desc": "Gentle growth bias",
-        "icon": "res://assets/ui/totems/heartwood.png",
+        "icon": "",
         "tier": 1,
         "passives": ["pas.regen_small", "pas.growth_bonus"],
         "commune_weights": {

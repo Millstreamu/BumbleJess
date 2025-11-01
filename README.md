@@ -223,7 +223,7 @@ Each Totem defines run theme, commune weighting, and passives. Upgraded via Life
 
 ```json
 {
-  "id": "map.demo_01",
+  "id": "map.demo_001",
   "grid": {"width": 32, "height": 24},
   "seed": 12345,
   "totem_pos": {"x": 8, "y": 12},
