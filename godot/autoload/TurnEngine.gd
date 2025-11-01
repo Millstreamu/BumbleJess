@@ -60,7 +60,7 @@ func end_turn() -> void:
     emit_signal("phase_started", "resources")
     _do_resources()
     emit_signal("phase_started", "decay")
-    _do_decay()
+    await _do_decay()
     emit_signal("phase_started", "regen")
     _do_regen()
     emit_signal("phase_started", "totem_passives")
@@ -85,8 +85,19 @@ func _do_resources() -> void:
         manager.call("tick_production_phase", turn_index)
 
 func _do_decay() -> void:
-    var manager: Node = get_tree().root.get_node_or_null("DecayManager")
-    if manager != null and manager.has_method("tick_decay_phase"):
+    var manager: Node = null
+    if Engine.has_singleton("DecayManager"):
+        var singleton := Engine.get_singleton("DecayManager")
+        if singleton is Node:
+            manager = singleton
+    if manager == null:
+        manager = get_tree().root.get_node_or_null("DecayManager")
+    if manager == null:
+        return
+    if manager.has_method("begin_decay_phase_async"):
+        manager.call("begin_decay_phase_async", turn_index)
+        await manager.decay_phase_complete
+    elif manager.has_method("tick_decay_phase"):
         manager.call("tick_decay_phase", turn_index)
 
 func _do_regen() -> void:
