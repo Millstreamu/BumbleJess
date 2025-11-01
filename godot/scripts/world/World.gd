@@ -30,12 +30,12 @@ var _placing_special: String = ""
 var _extra_tile_colors: Dictionary[String, Color] = {}
 var _tile_rules_cache: Dictionary = {}
 var _fx_color_for_cat := {
-        "Nature": Color(0.25, 0.6, 0.25, 0.22),
-        "Earth": Color(0.55, 0.35, 0.2, 0.22),
-        "Water": Color(0.2, 0.4, 0.8, 0.22),
-        "Nest": Color(0.7, 0.6, 0.2, 0.22),
-        "Mystic": Color(0.6, 0.4, 0.7, 0.22),
-        "Aggression": Color(0.7, 0.2, 0.2, 0.22),
+		"Nature": Color(0.25, 0.6, 0.25, 0.22),
+		"Earth": Color(0.55, 0.35, 0.2, 0.22),
+		"Water": Color(0.2, 0.4, 0.8, 0.22),
+		"Nest": Color(0.7, 0.6, 0.2, 0.22),
+		"Mystic": Color(0.6, 0.4, 0.7, 0.22),
+		"Aggression": Color(0.7, 0.2, 0.2, 0.22),
 }
 
 @onready var hexmap: TileMap = $HexMap
@@ -58,71 +58,71 @@ func _get_resource_manager() -> Node:
 
 
 func _get_turn_engine() -> Node:
-        if Engine.has_singleton("TurnEngine"):
-                var singleton := Engine.get_singleton("TurnEngine")
-                if singleton is Node:
-                        return singleton
-        var node := get_node_or_null("/root/TurnEngine")
-        if node != null:
-                return node
-        if Engine.has_singleton("Game"):
-                var game_singleton := Engine.get_singleton("Game")
-                if game_singleton is Node:
-                        return game_singleton
-        return get_node_or_null("/root/Game")
+		if Engine.has_singleton("TurnEngine"):
+				var singleton := Engine.get_singleton("TurnEngine")
+				if singleton is Node:
+						return singleton
+		var node := get_node_or_null("/root/TurnEngine")
+		if node != null:
+				return node
+		if Engine.has_singleton("Game"):
+				var game_singleton := Engine.get_singleton("Game")
+				if game_singleton is Node:
+						return game_singleton
+		return get_node_or_null("/root/Game")
 
 func _connect_turn_engine_signals() -> void:
-        var turn_engine: Node = _get_turn_engine()
-        if turn_engine == null:
-                return
-        if turn_engine.has_signal("run_started") and not turn_engine.is_connected(
-                "run_started", Callable(self, "_on_turn_engine_run_started")
-        ):
-                turn_engine.connect("run_started", Callable(self, "_on_turn_engine_run_started"))
-        if turn_engine.has_signal("turn_changed") and not turn_engine.is_connected(
-                "turn_changed", Callable(self, "_on_turn_engine_turn_changed")
-        ):
-                turn_engine.connect("turn_changed", Callable(self, "_on_turn_engine_turn_changed"))
+		var turn_engine: Node = _get_turn_engine()
+		if turn_engine == null:
+				return
+		if turn_engine.has_signal("run_started") and not turn_engine.is_connected(
+				"run_started", Callable(self, "_on_turn_engine_run_started")
+		):
+				turn_engine.connect("run_started", Callable(self, "_on_turn_engine_run_started"))
+		if turn_engine.has_signal("turn_changed") and not turn_engine.is_connected(
+				"turn_changed", Callable(self, "_on_turn_engine_turn_changed")
+		):
+				turn_engine.connect("turn_changed", Callable(self, "_on_turn_engine_turn_changed"))
 
 func _ensure_turn_engine_run_started() -> void:
-        var turn_engine: Node = _get_turn_engine()
-        if turn_engine == null:
-                return
-        if turn_engine.has_method("is_run_active") and bool(turn_engine.call("is_run_active")):
-                return
-        if turn_engine.has_method("begin_run"):
-                turn_engine.call("begin_run")
+		var turn_engine: Node = _get_turn_engine()
+		if turn_engine == null:
+				return
+		if turn_engine.has_method("is_run_active") and bool(turn_engine.call("is_run_active")):
+				return
+		if turn_engine.has_method("begin_run"):
+				turn_engine.call("begin_run")
 
 func _sync_turn_with_engine(update_hud: bool = false) -> void:
-        var new_turn := max(turn, 1)
-        var turn_engine: Node = _get_turn_engine()
-        if turn_engine != null:
-                var value: Variant = turn_engine.get("turn_index")
-                if typeof(value) == TYPE_INT:
-                        new_turn = max(int(value), 1)
-        turn = new_turn
-        if update_hud:
-                _update_hud()
+		var new_turn := max(turn, 1)
+		var turn_engine: Node = _get_turn_engine()
+		if turn_engine != null:
+				var value: Variant = turn_engine.get("turn_index")
+				if typeof(value) == TYPE_INT:
+						new_turn = max(int(value), 1)
+		turn = new_turn
+		if update_hud:
+				_update_hud()
 
 func _on_turn_engine_run_started() -> void:
-        _sync_turn_with_engine(true)
+		_sync_turn_with_engine(true)
 
 func _on_turn_engine_turn_changed(turn_index: int) -> void:
-        turn = max(turn_index, 1)
-        _update_hud()
+		turn = max(turn_index, 1)
+		_update_hud()
 
 func _current_turn_index() -> int:
-        var turn_engine: Node = _get_turn_engine()
-        if turn_engine != null:
-                var value: Variant = turn_engine.get("turn_index")
-                if typeof(value) == TYPE_INT:
-                        return max(int(value), 1)
-        return max(turn, 1)
+		var turn_engine: Node = _get_turn_engine()
+		if turn_engine != null:
+				var value: Variant = turn_engine.get("turn_index")
+				if typeof(value) == TYPE_INT:
+						return max(int(value), 1)
+		return max(turn, 1)
 
 func _notify_turn_engine_tile_placed() -> void:
-        var turn_engine: Node = _get_turn_engine()
-        if turn_engine != null and turn_engine.has_method("notify_tile_placed"):
-                turn_engine.call("notify_tile_placed")
+		var turn_engine: Node = _get_turn_engine()
+		if turn_engine != null and turn_engine.has_method("notify_tile_placed"):
+				turn_engine.call("notify_tile_placed")
 
 
 func _calculate_hex_cell_size(px: int) -> Vector2i:
@@ -134,14 +134,14 @@ func _calculate_hex_cell_size(px: int) -> Vector2i:
 func _ready() -> void:
 	add_child(rules)
 	rules.set_world(self)
-        _ensure_hex_config()
-        _ensure_layers()
-        _build_tileset()
-        tileset_add_named_color("fx_bloom_hint", Color(0.4, 0.8, 0.4, 0.18))
-        tileset_add_named_color("fx_grove_glow", Color(0.6, 1.0, 0.6, 0.28))
-        var growth_manager: Node = get_node_or_null("/root/GrowthManager")
-        if growth_manager != null:
-                growth_manager.bind_world(self)
+		_ensure_hex_config()
+		_ensure_layers()
+		_build_tileset()
+		tileset_add_named_color("fx_bloom_hint", Color(0.4, 0.8, 0.4, 0.18))
+		tileset_add_named_color("fx_grove_glow", Color(0.6, 1.0, 0.6, 0.28))
+		var growth_manager: Node = get_node_or_null("/root/GrowthManager")
+		if growth_manager != null:
+				growth_manager.bind_world(self)
 		var sprout_registry: Node = get_node_or_null("/root/SproutRegistry")
 		if (
 			sprout_registry != null
@@ -150,27 +150,27 @@ func _ready() -> void:
 			)
 		):
 			growth_manager.connect("grove_spawned", Callable(sprout_registry, "on_grove_spawned"))
-        _bind_resource_manager()
-        _bind_sprout_registry()
-        _bind_tile_gen()
-        _bind_commune_manager()
-        _connect_turn_engine_signals()
-        _ensure_turn_engine_run_started()
-        var decay_manager: Node = get_node_or_null("/root/DecayManager")
-        if decay_manager != null and decay_manager.has_method("bind_world"):
-                decay_manager.call("bind_world", self)
-        _ensure_toggle_threats_action()
-        _ensure_toggle_sprout_register_action()
-        _ensure_toggle_cluster_fx_action()
-        _ensure_meta_debug_actions()
-        var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
-        if threat_list != null:
-                threat_list.visible = false
-        _is_ready = true
-        draw_debug_grid()
-        _sync_turn_with_engine()
-        _setup_hud()
-        _update_hud()
+		_bind_resource_manager()
+		_bind_sprout_registry()
+		_bind_tile_gen()
+		_bind_commune_manager()
+		_connect_turn_engine_signals()
+		_ensure_turn_engine_run_started()
+		var decay_manager: Node = get_node_or_null("/root/DecayManager")
+		if decay_manager != null and decay_manager.has_method("bind_world"):
+				decay_manager.call("bind_world", self)
+		_ensure_toggle_threats_action()
+		_ensure_toggle_sprout_register_action()
+		_ensure_toggle_cluster_fx_action()
+		_ensure_meta_debug_actions()
+		var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
+		if threat_list != null:
+				threat_list.visible = false
+		_is_ready = true
+		draw_debug_grid()
+		_sync_turn_with_engine()
+		_setup_hud()
+		_update_hud()
 	if not is_connected("tile_placed", Callable(self, "_on_tile_placed")):
 		connect("tile_placed", Callable(self, "_on_tile_placed"))
 
@@ -208,50 +208,50 @@ func _ensure_toggle_sprout_register_action() -> void:
 
 
 func _ensure_toggle_cluster_fx_action() -> void:
-        var action := "ui_toggle_cluster_fx"
-        if not InputMap.has_action(action):
-                InputMap.add_action(action)
-        var has_event := false
-        for existing_event in InputMap.action_get_events(action):
-                if existing_event is InputEventKey and existing_event.physical_keycode == Key.KEY_Y:
-                        has_event = true
-                        break
-        if not has_event:
-                var event := InputEventKey.new()
-                event.physical_keycode = Key.KEY_Y
-                event.keycode = Key.KEY_Y
-                InputMap.action_add_event(action, event)
+		var action := "ui_toggle_cluster_fx"
+		if not InputMap.has_action(action):
+				InputMap.add_action(action)
+		var has_event := false
+		for existing_event in InputMap.action_get_events(action):
+				if existing_event is InputEventKey and existing_event.physical_keycode == Key.KEY_Y:
+						has_event = true
+						break
+		if not has_event:
+				var event := InputEventKey.new()
+				event.physical_keycode = Key.KEY_Y
+				event.keycode = Key.KEY_Y
+				InputMap.action_add_event(action, event)
 
 
 func _ensure_meta_debug_actions() -> void:
-        _ensure_debug_action_with_key("debug_meta_list", Key.KEY_F6)
-        _ensure_debug_action_with_key("debug_meta_unlock_clipboard", Key.KEY_U, true, true)
-        _ensure_debug_action_with_key("debug_meta_lock_clipboard", Key.KEY_L, true, true)
-        _ensure_debug_action_with_key("debug_meta_wipe", Key.KEY_W, true, true)
-        _ensure_debug_action_with_key("debug_meta_unlock_all", Key.KEY_A, true, true)
+		_ensure_debug_action_with_key("debug_meta_list", Key.KEY_F6)
+		_ensure_debug_action_with_key("debug_meta_unlock_clipboard", Key.KEY_U, true, true)
+		_ensure_debug_action_with_key("debug_meta_lock_clipboard", Key.KEY_L, true, true)
+		_ensure_debug_action_with_key("debug_meta_wipe", Key.KEY_W, true, true)
+		_ensure_debug_action_with_key("debug_meta_unlock_all", Key.KEY_A, true, true)
 
 
 func _ensure_debug_action_with_key(action: String, keycode: Key, ctrl := false, alt := false, shift := false) -> void:
-        if not InputMap.has_action(action):
-                InputMap.add_action(action)
-        for existing_event in InputMap.action_get_events(action):
-                if not (existing_event is InputEventKey):
-                        continue
-                var event := existing_event as InputEventKey
-                if (
-                        event.physical_keycode == keycode
-                        and event.ctrl_pressed == ctrl
-                        and event.alt_pressed == alt
-                        and event.shift_pressed == shift
-                ):
-                        return
-        var new_event := InputEventKey.new()
-        new_event.physical_keycode = keycode
-        new_event.keycode = keycode
-        new_event.ctrl_pressed = ctrl
-        new_event.alt_pressed = alt
-        new_event.shift_pressed = shift
-        InputMap.action_add_event(action, new_event)
+		if not InputMap.has_action(action):
+				InputMap.add_action(action)
+		for existing_event in InputMap.action_get_events(action):
+				if not (existing_event is InputEventKey):
+						continue
+				var event := existing_event as InputEventKey
+				if (
+						event.physical_keycode == keycode
+						and event.ctrl_pressed == ctrl
+						and event.alt_pressed == alt
+						and event.shift_pressed == shift
+				):
+						return
+		var new_event := InputEventKey.new()
+		new_event.physical_keycode = keycode
+		new_event.keycode = keycode
+		new_event.ctrl_pressed = ctrl
+		new_event.alt_pressed = alt
+		new_event.shift_pressed = shift
+		InputMap.action_add_event(action, new_event)
 
 
 func _ensure_sprout_picker() -> void:
@@ -274,10 +274,10 @@ func _ensure_sprout_picker() -> void:
 
 
 func _toggle_sprout_register() -> void:
-        _ensure_sprout_picker()
-        if not is_instance_valid(_sprout_picker):
-                return
-        if _sprout_picker.visible:
+		_ensure_sprout_picker()
+		if not is_instance_valid(_sprout_picker):
+				return
+		if _sprout_picker.visible:
 		_sprout_picker.close()
 	else:
 		_sprout_picker.open()
@@ -375,32 +375,32 @@ func rebind_tileset() -> void:
 
 
 func set_fx(cell: Vector2i, fx_name: String) -> void:
-        if hexmap == null:
-                return
-        if tiles_name_to_id.is_empty():
-                _build_tileset()
-        if not tiles_name_to_id.has(fx_name):
-                return
-        var tile_info_variant: Variant = tiles_name_to_id[fx_name]
-        if not (tile_info_variant is Dictionary):
-                return
-        var tile_info: Dictionary = tile_info_variant
-        var src_id: int = int(tile_info.get("source_id", -1))
-        var atlas_value: Variant = tile_info.get("atlas_coords", Vector2i.ZERO)
-        var atlas_coords: Vector2i = atlas_value if atlas_value is Vector2i else Vector2i.ZERO
-        if src_id < 0:
-                return
-        hexmap.set_cell(LAYER_FX, cell, src_id, atlas_coords)
+		if hexmap == null:
+				return
+		if tiles_name_to_id.is_empty():
+				_build_tileset()
+		if not tiles_name_to_id.has(fx_name):
+				return
+		var tile_info_variant: Variant = tiles_name_to_id[fx_name]
+		if not (tile_info_variant is Dictionary):
+				return
+		var tile_info: Dictionary = tile_info_variant
+		var src_id: int = int(tile_info.get("source_id", -1))
+		var atlas_value: Variant = tile_info.get("atlas_coords", Vector2i.ZERO)
+		var atlas_coords: Vector2i = atlas_value if atlas_value is Vector2i else Vector2i.ZERO
+		if src_id < 0:
+				return
+		hexmap.set_cell(LAYER_FX, cell, src_id, atlas_coords)
 
 
 func set_fx_for_category(cell: Vector2i, category: String) -> void:
-        var cat := String(category)
-        if cat.is_empty():
-                return
-        var fx_name := "fx_cat_%s" % cat
-        var color: Color = _fx_color_for_cat.get(cat, Color(1, 1, 1, 0.15))
-        tileset_add_named_color(fx_name, color)
-        set_fx(cell, fx_name)
+		var cat := String(category)
+		if cat.is_empty():
+				return
+		var fx_name := "fx_cat_%s" % cat
+		var color: Color = _fx_color_for_cat.get(cat, Color(1, 1, 1, 0.15))
+		tileset_add_named_color(fx_name, color)
+		set_fx(cell, fx_name)
 
 
 func clear_fx(cell: Vector2i) -> void:
@@ -550,26 +550,26 @@ func get_cell_meta(layer: int, c: Vector2i, key: String):
 
 
 func set_cell_tile_id(layer: int, c: Vector2i, id: String) -> void:
-        if id.is_empty():
-                set_cell_meta(layer, c, "id", null)
-                if layer == LAYER_LIFE:
-                        clear_fx(c)
-                        set_cell_meta(layer, c, "tags", null)
-                        set_cell_meta(layer, c, "category", null)
-                return
-        set_cell_meta(layer, c, "id", id)
-        if layer != LAYER_LIFE:
-                return
-        var tags: Array = []
-        if typeof(DataDB) != TYPE_NIL and DataDB.has_method("get_tags_for_id"):
-                tags = DataDB.get_tags_for_id(id)
-        set_cell_meta(layer, c, "tags", tags)
-        var canonical_category := ""
-        if typeof(DataDB) != TYPE_NIL and DataDB.has_method("get_category_for_id"):
-                canonical_category = String(DataDB.get_category_for_id(id))
-        if canonical_category.is_empty():
-                canonical_category = CategoryMap.normalize_from_tile_id(id)
-        set_cell_meta(layer, c, "category", canonical_category)
+		if id.is_empty():
+				set_cell_meta(layer, c, "id", null)
+				if layer == LAYER_LIFE:
+						clear_fx(c)
+						set_cell_meta(layer, c, "tags", null)
+						set_cell_meta(layer, c, "category", null)
+				return
+		set_cell_meta(layer, c, "id", id)
+		if layer != LAYER_LIFE:
+				return
+		var tags: Array = []
+		if typeof(DataDB) != TYPE_NIL and DataDB.has_method("get_tags_for_id"):
+				tags = DataDB.get_tags_for_id(id)
+		set_cell_meta(layer, c, "tags", tags)
+		var canonical_category := ""
+		if typeof(DataDB) != TYPE_NIL and DataDB.has_method("get_category_for_id"):
+				canonical_category = String(DataDB.get_category_for_id(id))
+		if canonical_category.is_empty():
+				canonical_category = CategoryMap.normalize_from_tile_id(id)
+		set_cell_meta(layer, c, "category", canonical_category)
 
 
 func get_cell_tile_id(layer: int, c: Vector2i) -> String:
@@ -592,37 +592,37 @@ func id_to_name(id: String) -> String:
 
 
 func get_cell_name(layer: int, c: Vector2i) -> String:
-        if hexmap == null:
-                return ""
-        if hexmap.get_cell_tile_data(layer, c) == null:
-                return ""
+		if hexmap == null:
+				return ""
+		if hexmap.get_cell_tile_data(layer, c) == null:
+				return ""
 	var source_id: int = hexmap.get_cell_source_id(layer, c)
 	if source_id < 0:
 		return ""
 	var atlas_coords: Vector2i = hexmap.get_cell_atlas_coords(layer, c)
-        var key := TileSetBuilder.encode_tile_key(source_id, atlas_coords)
-        return String(tiles_id_to_name.get(key, ""))
+		var key := TileSetBuilder.encode_tile_key(source_id, atlas_coords)
+		return String(tiles_id_to_name.get(key, ""))
 
 
 func get_cell_tooltip(cell: Vector2i) -> String:
-        var lines: Array[String] = []
-        var life := get_cell_name(LAYER_LIFE, cell)
-        if not life.is_empty():
-                lines.append("Life: %s" % life)
-        if Engine.has_singleton("DecayManager") and DecayManager.has_method("get_threat_turns_left"):
-                var tl := int(DecayManager.get_threat_turns_left(cell))
-                if tl >= 0:
-                        lines.append("Decay attacks in: %d turn(s)" % tl)
-        return "\n".join(lines).strip_edges()
+		var lines: Array[String] = []
+		var life := get_cell_name(LAYER_LIFE, cell)
+		if not life.is_empty():
+				lines.append("Life: %s" % life)
+		if Engine.has_singleton("DecayManager") and DecayManager.has_method("get_threat_turns_left"):
+				var tl := int(DecayManager.get_threat_turns_left(cell))
+				if tl >= 0:
+						lines.append("Decay attacks in: %d turn(s)" % tl)
+		return "\n".join(lines).strip_edges()
 
 
 func clear_cell_tile_id(layer: int, c: Vector2i) -> void:
-        if hexmap == null:
-                return
-        set_cell_meta(layer, c, "id", null)
-        if layer == LAYER_LIFE:
-                set_cell_meta(layer, c, "tags", null)
-                set_cell_meta(layer, c, "category", null)
+		if hexmap == null:
+				return
+		set_cell_meta(layer, c, "id", null)
+		if layer == LAYER_LIFE:
+				set_cell_meta(layer, c, "tags", null)
+				set_cell_meta(layer, c, "category", null)
 
 
 func is_empty(layer: int, c: Vector2i) -> bool:
@@ -667,20 +667,20 @@ func draw_debug_grid() -> void:
 
 
 func can_place_at(cell: Vector2i) -> bool:
-        if not _placing_special.is_empty():
-                return rules.can_place(self, cell)
-        if typeof(CommuneManager) == TYPE_NIL:
-                return false
-        if not CommuneManager.has_current_tile():
-                return false
-        var turn_engine := _get_turn_engine()
-        if (
-                turn_engine != null
-                and turn_engine.has_method("can_place_tile")
-                and not bool(turn_engine.call("can_place_tile"))
-        ):
-                return false
-        return rules.can_place(self, cell)
+		if not _placing_special.is_empty():
+				return rules.can_place(self, cell)
+		if typeof(CommuneManager) == TYPE_NIL:
+				return false
+		if not CommuneManager.has_current_tile():
+				return false
+		var turn_engine := _get_turn_engine()
+		if (
+				turn_engine != null
+				and turn_engine.has_method("can_place_tile")
+				and not bool(turn_engine.call("can_place_tile"))
+		):
+				return false
+		return rules.can_place(self, cell)
 
 
 func attempt_place_at(cell: Vector2i) -> void:
@@ -690,130 +690,130 @@ func attempt_place_at(cell: Vector2i) -> void:
 
 
 func place_current_tile(cell: Vector2i) -> void:
-        if not _placing_special.is_empty():
-                if not rules.can_place(self, cell):
-                        return
-                var special_id := _placing_special
-                if special_id.is_empty():
-                        return
-                if _place_tile(cell, special_id):
-                        _placing_special = ""
-                        _dequeue_special()
-                return
+		if not _placing_special.is_empty():
+				if not rules.can_place(self, cell):
+						return
+				var special_id := _placing_special
+				if special_id.is_empty():
+						return
+				if _place_tile(cell, special_id):
+						_placing_special = ""
+						_dequeue_special()
+				return
 
-        if typeof(CommuneManager) == TYPE_NIL:
-                return
-        if not CommuneManager.has_current_tile():
-                return
-        if not rules.can_place(self, cell):
-                return
-        var tile_id: String = CommuneManager.get_current_tile_id()
-        if tile_id.is_empty():
-                return
-        if not _place_tile(cell, tile_id):
-                return
-        CommuneManager.consume_current_tile()
-        _notify_turn_engine_tile_placed()
+		if typeof(CommuneManager) == TYPE_NIL:
+				return
+		if not CommuneManager.has_current_tile():
+				return
+		if not rules.can_place(self, cell):
+				return
+		var tile_id: String = CommuneManager.get_current_tile_id()
+		if tile_id.is_empty():
+				return
+		if not _place_tile(cell, tile_id):
+				return
+		CommuneManager.consume_current_tile()
+		_notify_turn_engine_tile_placed()
 
 
 func _place_tile(cell: Vector2i, tile_id: String) -> bool:
-        var category: String = id_to_category(tile_id)
-        if category.is_empty():
-                return false
-        var tile_name := category
-        var legacy_name := CategoryMap.legacy(category)
-        if not legacy_name.is_empty():
-                tile_name = legacy_name
-        var tags: Array = []
-        if typeof(DataDB) != TYPE_NIL and DataDB.has_method("get_tags_for_id"):
-                tags = DataDB.get_tags_for_id(tile_id)
-        var preferred_names: Array = [
-                "harvest",
-                "build",
-                "refine",
-                "storage",
-                "guard",
-                "upgrade",
-                "chanting",
-                "grove",
-                "overgrowth",
-        ]
-        for candidate in preferred_names:
-                if tags.has(candidate):
-                        tile_name = candidate
-                        break
-        if not tile_name.is_empty():
-                tile_name = String(tile_name).to_lower()
-        set_cell_named(LAYER_LIFE, cell, tile_name)
-        set_cell_tile_id(LAYER_LIFE, cell, tile_id)
-        var cat_meta := get_cell_meta(LAYER_LIFE, cell, "category")
-        if typeof(cat_meta) == TYPE_STRING:
-                var cat := String(cat_meta)
-                if not cat.is_empty():
-                        set_fx_for_category(cell, cat)
-        emit_signal("tile_placed", tile_id, cell)
-        rules.mark_occupied(cell)
-        _finalize_tile_placement()
-        return true
+		var category: String = id_to_category(tile_id)
+		if category.is_empty():
+				return false
+		var tile_name := category
+		var legacy_name := CategoryMap.legacy(category)
+		if not legacy_name.is_empty():
+				tile_name = legacy_name
+		var tags: Array = []
+		if typeof(DataDB) != TYPE_NIL and DataDB.has_method("get_tags_for_id"):
+				tags = DataDB.get_tags_for_id(tile_id)
+		var preferred_names: Array = [
+				"harvest",
+				"build",
+				"refine",
+				"storage",
+				"guard",
+				"upgrade",
+				"chanting",
+				"grove",
+				"overgrowth",
+		]
+		for candidate in preferred_names:
+				if tags.has(candidate):
+						tile_name = candidate
+						break
+		if not tile_name.is_empty():
+				tile_name = String(tile_name).to_lower()
+		set_cell_named(LAYER_LIFE, cell, tile_name)
+		set_cell_tile_id(LAYER_LIFE, cell, tile_id)
+		var cat_meta := get_cell_meta(LAYER_LIFE, cell, "category")
+		if typeof(cat_meta) == TYPE_STRING:
+				var cat := String(cat_meta)
+				if not cat.is_empty():
+						set_fx_for_category(cell, cat)
+		emit_signal("tile_placed", tile_id, cell)
+		rules.mark_occupied(cell)
+		_finalize_tile_placement()
+		return true
 
 
 func _finalize_tile_placement() -> void:
-        _sync_turn_with_engine()
-        _update_hud()
-        if is_instance_valid(cursor):
-                cursor.update_highlight_state()
-        var growth_manager: Node = get_node_or_null("/root/GrowthManager")
-        if growth_manager != null and growth_manager.has_method("request_growth_update"):
-                growth_manager.request_growth_update(_current_turn_index())
-        var resource_manager: Node = _get_resource_manager()
-        if resource_manager != null:
-                resource_manager.emit_signal("resources_changed")
+		_sync_turn_with_engine()
+		_update_hud()
+		if is_instance_valid(cursor):
+				cursor.update_highlight_state()
+		var growth_manager: Node = get_node_or_null("/root/GrowthManager")
+		if growth_manager != null and growth_manager.has_method("request_growth_update"):
+				growth_manager.request_growth_update(_current_turn_index())
+		var resource_manager: Node = _get_resource_manager()
+		if resource_manager != null:
+				resource_manager.emit_signal("resources_changed")
 
 
 func enqueue_special(tile_id: String) -> void:
-        var id := String(tile_id)
-        if id.is_empty():
-                return
-        _special_queue.append(id)
-        if _placing_special.is_empty():
-                _dequeue_special()
+		var id := String(tile_id)
+		if id.is_empty():
+				return
+		_special_queue.append(id)
+		if _placing_special.is_empty():
+				_dequeue_special()
 
 
 func _on_special_now(tile_id: String) -> void:
-        enqueue_special(tile_id)
+		enqueue_special(tile_id)
 
 
 func _dequeue_special() -> void:
-        if _special_queue.is_empty():
-                _placing_special = ""
-                _update_hud()
-                if is_instance_valid(cursor):
-                        cursor.update_highlight_state()
-                return
-        var next_id_variant = _special_queue.pop_front()
-        _placing_special = String(next_id_variant)
-        _update_hud()
-        if is_instance_valid(cursor):
-                cursor.update_highlight_state()
+		if _special_queue.is_empty():
+				_placing_special = ""
+				_update_hud()
+				if is_instance_valid(cursor):
+						cursor.update_highlight_state()
+				return
+		var next_id_variant = _special_queue.pop_front()
+		_placing_special = String(next_id_variant)
+		_update_hud()
+		if is_instance_valid(cursor):
+				cursor.update_highlight_state()
 
 
 func _advance_turn() -> void:
-        on_end_turn_pressed()
+		on_end_turn_pressed()
 
 func on_end_turn_pressed() -> void:
-        var turn_engine: Node = _get_turn_engine()
-        if turn_engine != null and turn_engine.has_method("end_turn"):
-                turn_engine.call("end_turn")
-                return
-        var game_singleton: Object = null
-        if Engine.has_singleton("Game"):
-                game_singleton = Engine.get_singleton("Game")
-        if game_singleton != null:
-                if game_singleton.has_method("end_turn"):
-                        game_singleton.call("end_turn")
-                        return
-                if game_singleton.has_method("advance_one_turn"):
-                        game_singleton.call("advance_one_turn")
+		var turn_engine: Node = _get_turn_engine()
+		if turn_engine != null and turn_engine.has_method("end_turn"):
+				turn_engine.call("end_turn")
+				return
+		var game_singleton: Object = null
+		if Engine.has_singleton("Game"):
+				game_singleton = Engine.get_singleton("Game")
+		if game_singleton != null:
+				if game_singleton.has_method("end_turn"):
+						game_singleton.call("end_turn")
+						return
+				if game_singleton.has_method("advance_one_turn"):
+						game_singleton.call("advance_one_turn")
 
 
 func _on_totem_tier_changed(_tier_value: int) -> void:
@@ -825,9 +825,9 @@ func world_to_map(p: Vector2) -> Vector2i:
 
 
 func _setup_hud() -> void:
-        if is_instance_valid(hud):
-                hud.text = _build_hud_text()
-        _update_resource_panel()
+		if is_instance_valid(hud):
+				hud.text = _build_hud_text()
+		_update_resource_panel()
 
 
 func _bind_sprout_registry() -> void:
@@ -841,181 +841,181 @@ func _bind_sprout_registry() -> void:
 
 
 func _bind_tile_gen() -> void:
-        if TileGen == null:
-                return
-        TileGen.bind_world(self)
-        if not TileGen.is_connected("special_to_place_now", Callable(self, "_on_special_now")):
-                TileGen.connect("special_to_place_now", Callable(self, "_on_special_now"))
-        if not TileGen.is_connected("totem_tier_changed", Callable(self, "_on_totem_tier_changed")):
-                TileGen.connect("totem_tier_changed", Callable(self, "_on_totem_tier_changed"))
+		if TileGen == null:
+				return
+		TileGen.bind_world(self)
+		if not TileGen.is_connected("special_to_place_now", Callable(self, "_on_special_now")):
+				TileGen.connect("special_to_place_now", Callable(self, "_on_special_now"))
+		if not TileGen.is_connected("totem_tier_changed", Callable(self, "_on_totem_tier_changed")):
+				TileGen.connect("totem_tier_changed", Callable(self, "_on_totem_tier_changed"))
 
 
 func _bind_commune_manager() -> void:
-        if typeof(CommuneManager) == TYPE_NIL:
-                return
-        if not CommuneManager.offer_ready.is_connected(_on_commune_offer):
-                CommuneManager.offer_ready.connect(_on_commune_offer)
-        if not CommuneManager.chosen.is_connected(_on_commune_chosen):
-                CommuneManager.chosen.connect(_on_commune_chosen)
-        if not CommuneManager.cleared.is_connected(_on_commune_cleared):
-                CommuneManager.cleared.connect(_on_commune_cleared)
+		if typeof(CommuneManager) == TYPE_NIL:
+				return
+		if not CommuneManager.offer_ready.is_connected(_on_commune_offer):
+				CommuneManager.offer_ready.connect(_on_commune_offer)
+		if not CommuneManager.chosen.is_connected(_on_commune_chosen):
+				CommuneManager.chosen.connect(_on_commune_chosen)
+		if not CommuneManager.cleared.is_connected(_on_commune_cleared):
+				CommuneManager.cleared.connect(_on_commune_cleared)
 
 
 func _on_sprout_error(text: String) -> void:
-        if has_node("HUD/DeckLabel"):
-                var label: Label = $HUD/DeckLabel
-                label.text += "\n[SPR] " + text
+		if has_node("HUD/DeckLabel"):
+				var label: Label = $HUD/DeckLabel
+				label.text += "\n[SPR] " + text
 
 
 func _on_sprout_leveled(uid: String, lvl: int) -> void:
-        if has_node("HUD/DeckLabel"):
-                var label: Label = $HUD/DeckLabel
-                label.text += "\n[SPR] " + uid + " → Lv" + str(lvl)
+		if has_node("HUD/DeckLabel"):
+				var label: Label = $HUD/DeckLabel
+				label.text += "\n[SPR] " + uid + " → Lv" + str(lvl)
 
 
 func _on_commune_offer(_choices: Array) -> void:
-        _update_hud()
+		_update_hud()
 
 
 func _on_commune_chosen(_tile_id: String) -> void:
-        _update_hud()
+		_update_hud()
 
 
 func _on_commune_cleared() -> void:
-        _update_hud()
+		_update_hud()
 
 
 func _unhandled_input(event: InputEvent) -> void:
-        if event.is_action_pressed("ui_toggle_sprout_register"):
-                _toggle_sprout_register()
-                var sr_viewport := get_viewport()
-                if sr_viewport != null:
-                        sr_viewport.set_input_as_handled()
-                return
-        if event.is_action_pressed("ui_toggle_threats"):
-                var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
-                if threat_list != null:
-                        threat_list.visible = not threat_list.visible
-                        var threat_viewport := get_viewport()
-                        if threat_viewport != null:
-                                threat_viewport.set_input_as_handled()
-        if event.is_action_pressed("ui_toggle_cluster_fx"):
-                var decay_manager: Node = get_node_or_null("/root/DecayManager")
-                if decay_manager != null:
-                        var current_state := bool(decay_manager.get("debug_show_clusters"))
-                        decay_manager.set("debug_show_clusters", not current_state)
-                        if decay_manager.has_method("_refresh_cluster_fx_overlay"):
-                                decay_manager.call("_refresh_cluster_fx_overlay")
-                var fx_viewport := get_viewport()
-                if fx_viewport != null:
-                        fx_viewport.set_input_as_handled()
-        if event.is_action_pressed("debug_meta_list"):
-                _handle_meta_debug_list()
-                return
-        if event.is_action_pressed("debug_meta_unlock_clipboard"):
-                _handle_meta_debug_unlock_from_clipboard()
-                return
-        if event.is_action_pressed("debug_meta_lock_clipboard"):
-                _handle_meta_debug_lock_from_clipboard()
-                return
-        if event.is_action_pressed("debug_meta_wipe"):
-                _handle_meta_debug_wipe()
-                return
-        if event.is_action_pressed("debug_meta_unlock_all"):
-                _handle_meta_debug_unlock_all()
-                return
+		if event.is_action_pressed("ui_toggle_sprout_register"):
+				_toggle_sprout_register()
+				var sr_viewport := get_viewport()
+				if sr_viewport != null:
+						sr_viewport.set_input_as_handled()
+				return
+		if event.is_action_pressed("ui_toggle_threats"):
+				var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
+				if threat_list != null:
+						threat_list.visible = not threat_list.visible
+						var threat_viewport := get_viewport()
+						if threat_viewport != null:
+								threat_viewport.set_input_as_handled()
+		if event.is_action_pressed("ui_toggle_cluster_fx"):
+				var decay_manager: Node = get_node_or_null("/root/DecayManager")
+				if decay_manager != null:
+						var current_state := bool(decay_manager.get("debug_show_clusters"))
+						decay_manager.set("debug_show_clusters", not current_state)
+						if decay_manager.has_method("_refresh_cluster_fx_overlay"):
+								decay_manager.call("_refresh_cluster_fx_overlay")
+				var fx_viewport := get_viewport()
+				if fx_viewport != null:
+						fx_viewport.set_input_as_handled()
+		if event.is_action_pressed("debug_meta_list"):
+				_handle_meta_debug_list()
+				return
+		if event.is_action_pressed("debug_meta_unlock_clipboard"):
+				_handle_meta_debug_unlock_from_clipboard()
+				return
+		if event.is_action_pressed("debug_meta_lock_clipboard"):
+				_handle_meta_debug_lock_from_clipboard()
+				return
+		if event.is_action_pressed("debug_meta_wipe"):
+				_handle_meta_debug_wipe()
+				return
+		if event.is_action_pressed("debug_meta_unlock_all"):
+				_handle_meta_debug_unlock_all()
+				return
 
 
 func _handle_meta_debug_list() -> void:
-        if not Engine.has_singleton("MetaManager"):
-                return
-        MetaManager.debug_list_unlocked()
+		if not Engine.has_singleton("MetaManager"):
+				return
+		MetaManager.debug_list_unlocked()
 
 
 func _handle_meta_debug_unlock_from_clipboard() -> void:
-        var id := _clipboard_text()
-        if id.is_empty():
-                return
-        if Engine.has_singleton("MetaManager"):
-                MetaManager.debug_unlock_sprout(id)
+		var id := _clipboard_text()
+		if id.is_empty():
+				return
+		if Engine.has_singleton("MetaManager"):
+				MetaManager.debug_unlock_sprout(id)
 
 
 func _handle_meta_debug_lock_from_clipboard() -> void:
-        var id := _clipboard_text()
-        if id.is_empty():
-                return
-        if Engine.has_singleton("MetaManager"):
-                MetaManager.debug_lock_sprout(id)
+		var id := _clipboard_text()
+		if id.is_empty():
+				return
+		if Engine.has_singleton("MetaManager"):
+				MetaManager.debug_lock_sprout(id)
 
 
 func _handle_meta_debug_wipe() -> void:
-        if Engine.has_singleton("MetaManager"):
-                MetaManager.debug_wipe_library()
+		if Engine.has_singleton("MetaManager"):
+				MetaManager.debug_wipe_library()
 
 
 func _handle_meta_debug_unlock_all() -> void:
-        if Engine.has_singleton("MetaManager"):
-                MetaManager.debug_unlock_all()
+		if Engine.has_singleton("MetaManager"):
+				MetaManager.debug_unlock_all()
 
 
 func _clipboard_text() -> String:
-        var raw := ""
-        if DisplayServer.has_feature(DisplayServer.FEATURE_CLIPBOARD):
-                raw = DisplayServer.clipboard_get()
-        return String(raw).strip_edges()
+		var raw := ""
+		if DisplayServer.has_feature(DisplayServer.FEATURE_CLIPBOARD):
+				raw = DisplayServer.clipboard_get()
+		return String(raw).strip_edges()
 
 
 func update_hud(_next_name: String = "", _remaining: int = 0) -> void:
-        _update_hud()
+		_update_hud()
 
 
 func _update_hud() -> void:
-        if not is_instance_valid(hud):
-                return
-        hud.text = _build_hud_text()
-        _update_resource_panel()
+		if not is_instance_valid(hud):
+				return
+		hud.text = _build_hud_text()
+		_update_resource_panel()
 
 
 func _build_hud_text() -> String:
-        var lines: Array[String] = []
-        var current_line := ""
-        var deck := DeckManager if typeof(DeckManager) != TYPE_NIL else null
-        if not _placing_special.is_empty():
-                var display_name := id_to_name(_placing_special)
-                if display_name.is_empty():
-                        display_name = _placing_special
-                current_line = "Current: SPECIAL - %s" % display_name
-        elif typeof(CommuneManager) != TYPE_NIL and CommuneManager.has_current_tile():
-                var tile_id := CommuneManager.get_current_tile_id()
-                var display := id_to_name(tile_id)
-                if display.is_empty():
-                        display = tile_id
-                var cat := ""
-                if deck != null:
-                        cat = deck.get_tile_category(tile_id)
-                if not cat.is_empty():
-                        var canon := CategoryMap.canonical(cat)
-                        var cat_display := CategoryMap.display_name(canon)
-                        if not cat_display.is_empty():
-                                display = "%s (%s)" % [display, cat_display]
-                current_line = "Current: %s" % display
-        else:
-                current_line = "Current: Choose from the Commune"
-        lines.append(current_line)
-        var rc := RunConfig if typeof(RunConfig) != TYPE_NIL else null
-        if rc != null and not rc.last_pick_id.is_empty():
-                var last_name := id_to_name(rc.last_pick_id)
-                if last_name.is_empty():
-                        last_name = rc.last_pick_id
-                lines.append("Last Pick: %s" % last_name)
-        var totem_line := _totem_status_line()
-        if not totem_line.is_empty():
-                lines.append(totem_line)
-        lines.append(
-                (
-                        "Overgrowth: %d | Groves: %d"
-                        % [_count_cells_named("overgrowth"), _count_cells_named("grove")]
-                )
+		var lines: Array[String] = []
+		var current_line := ""
+		var deck := DeckManager if typeof(DeckManager) != TYPE_NIL else null
+		if not _placing_special.is_empty():
+				var display_name := id_to_name(_placing_special)
+				if display_name.is_empty():
+						display_name = _placing_special
+				current_line = "Current: SPECIAL - %s" % display_name
+		elif typeof(CommuneManager) != TYPE_NIL and CommuneManager.has_current_tile():
+				var tile_id := CommuneManager.get_current_tile_id()
+				var display := id_to_name(tile_id)
+				if display.is_empty():
+						display = tile_id
+				var cat := ""
+				if deck != null:
+						cat = deck.get_tile_category(tile_id)
+				if not cat.is_empty():
+						var canon := CategoryMap.canonical(cat)
+						var cat_display := CategoryMap.display_name(canon)
+						if not cat_display.is_empty():
+								display = "%s (%s)" % [display, cat_display]
+				current_line = "Current: %s" % display
+		else:
+				current_line = "Current: Choose from the Commune"
+		lines.append(current_line)
+		var rc := RunConfig if typeof(RunConfig) != TYPE_NIL else null
+		if rc != null and not rc.last_pick_id.is_empty():
+				var last_name := id_to_name(rc.last_pick_id)
+				if last_name.is_empty():
+						last_name = rc.last_pick_id
+				lines.append("Last Pick: %s" % last_name)
+		var totem_line := _totem_status_line()
+		if not totem_line.is_empty():
+				lines.append(totem_line)
+		lines.append(
+				(
+						"Overgrowth: %d | Groves: %d"
+						% [_count_cells_named("overgrowth"), _count_cells_named("grove")]
+				)
 	)
 	var resource_manager: Node = _get_resource_manager()
 	if resource_manager != null:
@@ -1025,9 +1025,9 @@ func _build_hud_text() -> String:
 
 
 func _totem_status_line() -> String:
-        if TileGen == null:
-                return ""
-        return "Totem Tier: %d" % TileGen.get_tier()
+		if TileGen == null:
+				return ""
+		return "Totem Tier: %d" % TileGen.get_tier()
 
 
 func _update_resource_panel() -> void:
@@ -1125,30 +1125,30 @@ func _on_produced_cells(cells_by_fx: Dictionary) -> void:
 
 
 func _count_cells_named(tile_name: String) -> int:
-        var total := 0
-        for y in range(height):
-                for x in range(width):
-                        if get_cell_name(LAYER_LIFE, Vector2i(x, y)) == tile_name:
-                                total += 1
-        return total
+		var total := 0
+		for y in range(height):
+				for x in range(width):
+						if get_cell_name(LAYER_LIFE, Vector2i(x, y)) == tile_name:
+								total += 1
+		return total
 
 func _check_artefact_reveal(cell: Vector2i) -> void:
-        var payload_variant := get_cell_meta(LAYER_OBJECTS, cell, "artefact")
-        if not (payload_variant is Dictionary):
-                if payload_variant != null:
-                        set_cell_meta(LAYER_OBJECTS, cell, "artefact", null)
-                return
-        var payload: Dictionary = payload_variant
-        if payload.is_empty():
-                set_cell_meta(LAYER_OBJECTS, cell, "artefact", null)
-                return
-        _reveal_artefact(cell, payload.duplicate(true))
+		var payload_variant := get_cell_meta(LAYER_OBJECTS, cell, "artefact")
+		if not (payload_variant is Dictionary):
+				if payload_variant != null:
+						set_cell_meta(LAYER_OBJECTS, cell, "artefact", null)
+				return
+		var payload: Dictionary = payload_variant
+		if payload.is_empty():
+				set_cell_meta(LAYER_OBJECTS, cell, "artefact", null)
+				return
+		_reveal_artefact(cell, payload.duplicate(true))
 
 func _on_tile_placed(tile_id: String, cell: Vector2i) -> void:
-        _check_artefact_reveal(cell)
-        var rule_set := _rules_for_tile(tile_id)
-        if rule_set.is_empty():
-                return
+		_check_artefact_reveal(cell)
+		var rule_set := _rules_for_tile(tile_id)
+		if rule_set.is_empty():
+				return
 
 	var on_place_variant: Variant = rule_set.get("on_place", {})
 	if on_place_variant is Dictionary:
@@ -1179,34 +1179,34 @@ func _on_tile_placed(tile_id: String, cell: Vector2i) -> void:
 			if count > 0:
 				_add_sprouts_to_roster(count)
 
-                if bool(on_place.get("cleanse_adjacent_decay", false)):
-                        for n in neighbors_even_q(cell):
-                                if get_cell_name(LAYER_OBJECTS, n) == "decay":
-                                        set_cell_named(LAYER_OBJECTS, n, "empty")
+				if bool(on_place.get("cleanse_adjacent_decay", false)):
+						for n in neighbors_even_q(cell):
+								if get_cell_name(LAYER_OBJECTS, n) == "decay":
+										set_cell_named(LAYER_OBJECTS, n, "empty")
 
 func _reveal_artefact(cell: Vector2i, payload: Dictionary) -> void:
-        set_cell_meta(LAYER_OBJECTS, cell, "artefact", null)
-        if get_cell_name(LAYER_OBJECTS, cell) != "":
-                set_cell_named(LAYER_OBJECTS, cell, "empty")
-        var sprout_id := String(payload.get("reveals_sprout_id", ""))
-        if Engine.has_singleton("MetaManager"):
-                MetaManager.unlock_sprout(sprout_id)
-        if Engine.has_singleton("AudioBus"):
-                AudioBus.play("res://assets/sfx/artefact.wav")
-        _show_artefact_modal(payload)
+		set_cell_meta(LAYER_OBJECTS, cell, "artefact", null)
+		if get_cell_name(LAYER_OBJECTS, cell) != "":
+				set_cell_named(LAYER_OBJECTS, cell, "empty")
+		var sprout_id := String(payload.get("reveals_sprout_id", ""))
+		if Engine.has_singleton("MetaManager"):
+				MetaManager.unlock_sprout(sprout_id)
+		if Engine.has_singleton("AudioBus"):
+				AudioBus.play("res://assets/sfx/artefact.wav")
+		_show_artefact_modal(payload)
 
 func _show_artefact_modal(payload: Dictionary) -> void:
-        if ARTEFACT_REVEAL_SCENE == null:
-                return
-        var existing_modal := get_node_or_null("ArtefactReveal")
-        if existing_modal != null and existing_modal is Node:
-                existing_modal.queue_free()
-        var modal := ARTEFACT_REVEAL_SCENE.instantiate()
-        if modal == null:
-                return
-        add_child(modal)
-        if modal.has_method("open"):
-                modal.call_deferred("open", payload.duplicate(true))
+		if ARTEFACT_REVEAL_SCENE == null:
+				return
+		var existing_modal := get_node_or_null("ArtefactReveal")
+		if existing_modal != null and existing_modal is Node:
+				existing_modal.queue_free()
+		var modal := ARTEFACT_REVEAL_SCENE.instantiate()
+		if modal == null:
+				return
+		add_child(modal)
+		if modal.has_method("open"):
+				modal.call_deferred("open", payload.duplicate(true))
 
 
 func _add_sprouts_to_roster(count: int) -> void:
