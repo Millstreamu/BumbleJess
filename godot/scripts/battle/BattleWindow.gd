@@ -152,30 +152,30 @@ func _on_picker_cancel() -> void:
 	pass
 
 func _build_teams() -> void:
-	left_units.clear()
-	right_units.clear()
-	var attack_defs: Array = DataLite.load_json_array("res://data/attacks.json")
-	var sprouts: Array = []
-	if selected_team.size() > 0:
-		selected_team = _clamp_selection(selected_team)
-		sprouts = selected_team.duplicate(true)
-	else:
-		sprouts = SproutRegistry.pick_for_battle(SLOT_COUNT)
-		if sprouts.is_empty():
-			for i in range(3):
-				sprouts.append({"id": "sprout.woodling", "level": 1})
-	for i in range(SLOT_COUNT):
-		var entry: Dictionary = {}
-		if i < sprouts.size() and typeof(sprouts[i]) == TYPE_DICTIONARY:
-			entry = sprouts[i]
-		left_units.append(_make_unit_from_sprout(entry, true, attack_defs))
+        left_units.clear()
+        right_units.clear()
+        var attack_defs: Array = DataLite.load_json_array("res://data/attacks.json")
+        var sprouts: Array = []
+        if selected_team.size() > 0:
+                selected_team = _clamp_selection(selected_team)
+                sprouts = selected_team.duplicate(true)
+        else:
+                sprouts = SproutRegistry.pick_for_battle(SLOT_COUNT)
+                if sprouts.is_empty():
+                        for filler_index in range(3):
+                                sprouts.append({"id": "sprout.woodling", "level": 1})
+        for slot_index in range(SLOT_COUNT):
+                var entry: Dictionary = {}
+                if slot_index < sprouts.size() and typeof(sprouts[slot_index]) == TYPE_DICTIONARY:
+                        entry = sprouts[slot_index]
+                left_units.append(_make_unit_from_sprout(entry, true, attack_defs))
         var turn_engine: Node = get_tree().root.get_node_or_null("TurnEngine")
         var difficulty_scale: float = 1.0
         if turn_engine:
                 var turn_value: Variant = turn_engine.get("turn_index")
                 if typeof(turn_value) == TYPE_INT:
                         difficulty_scale += 0.03 * max(0, int(turn_value))
-        for i in range(SLOT_COUNT):
+        for enemy_index in range(SLOT_COUNT):
                 right_units.append(_make_decay_unit(difficulty_scale, attack_defs))
 
 func _populate_ui() -> void:
@@ -330,26 +330,26 @@ func _tick_cooldowns(delta: float) -> void:
 			unit["cd_curr"] = max(0.0, float(unit.get("cd_curr", 0.0)) - delta)
 
 func _auto_attacks() -> void:
-	for i in range(SLOT_COUNT):
-		var attacker: Dictionary = left_units[i]
-		if not attacker.get("alive", false):
-			continue
-		if attacker.get("cd_curr", 0.0) > 0.0:
-			continue
-		var target_idx: int = _pick_target(right_units)
-		if target_idx >= 0:
-			_apply_attack(attacker, right_units[target_idx], decay_grid.get_child(target_idx))
-			attacker["cd_curr"] = float(attacker.get("cd", 1.0))
-	for i in range(SLOT_COUNT):
-		var attacker: Dictionary = right_units[i]
-		if not attacker.get("alive", false):
-			continue
-		if attacker.get("cd_curr", 0.0) > 0.0:
-			continue
-		var target_idx: int = _pick_target(left_units)
-		if target_idx >= 0:
-			_apply_attack(attacker, left_units[target_idx], sprout_grid.get_child(target_idx))
-			attacker["cd_curr"] = float(attacker.get("cd", 1.0))
+        for left_index in range(SLOT_COUNT):
+                var attacker: Dictionary = left_units[left_index]
+                if not attacker.get("alive", false):
+                        continue
+                if attacker.get("cd_curr", 0.0) > 0.0:
+                        continue
+                var target_idx: int = _pick_target(right_units)
+                if target_idx >= 0:
+                        _apply_attack(attacker, right_units[target_idx], decay_grid.get_child(target_idx))
+                        attacker["cd_curr"] = float(attacker.get("cd", 1.0))
+        for right_index in range(SLOT_COUNT):
+                var attacker: Dictionary = right_units[right_index]
+                if not attacker.get("alive", false):
+                        continue
+                if attacker.get("cd_curr", 0.0) > 0.0:
+                        continue
+                var target_idx: int = _pick_target(left_units)
+                if target_idx >= 0:
+                        _apply_attack(attacker, left_units[target_idx], sprout_grid.get_child(target_idx))
+                        attacker["cd_curr"] = float(attacker.get("cd", 1.0))
 
 func _pick_target(team: Array) -> int:
 	for idx in FRONT_INDICES:
