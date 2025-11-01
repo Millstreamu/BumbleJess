@@ -825,7 +825,11 @@ func _threat_turns_left(cell: Vector2i) -> int:
                 if record_variant is Dictionary:
                         var record: Dictionary = record_variant
                         return int(record.get("turns", 0))
-        return 0
+        return -1
+
+
+func get_threat_turns_left(cell: Vector2i) -> int:
+        return _threat_turns_left(cell)
 
 
 func _is_valid_threat_target(cell: Vector2i) -> bool:

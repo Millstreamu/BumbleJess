@@ -50,6 +50,17 @@ func unlock_sprout(id: String) -> void:
                 _append_unlock(sid)
                 _save()
                 emit_signal("library_changed")
+                var root := get_tree().root
+                var hud := root.get_node_or_null("HUD") if root != null else null
+                var display_name := sid
+                if Engine.has_singleton("SproutRegistry"):
+                        var def := SproutRegistry.get_by_id(sid)
+                        if def.has("name"):
+                                display_name = String(def.get("name"))
+                if hud == null and root != null:
+                        hud = root.get_node_or_null("Main/World/HUD")
+                if hud != null and hud.has_method("_show_toast"):
+                        hud.call_deferred("_show_toast", "Unlocked: %s" % display_name)
 
 func lock_sprout(id: String) -> void:
         var sid := _normalize_id(id)

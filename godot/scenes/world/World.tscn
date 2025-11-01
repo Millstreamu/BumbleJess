@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://bwyy5o3ygqot8"]
+[gd_scene load_steps=5 format=3 uid="uid://bwyy5o3ygqot8"]
 
 [ext_resource type="Script" uid="uid://dwsw0ea6yceli" path="res://scripts/world/World.gd" id="1"]
 [ext_resource type="Script" uid="uid://d2grjnunlfb7b" path="res://scripts/world/Cursor.gd" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="3"]
 
 [sub_resource type="TileSet" id="TileSet_hex"]
 tile_shape = 3
@@ -27,12 +28,8 @@ default_color = Color(0.95, 0.95, 0.4, 0.9)
 
 [node name="Camera" type="Camera2D" parent="."]
 
-[node name="HUD" type="CanvasLayer" parent="."]
 
-[node name="DeckLabel" type="Label" parent="HUD"]
-offset_left = 16.0
-offset_top = 16.0
-text = "Next: — | Deck: —"
+[node name="HUD" parent="." instance=ExtResource("3")]
 
 [node name="ThreatHUD" type="CanvasLayer" parent="."]
 
@@ -56,46 +53,3 @@ offset_right = -8.0
 offset_bottom = -8.0
 theme_override_constants/separation = 4
 
-[node name="ResourcesPanel" type="Panel" parent="HUD"]
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-mouse_filter = 2
-offset_left = -248.0
-offset_top = -184.0
-offset_right = -16.0
-offset_bottom = -16.0
-
-[node name="Content" type="MarginContainer" parent="HUD/ResourcesPanel"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-offset_top = 8.0
-offset_right = -8.0
-offset_bottom = -8.0
-
-[node name="Rows" type="VBoxContainer" parent="HUD/ResourcesPanel/Content"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_right = 0.0
-offset_bottom = 0.0
-theme_override_constants/separation = 4
-
-[node name="Title" type="Label" parent="HUD/ResourcesPanel/Content/Rows"]
-text = "Resources"
-
-[node name="NatureValue" type="Label" parent="HUD/ResourcesPanel/Content/Rows"]
-text = "Nature: 0/0"
-
-[node name="EarthValue" type="Label" parent="HUD/ResourcesPanel/Content/Rows"]
-text = "Earth: 0/0"
-
-[node name="WaterValue" type="Label" parent="HUD/ResourcesPanel/Content/Rows"]
-text = "Water: 0/0"
-
-[node name="LifeValue" type="Label" parent="HUD/ResourcesPanel/Content/Rows"]
-text = "Life: 0"
-
-[node name="SoulSeedsValue" type="Label" parent="HUD/ResourcesPanel/Content/Rows"]
-text = "Soul Seeds: 0"

@@ -32,6 +32,8 @@ func open_battle_for_cell(target_cell: Vector2i, opts: Dictionary = {}) -> void:
     if opts.has("callback") and opts["callback"] is Callable:
         callback = opts["callback"]
     emit_signal("battle_started", target_cell)
+    if Engine.has_singleton("AudioBus"):
+        AudioBus.play("res://assets/sfx/battle_start.wav")
     open_battle(encounter, callback)
 
 func _create_window() -> void:

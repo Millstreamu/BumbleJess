@@ -15,7 +15,10 @@ var _draft_ui: PreRunDraft = null
 func _ready() -> void:
         set_anchors_preset(Control.PRESET_FULL_RECT)
         var map_id: String = str(ProjectSettings.get_setting(\"application/config/starting_map_id\", \"map.demo_001\"))
-        RunConfig.map_id = map_id
+        if RunConfig.has_method("set_map"):
+                RunConfig.set_map(map_id)
+        else:
+                RunConfig.map_id = map_id
         _prepare_new_game(map_id)
         MapSeeder.load_map(map_id, $World)
         _ensure_pre_run_draft()

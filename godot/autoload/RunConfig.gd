@@ -29,7 +29,9 @@ var selected_variants := {
 }
 
 var totem_id := ""
-var map_id := "map.demo_001"
+var map_id: String = "map.demo_01"
+var difficulty: String = "normal"
+var world_seed: int = 12345
 var core_tiles: Array[String] = []
 var spawn_sprout_ids: Array[String] = []
 var last_pick_id: String = ""
@@ -66,6 +68,15 @@ func set_totem(id: String) -> void:
         emit_signal("selections_changed")
         if not sanitized.is_empty() and Engine.has_singleton("TileGen"):
                 TileGen.set_totem(sanitized)
+
+func set_map(id: String) -> void:
+        map_id = String(id)
+
+func set_difficulty(d: String) -> void:
+        difficulty = String(d)
+
+func set_seed(n: int) -> void:
+        world_seed = int(n)
 
 func set_spawn_sprouts(ids: Array) -> void:
         var sanitized: Array[String] = []

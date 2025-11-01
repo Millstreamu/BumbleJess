@@ -155,7 +155,16 @@ func _execute_passive_def(id: String, def_variant: Variant, context: String, met
             var scaled_effect := _scale_effect(single_effect, tier)
             handled = _dispatch_effect(id, def, scaled_effect, context, metadata) or handled
     if handled:
-        emit_signal("passive_applied", id, context)
+        var signal_context := context
+        if signal_context.is_empty():
+            signal_context = "totem_phase"
+        emit_signal("passive_applied", id, signal_context)
+        var root := get_tree().root
+        var hud := root.get_node_or_null("HUD") if root != null else null
+        if hud == null and root != null:
+            hud = root.get_node_or_null("Main/World/HUD")
+        if hud != null and hud.has_method("_show_toast"):
+            hud.call_deferred("_show_toast", "Passive: %s" % id)
     elif attempted:
         push_warning("Passive type not implemented: %s" % [String(def.get("id", id))])
 
