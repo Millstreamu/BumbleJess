@@ -3,6 +3,7 @@ extends Node
 signal roster_changed()
 signal sprout_leveled(sprout_uid: String, new_level: int)
 signal error_msg(text: String)
+signal roster_regenerated(percent: float)
 
 const MAX_SELECTION := 6
 const TEMPLATE_PATH := "res://data/sprouts_roster.json"
@@ -28,9 +29,12 @@ func _ensure_db_loaded() -> void:
 		_load_db()
 
 func _ready() -> void:
-	_load_db()
-	_load_persisted_roster()
-	_rng.randomize()
+        _load_db()
+        _load_persisted_roster()
+        _rng.randomize()
+
+func regen_percent_all(p: float) -> void:
+        emit_signal("roster_regenerated", p)
 
 func refresh_for_new_game(map_id: String = "") -> void:
 	if _db_by_id.is_empty():

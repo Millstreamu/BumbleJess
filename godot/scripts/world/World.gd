@@ -49,7 +49,71 @@ func _get_resource_manager() -> Node:
 
 
 func _get_turn_engine() -> Node:
-	return get_node_or_null("/root/TurnEngine")
+        if Engine.has_singleton("TurnEngine"):
+                var singleton := Engine.get_singleton("TurnEngine")
+                if singleton is Node:
+                        return singleton
+        var node := get_node_or_null("/root/TurnEngine")
+        if node != null:
+                return node
+        if Engine.has_singleton("Game"):
+                var game_singleton := Engine.get_singleton("Game")
+                if game_singleton is Node:
+                        return game_singleton
+        return get_node_or_null("/root/Game")
+
+func _connect_turn_engine_signals() -> void:
+        var turn_engine: Node = _get_turn_engine()
+        if turn_engine == null:
+                return
+        if turn_engine.has_signal("run_started") and not turn_engine.is_connected(
+                "run_started", Callable(self, "_on_turn_engine_run_started")
+        ):
+                turn_engine.connect("run_started", Callable(self, "_on_turn_engine_run_started"))
+        if turn_engine.has_signal("turn_changed") and not turn_engine.is_connected(
+                "turn_changed", Callable(self, "_on_turn_engine_turn_changed")
+        ):
+                turn_engine.connect("turn_changed", Callable(self, "_on_turn_engine_turn_changed"))
+
+func _ensure_turn_engine_run_started() -> void:
+        var turn_engine: Node = _get_turn_engine()
+        if turn_engine == null:
+                return
+        if turn_engine.has_method("is_run_active") and bool(turn_engine.call("is_run_active")):
+                return
+        if turn_engine.has_method("begin_run"):
+                turn_engine.call("begin_run")
+
+func _sync_turn_with_engine(update_hud: bool = false) -> void:
+        var new_turn := max(turn, 1)
+        var turn_engine: Node = _get_turn_engine()
+        if turn_engine != null:
+                var value: Variant = turn_engine.get("turn_index")
+                if typeof(value) == TYPE_INT:
+                        new_turn = max(int(value), 1)
+        turn = new_turn
+        if update_hud:
+                _update_hud()
+
+func _on_turn_engine_run_started() -> void:
+        _sync_turn_with_engine(true)
+
+func _on_turn_engine_turn_changed(turn_index: int) -> void:
+        turn = max(turn_index, 1)
+        _update_hud()
+
+func _current_turn_index() -> int:
+        var turn_engine: Node = _get_turn_engine()
+        if turn_engine != null:
+                var value: Variant = turn_engine.get("turn_index")
+                if typeof(value) == TYPE_INT:
+                        return max(int(value), 1)
+        return max(turn, 1)
+
+func _notify_turn_engine_tile_placed() -> void:
+        var turn_engine: Node = _get_turn_engine()
+        if turn_engine != null and turn_engine.has_method("notify_tile_placed"):
+                turn_engine.call("notify_tile_placed")
 
 
 func _calculate_hex_cell_size(px: int) -> Vector2i:
@@ -75,23 +139,26 @@ func _ready() -> void:
 			)
 		):
 			growth_manager.connect("grove_spawned", Callable(sprout_registry, "on_grove_spawned"))
-	_bind_resource_manager()
+        _bind_resource_manager()
         _bind_sprout_registry()
         _bind_tile_gen()
         _bind_commune_manager()
+        _connect_turn_engine_signals()
+        _ensure_turn_engine_run_started()
         var decay_manager: Node = get_node_or_null("/root/DecayManager")
         if decay_manager != null and decay_manager.has_method("bind_world"):
                 decay_manager.call("bind_world", self)
-	_ensure_toggle_threats_action()
-	_ensure_toggle_sprout_register_action()
-	_ensure_toggle_cluster_fx_action()
-	var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
-	if threat_list != null:
-		threat_list.visible = false
-	_is_ready = true
-	draw_debug_grid()
-	_setup_hud()
-	_update_hud()
+        _ensure_toggle_threats_action()
+        _ensure_toggle_sprout_register_action()
+        _ensure_toggle_cluster_fx_action()
+        var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
+        if threat_list != null:
+                threat_list.visible = false
+        _is_ready = true
+        draw_debug_grid()
+        _sync_turn_with_engine()
+        _setup_hud()
+        _update_hud()
 	if not is_connected("tile_placed", Callable(self, "_on_tile_placed")):
 		connect("tile_placed", Callable(self, "_on_tile_placed"))
 
@@ -540,6 +607,13 @@ func can_place_at(cell: Vector2i) -> bool:
                 return false
         if not CommuneManager.has_current_tile():
                 return false
+        var turn_engine := _get_turn_engine()
+        if (
+                turn_engine != null
+                and turn_engine.has_method("can_place_tile")
+                and not bool(turn_engine.call("can_place_tile"))
+        ):
+                return false
         return rules.can_place(self, cell)
 
 
@@ -559,7 +633,6 @@ func place_current_tile(cell: Vector2i) -> void:
                 if _place_tile(cell, special_id):
                         _placing_special = ""
                         _dequeue_special()
-                        _advance_turn()
                 return
 
         if typeof(CommuneManager) == TYPE_NIL:
@@ -574,7 +647,7 @@ func place_current_tile(cell: Vector2i) -> void:
         if not _place_tile(cell, tile_id):
                 return
         CommuneManager.consume_current_tile()
-        _advance_turn()
+        _notify_turn_engine_tile_placed()
 
 
 func _place_tile(cell: Vector2i, tile_id: String) -> bool:
@@ -614,13 +687,13 @@ func _place_tile(cell: Vector2i, tile_id: String) -> bool:
 
 
 func _finalize_tile_placement() -> void:
-        turn += 1
+        _sync_turn_with_engine()
         _update_hud()
         if is_instance_valid(cursor):
                 cursor.update_highlight_state()
         var growth_manager: Node = get_node_or_null("/root/GrowthManager")
         if growth_manager != null and growth_manager.has_method("request_growth_update"):
-                growth_manager.request_growth_update(turn)
+                growth_manager.request_growth_update(_current_turn_index())
         var resource_manager: Node = _get_resource_manager()
         if resource_manager != null:
                 resource_manager.emit_signal("resources_changed")
@@ -654,15 +727,22 @@ func _dequeue_special() -> void:
 
 
 func _advance_turn() -> void:
-	var turn_engine: Node = _get_turn_engine()
-	if turn_engine != null:
-		turn_engine.call("advance_one_turn")
-		return
-	var game_singleton: Object = null
-	if Engine.has_singleton("Game"):
-		game_singleton = Engine.get_singleton("Game")
-	if game_singleton != null and game_singleton.has_method("advance_one_turn"):
-		game_singleton.call("advance_one_turn")
+        on_end_turn_pressed()
+
+func on_end_turn_pressed() -> void:
+        var turn_engine: Node = _get_turn_engine()
+        if turn_engine != null and turn_engine.has_method("end_turn"):
+                turn_engine.call("end_turn")
+                return
+        var game_singleton: Object = null
+        if Engine.has_singleton("Game"):
+                game_singleton = Engine.get_singleton("Game")
+        if game_singleton != null:
+                if game_singleton.has_method("end_turn"):
+                        game_singleton.call("end_turn")
+                        return
+                if game_singleton.has_method("advance_one_turn"):
+                        game_singleton.call("advance_one_turn")
 
 
 func _on_totem_tier_changed(_tier_value: int) -> void:

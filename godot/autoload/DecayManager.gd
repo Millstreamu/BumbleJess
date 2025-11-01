@@ -402,62 +402,96 @@ func _scan_clusters() -> void:
 
 
 func _ready() -> void:
-	var data := DataLite.load_json_dict("res://data/decay.json")
-	if data is Dictionary and not data.is_empty():
-		for key in data.keys():
-			cfg[key] = data[key]
-
-	var node: Node = get_node_or_null("/root/TurnEngine")
-	if node == null:
-		node = get_node_or_null("/root/Game")
-	if node != null:
-		if (
-			node.has_signal("turn_started")
-			and not node.is_connected("turn_started", Callable(self, "_on_turn_started"))
-		):
-			node.connect("turn_started", Callable(self, "_on_turn_started"))
-		if (
-			node.has_signal("phase_started")
-			and not node.is_connected("phase_started", Callable(self, "_on_phase_started"))
-		):
-			node.connect("phase_started", Callable(self, "_on_phase_started"))
+        var data := DataLite.load_json_dict("res://data/decay.json")
+        if data is Dictionary and not data.is_empty():
+                for key in data.keys():
+                        cfg[key] = data[key]
+        _connect_turn_engine()
 
 
 func bind_world(world: Node) -> void:
-	if _world != null and _world != world:
-		_clear_all_threats()
-	_world = world
-	_refresh_threat_list()
-	rescan_clusters()
-	_recompute_mirror_pool_protection()
-	if _world != null and _world.has_signal("tile_placed"):
-		if not _world.is_connected("tile_placed", Callable(self, "_on_world_tile_placed")):
-			_world.connect("tile_placed", Callable(self, "_on_world_tile_placed"))
+        if _world != null and _world != world:
+                _clear_all_threats()
+        _world = world
+        _refresh_threat_list()
+        rescan_clusters()
+        _recompute_mirror_pool_protection()
+        if _world != null and _world.has_signal("tile_placed"):
+                if not _world.is_connected("tile_placed", Callable(self, "_on_world_tile_placed")):
+                        _world.connect("tile_placed", Callable(self, "_on_world_tile_placed"))
+
+func _connect_turn_engine() -> void:
+        var turn_engine: Node = _get_turn_engine()
+        if turn_engine == null:
+                return
+        if turn_engine.has_signal("run_started") and not turn_engine.is_connected(
+                "run_started", Callable(self, "_on_run_started")
+        ):
+                turn_engine.connect("run_started", Callable(self, "_on_run_started"))
+        if turn_engine.has_signal("turn_changed") and not turn_engine.is_connected(
+                "turn_changed", Callable(self, "_on_turn_changed")
+        ):
+                turn_engine.connect("turn_changed", Callable(self, "_on_turn_changed"))
+        _on_run_started()
+
+func _on_run_started() -> void:
+        var engine := _get_turn_engine()
+        if engine == null:
+                _turn = 1
+                return
+        var value: Variant = engine.get("turn_index")
+        if typeof(value) == TYPE_INT:
+                _turn = max(int(value), 1)
+        else:
+                _turn = 1
+
+func _on_turn_changed(turn: int) -> void:
+        _turn = max(turn, 1)
+
+func _get_turn_engine() -> Node:
+        var turn_engine: Node = null
+        if Engine.has_singleton("TurnEngine"):
+                var singleton := Engine.get_singleton("TurnEngine")
+                if singleton is Node:
+                        turn_engine = singleton
+        if turn_engine == null:
+                turn_engine = get_node_or_null("/root/TurnEngine")
+        if turn_engine == null and Engine.has_singleton("Game"):
+                var game_singleton := Engine.get_singleton("Game")
+                if game_singleton is Node:
+                        turn_engine = game_singleton
+        if turn_engine == null:
+                turn_engine = get_node_or_null("/root/Game")
+        return turn_engine
 
 
-func _on_turn_started(turn: int) -> void:
-	_turn = turn
+func tick_decay_phase(turn: int) -> void:
+        _turn = max(turn, 1)
+        if _world == null:
+                return
+        _spread_clusters_if_due()
+        _tick_and_trigger_battles()
+        _start_new_threats_up_to_limit()
 
-
-func _on_phase_started(phase_name: String) -> void:
-	if _world == null:
-		return
-	if phase_name == "decay":
-		_spread_clusters_if_due()
-		_tick_and_trigger_battles()
-		_start_new_threats_up_to_limit()
+func regen_percent_hostiles(percent: float) -> void:
+        percent = clamp(percent, 0.0, 100.0)
+        if percent <= 0.0:
+                return
+        # Placeholder: apply when persistent hostile HP model is implemented.
+        # Keeping stub to satisfy TurnEngine regen hook.
+        pass
 
 
 func _spread_decay_if_due() -> void:
-	_spread_clusters_if_due()
+        _spread_clusters_if_due()
 
 
 func _spread_clusters_if_due() -> void:
-	var interval := int(cfg.get("totem_spread_interval_turns", 3))
-	if interval <= 0:
-		interval = 3
-	if (_turn - _last_spread_turn) % interval != 0:
-		return
+        var interval := int(cfg.get("totem_spread_interval_turns", 3))
+        if interval <= 0:
+                interval = 3
+        if (_turn - _last_spread_turn) % interval != 0:
+                return
 	_last_spread_turn = _turn
 
 	_ensure_clusters_scanned()
@@ -635,9 +669,9 @@ func _tick_and_trigger_battles() -> void:
 
 
 func _start_new_threats_up_to_limit() -> void:
-		var max_per_turn := int(cfg.get("max_attacks_per_turn", 3))
-		if max_per_turn <= 0:
-				return
+                var max_per_turn := int(cfg.get("max_attacks_per_turn", 3))
+                if max_per_turn <= 0:
+                                return
 		var started := 0
 		var seen: Dictionary = {}
 		var countdown := int(cfg.get("attack_countdown_turns", 3))
@@ -666,18 +700,18 @@ func _start_new_threats_up_to_limit() -> void:
 
 
 func _trigger_battle(target_cell: Vector2i) -> void:
-		var attacker_cell := Vector2i.ZERO
-		var key := _threat_key(target_cell)
-		if _threats.has(key):
-				var record: Dictionary = _threats[key]
-				var attacker_variant: Variant = record.get("attacker")
-				if attacker_variant is Vector2i:
-						attacker_cell = attacker_variant
-		_clear_threat(target_cell)
-		var encounter := {
-				"target": target_cell,
-				"attacker": attacker_cell,
-		}
+                var attacker_cell := Vector2i.ZERO
+                var key := _threat_key(target_cell)
+                if _threats.has(key):
+                                var record: Dictionary = _threats[key]
+                                var attacker_variant: Variant = record.get("attacker")
+                                if attacker_variant is Vector2i:
+                                                attacker_cell = attacker_variant
+                _clear_threat(target_cell)
+                var encounter := {
+                                "target": target_cell,
+                                "attacker": attacker_cell,
+                }
 		BattleManager.open_battle(encounter, Callable(self, "_on_battle_finished"))
 
 

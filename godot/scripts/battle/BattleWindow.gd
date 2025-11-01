@@ -169,14 +169,14 @@ func _build_teams() -> void:
 		if i < sprouts.size() and typeof(sprouts[i]) == TYPE_DICTIONARY:
 			entry = sprouts[i]
 		left_units.append(_make_unit_from_sprout(entry, true, attack_defs))
-	var turn_engine: Node = get_tree().root.get_node_or_null("TurnEngine")
-	var difficulty_scale: float = 1.0
-	if turn_engine:
-		var turn_value: Variant = turn_engine.get("turn_count")
-		if typeof(turn_value) == TYPE_INT:
-			difficulty_scale += 0.03 * max(0, int(turn_value))
-	for i in range(SLOT_COUNT):
-		right_units.append(_make_decay_unit(difficulty_scale, attack_defs))
+        var turn_engine: Node = get_tree().root.get_node_or_null("TurnEngine")
+        var difficulty_scale: float = 1.0
+        if turn_engine:
+                var turn_value: Variant = turn_engine.get("turn_index")
+                if typeof(turn_value) == TYPE_INT:
+                        difficulty_scale += 0.03 * max(0, int(turn_value))
+        for i in range(SLOT_COUNT):
+                right_units.append(_make_decay_unit(difficulty_scale, attack_defs))
 
 func _populate_ui() -> void:
 	if sprout_grid == null or decay_grid == null:
