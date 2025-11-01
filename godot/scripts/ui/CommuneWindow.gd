@@ -81,7 +81,6 @@ func _summarize(def: Dictionary) -> String:
 						var bonus_variant: Variant = syn.get("bonus", {})
 						var bonus_text := JSON.stringify(bonus_variant) if bonus_variant is Dictionary else String(bonus_variant)
 						lines.append("Adj [%s] +%s" % [tag, bonus_text])
-		if lines.is_empty() and def.has("rules"):
-				lines.append("(legacy rules)")
-		return "\n".join(lines)
-*** End of File
+                if lines.is_empty() and def.has("rules"):
+                                lines.append("(legacy rules)")
+                return "\n".join(lines)

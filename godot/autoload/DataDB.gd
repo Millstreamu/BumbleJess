@@ -73,7 +73,6 @@ func _canonicalize_category(value: String) -> String:
 		var trimmed := String(value).strip_edges()
 		if trimmed.is_empty():
 				return ""
-		if typeof(CategoryMap) != TYPE_NIL:
-				return CategoryMap.canonical(trimmed)
-		return trimmed
-*** End of File
+                if typeof(CategoryMap) != TYPE_NIL:
+                                return CategoryMap.canonical(trimmed)
+                return trimmed

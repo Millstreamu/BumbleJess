@@ -307,8 +307,7 @@ func _find_world() -> Node:
 		var root := get_tree().root
 		if root == null:
 				return null
-		var main := root.get_node_or_null("Main")
-		if main != null and main.has_node("World"):
-				return main.get_node("World")
-		return root.find_child("World", true, false)
-*** End of File
+                var main := root.get_node_or_null("Main")
+                if main != null and main.has_node("World"):
+                                return main.get_node("World")
+                return root.find_child("World", true, false)
