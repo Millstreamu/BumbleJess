@@ -1,8 +1,26 @@
 [
   {
-	"id": "pas.none",
-	"name": "None",
-	"trigger": "none",
-	"effects": []
+        "id": "pas.none",
+        "name": "None",
+        "trigger": "none",
+        "effects": []
+  },
+  {
+        "id": "pas.regen_small",
+        "name": "Small Regeneration",
+        "trigger": "on_totem_phase",
+        "effect": {"type": "regen_all", "percent": 1.0}
+  },
+  {
+        "id": "pas.growth_bonus",
+        "name": "Growth Acceleration",
+        "trigger": "on_totem_phase",
+        "effect": {"type": "growth_speed_mult", "multiplier": 1.1}
+  },
+  {
+        "id": "pas.resource_boost",
+        "name": "Nature Windfall",
+        "trigger": "on_totem_phase",
+        "effect": {"type": "resource_bonus", "resource": "nature", "multiplier": 1.1}
   }
 ]
