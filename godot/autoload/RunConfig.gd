@@ -29,7 +29,7 @@ var selected_variants := {
 }
 
 var totem_id := ""
-var map_id: String = "map.demo_01"
+var map_id: String = "map.demo_001"
 var difficulty: String = "normal"
 var world_seed: int = 12345
 var core_tiles: Array[String] = []

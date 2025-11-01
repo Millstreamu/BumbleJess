@@ -24,7 +24,7 @@ func _load() -> void:
                         if typeof(data) == TYPE_DICTIONARY and data.has("unlocked"):
                                 _library = data
                                 return
-        _library = {"unlocked": ["sprout.grumbler", "sprout.amber_knight"]}
+        _library = {"unlocked": ["sprout.grumbler", "sprout.sprite"]}
         _save()
 
 func _save() -> void:

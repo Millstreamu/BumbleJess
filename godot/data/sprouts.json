@@ -2,7 +2,7 @@
   {
                 "id": "sprout.woodling",
                 "name": "Woodling",
-                "icon": "res://assets/ui/sprouts/woodling.png",
+                "icon": "",
                 "base_stats": {
                   "hp": 35,
 		  "attack": 12,
@@ -24,7 +24,7 @@
   {
                 "id": "sprout.sprite",
                 "name": "Sprite",
-                "icon": "res://assets/ui/sprouts/sprite.png",
+                "icon": "",
                 "base_stats": {
 		  "hp": 24,
 		  "attack": 8,
@@ -46,7 +46,7 @@
   {
                 "id": "sprout.grumbler",
                 "name": "Grumbler",
-                "icon": "res://assets/ui/sprouts/grumbler.png",
+                "icon": "",
                 "base_stats": {
 		  "hp": 42,
 		  "attack": 10,
