@@ -29,6 +29,14 @@ var _special_queue: Array[String] = []
 var _placing_special: String = ""
 var _extra_tile_colors: Dictionary[String, Color] = {}
 var _tile_rules_cache: Dictionary = {}
+var _fx_color_for_cat := {
+        "Nature": Color(0.25, 0.6, 0.25, 0.22),
+        "Earth": Color(0.55, 0.35, 0.2, 0.22),
+        "Water": Color(0.2, 0.4, 0.8, 0.22),
+        "Nest": Color(0.7, 0.6, 0.2, 0.22),
+        "Mystic": Color(0.6, 0.4, 0.7, 0.22),
+        "Aggression": Color(0.7, 0.2, 0.2, 0.22),
+}
 
 @onready var hexmap: TileMap = $HexMap
 @onready var cursor: Node = $Cursor
@@ -126,12 +134,14 @@ func _calculate_hex_cell_size(px: int) -> Vector2i:
 func _ready() -> void:
 	add_child(rules)
 	rules.set_world(self)
-	_ensure_hex_config()
-	_ensure_layers()
-	_build_tileset()
-	var growth_manager: Node = get_node_or_null("/root/GrowthManager")
-	if growth_manager != null:
-		growth_manager.bind_world(self)
+        _ensure_hex_config()
+        _ensure_layers()
+        _build_tileset()
+        tileset_add_named_color("fx_bloom_hint", Color(0.4, 0.8, 0.4, 0.18))
+        tileset_add_named_color("fx_grove_glow", Color(0.6, 1.0, 0.6, 0.28))
+        var growth_manager: Node = get_node_or_null("/root/GrowthManager")
+        if growth_manager != null:
+                growth_manager.bind_world(self)
 		var sprout_registry: Node = get_node_or_null("/root/SproutRegistry")
 		if (
 			sprout_registry != null
@@ -365,22 +375,32 @@ func rebind_tileset() -> void:
 
 
 func set_fx(cell: Vector2i, fx_name: String) -> void:
-	if hexmap == null:
-		return
-	if tiles_name_to_id.is_empty():
-		_build_tileset()
-	if not tiles_name_to_id.has(fx_name):
-		return
-	var tile_info_variant: Variant = tiles_name_to_id[fx_name]
-	if not (tile_info_variant is Dictionary):
-		return
-	var tile_info: Dictionary = tile_info_variant
-	var src_id: int = int(tile_info.get("source_id", -1))
-	var atlas_value: Variant = tile_info.get("atlas_coords", Vector2i.ZERO)
-	var atlas_coords: Vector2i = atlas_value if atlas_value is Vector2i else Vector2i.ZERO
-	if src_id < 0:
-		return
-	hexmap.set_cell(LAYER_FX, cell, src_id, atlas_coords)
+        if hexmap == null:
+                return
+        if tiles_name_to_id.is_empty():
+                _build_tileset()
+        if not tiles_name_to_id.has(fx_name):
+                return
+        var tile_info_variant: Variant = tiles_name_to_id[fx_name]
+        if not (tile_info_variant is Dictionary):
+                return
+        var tile_info: Dictionary = tile_info_variant
+        var src_id: int = int(tile_info.get("source_id", -1))
+        var atlas_value: Variant = tile_info.get("atlas_coords", Vector2i.ZERO)
+        var atlas_coords: Vector2i = atlas_value if atlas_value is Vector2i else Vector2i.ZERO
+        if src_id < 0:
+                return
+        hexmap.set_cell(LAYER_FX, cell, src_id, atlas_coords)
+
+
+func set_fx_for_category(cell: Vector2i, category: String) -> void:
+        var cat := String(category)
+        if cat.is_empty():
+                return
+        var fx_name := "fx_cat_%s" % cat
+        var color: Color = _fx_color_for_cat.get(cat, Color(1, 1, 1, 0.15))
+        tileset_add_named_color(fx_name, color)
+        set_fx(cell, fx_name)
 
 
 func clear_fx(cell: Vector2i) -> void:
@@ -533,6 +553,7 @@ func set_cell_tile_id(layer: int, c: Vector2i, id: String) -> void:
         if id.is_empty():
                 set_cell_meta(layer, c, "id", null)
                 if layer == LAYER_LIFE:
+                        clear_fx(c)
                         set_cell_meta(layer, c, "tags", null)
                         set_cell_meta(layer, c, "category", null)
                 return
@@ -571,16 +592,28 @@ func id_to_name(id: String) -> String:
 
 
 func get_cell_name(layer: int, c: Vector2i) -> String:
-	if hexmap == null:
-		return ""
-	if hexmap.get_cell_tile_data(layer, c) == null:
-		return ""
+        if hexmap == null:
+                return ""
+        if hexmap.get_cell_tile_data(layer, c) == null:
+                return ""
 	var source_id: int = hexmap.get_cell_source_id(layer, c)
 	if source_id < 0:
 		return ""
 	var atlas_coords: Vector2i = hexmap.get_cell_atlas_coords(layer, c)
-	var key := TileSetBuilder.encode_tile_key(source_id, atlas_coords)
-	return String(tiles_id_to_name.get(key, ""))
+        var key := TileSetBuilder.encode_tile_key(source_id, atlas_coords)
+        return String(tiles_id_to_name.get(key, ""))
+
+
+func get_cell_tooltip(cell: Vector2i) -> String:
+        var lines: Array[String] = []
+        var life := get_cell_name(LAYER_LIFE, cell)
+        if not life.is_empty():
+                lines.append("Life: %s" % life)
+        if Engine.has_singleton("DecayManager") and DecayManager.has_method("get_threat_turns_left"):
+                var tl := int(DecayManager.get_threat_turns_left(cell))
+                if tl >= 0:
+                        lines.append("Decay attacks in: %d turn(s)" % tl)
+        return "\n".join(lines).strip_edges()
 
 
 func clear_cell_tile_id(layer: int, c: Vector2i) -> void:
@@ -713,6 +746,11 @@ func _place_tile(cell: Vector2i, tile_id: String) -> bool:
                 tile_name = String(tile_name).to_lower()
         set_cell_named(LAYER_LIFE, cell, tile_name)
         set_cell_tile_id(LAYER_LIFE, cell, tile_id)
+        var cat_meta := get_cell_meta(LAYER_LIFE, cell, "category")
+        if typeof(cat_meta) == TYPE_STRING:
+                var cat := String(cat_meta)
+                if not cat.is_empty():
+                        set_fx_for_category(cell, cat)
         emit_signal("tile_placed", tile_id, cell)
         rules.mark_occupied(cell)
         _finalize_tile_placement()
@@ -1153,6 +1191,8 @@ func _reveal_artefact(cell: Vector2i, payload: Dictionary) -> void:
         var sprout_id := String(payload.get("reveals_sprout_id", ""))
         if Engine.has_singleton("MetaManager"):
                 MetaManager.unlock_sprout(sprout_id)
+        if Engine.has_singleton("AudioBus"):
+                AudioBus.play("res://assets/sfx/artefact.wav")
         _show_artefact_modal(payload)
 
 func _show_artefact_modal(payload: Dictionary) -> void:
