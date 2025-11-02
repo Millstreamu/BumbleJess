@@ -2,53 +2,53 @@
 
 [node name="TotemCard" type="Button"]
 custom_minimum_size = Vector2(260, 180)
-focus_mode = Control.FOCUS_NONE
-size_flags_horizontal = Control.SIZE_EXPAND_FILL
-size_flags_vertical = Control.SIZE_EXPAND_FILL
+focus_mode = 0
+size_flags_horizontal = 3
+size_flags_vertical = 3
 clip_text = false
 
 [node name="Content" type="VBoxContainer" parent="."]
-anchors_preset = Control.PRESET_FULL_RECT
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 8.0
 offset_top = 8.0
 offset_right = -8.0
 offset_bottom = -8.0
-size_flags_horizontal = Control.SIZE_EXPAND_FILL
-size_flags_vertical = Control.SIZE_EXPAND_FILL
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [node name="Name" type="Label" parent="Content"]
 text = "Totem"
-vertical_alignment = VERTICAL_ALIGNMENT_TOP
-horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-size_flags_horizontal = Control.SIZE_EXPAND_FILL
+vertical_alignment = 0
+horizontal_alignment = 0
+size_flags_horizontal = 3
 
 [node name="Icon" type="TextureRect" parent="Content"]
 custom_minimum_size = Vector2(0, 80)
-expand_mode = TextureRect.EXPAND_FIT_WIDTH
-stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-size_flags_horizontal = Control.SIZE_EXPAND_FILL
-size_flags_vertical = Control.SIZE_FILL
+expand_mode = 1
+stretch_mode = 5
+size_flags_horizontal = 3
+size_flags_vertical = 1
 
 [node name="Desc" type="RichTextLabel" parent="Content"]
 text = "—"
-autowrap_mode = TextServer.AUTOWRAP_WORD
+autowrap_mode = 2
 scroll_active = false
 fit_content = true
-size_flags_horizontal = Control.SIZE_EXPAND_FILL
-size_flags_vertical = Control.SIZE_EXPAND_FILL
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [node name="Chosen" type="Label" parent="."]
-anchors_preset = Control.PRESET_TOP_RIGHT
+anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -40.0
 offset_top = 8.0
 offset_right = -8.0
 offset_bottom = 40.0
-horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+horizontal_alignment = 2
+vertical_alignment = 1
 text = "✓"
 visible = false
 
