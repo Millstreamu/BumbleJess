@@ -13,13 +13,13 @@ const CORE_TILE_CARD_SCENE_PATH := "res://scenes/ui/CoreTileCard.tscn"
 @onready var btn_start: Button = $"Panel/Root/Footer/StartRunBtn"
 
 @onready var totem_grid: HFlowContainer = $"Panel/Root/Tabs/Totem/ScrollContainer/TotemGrid"
-@onready var totem_info: Label = $"Panel/Root/Tabs/Totem/TotemInfo"
-@onready var btn_totem_confirm: Button = $"Panel/Root/Tabs/Totem/TotemConfirm"
+@onready var totem_info: Label = $"Panel/Root/Tabs/Totem/TotemFooter/TotemInfo"
+@onready var btn_totem_confirm: Button = $"Panel/Root/Tabs/Totem/TotemFooter/TotemConfirm"
 
 @onready var sprout_grid: HFlowContainer = $"Panel/Root/Tabs/Sprouts/ScrollContainer/SproutGrid"
-@onready var sprout_info: Label = $"Panel/Root/Tabs/Sprouts/SproutInfo"
-@onready var btn_sprout_clear: Button = $"Panel/Root/Tabs/Sprouts/ClearBtn"
-@onready var btn_sprout_confirm: Button = $"Panel/Root/Tabs/Sprouts/SproutConfirm"
+@onready var sprout_info: Label = $"Panel/Root/Tabs/Sprouts/SproutFooter/SproutInfo"
+@onready var btn_sprout_clear: Button = $"Panel/Root/Tabs/Sprouts/SproutFooter/ClearBtn"
+@onready var btn_sprout_confirm: Button = $"Panel/Root/Tabs/Sprouts/SproutFooter/SproutConfirm"
 
 @onready var core_filter: OptionButton = $"Panel/Root/Tabs/CoreTiles/FilterRow/FilterCat"
 @onready var core_search: LineEdit = $"Panel/Root/Tabs/CoreTiles/FilterRow/Search"
