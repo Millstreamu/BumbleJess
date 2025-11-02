@@ -54,9 +54,10 @@ func canonical(cat_or_id: String) -> String:
 				return token
 		if CANONICAL_TO_LEGACY.has(token):
 				return token
-		for canonical_name in DISPLAY_NAMES.keys():
-						if String(canonical_name).to_lower() == lower:
-								return String(canonical_name)
+                for display_key in DISPLAY_NAMES.keys():
+                                var candidate := String(display_key)
+                                if candidate.to_lower() == lower:
+                                                return candidate
 		return cat_or_id
 
 func legacy(cat_or_id: String) -> String:
@@ -74,10 +75,9 @@ func legacy(cat_or_id: String) -> String:
 		var canonical_name := canonical(token)
 		if CANONICAL_TO_LEGACY.has(canonical_name):
 				return String(CANONICAL_TO_LEGACY[canonical_name])
-		var lower := canonical_name.to_lower()
-		for legacy_name in LEGACY_TO_CANONICAL.keys():
-				if LEGACY_TO_CANONICAL[legacy_name] == canonical_name:
-						return String(legacy_name)
+                for legacy_name in LEGACY_TO_CANONICAL.keys():
+                                if LEGACY_TO_CANONICAL[legacy_name] == canonical_name:
+                                                return String(legacy_name)
 		return token
 
 func display_name(cat_or_id: String) -> String:

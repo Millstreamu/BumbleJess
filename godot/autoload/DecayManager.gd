@@ -759,57 +759,57 @@ func _clear_threat(c: Vector2i) -> void:
 
 
 func _tick_and_trigger_battles() -> void:
-		var ready := _tick_threats_and_collect_ready()
-		for cell in ready:
-				_trigger_battle(cell)
+        var ready_cells := _tick_threats_and_collect_ready()
+        for cell in ready_cells:
+                _trigger_battle(cell)
 
 
 func _tick_threats_and_collect_ready() -> Array[Vector2i]:
-		var ready: Array[Vector2i] = []
-		var to_clear: Array[Vector2i] = []
-		for key in _threats.keys():
-				var record_variant: Variant = _threats[key]
-				if not (record_variant is Dictionary):
-						continue
-				var record: Dictionary = record_variant
-				var cell_variant: Variant = record.get("cell", Vector2i.ZERO)
-				if not (cell_variant is Vector2i):
-						continue
-				var cell: Vector2i = cell_variant
-				if _world == null:
-						to_clear.append(cell)
-						continue
-				if _protected_cells.has(_cell_hash(cell)) or _is_guard(cell):
-						to_clear.append(cell)
-						continue
-				var attacker_variant: Variant = record.get("attacker")
-				var attacker_cell := Vector2i.ZERO
-				if attacker_variant is Vector2i:
-						attacker_cell = attacker_variant
-				var target_life_name: String = _world.get_cell_name(_world.LAYER_LIFE, cell)
-				var attacker_name := ""
-				if attacker_cell != Vector2i.ZERO:
-						attacker_name = _world.get_cell_name(_world.LAYER_OBJECTS, attacker_cell)
-				var target_canonical := CategoryMap.canonical(target_life_name)
-				var target_defended: bool = target_canonical == "" or target_canonical == CAT_AGGRESSION
-				var attacker_gone := attacker_cell != Vector2i.ZERO and attacker_name != "decay"
-				if target_defended or attacker_gone:
-						to_clear.append(cell)
-						continue
-				var current_turns := int(record.get("turns", 0))
-				if current_turns > 0:
-						var next_turns := current_turns - 1
-						if next_turns <= 0:
-								_update_threat(cell, 0)
-								ready.append(cell)
-						else:
-								_update_threat(cell, next_turns)
-						continue
-				_update_threat(cell, 0)
-				ready.append(cell)
-		for cell in to_clear:
-				_clear_threat(cell)
-		return ready
+        var ready_cells: Array[Vector2i] = []
+        var to_clear: Array[Vector2i] = []
+        for key in _threats.keys():
+                var record_variant: Variant = _threats[key]
+                if not (record_variant is Dictionary):
+                        continue
+                var record: Dictionary = record_variant
+                var cell_variant: Variant = record.get("cell", Vector2i.ZERO)
+                if not (cell_variant is Vector2i):
+                        continue
+                var cell: Vector2i = cell_variant
+                if _world == null:
+                        to_clear.append(cell)
+                        continue
+                if _protected_cells.has(_cell_hash(cell)) or _is_guard(cell):
+                        to_clear.append(cell)
+                        continue
+                var attacker_variant: Variant = record.get("attacker")
+                var attacker_cell := Vector2i.ZERO
+                if attacker_variant is Vector2i:
+                        attacker_cell = attacker_variant
+                var target_life_name: String = _world.get_cell_name(_world.LAYER_LIFE, cell)
+                var attacker_name := ""
+                if attacker_cell != Vector2i.ZERO:
+                        attacker_name = _world.get_cell_name(_world.LAYER_OBJECTS, attacker_cell)
+                var target_canonical := CategoryMap.canonical(target_life_name)
+                var target_defended: bool = target_canonical == "" or target_canonical == CAT_AGGRESSION
+                var attacker_gone := attacker_cell != Vector2i.ZERO and attacker_name != "decay"
+                if target_defended or attacker_gone:
+                        to_clear.append(cell)
+                        continue
+                var current_turns := int(record.get("turns", 0))
+                if current_turns > 0:
+                        var next_turns := current_turns - 1
+                        if next_turns <= 0:
+                                _update_threat(cell, 0)
+                                ready_cells.append(cell)
+                        else:
+                                _update_threat(cell, next_turns)
+                        continue
+                _update_threat(cell, 0)
+                ready_cells.append(cell)
+        for cell in to_clear:
+                _clear_threat(cell)
+        return ready_cells
 
 
 func _is_threat_ready(cell: Vector2i) -> bool:
@@ -849,7 +849,7 @@ func _is_valid_threat_target(cell: Vector2i) -> bool:
 		return true
 
 
-func _priority_for_target(cell: Vector2i, totem: Vector2i, turn: int) -> int:
+func _priority_for_target(cell: Vector2i, totem: Vector2i, _turn: int) -> int:
 		var distance := _axial_like_distance(cell, totem)
 		var urgency: int = max(0, _threat_turns_left(cell))
 		return distance * 10 + urgency
@@ -866,10 +866,10 @@ func _unique_by_cell(arr: Array) -> Array:
 				if not (cell_variant is Vector2i):
 						continue
 				var cell: Vector2i = cell_variant
-				var hash := _cell_hash(cell)
-				if seen.has(hash):
-						continue
-				seen[hash] = true
+                                var cell_hash := _cell_hash(cell)
+                                if seen.has(cell_hash):
+                                                continue
+                                seen[cell_hash] = true
 				out.append(entry)
 		return out
 
