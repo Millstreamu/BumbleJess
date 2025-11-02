@@ -17,25 +17,25 @@ func open_battle(encounter: Dictionary, callback: Callable) -> void:
 	_window.open(encounter, callback)
 
 func open_battle_for_cell(target_cell: Vector2i, opts: Dictionary = {}) -> void:
-        var encounter: Dictionary = {
-                "target": target_cell,
-        }
-        if opts.has("attacker_cell"):
-                encounter["attacker"] = opts["attacker_cell"]
-        elif opts.has("attacker"):
-                encounter["attacker"] = opts["attacker"]
-        if opts.has("encounter") and typeof(opts["encounter"]) == TYPE_DICTIONARY:
-                var extra := opts["encounter"] as Dictionary
-                for key in extra.keys():
-                        encounter[key] = extra[key]
-        var callback: Callable = Callable()
-        if opts.has("callback") and opts["callback"] is Callable:
-                callback = opts["callback"]
-        emit_signal("battle_started", target_cell)
-        var audio_bus := get_node_or_null("/root/AudioBus")
-        if audio_bus != null and audio_bus.has_method("play"):
-                audio_bus.play("res://assets/sfx/battle_start.wav")
-        open_battle(encounter, callback)
+		var encounter: Dictionary = {
+				"target": target_cell,
+		}
+		if opts.has("attacker_cell"):
+				encounter["attacker"] = opts["attacker_cell"]
+		elif opts.has("attacker"):
+				encounter["attacker"] = opts["attacker"]
+		if opts.has("encounter") and typeof(opts["encounter"]) == TYPE_DICTIONARY:
+				var extra := opts["encounter"] as Dictionary
+				for key in extra.keys():
+						encounter[key] = extra[key]
+		var callback: Callable = Callable()
+		if opts.has("callback") and opts["callback"] is Callable:
+				callback = opts["callback"]
+		emit_signal("battle_started", target_cell)
+		var audio_bus := get_node_or_null("/root/AudioBus")
+		if audio_bus != null and audio_bus.has_method("play"):
+				audio_bus.play("res://assets/sfx/battle_start.wav")
+		open_battle(encounter, callback)
 
 func _create_window() -> void:
 	var scene := load("res://scenes/battle/BattleWindow.tscn") as PackedScene

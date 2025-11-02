@@ -981,23 +981,23 @@ func _apply_battle_outcome(cell: Vector2i, victory: bool, attacker_cell: Vector2
 		if _world.get_cell_name(_world.LAYER_OBJECTS, decay_cell) == "decay":
 			_world.set_cell_named(_world.LAYER_OBJECTS, decay_cell, "empty")
 			_clear_cluster_metadata(decay_cell)
-        else:
-                if _protected_cells.has(_cell_hash(cell)):
-                        return
-                var defender_name := CategoryMap.canonical(
-                        String(_world.get_cell_name(_world.LAYER_LIFE, cell))
-                )
-                if defender_name != CAT_AGGRESSION:
-                        _world.set_cell_named(_world.LAYER_LIFE, cell, "empty")
-                _world.set_cell_named(_world.LAYER_OBJECTS, cell, "decay")
-                for neighbor in _world.neighbors_even_q(cell):
-                        if _protected_cells.has(_cell_hash(neighbor)):
-                                continue
-                        var life_name: String = _world.get_cell_name(_world.LAYER_LIFE, neighbor)
-                        var canonical_life := CategoryMap.canonical(life_name)
-                        if canonical_life != "" and canonical_life != CAT_AGGRESSION:
-                                _world.set_cell_named(_world.LAYER_LIFE, neighbor, "empty")
-                                _world.set_cell_named(_world.LAYER_OBJECTS, neighbor, "decay")
+		else:
+				if _protected_cells.has(_cell_hash(cell)):
+						return
+				var defender_name := CategoryMap.canonical(
+						String(_world.get_cell_name(_world.LAYER_LIFE, cell))
+				)
+				if defender_name != CAT_AGGRESSION:
+						_world.set_cell_named(_world.LAYER_LIFE, cell, "empty")
+				_world.set_cell_named(_world.LAYER_OBJECTS, cell, "decay")
+				for neighbor in _world.neighbors_even_q(cell):
+						if _protected_cells.has(_cell_hash(neighbor)):
+								continue
+						var life_name: String = _world.get_cell_name(_world.LAYER_LIFE, neighbor)
+						var canonical_life := CategoryMap.canonical(life_name)
+						if canonical_life != "" and canonical_life != CAT_AGGRESSION:
+								_world.set_cell_named(_world.LAYER_LIFE, neighbor, "empty")
+								_world.set_cell_named(_world.LAYER_OBJECTS, neighbor, "decay")
 	emit_signal("threat_resolved", cell, victory)
 	rescan_clusters()
 
