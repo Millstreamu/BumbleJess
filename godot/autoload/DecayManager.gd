@@ -855,9 +855,9 @@ func _priority_for_target(cell: Vector2i, totem: Vector2i, _turn_index: int) -> 
 		return distance * 10 + urgency
 
 
-func _unique_by_cell(arr: Array) -> Array:
-		var seen := {}
-		var out: Array = []
+func _unique_by_cell(arr: Array) -> Array[Dictionary]:
+                var seen := {}
+                var out: Array[Dictionary] = []
 		for entry_variant in arr:
 			if not (entry_variant is Dictionary):
 				continue
