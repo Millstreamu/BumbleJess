@@ -1,5 +1,4 @@
 extends Node
-class_name TurnEngine
 
 signal phase_started(name: String)
 signal turn_changed(turn_index: int)

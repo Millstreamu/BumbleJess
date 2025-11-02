@@ -265,19 +265,19 @@ func _get_max_tier() -> int:
 
 
 func _get_turn_count() -> int:
-		if _turn_source == null:
-				_turn_source = _locate_turn_source()
-		var turn_node := _turn_source
-		var value: Variant = null
-		if turn_node != null:
-				value = turn_node.get("turn_index")
-				if typeof(value) != TYPE_INT and typeof(value) != TYPE_FLOAT:
-						value = turn_node.get("turn_count")
-		if typeof(value) == TYPE_INT:
-				return int(value)
-		if typeof(value) == TYPE_FLOAT:
-				return int(value)
-		if _world != null and _world.has_method("get"):
+	if _turn_source == null:
+		_turn_source = _locate_turn_source()
+	var turn_node := _turn_source
+	var value: Variant = null
+	if turn_node != null:
+		value = turn_node.get("turn_index")
+		if typeof(value) != TYPE_INT and typeof(value) != TYPE_FLOAT:
+			value = turn_node.get("turn_count")
+	if typeof(value) == TYPE_INT:
+		return int(value)
+	if typeof(value) == TYPE_FLOAT:
+		return int(value)
+	if _world != null and _world.has_method("get"):
 		var world_turn: Variant = _world.get("turn")
 		if typeof(world_turn) == TYPE_INT:
 			return int(world_turn)

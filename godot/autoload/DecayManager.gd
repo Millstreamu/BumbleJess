@@ -962,44 +962,44 @@ func _trigger_battle(target_cell: Vector2i) -> void:
 
 
 func _on_battle_finished(result: Dictionary) -> void:
-		var cell: Vector2i = result.get("target_cell", Vector2i.ZERO)
-		var victory := bool(result.get("victory", true))
-		var attacker_cell: Vector2i = result.get("attacker_cell", Vector2i.ZERO)
-		_apply_battle_outcome(cell, victory, attacker_cell)
+        var cell: Vector2i = result.get("target_cell", Vector2i.ZERO)
+        var victory := bool(result.get("victory", true))
+        var attacker_cell: Vector2i = result.get("attacker_cell", Vector2i.ZERO)
+        _apply_battle_outcome(cell, victory, attacker_cell)
 
 
 func _apply_battle_outcome(cell: Vector2i, victory: bool, attacker_cell: Vector2i = Vector2i.ZERO) -> void:
-	if _world == null:
-		return
-	if victory:
-		var resource_manager := get_node_or_null("/root/ResourceManager")
-		if resource_manager != null and resource_manager.has_method("add_life"):
-			resource_manager.call("add_life", 3)
-		var decay_cell := attacker_cell
-		if _world.get_cell_name(_world.LAYER_OBJECTS, decay_cell) != "decay":
-			decay_cell = cell
-		if _world.get_cell_name(_world.LAYER_OBJECTS, decay_cell) == "decay":
-			_world.set_cell_named(_world.LAYER_OBJECTS, decay_cell, "empty")
-			_clear_cluster_metadata(decay_cell)
-	else:
-		if _protected_cells.has(_cell_hash(cell)):
-			return
-				var defender_name := CategoryMap.canonical(
-						String(_world.get_cell_name(_world.LAYER_LIFE, cell))
-				)
-				if defender_name != CAT_AGGRESSION:
-						_world.set_cell_named(_world.LAYER_LIFE, cell, "empty")
-		_world.set_cell_named(_world.LAYER_OBJECTS, cell, "decay")
-		for neighbor in _world.neighbors_even_q(cell):
-			if _protected_cells.has(_cell_hash(neighbor)):
-				continue
-						var life_name: String = _world.get_cell_name(_world.LAYER_LIFE, neighbor)
-						var canonical_life := CategoryMap.canonical(life_name)
-						if canonical_life != "" and canonical_life != CAT_AGGRESSION:
-								_world.set_cell_named(_world.LAYER_LIFE, neighbor, "empty")
-								_world.set_cell_named(_world.LAYER_OBJECTS, neighbor, "decay")
-	emit_signal("threat_resolved", cell, victory)
-	rescan_clusters()
+        if _world == null:
+                return
+        if victory:
+                var resource_manager := get_node_or_null("/root/ResourceManager")
+                if resource_manager != null and resource_manager.has_method("add_life"):
+                        resource_manager.call("add_life", 3)
+                var decay_cell := attacker_cell
+                if _world.get_cell_name(_world.LAYER_OBJECTS, decay_cell) != "decay":
+                        decay_cell = cell
+                if _world.get_cell_name(_world.LAYER_OBJECTS, decay_cell) == "decay":
+                        _world.set_cell_named(_world.LAYER_OBJECTS, decay_cell, "empty")
+                        _clear_cluster_metadata(decay_cell)
+        else:
+                if _protected_cells.has(_cell_hash(cell)):
+                        return
+                var defender_name := CategoryMap.canonical(
+                        String(_world.get_cell_name(_world.LAYER_LIFE, cell))
+                )
+                if defender_name != CAT_AGGRESSION:
+                        _world.set_cell_named(_world.LAYER_LIFE, cell, "empty")
+                _world.set_cell_named(_world.LAYER_OBJECTS, cell, "decay")
+                for neighbor in _world.neighbors_even_q(cell):
+                        if _protected_cells.has(_cell_hash(neighbor)):
+                                continue
+                        var life_name: String = _world.get_cell_name(_world.LAYER_LIFE, neighbor)
+                        var canonical_life := CategoryMap.canonical(life_name)
+                        if canonical_life != "" and canonical_life != CAT_AGGRESSION:
+                                _world.set_cell_named(_world.LAYER_LIFE, neighbor, "empty")
+                                _world.set_cell_named(_world.LAYER_OBJECTS, neighbor, "decay")
+        emit_signal("threat_resolved", cell, victory)
+        rescan_clusters()
 
 func _on_world_tile_placed(tile_id: String, _cell: Vector2i) -> void:
 	if tile_id.begins_with("tile.veil.mirror_pool"):

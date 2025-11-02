@@ -134,43 +134,44 @@ func _calculate_hex_cell_size(px: int) -> Vector2i:
 func _ready() -> void:
 	add_child(rules)
 	rules.set_world(self)
-		_ensure_hex_config()
-		_ensure_layers()
-		_build_tileset()
-		tileset_add_named_color("fx_bloom_hint", Color(0.4, 0.8, 0.4, 0.18))
-		tileset_add_named_color("fx_grove_glow", Color(0.6, 1.0, 0.6, 0.28))
-		var growth_manager: Node = get_node_or_null("/root/GrowthManager")
-		if growth_manager != null:
-				growth_manager.bind_world(self)
-		var sprout_registry: Node = get_node_or_null("/root/SproutRegistry")
-		if (
-			sprout_registry != null
-			and not growth_manager.is_connected(
-				"grove_spawned", Callable(sprout_registry, "on_grove_spawned")
-			)
-		):
-			growth_manager.connect("grove_spawned", Callable(sprout_registry, "on_grove_spawned"))
-		_bind_resource_manager()
-		_bind_sprout_registry()
-		_bind_tile_gen()
-		_bind_commune_manager()
-		_connect_turn_engine_signals()
-		_ensure_turn_engine_run_started()
-		var decay_manager: Node = get_node_or_null("/root/DecayManager")
-		if decay_manager != null and decay_manager.has_method("bind_world"):
-				decay_manager.call("bind_world", self)
-		_ensure_toggle_threats_action()
-		_ensure_toggle_sprout_register_action()
-		_ensure_toggle_cluster_fx_action()
-		_ensure_meta_debug_actions()
-		var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
-		if threat_list != null:
-				threat_list.visible = false
-		_is_ready = true
-		draw_debug_grid()
-		_sync_turn_with_engine()
-		_setup_hud()
-		_update_hud()
+	_ensure_hex_config()
+	_ensure_layers()
+	_build_tileset()
+	tileset_add_named_color("fx_bloom_hint", Color(0.4, 0.8, 0.4, 0.18))
+	tileset_add_named_color("fx_grove_glow", Color(0.6, 1.0, 0.6, 0.28))
+	var growth_manager: Node = get_node_or_null("/root/GrowthManager")
+	if growth_manager != null:
+		growth_manager.bind_world(self)
+	var sprout_registry: Node = get_node_or_null("/root/SproutRegistry")
+	if (
+		growth_manager != null
+		and sprout_registry != null
+		and not growth_manager.is_connected(
+			"grove_spawned", Callable(sprout_registry, "on_grove_spawned")
+		)
+	):
+		growth_manager.connect("grove_spawned", Callable(sprout_registry, "on_grove_spawned"))
+	_bind_resource_manager()
+	_bind_sprout_registry()
+	_bind_tile_gen()
+	_bind_commune_manager()
+	_connect_turn_engine_signals()
+	_ensure_turn_engine_run_started()
+	var decay_manager: Node = get_node_or_null("/root/DecayManager")
+	if decay_manager != null and decay_manager.has_method("bind_world"):
+		decay_manager.call("bind_world", self)
+	_ensure_toggle_threats_action()
+	_ensure_toggle_sprout_register_action()
+	_ensure_toggle_cluster_fx_action()
+	_ensure_meta_debug_actions()
+	var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
+	if threat_list != null:
+		threat_list.visible = false
+	_is_ready = true
+	draw_debug_grid()
+	_sync_turn_with_engine()
+	_setup_hud()
+	_update_hud()
 	if not is_connected("tile_placed", Callable(self, "_on_tile_placed")):
 		connect("tile_placed", Callable(self, "_on_tile_placed"))
 
