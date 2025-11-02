@@ -27,6 +27,7 @@ var _tiles_by_cat: Dictionary = {}
 var _choices: Dictionary = {}
 var _tab_nodes: Dictionary = {}
 
+
 func _ready() -> void:
     process_mode = Node.PROCESS_MODE_WHEN_PAUSED
     _card_scene = load(CARD_SCENE_PATH)
@@ -43,6 +44,7 @@ func _ready() -> void:
     _roll_all()
     _refresh_confirm()
 
+
 func open() -> void:
     RunConfig.clear_draft_selections()
     _roll_all()
@@ -52,8 +54,10 @@ func open() -> void:
     get_tree().paused = true
     visible = true
 
+
 func _on_cancel() -> void:
     _close()
+
 
 func _load_tiles() -> void:
     _tiles_by_cat.clear()
@@ -72,6 +76,7 @@ func _load_tiles() -> void:
         var list: Array = _tiles_by_cat[cat]
         list.append(tile)
         _tiles_by_cat[cat] = list
+
 
 func _build_tabs() -> void:
     for child in tabs.get_children():
@@ -202,6 +207,7 @@ func _update_badges(cat: String, chosen_id: String) -> void:
         var tile_id := String(button.get_meta("tile_id")) if button.has_meta("tile_id") else ""
         badge.visible = (tile_id == chosen_id)
 
+
 func _summarize_rules(rules_variant: Variant) -> String:
     if not (rules_variant is Dictionary):
         return "—"
@@ -214,6 +220,7 @@ func _summarize_rules(rules_variant: Variant) -> String:
         lines.append("%s: %s" % [str(key), JSON.stringify(value)])
     return "\n".join(lines)
 
+
 func _on_reroll_current() -> void:
     var idx := tabs.current_tab
     if idx < 0 or idx >= CATEGORIES.size():
@@ -224,6 +231,7 @@ func _on_reroll_current() -> void:
 
 func _refresh_confirm() -> void:
     confirm_btn.disabled = not RunConfig.all_categories_selected()
+
 
 func _on_confirm() -> void:
     if not RunConfig.all_categories_selected():
