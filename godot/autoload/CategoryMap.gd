@@ -40,45 +40,45 @@ const DISPLAY_NAMES: Dictionary = {
 var _tile_category_cache: Dictionary = {}
 
 func canonical(cat_or_id: String) -> String:
-		var token := _normalize_input(cat_or_id)
-		if token.is_empty():
-			return cat_or_id
-		if token.begins_with("tile."):
-			return normalize_from_tile_id(token)
-		if token.begins_with("cat:"):
-			token = token.substr(4)
-		var lower := token.to_lower()
-		if LEGACY_TO_CANONICAL.has(lower):
-			return String(LEGACY_TO_CANONICAL[lower])
-		if DISPLAY_NAMES.has(token):
-			return token
-		if CANONICAL_TO_LEGACY.has(token):
-			return token
-			for display_key in DISPLAY_NAMES.keys():
-				var candidate := String(display_key)
-				if candidate.to_lower() == lower:
-					return candidate
+	var token := _normalize_input(cat_or_id)
+	if token.is_empty():
 		return cat_or_id
+	if token.begins_with("tile."):
+		return normalize_from_tile_id(token)
+	if token.begins_with("cat:"):
+		token = token.substr(4)
+	var lower := token.to_lower()
+	if LEGACY_TO_CANONICAL.has(lower):
+		return String(LEGACY_TO_CANONICAL[lower])
+	if DISPLAY_NAMES.has(token):
+		return token
+	if CANONICAL_TO_LEGACY.has(token):
+		return token
+	for display_key in DISPLAY_NAMES.keys():
+		var candidate := String(display_key)
+		if candidate.to_lower() == lower:
+			return candidate
+	return cat_or_id
 
 func legacy(cat_or_id: String) -> String:
-		var token := _normalize_input(cat_or_id)
-		if token.is_empty():
-				return cat_or_id
-		if token.begins_with("tile."):
-				var canonical_name := normalize_from_tile_id(token)
-				return legacy(canonical_name)
-		if token.begins_with("cat:"):
-				token = token.substr(4)
-		var lower_token := token.to_lower()
-		if LEGACY_TO_CANONICAL.has(lower_token):
-				return String(lower_token)
-		var canonical_name := canonical(token)
-		if CANONICAL_TO_LEGACY.has(canonical_name):
-				return String(CANONICAL_TO_LEGACY[canonical_name])
-				for legacy_name in LEGACY_TO_CANONICAL.keys():
-								if LEGACY_TO_CANONICAL[legacy_name] == canonical_name:
-												return String(legacy_name)
-		return token
+	var token := _normalize_input(cat_or_id)
+	if token.is_empty():
+		return cat_or_id
+	if token.begins_with("tile."):
+		var tile_canonical := normalize_from_tile_id(token)
+		return legacy(tile_canonical)
+	if token.begins_with("cat:"):
+		token = token.substr(4)
+	var lower_token := token.to_lower()
+	if LEGACY_TO_CANONICAL.has(lower_token):
+		return String(lower_token)
+	var canonical_name := canonical(token)
+	if CANONICAL_TO_LEGACY.has(canonical_name):
+		return String(CANONICAL_TO_LEGACY[canonical_name])
+	for legacy_name in LEGACY_TO_CANONICAL.keys():
+		if LEGACY_TO_CANONICAL[legacy_name] == canonical_name:
+			return String(legacy_name)
+	return token
 
 func display_name(cat_or_id: String) -> String:
 		var canonical_name := canonical(cat_or_id)

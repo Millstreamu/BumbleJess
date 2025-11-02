@@ -849,7 +849,7 @@ func _is_valid_threat_target(cell: Vector2i) -> bool:
 		return true
 
 
-func _priority_for_target(cell: Vector2i, totem: Vector2i, _turn: int) -> int:
+func _priority_for_target(cell: Vector2i, totem: Vector2i, _turn_index: int) -> int:
 		var distance := _axial_like_distance(cell, totem)
 		var urgency: int = max(0, _threat_turns_left(cell))
 		return distance * 10 + urgency
