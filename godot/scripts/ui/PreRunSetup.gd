@@ -3,9 +3,9 @@ class_name PreRunSetup
 
 signal setup_finished(totem_id: String, sprout_ids: Array)
 
-const TOTEM_CARD_SCENE: PackedScene = preload("res://scenes/ui/TotemCard.tscn")
-const SPROUT_CARD_SCENE: PackedScene = preload("res://scenes/ui/SproutCard.tscn")
-const CORE_TILE_CARD_SCENE: PackedScene = preload("res://scenes/ui/CoreTileCard.tscn")
+const TOTEM_CARD_SCENE_PATH := "res://scenes/ui/TotemCard.tscn"
+const SPROUT_CARD_SCENE_PATH := "res://scenes/ui/SproutCard.tscn"
+const CORE_TILE_CARD_SCENE_PATH := "res://scenes/ui/CoreTileCard.tscn"
 
 @onready var tabs: TabContainer = $"Panel/Root/Tabs"
 @onready var btn_cancel: Button = $"Panel/Root/Header/CloseBtn"
@@ -38,26 +38,33 @@ var _all_tiles: Array = []
 var _core_selected: Array[String] = []
 var _tree_was_paused: bool = false
 
+var _totem_card_scene: PackedScene = null
+var _sprout_card_scene: PackedScene = null
+var _core_tile_card_scene: PackedScene = null
+
 const CORE_MAX := 10
 
 func _ready() -> void:
-		process_mode = Node.PROCESS_MODE_WHEN_PAUSED
-		visible = false
-		btn_cancel.pressed.connect(_on_cancel)
-		btn_back.pressed.connect(_on_back)
-		btn_start.pressed.connect(_on_start)
-		btn_totem_confirm.pressed.connect(_on_totem_confirm)
-		btn_sprout_clear.pressed.connect(_on_sprout_clear)
-		btn_sprout_confirm.pressed.connect(_on_sprout_confirm)
-		core_filter.item_selected.connect(_on_core_filter)
-		core_search.text_changed.connect(_on_core_search_changed)
-		core_clear.pressed.connect(_on_core_clear)
-		core_confirm.pressed.connect(_on_core_confirm)
-		_load_data()
-		_load_all_tiles()
-		_apply_existing_choices()
-		_build_totem_grid()
-		_build_sprout_grid()
+                process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+                visible = false
+                btn_cancel.pressed.connect(_on_cancel)
+                btn_back.pressed.connect(_on_back)
+                btn_start.pressed.connect(_on_start)
+                btn_totem_confirm.pressed.connect(_on_totem_confirm)
+                btn_sprout_clear.pressed.connect(_on_sprout_clear)
+                btn_sprout_confirm.pressed.connect(_on_sprout_confirm)
+                core_filter.item_selected.connect(_on_core_filter)
+                core_search.text_changed.connect(_on_core_search_changed)
+                core_clear.pressed.connect(_on_core_clear)
+                core_confirm.pressed.connect(_on_core_confirm)
+                _totem_card_scene = _load_scene(TOTEM_CARD_SCENE_PATH)
+                _sprout_card_scene = _load_scene(SPROUT_CARD_SCENE_PATH)
+                _core_tile_card_scene = _load_scene(CORE_TILE_CARD_SCENE_PATH)
+                _load_data()
+                _load_all_tiles()
+                _apply_existing_choices()
+                _build_totem_grid()
+                _build_sprout_grid()
 		_build_core_filters()
 		_rebuild_core_grid()
 		_refresh_all()
@@ -123,17 +130,20 @@ func _apply_existing_choices() -> void:
 				_core_selected.append(cid)
 
 func _build_totem_grid() -> void:
-		_clear_children(totem_grid)
-		for entry_variant in _totems:
-				if not (entry_variant is Dictionary):
-						continue
-				var entry: Dictionary = entry_variant
-				var tid := String(entry.get("id", ""))
-				if tid.is_empty():
-						continue
-				var button := TOTEM_CARD_SCENE.instantiate() as Button
-				if button == null:
-						continue
+                _clear_children(totem_grid)
+                if _totem_card_scene == null:
+                                _update_totem_badges()
+                                return
+                for entry_variant in _totems:
+                                if not (entry_variant is Dictionary):
+                                                continue
+                                var entry: Dictionary = entry_variant
+                                var tid := String(entry.get("id", ""))
+                                if tid.is_empty():
+                                                continue
+                                var button := _totem_card_scene.instantiate() as Button
+                                if button == null:
+                                                continue
 				button.set_meta("id", tid)
 				var display_name := String(entry.get("name", tid))
 				var desc := String(entry.get("desc", ""))
@@ -163,18 +173,21 @@ func _build_totem_grid() -> void:
 		_update_totem_badges()
 
 func _build_sprout_grid() -> void:
-		_clear_children(sprout_grid)
-		var removed_locked := false
-		for sprout_variant in _sprouts:
-				if not (sprout_variant is Dictionary):
-						continue
-				var sprout: Dictionary = sprout_variant
-				var sid := String(sprout.get("id", ""))
-				if sid.is_empty():
-						continue
-				var button := SPROUT_CARD_SCENE.instantiate() as Button
-				if button == null:
-						continue
+                _clear_children(sprout_grid)
+                if _sprout_card_scene == null:
+                                _update_sprout_badges()
+                                return
+                var removed_locked := false
+                for sprout_variant in _sprouts:
+                                if not (sprout_variant is Dictionary):
+                                                continue
+                                var sprout: Dictionary = sprout_variant
+                                var sid := String(sprout.get("id", ""))
+                                if sid.is_empty():
+                                                continue
+                                var button := _sprout_card_scene.instantiate() as Button
+                                if button == null:
+                                                continue
 				button.set_meta("id", sid)
 				var display_name := String(sprout.get("name", sid))
 				var name_label := button.get_node_or_null("Name") as Label
@@ -251,9 +264,13 @@ func _build_core_filters() -> void:
 				core_filter.select(0)
 
 func _rebuild_core_grid() -> void:
-	if core_grid == null:
-		return
-	_clear_children(core_grid)
+        if core_grid == null:
+                return
+        _clear_children(core_grid)
+
+        if _core_tile_card_scene == null:
+                _refresh_core_ui()
+                return
 
 	var sel_cat := ""
 	var idx := core_filter.selected if core_filter != null else -1
@@ -291,9 +308,9 @@ func _rebuild_core_grid() -> void:
 			if not hay.contains(query):
 				continue
 
-		var button := CORE_TILE_CARD_SCENE.instantiate() as Button
-		if button == null:
-			continue
+                var button := _core_tile_card_scene.instantiate() as Button
+                if button == null:
+                        continue
 		button.set_meta("id", id)
 
 		var name_label := button.get_node_or_null("Content/Header/Name") as Label
@@ -317,7 +334,19 @@ func _rebuild_core_grid() -> void:
 		)
 		core_grid.add_child(button)
 
-	_refresh_core_ui()
+        _refresh_core_ui()
+
+func _load_scene(path: String) -> PackedScene:
+        if path.is_empty():
+                return null
+        if not ResourceLoader.exists(path):
+                push_warning("PreRunSetup: missing scene at %s" % path)
+                return null
+        var resource := ResourceLoader.load(path)
+        if resource is PackedScene:
+                return resource
+        push_warning("PreRunSetup: resource at %s is not a PackedScene" % path)
+        return null
 
 func _summarize_tile(def: Dictionary) -> String:
 		var lines: Array[String] = []
