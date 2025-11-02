@@ -1,13 +1,10 @@
 extends Control
 
 const PRE_RUN_SETUP_SCENE_PATH := "res://scenes/ui/PreRunSetup.tscn"
-const PRE_RUN_DRAFT_SCENE_PATH := "res://scenes/ui/PreRunDraft.tscn"
 
 var _pre_run_setup_scene: PackedScene = null
-var _pre_run_draft_scene: PackedScene = null
 
 var _setup_ui: PreRunSetup = null
-var _draft_ui: PreRunDraft = null
 
 func _ready() -> void:
 		set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -17,27 +14,23 @@ func _ready() -> void:
 		else:
 				RunConfig.map_id = map_id
 		_pre_run_setup_scene = _load_scene(PRE_RUN_SETUP_SCENE_PATH)
-		_pre_run_draft_scene = _load_scene(PRE_RUN_DRAFT_SCENE_PATH)
-		_prepare_new_game(map_id)
-		MapSeeder.load_map(map_id, $World)
-		_ensure_pre_run_draft()
-		_ensure_pre_run_setup()
-		_begin_new_run_flow()
+                _prepare_new_game(map_id)
+                MapSeeder.load_map(map_id, $World)
+                _ensure_pre_run_setup()
+                _begin_new_run_flow()
 
 func _prepare_new_game(map_id: String) -> void:
 	if SproutRegistry != null and SproutRegistry.has_method("refresh_for_new_game"):
 		SproutRegistry.refresh_for_new_game(map_id)
 
 func _begin_new_run_flow() -> void:
-	RunConfig.clear_for_new_run()
-	if _setup_ui != null:
-		_setup_ui.open()
-	elif _draft_ui != null:
-		_draft_ui.open()
+        RunConfig.clear_for_new_run()
+        if _setup_ui != null:
+                _setup_ui.open()
 
 func _ensure_pre_run_setup() -> void:
-	if is_instance_valid(_setup_ui):
-		return
+        if is_instance_valid(_setup_ui):
+                return
 	if _pre_run_setup_scene == null:
 		return
 	var instance: Node = _pre_run_setup_scene.instantiate()
@@ -48,43 +41,27 @@ func _ensure_pre_run_setup() -> void:
 	if setup == null:
 		instance.queue_free()
 		return
-	_setup_ui = setup
-	setup.setup_finished.connect(_on_setup_finished)
-	setup.tree_exited.connect(func():
-		if _setup_ui == setup:
-			_setup_ui = null
-	)
-
-func _ensure_pre_run_draft() -> void:
-	if is_instance_valid(_draft_ui):
-		return
-	if _pre_run_draft_scene == null:
-		return
-	var instance: Node = _pre_run_draft_scene.instantiate()
-	if instance == null:
-		return
-	add_child(instance)
-	var draft := instance as PreRunDraft
-	if draft == null:
-		instance.queue_free()
-		return
-	_draft_ui = draft
-	draft.draft_done.connect(_on_draft_done)
-	draft.tree_exited.connect(func():
-		if _draft_ui == draft:
-			_draft_ui = null
-	)
+        _setup_ui = setup
+        setup.setup_finished.connect(_on_setup_finished)
+        setup.tree_exited.connect(func():
+                if _setup_ui == setup:
+                        _setup_ui = null
+        )
 
 func _on_setup_finished(_totem_id: String, _sprout_ids: Array) -> void:
-		if RunConfig.core_tiles.size() > 0:
-				DeckManager.build_deck_from_core("res://data/deck.json", RunConfig.core_tiles)
-		if _draft_ui != null:
-				_draft_ui.open()
-
-func _on_draft_done() -> void:
-		var world := $World
-		if world != null and world.has_method("update_hud"):
-				world.call("update_hud")
+                if RunConfig.core_tiles.size() > 0:
+                                DeckManager.build_deck_from_core("res://data/deck.json", RunConfig.core_tiles)
+                else:
+                                DeckManager.build_starting_deck()
+                                if DeckManager.deck.size() > 0:
+                                                DeckManager.shuffle()
+                                                DeckManager.draw_one()
+                                else:
+                                                DeckManager.next_tile_id = ""
+                var world := $World
+                if world != null and world.has_method("update_hud"):
+                                world.call("update_hud")
+                RunConfig.mark_ready()
 
 func _load_scene(path: String) -> PackedScene:
 		if path.is_empty():
