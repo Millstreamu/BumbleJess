@@ -1,23 +1,28 @@
 extends Control
 
-const PRE_RUN_SETUP_SCENE: PackedScene = preload("res://scenes/ui/PreRunSetup.tscn")
-const PRE_RUN_DRAFT_SCENE: PackedScene = preload("res://scenes/ui/PreRunDraft.tscn")
+const PRE_RUN_SETUP_SCENE_PATH := "res://scenes/ui/PreRunSetup.tscn"
+const PRE_RUN_DRAFT_SCENE_PATH := "res://scenes/ui/PreRunDraft.tscn"
+
+var _pre_run_setup_scene: PackedScene = null
+var _pre_run_draft_scene: PackedScene = null
 
 var _setup_ui: PreRunSetup = null
 var _draft_ui: PreRunDraft = null
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
-	var map_id: String = str(ProjectSettings.get_setting("application/config/starting_map_id", "map.demo_001"))
-	if RunConfig.has_method("set_map"):
-		RunConfig.set_map(map_id)
-	else:
-		RunConfig.map_id = map_id
-	_prepare_new_game(map_id)
-	MapSeeder.load_map(map_id, $World)
-	_ensure_pre_run_draft()
-	_ensure_pre_run_setup()
-	_begin_new_run_flow()
+        set_anchors_preset(Control.PRESET_FULL_RECT)
+        var map_id: String = str(ProjectSettings.get_setting("application/config/starting_map_id", "map.demo_001"))
+        if RunConfig.has_method("set_map"):
+                RunConfig.set_map(map_id)
+        else:
+                RunConfig.map_id = map_id
+        _pre_run_setup_scene = _load_scene(PRE_RUN_SETUP_SCENE_PATH)
+        _pre_run_draft_scene = _load_scene(PRE_RUN_DRAFT_SCENE_PATH)
+        _prepare_new_game(map_id)
+        MapSeeder.load_map(map_id, $World)
+        _ensure_pre_run_draft()
+        _ensure_pre_run_setup()
+        _begin_new_run_flow()
 
 func _prepare_new_game(map_id: String) -> void:
 	if SproutRegistry != null and SproutRegistry.has_method("refresh_for_new_game"):
@@ -31,11 +36,11 @@ func _begin_new_run_flow() -> void:
 		_draft_ui.open()
 
 func _ensure_pre_run_setup() -> void:
-	if is_instance_valid(_setup_ui):
-		return
-	if PRE_RUN_SETUP_SCENE == null:
-		return
-	var instance: Node = PRE_RUN_SETUP_SCENE.instantiate()
+        if is_instance_valid(_setup_ui):
+                return
+        if _pre_run_setup_scene == null:
+                return
+        var instance: Node = _pre_run_setup_scene.instantiate()
 	if instance == null:
 		return
 	add_child(instance)
@@ -51,11 +56,11 @@ func _ensure_pre_run_setup() -> void:
 	)
 
 func _ensure_pre_run_draft() -> void:
-	if is_instance_valid(_draft_ui):
-		return
-	if PRE_RUN_DRAFT_SCENE == null:
-		return
-	var instance: Node = PRE_RUN_DRAFT_SCENE.instantiate()
+        if is_instance_valid(_draft_ui):
+                return
+        if _pre_run_draft_scene == null:
+                return
+        var instance: Node = _pre_run_draft_scene.instantiate()
 	if instance == null:
 		return
 	add_child(instance)
@@ -71,12 +76,24 @@ func _ensure_pre_run_draft() -> void:
 	)
 
 func _on_setup_finished(_totem_id: String, _sprout_ids: Array) -> void:
-	if RunConfig.core_tiles.size() > 0:
-		DeckManager.build_deck_from_core("res://data/deck.json", RunConfig.core_tiles)
-	if _draft_ui != null:
-		_draft_ui.open()
+        if RunConfig.core_tiles.size() > 0:
+                DeckManager.build_deck_from_core("res://data/deck.json", RunConfig.core_tiles)
+        if _draft_ui != null:
+                _draft_ui.open()
 
 func _on_draft_done() -> void:
-	var world := $World
-	if world != null and world.has_method("update_hud"):
-		world.call("update_hud")
+        var world := $World
+        if world != null and world.has_method("update_hud"):
+                world.call("update_hud")
+
+func _load_scene(path: String) -> PackedScene:
+        if path.is_empty():
+                return null
+        if not ResourceLoader.exists(path):
+                push_warning("Pre-run UI scene not found at %s" % path)
+                return null
+        var resource := ResourceLoader.load(path)
+        if resource is PackedScene:
+                return resource
+        push_warning("Resource at %s is not a PackedScene" % path)
+        return null
