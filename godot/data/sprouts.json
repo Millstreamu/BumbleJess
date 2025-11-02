@@ -64,5 +64,27 @@
 				],
 				"attack_id": "atk.root_quake",
 				"passive_ids": []
+  },
+  {
+				"id": "sprout.trog",
+				"name": "Trog",
+				"icon": "",
+				"base_stats": {
+		  "hp": 30,
+		  "attack": 5,
+		  "attack_speed": 2.0
+		},
+				"growth": {
+				  "hp_per_level": 5,
+				  "attack_per_level": 1,
+				  "aspeed_per_level": 0.05
+				},
+				"upgrade_costs": [
+				  {"nature": 0, "earth": 6, "water": 0},
+				  {"nature": 2, "earth": 10, "water": 0},
+				  {"nature": 4, "earth": 16, "water": 0}
+				],
+				"attack_id": "atk.root_quake",
+				"passive_ids": []
   }
 ]
