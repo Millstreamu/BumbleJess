@@ -275,13 +275,13 @@ func _ensure_sprout_picker() -> void:
 
 
 func _toggle_sprout_register() -> void:
-		_ensure_sprout_picker()
-		if not is_instance_valid(_sprout_picker):
-				return
-		if _sprout_picker.visible:
-		_sprout_picker.close()
-	else:
-		_sprout_picker.open()
+        _ensure_sprout_picker()
+        if not is_instance_valid(_sprout_picker):
+                return
+        if _sprout_picker.visible:
+                _sprout_picker.close()
+        else:
+                _sprout_picker.open()
 
 
 func set_width(value: int) -> void:

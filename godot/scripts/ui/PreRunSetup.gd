@@ -3,9 +3,9 @@ class_name PreRunSetup
 
 signal setup_finished(totem_id: String, sprout_ids: Array)
 
-const TOTEM_CARD_SCENE := preload("res://scenes/ui/TotemCard.tscn")
-const SPROUT_CARD_SCENE := preload("res://scenes/ui/SproutCard.tscn")
-const CORE_TILE_CARD_SCENE := preload("res://scenes/ui/CoreTileCard.tscn")
+const TOTEM_CARD_SCENE: PackedScene = preload("res://scenes/ui/TotemCard.tscn")
+const SPROUT_CARD_SCENE: PackedScene = preload("res://scenes/ui/SproutCard.tscn")
+const CORE_TILE_CARD_SCENE: PackedScene = preload("res://scenes/ui/CoreTileCard.tscn")
 
 @onready var tabs: TabContainer = $"Panel/Root/Tabs"
 @onready var btn_cancel: Button = $"Panel/Root/Header/CloseBtn"
@@ -254,12 +254,12 @@ func _rebuild_core_grid() -> void:
 		if core_grid == null:
 				return
 		_clear_children(core_grid)
-		var sel_cat := ""
-		var idx := core_filter.selected if core_filter != null else -1
-		if idx >= 0:
-				var meta := core_filter.get_item_metadata(idx)
-				if typeof(meta) == TYPE_STRING:
-						sel_cat = String(meta)
+                var sel_cat := ""
+                var idx := core_filter.selected if core_filter != null else -1
+                if idx >= 0:
+                                var meta: Variant = core_filter.get_item_metadata(idx)
+                                if typeof(meta) == TYPE_STRING:
+                                                sel_cat = String(meta)
 		var query := ""
 		if core_search != null:
 				query = core_search.text.strip_edges().to_lower()
@@ -273,15 +273,15 @@ func _rebuild_core_grid() -> void:
 				var cat := CategoryMap.canonical(String(entry.get("category", "")))
 				if not sel_cat.is_empty() and cat != sel_cat:
 						continue
-				if query != "":
-						var hay := String(entry.get("name", id)) + " " + id
-						var tags_variant := entry.get("tags", [])
-						if tags_variant is PackedStringArray:
-								for tag in tags_variant:
-										hay += " " + String(tag)
-						elif tags_variant is Array:
-								for tag in tags_variant:
-										hay += " " + String(tag)
+                                if query != "":
+                                                var hay := String(entry.get("name", id)) + " " + id
+                                                var tags_variant: Variant = entry.get("tags", [])
+                                                if tags_variant is PackedStringArray:
+                                                                for tag in tags_variant:
+                                                                                hay += " " + String(tag)
+                                                elif tags_variant is Array:
+                                                                for tag in tags_variant:
+                                                                                hay += " " + String(tag)
 						hay = hay.to_lower()
 						if not hay.contains(query):
 								continue
