@@ -35,7 +35,7 @@ func _ensure_pre_run_setup() -> void:
 		return
 	if PRE_RUN_SETUP_SCENE == null:
 		return
-        var instance: Node = PRE_RUN_SETUP_SCENE.instantiate()
+	var instance: Node = PRE_RUN_SETUP_SCENE.instantiate()
 	if instance == null:
 		return
 	add_child(instance)
@@ -55,7 +55,7 @@ func _ensure_pre_run_draft() -> void:
 		return
 	if PRE_RUN_DRAFT_SCENE == null:
 		return
-        var instance: Node = PRE_RUN_DRAFT_SCENE.instantiate()
+	var instance: Node = PRE_RUN_DRAFT_SCENE.instantiate()
 	if instance == null:
 		return
 	add_child(instance)
