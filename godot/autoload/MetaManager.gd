@@ -5,159 +5,159 @@ signal library_changed()
 const LIB_PATH := "user://sprout_library.json"
 
 var _library: Dictionary = {
-        "unlocked": []
+		"unlocked": []
 }
 
 func _normalize_id(value: String) -> String:
-        return String(value).strip_edges()
+		return String(value).strip_edges()
 
 func _ready() -> void:
-        _load()
+		_load()
 
 func _load() -> void:
-        if FileAccess.file_exists(LIB_PATH):
-                var file: FileAccess = FileAccess.open(LIB_PATH, FileAccess.READ)
-                if file != null:
-                        var text := file.get_as_text()
-                        var data: Variant = JSON.parse_string(text)
-                        if typeof(data) == TYPE_DICTIONARY and data.has("unlocked"):
-                                _library = data
-                                return
-        _library = {"unlocked": ["sprout.grumbler", "sprout.sprite"]}
-        _save()
+		if FileAccess.file_exists(LIB_PATH):
+				var file: FileAccess = FileAccess.open(LIB_PATH, FileAccess.READ)
+				if file != null:
+						var text := file.get_as_text()
+						var data: Variant = JSON.parse_string(text)
+						if typeof(data) == TYPE_DICTIONARY and data.has("unlocked"):
+								_library = data
+								return
+		_library = {"unlocked": ["sprout.grumbler", "sprout.sprite"]}
+		_save()
 
 func _save() -> void:
-        var file: FileAccess = FileAccess.open(LIB_PATH, FileAccess.WRITE)
-        if file == null:
-                return
-        file.store_string(JSON.stringify(_library))
-        file.flush()
+		var file: FileAccess = FileAccess.open(LIB_PATH, FileAccess.WRITE)
+		if file == null:
+				return
+		file.store_string(JSON.stringify(_library))
+		file.flush()
 
 func is_unlocked_sprout(id: String) -> bool:
-        var arr_variant: Variant = _library.get("unlocked", [])
-        if arr_variant is Array:
-                return (arr_variant as Array).has(id)
-        if arr_variant is PackedStringArray:
-                return Array(arr_variant).has(id)
-        return false
+		var arr_variant: Variant = _library.get("unlocked", [])
+		if arr_variant is Array:
+				return (arr_variant as Array).has(id)
+		if arr_variant is PackedStringArray:
+				return Array(arr_variant).has(id)
+		return false
 
 func unlock_sprout(id: String) -> void:
-        var sid := _normalize_id(id)
-        if sid.is_empty():
-                return
-        if not is_unlocked_sprout(sid):
-                _append_unlock(sid)
-                _save()
-                emit_signal("library_changed")
-                var root: Node = get_tree().root
-                var hud: Node = root.get_node_or_null("HUD") if root != null else null
-                var display_name := sid
-                if Engine.has_singleton("SproutRegistry"):
-                        var def_variant: Variant = SproutRegistry.get_by_id(sid)
-                        if def_variant is Dictionary:
-                                var def: Dictionary = def_variant
-                                if def.has("name"):
-                                        display_name = String(def.get("name"))
-                if hud == null and root != null:
-                        hud = root.get_node_or_null("Main/World/HUD")
-                if hud != null and hud.has_method("_show_toast"):
-                        hud.call_deferred("_show_toast", "Unlocked: %s" % display_name)
+		var sid := _normalize_id(id)
+		if sid.is_empty():
+				return
+		if not is_unlocked_sprout(sid):
+				_append_unlock(sid)
+				_save()
+				emit_signal("library_changed")
+				var root: Node = get_tree().root
+				var hud: Node = root.get_node_or_null("HUD") if root != null else null
+				var display_name := sid
+				if Engine.has_singleton("SproutRegistry"):
+						var def_variant: Variant = SproutRegistry.get_by_id(sid)
+						if def_variant is Dictionary:
+								var def: Dictionary = def_variant
+								if def.has("name"):
+										display_name = String(def.get("name"))
+				if hud == null and root != null:
+						hud = root.get_node_or_null("Main/World/HUD")
+				if hud != null and hud.has_method("_show_toast"):
+						hud.call_deferred("_show_toast", "Unlocked: %s" % display_name)
 
 func lock_sprout(id: String) -> void:
-        var sid := _normalize_id(id)
-        if sid.is_empty():
-                return
-        var list_variant: Variant = _library.get("unlocked", [])
-        var modified := false
-        if list_variant is Array:
-                var arr_list: Array = list_variant
-                if arr_list.has(sid):
-                        arr_list.erase(sid)
-                        _library["unlocked"] = arr_list
-                        modified = true
-        elif list_variant is PackedStringArray:
-                var arr := Array(list_variant)
-                if arr.has(sid):
-                        arr.erase(sid)
-                        _library["unlocked"] = arr
-                        modified = true
-        if modified:
-                _save()
-                emit_signal("library_changed")
+		var sid := _normalize_id(id)
+		if sid.is_empty():
+				return
+		var list_variant: Variant = _library.get("unlocked", [])
+		var modified := false
+		if list_variant is Array:
+				var arr_list: Array = list_variant
+				if arr_list.has(sid):
+						arr_list.erase(sid)
+						_library["unlocked"] = arr_list
+						modified = true
+		elif list_variant is PackedStringArray:
+				var arr := Array(list_variant)
+				if arr.has(sid):
+						arr.erase(sid)
+						_library["unlocked"] = arr
+						modified = true
+		if modified:
+				_save()
+				emit_signal("library_changed")
 
 func list_unlocked() -> Array[String]:
-        var list_variant: Variant = _library.get("unlocked", [])
-        if list_variant is Array:
-                return (list_variant as Array).duplicate()
-        if list_variant is PackedStringArray:
-                return Array(list_variant)
-        return []
+		var list_variant: Variant = _library.get("unlocked", [])
+		if list_variant is Array:
+				return (list_variant as Array).duplicate()
+		if list_variant is PackedStringArray:
+				return Array(list_variant)
+		return []
 
 func wipe_library() -> void:
-        _library = {"unlocked": []}
-        _save()
-        emit_signal("library_changed")
+		_library = {"unlocked": []}
+		_save()
+		emit_signal("library_changed")
 
 func debug_unlock_all() -> void:
-        var entries: Array = DataLite.load_json_array("res://data/sprouts.json")
-        var all_ids: Array[String] = []
-        for entry in entries:
-                if entry is Dictionary:
-                        var sid := String((entry as Dictionary).get("id", ""))
-                        if not sid.is_empty():
-                                all_ids.append(sid)
-        _library = {"unlocked": all_ids}
-        _save()
-        emit_signal("library_changed")
-        _debug_print("Unlocked all sprouts (%d)" % all_ids.size())
+		var entries: Array = DataLite.load_json_array("res://data/sprouts.json")
+		var all_ids: Array[String] = []
+		for entry in entries:
+				if entry is Dictionary:
+						var sid := String((entry as Dictionary).get("id", ""))
+						if not sid.is_empty():
+								all_ids.append(sid)
+		_library = {"unlocked": all_ids}
+		_save()
+		emit_signal("library_changed")
+		_debug_print("Unlocked all sprouts (%d)" % all_ids.size())
 
 func debug_list_unlocked() -> void:
-        var current := list_unlocked()
-        var summary := "(none)"
-        if not current.is_empty():
-                summary = ", ".join(current)
-        _debug_print("Unlocked sprouts: %s" % summary)
+		var current := list_unlocked()
+		var summary := "(none)"
+		if not current.is_empty():
+				summary = ", ".join(current)
+		_debug_print("Unlocked sprouts: %s" % summary)
 
 func debug_unlock_sprout(id: String) -> void:
-        var sid := _normalize_id(id)
-        if sid.is_empty():
-                _debug_print("Unlock sprout skipped — empty id")
-                return
-        var was_unlocked := is_unlocked_sprout(sid)
-        unlock_sprout(sid)
-        if was_unlocked:
-                _debug_print("Sprout already unlocked: %s" % sid)
-        else:
-                _debug_print("Unlocked sprout: %s" % sid)
+		var sid := _normalize_id(id)
+		if sid.is_empty():
+				_debug_print("Unlock sprout skipped — empty id")
+				return
+		var was_unlocked := is_unlocked_sprout(sid)
+		unlock_sprout(sid)
+		if was_unlocked:
+				_debug_print("Sprout already unlocked: %s" % sid)
+		else:
+				_debug_print("Unlocked sprout: %s" % sid)
 
 func debug_lock_sprout(id: String) -> void:
-        var sid := _normalize_id(id)
-        if sid.is_empty():
-                _debug_print("Lock sprout skipped — empty id")
-                return
-        var was_unlocked := is_unlocked_sprout(sid)
-        lock_sprout(sid)
-        if was_unlocked:
-                _debug_print("Locked sprout: %s" % sid)
-        else:
-                _debug_print("Sprout already locked: %s" % sid)
+		var sid := _normalize_id(id)
+		if sid.is_empty():
+				_debug_print("Lock sprout skipped — empty id")
+				return
+		var was_unlocked := is_unlocked_sprout(sid)
+		lock_sprout(sid)
+		if was_unlocked:
+				_debug_print("Locked sprout: %s" % sid)
+		else:
+				_debug_print("Sprout already locked: %s" % sid)
 
 func debug_wipe_library() -> void:
-        wipe_library()
-        _debug_print("Sprout library wiped")
+		wipe_library()
+		_debug_print("Sprout library wiped")
 
 func _append_unlock(id: String) -> void:
-        var list_variant: Variant = _library.get("unlocked", [])
-        var list: Array
-        if list_variant is PackedStringArray:
-                list = Array(list_variant)
-        elif list_variant is Array:
-                list = (list_variant as Array).duplicate()
-        else:
-                list = []
-        if not list.has(id):
-                list.append(id)
-        _library["unlocked"] = list
+		var list_variant: Variant = _library.get("unlocked", [])
+		var list: Array
+		if list_variant is PackedStringArray:
+				list = Array(list_variant)
+		elif list_variant is Array:
+				list = (list_variant as Array).duplicate()
+		else:
+				list = []
+		if not list.has(id):
+				list.append(id)
+		_library["unlocked"] = list
 
 func _debug_print(message: String) -> void:
-        print("[MetaManager] %s" % message)
+		print("[MetaManager] %s" % message)

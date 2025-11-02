@@ -89,51 +89,51 @@ func _on_phase_started(name: String) -> void:
 	_apply_totem_passives()
 
 func _apply_totem_passives() -> void:
-        if not Engine.has_singleton("RunConfig"):
-                return
-        var tid := String(RunConfig.totem_id)
-        if tid.is_empty():
-                return
-        var totem := _get_totem_def(tid)
-        if totem.is_empty():
-                return
-        var passives_variant: Variant = totem.get("passives", [])
-        var pids: Array = []
-        if passives_variant is Array:
-                pids = passives_variant
-        elif passives_variant is PackedStringArray:
-                pids = Array(passives_variant)
-        if pids.is_empty():
-                return
-        var tier := int(totem.get("tier", 1))
-        var metadata := {
-                "source": "totem",
-                "totem_id": tid,
-                "tier": tier,
-        }
-        for pid in pids:
-                var passive_id := String(pid)
-                if passive_id.is_empty():
-                        continue
-                var def_variant: Variant = _defs.get(passive_id, {})
-                if not (def_variant is Dictionary):
-                        continue
-                var def: Dictionary = def_variant
-                metadata["passive_id"] = passive_id
-                metadata["trigger"] = String(def.get("trigger", ""))
-                _execute_passive_def(passive_id, def, "totem_passives", metadata)
+		if not Engine.has_singleton("RunConfig"):
+				return
+		var tid := String(RunConfig.totem_id)
+		if tid.is_empty():
+				return
+		var totem := _get_totem_def(tid)
+		if totem.is_empty():
+				return
+		var passives_variant: Variant = totem.get("passives", [])
+		var pids: Array = []
+		if passives_variant is Array:
+				pids = passives_variant
+		elif passives_variant is PackedStringArray:
+				pids = Array(passives_variant)
+		if pids.is_empty():
+				return
+		var tier := int(totem.get("tier", 1))
+		var metadata := {
+				"source": "totem",
+				"totem_id": tid,
+				"tier": tier,
+		}
+		for pid in pids:
+				var passive_id := String(pid)
+				if passive_id.is_empty():
+						continue
+				var def_variant: Variant = _defs.get(passive_id, {})
+				if not (def_variant is Dictionary):
+						continue
+				var def: Dictionary = def_variant
+				metadata["passive_id"] = passive_id
+				metadata["trigger"] = String(def.get("trigger", ""))
+				_execute_passive_def(passive_id, def, "totem_passives", metadata)
 
 func _execute_passive(id: String, context: String = "", metadata: Dictionary = {}) -> void:
-        if not _defs.has(id):
-                return
-        var def_variant: Variant = _defs[id]
-        if not (def_variant is Dictionary):
-                return
-        var def: Dictionary = def_variant
-        var meta := metadata.duplicate(true)
-        if not meta.has("passive_id"):
-                meta["passive_id"] = id
-        _execute_passive_def(id, def, context, meta)
+		if not _defs.has(id):
+				return
+		var def_variant: Variant = _defs[id]
+		if not (def_variant is Dictionary):
+				return
+		var def: Dictionary = def_variant
+		var meta := metadata.duplicate(true)
+		if not meta.has("passive_id"):
+				meta["passive_id"] = id
+		_execute_passive_def(id, def, context, meta)
 
 func _execute_passive_def(id: String, def_variant: Variant, context: String, metadata: Dictionary) -> void:
 	if not (def_variant is Dictionary):
