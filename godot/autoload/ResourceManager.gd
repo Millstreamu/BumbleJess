@@ -821,7 +821,7 @@ func _fx_key_for_resource(resource: String) -> String:
 
 func _canonicalize_array(values: Variant) -> Array:
 	var result: Array = []
-	var source := values
+	var source: Variant = values
 	if source is PackedStringArray:
 		source = Array(source)
 	if source is Array:

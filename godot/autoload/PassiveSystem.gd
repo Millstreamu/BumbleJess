@@ -124,16 +124,20 @@ func _apply_totem_passives() -> void:
 				_execute_passive_def(passive_id, def, "totem_passives", metadata)
 
 func _execute_passive(id: String, context: String = "", metadata: Dictionary = {}) -> void:
-		if not _defs.has(id):
-			return
-		var def_variant: Variant = _defs[id]
-		if not (def_variant is Dictionary):
-			return
-			var def: Dictionary = def_variant
-			var meta: Dictionary = metadata.duplicate(true)
-		if not meta.has("passive_id"):
-				meta["passive_id"] = id
-		_execute_passive_def(id, def, context, meta)
+	if not _defs.has(id):
+		return
+
+	var def_variant: Variant = _defs[id]
+	if not (def_variant is Dictionary):
+		return
+
+	var def: Dictionary = def_variant
+	var meta: Dictionary = metadata.duplicate(true)
+
+	if not meta.has("passive_id"):
+		meta["passive_id"] = id
+
+	_execute_passive_def(id, def, context, meta)
 
 func _execute_passive_def(id: String, def_variant: Variant, context: String, metadata: Dictionary) -> void:
 	if not (def_variant is Dictionary):

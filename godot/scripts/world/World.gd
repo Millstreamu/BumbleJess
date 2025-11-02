@@ -94,15 +94,20 @@ func _ensure_turn_engine_run_started() -> void:
 				turn_engine.call("begin_run")
 
 func _sync_turn_with_engine(update_hud: bool = false) -> void:
-		var new_turn := max(turn, 1)
-		var turn_engine: Node = _get_turn_engine()
-		if turn_engine != null:
-				var value: Variant = turn_engine.get("turn_index")
-				if typeof(value) == TYPE_INT:
-						new_turn = max(int(value), 1)
-		turn = new_turn
-		if update_hud:
-				_update_hud()
+	var deck: Object = DeckManager if typeof(DeckManager) != TYPE_NIL else null
+	var new_turn: int = max(turn, 1)
+	var turn_engine: Node = _get_turn_engine()
+
+	if turn_engine != null:
+		var value: Variant = turn_engine.get("turn_index")
+		if typeof(value) == TYPE_INT:
+			new_turn = max(int(value), 1)
+
+	turn = new_turn
+
+	if update_hud:
+		_update_hud()
+
 
 func _on_turn_engine_run_started() -> void:
 		_sync_turn_with_engine(true)
@@ -747,7 +752,11 @@ func _place_tile(cell: Vector2i, tile_id: String) -> bool:
 				tile_name = String(tile_name).to_lower()
 		set_cell_named(LAYER_LIFE, cell, tile_name)
 		set_cell_tile_id(LAYER_LIFE, cell, tile_id)
-		var cat_meta := get_cell_meta(LAYER_LIFE, cell, "category")
+		var cat_meta: Variant = get_cell_meta(LAYER_LIFE, cell, "category")
+		if typeof(cat_meta) == TYPE_STRING:
+			var cat := String(cat_meta)
+			if not cat.is_empty():
+				set_fx_for_category(cell, cat)
 		if typeof(cat_meta) == TYPE_STRING:
 				var cat := String(cat_meta)
 				if not cat.is_empty():
@@ -1140,15 +1149,18 @@ func _count_cells_named(tile_name: String) -> int:
 		return total
 
 func _check_artefact_reveal(cell: Vector2i) -> void:
-	var payload_variant := get_cell_meta(LAYER_OBJECTS, cell, "artefact")
+	var payload_variant: Variant = get_cell_meta(LAYER_OBJECTS, cell, "artefact")
 	if not (payload_variant is Dictionary):
+		# If it's something else (including a stale value), clear it and stop.
 		if payload_variant != null:
 			set_cell_meta(LAYER_OBJECTS, cell, "artefact", null)
 		return
+
 	var payload: Dictionary = payload_variant
 	if payload.is_empty():
 		set_cell_meta(LAYER_OBJECTS, cell, "artefact", null)
 		return
+
 	_reveal_artefact(cell, payload.duplicate(true))
 
 func _on_tile_placed(tile_id: String, cell: Vector2i) -> void:

@@ -42,22 +42,22 @@ var _tile_category_cache: Dictionary = {}
 func canonical(cat_or_id: String) -> String:
 		var token := _normalize_input(cat_or_id)
 		if token.is_empty():
-				return cat_or_id
+			return cat_or_id
 		if token.begins_with("tile."):
-				return normalize_from_tile_id(token)
+			return normalize_from_tile_id(token)
 		if token.begins_with("cat:"):
-				token = token.substr(4)
+			token = token.substr(4)
 		var lower := token.to_lower()
 		if LEGACY_TO_CANONICAL.has(lower):
-				return String(LEGACY_TO_CANONICAL[lower])
+			return String(LEGACY_TO_CANONICAL[lower])
 		if DISPLAY_NAMES.has(token):
-				return token
+			return token
 		if CANONICAL_TO_LEGACY.has(token):
-				return token
-				for display_key in DISPLAY_NAMES.keys():
-								var candidate := String(display_key)
-								if candidate.to_lower() == lower:
-												return candidate
+			return token
+			for display_key in DISPLAY_NAMES.keys():
+				var candidate := String(display_key)
+				if candidate.to_lower() == lower:
+					return candidate
 		return cat_or_id
 
 func legacy(cat_or_id: String) -> String:
