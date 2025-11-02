@@ -57,8 +57,8 @@ func _max_battles_this_turn() -> int:
 
 func _emit_queue_update() -> void:
 		var max_per := _max_battles_this_turn()
-		var remaining_capacity := max(0, max_per - _processed_this_phase)
-		var pending := min(_threat_queue.size(), remaining_capacity)
+		var remaining_capacity: int = max(0, max_per - _processed_this_phase)
+		var pending: int = min(_threat_queue.size(), remaining_capacity)
 		emit_signal("battle_queue_updated", pending, _processed_this_phase, max_per)
 
 
@@ -851,7 +851,7 @@ func _is_valid_threat_target(cell: Vector2i) -> bool:
 
 func _priority_for_target(cell: Vector2i, totem: Vector2i, turn: int) -> int:
 		var distance := _axial_like_distance(cell, totem)
-		var urgency := max(0, _threat_turns_left(cell))
+		var urgency: int = max(0, _threat_turns_left(cell))
 		return distance * 10 + urgency
 
 
