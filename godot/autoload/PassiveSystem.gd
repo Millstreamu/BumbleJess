@@ -129,8 +129,8 @@ func _execute_passive(id: String, context: String = "", metadata: Dictionary = {
 		var def_variant: Variant = _defs[id]
 		if not (def_variant is Dictionary):
 				return
-		var def: Dictionary = def_variant
-		var meta := metadata.duplicate(true)
+                var def: Dictionary = def_variant
+                var meta: Dictionary = metadata.duplicate(true)
 		if not meta.has("passive_id"):
 				meta["passive_id"] = id
 		_execute_passive_def(id, def, context, meta)
@@ -142,7 +142,7 @@ func _execute_passive_def(id: String, def_variant: Variant, context: String, met
 	var tier := int(metadata.get("tier", 1))
 	var handled := false
 	var attempted := false
-	var effects_variant := def.get("effects", null)
+        var effects_variant: Variant = def.get("effects", null)
 	if effects_variant is Array:
 		for raw_effect in effects_variant:
 			var effect := _coerce_effect(raw_effect)

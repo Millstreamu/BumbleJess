@@ -237,25 +237,25 @@ func _handle_special_growth() -> void:
 					var count := int(rules.get("overgrowth_count", 1))
 					if count <= 0:
 						count = 1
-					var converted := 0
-					for neighbor in _world.neighbors_even_q(cell):
-						if converted >= count:
-							break
-						var neighbor_name: String = _world.get_cell_name(_world.LAYER_LIFE, neighbor)
-						if not (neighbor_name.is_empty() or neighbor_name == "empty"):
-							continue
-												_world.set_cell_named(_world.LAYER_LIFE, neighbor, "overgrowth")
-												if _world.has_method("set_fx"):
-														_world.set_fx(neighbor, "fx_bloom_hint")
-												if _world.has_method("set_cell_tile_id"):
-														_world.set_cell_tile_id(
-																_world.LAYER_LIFE,
-																neighbor,
-																"tile.overgrowth.default",
-							)
-						var neighbor_hash := _hash_cell(neighbor, width)
-						_overgrowth_born[neighbor_hash] = _turn
-						converted += 1
+                                          var converted := 0
+                                          for neighbor in _world.neighbors_even_q(cell):
+                                                  if converted >= count:
+                                                          break
+                                                  var neighbor_name: String = _world.get_cell_name(_world.LAYER_LIFE, neighbor)
+                                                  if not (neighbor_name.is_empty() or neighbor_name == "empty"):
+                                                          continue
+                                                  _world.set_cell_named(_world.LAYER_LIFE, neighbor, "overgrowth")
+                                                  if _world.has_method("set_fx"):
+                                                          _world.set_fx(neighbor, "fx_bloom_hint")
+                                                  if _world.has_method("set_cell_tile_id"):
+                                                          _world.set_cell_tile_id(
+                                                                  _world.LAYER_LIFE,
+                                                                  neighbor,
+                                                                  "tile.overgrowth.default",
+                                                          )
+                                                  var neighbor_hash := _hash_cell(neighbor, width)
+                                                  _overgrowth_born[neighbor_hash] = _turn
+                                                  converted += 1
 
 			if rules.has("decay_after_turns"):
 				var required := int(rules.get("decay_after_turns", 0))
@@ -265,25 +265,25 @@ func _handle_special_growth() -> void:
 				var born := int(_born_turn.get(cell_hash, _turn))
 				var age := _turn - born
 				if age >= required:
-					var into := String(rules.get("decay_into", "overgrowth"))
-					if into.is_empty():
-						into = "overgrowth"
-										_world.set_cell_named(_world.LAYER_LIFE, cell, into)
-										if _world.has_method("set_fx"):
-												if into == "overgrowth":
-														_world.set_fx(cell, "fx_bloom_hint")
-												elif into == "grove":
-														if _world.has_method("clear_fx"):
-																_world.clear_fx(cell)
-														_world.set_fx(cell, "fx_grove_glow")
-														if Engine.has_singleton("AudioBus"):
-																AudioBus.play("res://assets/sfx/growth.wav")
-										if _world.has_method("set_cell_tile_id"):
-												_world.set_cell_tile_id(
-														_world.LAYER_LIFE,
-														cell,
-														"tile.%s.default" % into,
-						)
+                                          var into := String(rules.get("decay_into", "overgrowth"))
+                                          if into.is_empty():
+                                                  into = "overgrowth"
+                                          _world.set_cell_named(_world.LAYER_LIFE, cell, into)
+                                          if _world.has_method("set_fx"):
+                                                  if into == "overgrowth":
+                                                          _world.set_fx(cell, "fx_bloom_hint")
+                                                  elif into == "grove":
+                                                          if _world.has_method("clear_fx"):
+                                                                  _world.clear_fx(cell)
+                                                          _world.set_fx(cell, "fx_grove_glow")
+                                                          if Engine.has_singleton("AudioBus"):
+                                                                  AudioBus.play("res://assets/sfx/growth.wav")
+                                          if _world.has_method("set_cell_tile_id"):
+                                                  _world.set_cell_tile_id(
+                                                          _world.LAYER_LIFE,
+                                                          cell,
+                                                          "tile.%s.default" % into,
+                                                  )
 					if into == "overgrowth":
 						var overgrowth_hash := _hash_cell(cell, width)
 						_overgrowth_born[overgrowth_hash] = _turn

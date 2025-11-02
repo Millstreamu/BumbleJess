@@ -1,7 +1,7 @@
 extends Control
 
-const PRE_RUN_SETUP_SCENE := preload("res://scenes/ui/PreRunSetup.tscn")
-const PRE_RUN_DRAFT_SCENE := preload("res://scenes/ui/PreRunDraft.tscn")
+const PRE_RUN_SETUP_SCENE: PackedScene = preload("res://scenes/ui/PreRunSetup.tscn")
+const PRE_RUN_DRAFT_SCENE: PackedScene = preload("res://scenes/ui/PreRunDraft.tscn")
 
 var _setup_ui: PreRunSetup = null
 var _draft_ui: PreRunDraft = null
@@ -35,7 +35,7 @@ func _ensure_pre_run_setup() -> void:
 		return
 	if PRE_RUN_SETUP_SCENE == null:
 		return
-	var instance := PRE_RUN_SETUP_SCENE.instantiate()
+        var instance: Node = PRE_RUN_SETUP_SCENE.instantiate()
 	if instance == null:
 		return
 	add_child(instance)
@@ -55,7 +55,7 @@ func _ensure_pre_run_draft() -> void:
 		return
 	if PRE_RUN_DRAFT_SCENE == null:
 		return
-	var instance := PRE_RUN_DRAFT_SCENE.instantiate()
+        var instance: Node = PRE_RUN_DRAFT_SCENE.instantiate()
 	if instance == null:
 		return
 	add_child(instance)
