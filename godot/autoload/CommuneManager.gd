@@ -71,18 +71,18 @@ func _roll_and_emit_offer() -> void:
 		emit_signal("offer_ready", defs)
 
 func _build_weighted_pool() -> Array:
-                var pool: Array = []
-                var bias_cfg_variant: Variant = _cfg.get("bias", {})
-                var bias_cfg: Dictionary = bias_cfg_variant if bias_cfg_variant is Dictionary else {}
-                var mult_t: float = max(float(bias_cfg.get("totem_weight_mult", 1.0)), 0.0)
-                var core_w: float = float(bias_cfg.get("core_tile_weight", 3.0))
-                var dupe_pen: float = float(bias_cfg.get("recent_dupe_penalty", -2.5))
-                var soft_cap: float = float(bias_cfg.get("category_soft_cap", 0.0))
-                var unique_chance: float = clamp(float(_cfg.get("unique_chance_base", 0.05)), 0.0, 1.0)
+		var pool: Array = []
+		var bias_cfg_variant: Variant = _cfg.get("bias", {})
+		var bias_cfg: Dictionary = bias_cfg_variant if bias_cfg_variant is Dictionary else {}
+		var mult_t: float = max(float(bias_cfg.get("totem_weight_mult", 1.0)), 0.0)
+		var core_w: float = float(bias_cfg.get("core_tile_weight", 3.0))
+		var dupe_pen: float = float(bias_cfg.get("recent_dupe_penalty", -2.5))
+		var soft_cap: float = float(bias_cfg.get("category_soft_cap", 0.0))
+		var unique_chance: float = clamp(float(_cfg.get("unique_chance_base", 0.05)), 0.0, 1.0)
 
-                var tw_cat: Dictionary = {}
-                var tw_tag: Dictionary = {}
-                var rc: Object = RunConfig if typeof(RunConfig) != TYPE_NIL else null
+		var tw_cat: Dictionary = {}
+		var tw_tag: Dictionary = {}
+		var rc: Object = RunConfig if typeof(RunConfig) != TYPE_NIL else null
 		if rc != null:
 				var tid := String(rc.totem_id)
 				var totem := _get_totem(tid)
@@ -107,10 +107,10 @@ func _build_weighted_pool() -> Array:
 						continue
 				var base := 1.0
 				if mult_t > 0.0:
-                                                var cat_bias := float(tw_cat.get(category, 1.0))
+						var cat_bias := float(tw_cat.get(category, 1.0))
 						if cat_bias != 1.0:
 								base *= pow(cat_bias, mult_t)
-                                                var tags_array: Array = entry.get("tags", [])
+						var tags_array: Array = entry.get("tags", [])
 						for tag_variant in tags_array:
 								var tag := String(tag_variant)
 								if tag.is_empty():
@@ -121,7 +121,7 @@ func _build_weighted_pool() -> Array:
 				if rc != null and rc.has_core_tile(id):
 						base += core_w
 				if rc != null:
-                                                var any_core_same_cat := false
+						var any_core_same_cat := false
 						if typeof(DataDB) != TYPE_NIL and DataDB.has_method("get_category_for_id"):
 								for core_id in rc.core_tiles:
 										if typeof(core_id) != TYPE_STRING:
@@ -129,8 +129,8 @@ func _build_weighted_pool() -> Array:
 										var cid := String(core_id)
 										if cid.is_empty():
 												continue
-                                                                                var core_cat := CategoryMap.canonical(DataDB.get_category_for_id(cid))
-                                                                                if core_cat == category:
+										var core_cat := CategoryMap.canonical(DataDB.get_category_for_id(cid))
+										if core_cat == category:
 												any_core_same_cat = true
 												break
 						if any_core_same_cat:
@@ -142,7 +142,7 @@ func _build_weighted_pool() -> Array:
 						var cat_count := float(_category_history.get(category, 0))
 						var cat_share := cat_count / float(history_total)
 						if cat_share > soft_cap:
-                                                                  var over: float = clamp(cat_share - soft_cap, 0.0, 0.9)
+								var over: float = clamp(cat_share - soft_cap, 0.0, 0.9)
 								base *= max(0.1, 1.0 - over)
 						var tags_array_hist: Array = entry.get("tags", [])
 						for tag_variant in tags_array_hist:
@@ -152,7 +152,7 @@ func _build_weighted_pool() -> Array:
 								var tag_count := float(_tag_history.get(tag, 0))
 								var tag_share := tag_count / float(history_total)
 								if tag_share > soft_cap:
-                                                                  var tag_over: float = clamp(tag_share - soft_cap, 0.0, 0.9)
+										var tag_over: float = clamp(tag_share - soft_cap, 0.0, 0.9)
 										base *= max(0.1, 1.0 - tag_over)
 				if bool(entry.get("unique", false)):
 						if unique_chance < 1.0 and unique_chance > 0.0:
@@ -218,7 +218,7 @@ func choose(tile_id: String) -> void:
 		if tile_id.is_empty():
 				return
 		current_tile_id = tile_id
-                var rc: Object = RunConfig if typeof(RunConfig) != TYPE_NIL else null
+		var rc: Object = RunConfig if typeof(RunConfig) != TYPE_NIL else null
 		if rc != null:
 				rc.last_pick_id = tile_id
 		_record_pick(tile_id)
@@ -263,9 +263,9 @@ func _record_pick(tile_id: String) -> void:
 				return
 		_history_ids.append(tile_id)
 		_apply_history_delta(tile_id, 1)
-                while _history_ids.size() > _history_limit:
-                                var removed_id: String = String(_history_ids.pop_front())
-                                _apply_history_delta(removed_id, -1)
+		while _history_ids.size() > _history_limit:
+				var removed_id: String = String(_history_ids.pop_front())
+				_apply_history_delta(removed_id, -1)
 
 func _apply_history_delta(tile_id: String, delta: int) -> void:
 		if tile_id.is_empty() or delta == 0:
