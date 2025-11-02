@@ -180,26 +180,26 @@ func skip() -> void:
 
 
 func _inject_pack(pack: Dictionary) -> void:
-		var tiles_variant: Variant = pack.get("tiles", [])
-		var specials_variant: Variant = pack.get("special", [])
-		var tiles: Array = tiles_variant if tiles_variant is Array else []
-		var specials: Array = specials_variant if specials_variant is Array else []
-		var resolved_tiles := _resolve_pack_tiles(tiles)
-		var resolved_specials := _resolve_pack_tiles(specials)
-		if not resolved_tiles.is_empty():
-				for tile_id in resolved_tiles:
-						DeckManager.deck.append(String(tile_id))
-				DeckManager.shuffle()
-		_update_world_hud()
-		if _special_forced_place and not resolved_specials.is_empty():
-				for special_id in resolved_specials:
-						emit_signal("special_to_place_now", String(special_id))
+        var tiles_variant: Variant = pack.get("tiles", [])
+        var specials_variant: Variant = pack.get("special", [])
+        var tiles: Array = tiles_variant if tiles_variant is Array else []
+        var specials: Array = specials_variant if specials_variant is Array else []
+        var resolved_tiles := _resolve_pack_tiles(tiles)
+        var resolved_specials := _resolve_pack_tiles(specials)
+        if not resolved_tiles.is_empty():
+                for tile_id in resolved_tiles:
+                        DeckManager.deck.append(String(tile_id))
+                DeckManager.shuffle()
+        _update_world_hud()
+        if _special_forced_place and not resolved_specials.is_empty():
+                for special_id in resolved_specials:
+                        emit_signal("special_to_place_now", String(special_id))
 
 func _update_world_hud() -> void:
-	if _world == null:
-		return
-		if _world.has_method("update_hud"):
-				_world.call("update_hud")
+        if _world == null:
+                return
+        if _world.has_method("update_hud"):
+                _world.call("update_hud")
 
 
 func can_evolve() -> bool:
