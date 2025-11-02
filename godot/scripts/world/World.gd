@@ -93,8 +93,7 @@ func _ensure_turn_engine_run_started() -> void:
 		if turn_engine.has_method("begin_run"):
 				turn_engine.call("begin_run")
 
-func _sync_turn_with_engine(update_hud: bool = false) -> void:
-	var deck: Object = DeckManager if typeof(DeckManager) != TYPE_NIL else null
+func _sync_turn_with_engine(should_update_hud: bool = false) -> void:
 	var new_turn: int = max(turn, 1)
 	var turn_engine: Node = _get_turn_engine()
 
@@ -105,7 +104,7 @@ func _sync_turn_with_engine(update_hud: bool = false) -> void:
 
 	turn = new_turn
 
-	if update_hud:
+	if should_update_hud:
 		_update_hud()
 
 

@@ -83,8 +83,8 @@ func _resolve_turn_engine() -> Node:
 			return singleton
 	return get_tree().root.get_node_or_null("TurnEngine")
 
-func _on_phase_started(name: String) -> void:
-	if name != "totem_passives":
+func _on_phase_started(phase_name: String) -> void:
+	if phase_name != "totem_passives":
 		return
 	_apply_totem_passives()
 
@@ -191,7 +191,7 @@ func _scale_effect(effect: Dictionary, tier: int) -> Dictionary:
 	return scaled
 
 func _dispatch_effect(
-	id: String, def: Dictionary, effect: Dictionary, context: String, metadata: Dictionary
+        _passive_id: String, def: Dictionary, effect: Dictionary, context: String, metadata: Dictionary
 ) -> bool:
 	var typ := String(effect.get("type", ""))
 	if typ.is_empty():

@@ -3,7 +3,6 @@ extends Node
 signal phase_started(name: String)
 signal turn_changed(turn_index: int)
 signal run_started()
-signal run_finished()
 signal totem_passives_started(turn_index: int)
 
 var turn_index: int = 1

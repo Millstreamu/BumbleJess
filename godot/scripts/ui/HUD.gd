@@ -53,11 +53,11 @@ func _on_turn_changed(turn_index: int) -> void:
 		if turn_l != null:
 				turn_l.text = "Turn %d" % safe_turn
 
-func _on_phase_started(name: String) -> void:
-		_current_phase = name
-		_refresh_phase_label()
-		if name == "player" or name == "growth":
-				_set_end_ready(false)
+func _on_phase_started(phase_name: String) -> void:
+                _current_phase = phase_name
+                _refresh_phase_label()
+                if phase_name == "player" or phase_name == "growth":
+                                _set_end_ready(false)
 
 func _refresh_phase_label() -> void:
 		if phase_l == null:
@@ -80,11 +80,11 @@ func _on_end_turn_pressed() -> void:
 func _on_tile_placed(_id: String, _cell: Vector2i) -> void:
 		_set_end_ready(true)
 
-func _set_end_ready(ready: bool) -> void:
-		if end_btn == null:
-				return
-		end_btn.modulate = Color(1, 1, 1, 1) if ready else Color(0.8, 0.8, 0.8, 1)
-		end_btn.add_theme_constant_override("outline_size", 2 if ready else 0)
+func _set_end_ready(is_ready: bool) -> void:
+                if end_btn == null:
+                                return
+                end_btn.modulate = Color(1, 1, 1, 1) if is_ready else Color(0.8, 0.8, 0.8, 1)
+                end_btn.add_theme_constant_override("outline_size", 2 if is_ready else 0)
 
 func _refresh_turn_display() -> void:
 		var turn_index := 1
