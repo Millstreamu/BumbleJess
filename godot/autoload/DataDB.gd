@@ -52,8 +52,8 @@ func _reload_tiles() -> void:
 				id_to_category[tile_id] = _canonicalize_category(String(entry.get("category", "")))
 
 func _normalize_tags(source: Variant) -> Array:
-		var result: Array = []
-		var tags_source := source
+                var result: Array = []
+                var tags_source: Variant = source
 		if tags_source is PackedStringArray:
 				tags_source = Array(tags_source)
 		if tags_source is Array:
