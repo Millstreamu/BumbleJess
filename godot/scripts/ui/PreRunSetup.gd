@@ -229,12 +229,12 @@ func _build_sprout_grid() -> void:
 			removed_locked = true
 
 		button.disabled = locked
-		if locked:
-			button.modulate = Color(1, 1, 1, 0.5)
-			button.hint_tooltip = "Locked — discover an Artefact to unlock."
-		else:
-			button.modulate = Color(1, 1, 1, 1)
-			button.hint_tooltip = ""
+                if locked:
+                        button.modulate = Color(1, 1, 1, 0.5)
+                        button.tooltip_text = "Locked — discover an Artefact to unlock."
+                else:
+                        button.modulate = Color(1, 1, 1, 1)
+                        button.tooltip_text = ""
 
 		button.pressed.connect(func():
 			_toggle_sprout(sid)
