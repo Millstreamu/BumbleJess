@@ -191,7 +191,7 @@ func _scale_effect(effect: Dictionary, tier: int) -> Dictionary:
 	return scaled
 
 func _dispatch_effect(
-        _passive_id: String, def: Dictionary, effect: Dictionary, context: String, metadata: Dictionary
+		_passive_id: String, def: Dictionary, effect: Dictionary, context: String, metadata: Dictionary
 ) -> bool:
 	var typ := String(effect.get("type", ""))
 	if typ.is_empty():

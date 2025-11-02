@@ -54,10 +54,10 @@ func _on_turn_changed(turn_index: int) -> void:
 				turn_l.text = "Turn %d" % safe_turn
 
 func _on_phase_started(phase_name: String) -> void:
-                _current_phase = phase_name
-                _refresh_phase_label()
-                if phase_name == "player" or phase_name == "growth":
-                                _set_end_ready(false)
+				_current_phase = phase_name
+				_refresh_phase_label()
+				if phase_name == "player" or phase_name == "growth":
+								_set_end_ready(false)
 
 func _refresh_phase_label() -> void:
 		if phase_l == null:
@@ -81,10 +81,10 @@ func _on_tile_placed(_id: String, _cell: Vector2i) -> void:
 		_set_end_ready(true)
 
 func _set_end_ready(is_ready: bool) -> void:
-                if end_btn == null:
-                                return
-                end_btn.modulate = Color(1, 1, 1, 1) if is_ready else Color(0.8, 0.8, 0.8, 1)
-                end_btn.add_theme_constant_override("outline_size", 2 if is_ready else 0)
+				if end_btn == null:
+								return
+				end_btn.modulate = Color(1, 1, 1, 1) if is_ready else Color(0.8, 0.8, 0.8, 1)
+				end_btn.add_theme_constant_override("outline_size", 2 if is_ready else 0)
 
 func _refresh_turn_display() -> void:
 		var turn_index := 1
@@ -93,37 +93,39 @@ func _refresh_turn_display() -> void:
 		_on_turn_changed(turn_index)
 
 func _refresh_sprout_hp() -> void:
-		if sprout_hp_label == null:
-				return
-		if not Engine.has_singleton("SproutRegistry"):
-				sprout_hp_label.text = "Sprout HP: —"
-				sprout_hp_label.hint_tooltip = ""
-				return
-		var roster := SproutRegistry.get_roster()
-		if roster.is_empty():
-				sprout_hp_label.text = "Sprout HP: 0"
-				sprout_hp_label.hint_tooltip = ""
-				return
-		var total_hp := 0
-		var tooltip_parts: Array[String] = []
-		for entry_variant in roster:
-				if not (entry_variant is Dictionary):
-						continue
-				var entry: Dictionary = entry_variant
-				var sid := String(entry.get("id", ""))
-				if sid.is_empty():
-						continue
-				var level := int(entry.get("level", 1))
-				var stats := SproutRegistry.compute_stats(sid, level)
-				var hp := int(stats.get("hp", 0))
-				total_hp += hp
-				var display := sid
-				var def := SproutRegistry.get_by_id(sid)
-				if def.has("name"):
-						display = String(def.get("name"))
-				tooltip_parts.append("%s: %d HP" % [display, hp])
-		sprout_hp_label.text = "Sprout HP: %d" % total_hp
-		sprout_hp_label.hint_tooltip = "\n".join(tooltip_parts)
+	if sprout_hp_label == null:
+		return
+	if not Engine.has_singleton("SproutRegistry"):
+		sprout_hp_label.text = "Sprout HP: —"
+		sprout_hp_label.tooltip_text = ""      # <— was hint_tooltip
+		return
+	var roster := SproutRegistry.get_roster()
+	if roster.is_empty():
+		sprout_hp_label.text = "Sprout HP: 0"
+		sprout_hp_label.tooltip_text = ""      # <— was hint_tooltip
+		return
+	var total_hp := 0
+	var tooltip_parts: Array[String] = []
+	for entry_variant in roster:
+		if not (entry_variant is Dictionary):
+			continue
+		var entry: Dictionary = entry_variant
+		var sid := String(entry.get("id", ""))
+		if sid.is_empty():
+			continue
+		var level := int(entry.get("level", 1))
+		var stats := SproutRegistry.compute_stats(sid, level)
+		var hp := int(stats.get("hp", 0))
+		total_hp += hp
+		var display := sid
+		var def := SproutRegistry.get_by_id(sid)
+		if def.has("name"):
+			display = String(def.get("name"))
+		tooltip_parts.append("%s: %d HP" % [display, hp])
+
+	sprout_hp_label.text = "Sprout HP: %d" % total_hp
+	sprout_hp_label.tooltip_text = "\n".join(tooltip_parts)  # <— was hint_tooltip
+
 
 func _on_roster_regenerated(percent: float) -> void:
 		_show_toast("+%d%% Regen" % int(round(percent)))
