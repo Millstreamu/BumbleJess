@@ -270,7 +270,7 @@ func _recompute_capacity() -> void:
 				if amount == 0:
 					continue
 				capacity[res] = int(capacity.get(res, 0)) + amount
-						if cat == CAT_MYSTIC:
+			if cat == CAT_MYSTIC:
 				var totem_bonus_variant: Variant = r.get(
 					"capacity_global_bonus_if_adjacent_to_totem", {}
 				)
@@ -289,7 +289,6 @@ func _recompute_capacity() -> void:
 							if add_value == 0:
 								continue
 							capacity[res] = int(capacity.get(res, 0)) + add_value
-
 			var flat_bonus_variant: Variant = r.get("capacity_global_bonus", {})
 			var flat_bonus: Dictionary = (
 				flat_bonus_variant if flat_bonus_variant is Dictionary else {}
@@ -309,17 +308,17 @@ func _recompute_capacity() -> void:
 			var cat: String = pair[1]
 			if cat.is_empty():
 				continue
-						var aura_variant: Variant = _rules_for(id, cat).get("capacity_aura_adjacent", {})
-						var aura: Dictionary = _canonicalize_dict_keys(aura_variant)
-						if aura.is_empty():
-								continue
-						for neighbor in _world.neighbors_even_q(cell):
-								var neighbor_cat: String = CategoryMap.canonical(
-										String(_world.get_cell_name(_world.LAYER_LIFE, neighbor))
-								)
-								if neighbor_cat.is_empty():
-										continue
-								if not aura.has(neighbor_cat):
+			var aura_variant: Variant = _rules_for(id, cat).get("capacity_aura_adjacent", {})
+			var aura: Dictionary = _canonicalize_dict_keys(aura_variant)
+			if aura.is_empty():
+				continue
+			for neighbor in _world.neighbors_even_q(cell):
+				var neighbor_cat: String = CategoryMap.canonical(
+					String(_world.get_cell_name(_world.LAYER_LIFE, neighbor))
+				)
+				if neighbor_cat.is_empty():
+					continue
+				if not aura.has(neighbor_cat):
 					continue
 				var add_variant: Variant = aura[neighbor_cat]
 				if not (add_variant is Dictionary):
@@ -336,6 +335,7 @@ func _recompute_capacity() -> void:
 			continue
 		var cap_value: int = int(capacity.get(res, 0))
 		amounts[res] = clamp(int(amounts.get(res, 0)), 0, cap_value)
+
 
 func _produce_resources() -> void:
 		if _world == null:

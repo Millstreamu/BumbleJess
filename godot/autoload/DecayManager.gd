@@ -962,10 +962,10 @@ func _trigger_battle(target_cell: Vector2i) -> void:
 
 
 func _on_battle_finished(result: Dictionary) -> void:
-		var cell: Vector2i = result.get("target_cell", Vector2i.ZERO)
-		var victory := bool(result.get("victory", true))
-		var attacker_cell: Vector2i = result.get("attacker_cell", Vector2i.ZERO)
-		_apply_battle_outcome(cell, victory, attacker_cell)
+        var cell: Vector2i = result.get("target_cell", Vector2i.ZERO)
+        var victory := bool(result.get("victory", true))
+        var attacker_cell: Vector2i = result.get("attacker_cell", Vector2i.ZERO)
+        _apply_battle_outcome(cell, victory, attacker_cell)
 
 
 func _apply_battle_outcome(cell: Vector2i, victory: bool, attacker_cell: Vector2i = Vector2i.ZERO) -> void:
