@@ -8,7 +8,7 @@ extends CanvasLayer
 @onready var toast_layer: Control = $"ToastLayer"
 
 var _world: Node = null
-var _current_phase := ""
+var _current_phase: String = ""
 
 func _ready() -> void:
         _world = get_parent()
@@ -138,7 +138,7 @@ func _show_toast(message: String) -> void:
         toast_layer.add_child(label)
         label.position = Vector2(24, 120 + randi() % 48)
         var tween := create_tween()
-        tween.tween_property(label, "modulate:a", 1.0, 0.2).as_relative(false)
+        tween.tween_property(label, "modulate:a", 1.0, 0.2)
         tween.tween_interval(1.0)
         tween.tween_property(label, "modulate:a", 0.0, 0.4)
         tween.finished.connect(label.queue_free)

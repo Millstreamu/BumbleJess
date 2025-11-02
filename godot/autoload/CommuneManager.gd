@@ -311,4 +311,3 @@ func _find_world() -> Node:
         if main != null and main.has_node("World"):
                 return main.get_node("World")
         return root.find_child("World", true, false)
-*** End of File
