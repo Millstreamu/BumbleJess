@@ -84,4 +84,3 @@ func _summarize(def: Dictionary) -> String:
         if lines.is_empty() and def.has("rules"):
                 lines.append("(legacy rules)")
         return "\n".join(lines)
-*** End of File
