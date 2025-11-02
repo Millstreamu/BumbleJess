@@ -184,29 +184,29 @@ func _handle_decay_contact() -> void:
 			_overgrowth_born.erase(cell_hash)
 
 func _bloom_groves() -> void:
-	if _world == null:
-		return
-	var width: int = _world.width
-	var to_bloom: Array[Vector2i] = []
+        if _world == null:
+                return
+        var width: int = _world.width
+        var to_bloom: Array[Vector2i] = []
 
-	for cell_hash in _overgrowth_born.keys():
-		var born_turn := int(_overgrowth_born[cell_hash])
-		if _turn - born_turn < MATURATION_TURNS:
-			continue
-		var cell := _unhash_cell(cell_hash, width)
-		if _world.get_cell_name(_world.LAYER_LIFE, cell) == "overgrowth":
-			to_bloom.append(cell)
+        for cell_hash in _overgrowth_born.keys():
+                var born_turn := int(_overgrowth_born[cell_hash])
+                if _turn - born_turn < MATURATION_TURNS:
+                        continue
+                var cell_pos := _unhash_cell(cell_hash, width)
+                if _world.get_cell_name(_world.LAYER_LIFE, cell_pos) == "overgrowth":
+                        to_bloom.append(cell_pos)
 
         var any_bloomed := false
-        for cell in to_bloom:
-                _world.set_cell_named(_world.LAYER_LIFE, cell, "grove")
+        for bloom_cell in to_bloom:
+                _world.set_cell_named(_world.LAYER_LIFE, bloom_cell, "grove")
                 if _world.has_method("clear_fx"):
-                        _world.clear_fx(cell)
+                        _world.clear_fx(bloom_cell)
                 if _world.has_method("set_fx"):
-                        _world.set_fx(cell, "fx_grove_glow")
-                var cell_hash := _hash_cell(cell, width)
-                _overgrowth_born.erase(cell_hash)
-                emit_signal("grove_spawned", cell)
+                        _world.set_fx(bloom_cell, "fx_grove_glow")
+                var bloom_hash := _hash_cell(bloom_cell, width)
+                _overgrowth_born.erase(bloom_hash)
+                emit_signal("grove_spawned", bloom_cell)
                 any_bloomed = true
         if any_bloomed and Engine.has_singleton("AudioBus"):
                 AudioBus.play("res://assets/sfx/growth.wav")

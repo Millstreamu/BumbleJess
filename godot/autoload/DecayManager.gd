@@ -622,59 +622,59 @@ func _spread_clusters_if_due() -> void:
                 interval = 3
         if (_turn - _last_spread_turn) % interval != 0:
                 return
-	_last_spread_turn = _turn
+        _last_spread_turn = _turn
 
-	_ensure_clusters_scanned()
-	if _clusters.is_empty():
-		return
+        _ensure_clusters_scanned()
+        if _clusters.is_empty():
+                return
 
-	var rng := RandomNumberGenerator.new()
-	rng.randomize()
+        var rng := RandomNumberGenerator.new()
+        rng.randomize()
 
-	for cluster in _clusters:
-		if cluster == null:
-			continue
-		_prune_cluster_frontier(cluster)
-		if cluster.frontier.is_empty():
-			_rebuild_cluster_frontier(cluster)
-		if cluster.frontier.is_empty():
-			continue
+        for cluster in _clusters:
+                if cluster == null:
+                        continue
+                _prune_cluster_frontier(cluster)
+                if cluster.frontier.is_empty():
+                        _rebuild_cluster_frontier(cluster)
+                if cluster.frontier.is_empty():
+                        continue
 
-		var origin := _origin_cell()
-		var best_k := -1
-		var best_c := Vector2i(-1, -1)
-		var best_score := 1_000_000
-		for k in cluster.frontier.keys():
-			var cell_variant: Variant = cluster.frontier[k]
-			if not (cell_variant is Vector2i):
-				continue
-			var c: Vector2i = cell_variant
-			var score := _axial_like_distance(c, origin)
-			score += int(rng.randi_range(0, 2))
-			if score < best_score:
-				best_score = score
-				best_k = k
-				best_c = c
+                var origin := _origin_cell()
+                var best_k := -1
+                var best_c := Vector2i(-1, -1)
+                var best_score := 1_000_000
+                for k in cluster.frontier.keys():
+                        var cell_variant: Variant = cluster.frontier[k]
+                        if not (cell_variant is Vector2i):
+                                continue
+                        var c: Vector2i = cell_variant
+                        var score := _axial_like_distance(c, origin)
+                        score += int(rng.randi_range(0, 2))
+                        if score < best_score:
+                                best_score = score
+                                best_k = k
+                                best_c = c
 
-		if best_k == -1:
-			continue
+                if best_k == -1:
+                        continue
 
-		_world.set_cell_named(_world.LAYER_OBJECTS, best_c, "decay")
-		_set_cluster_metadata(best_c, cluster.id)
-		cluster.tiles[_cell_hash(best_c)] = true
-		cluster.frontier.erase(best_k)
+                _world.set_cell_named(_world.LAYER_OBJECTS, best_c, "decay")
+                _set_cluster_metadata(best_c, cluster.id)
+                cluster.tiles[_cell_hash(best_c)] = true
+                cluster.frontier.erase(best_k)
 
-		for neighbor in _world.neighbors_even_q(best_c):
-			if _is_blocked_for_decay(neighbor):
-				continue
-			if _is_decay(neighbor):
-				continue
-			cluster.frontier[_cell_hash(neighbor)] = neighbor
+                for neighbor in _world.neighbors_even_q(best_c):
+                        if _is_blocked_for_decay(neighbor):
+                                continue
+                        if _is_decay(neighbor):
+                                continue
+                        cluster.frontier[_cell_hash(neighbor)] = neighbor
 
-		cluster.last_spread_turn = _turn
+                cluster.last_spread_turn = _turn
 
-	_recompute_mirror_pool_protection()
-	_refresh_cluster_fx_overlay()
+        _recompute_mirror_pool_protection()
+        _refresh_cluster_fx_overlay()
 
 
 func _threat_key(c: Vector2i) -> int:

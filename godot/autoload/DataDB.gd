@@ -76,4 +76,3 @@ func _canonicalize_category(value: String) -> String:
         if typeof(CategoryMap) != TYPE_NIL:
                 return CategoryMap.canonical(trimmed)
         return trimmed
-*** End of File
