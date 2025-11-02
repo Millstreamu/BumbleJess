@@ -49,7 +49,7 @@ func _setup_sprout_hooks() -> void:
 				SproutRegistry.roster_regenerated.connect(_on_roster_regenerated)
 
 func _on_turn_changed(turn_index: int) -> void:
-                var safe_turn: int = max(turn_index, 1)
+		var safe_turn: int = max(turn_index, 1)
 		if turn_l != null:
 				turn_l.text = "Turn %d" % safe_turn
 
