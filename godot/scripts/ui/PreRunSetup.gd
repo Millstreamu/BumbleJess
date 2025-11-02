@@ -45,32 +45,32 @@ var _core_tile_card_scene: PackedScene = null
 const CORE_MAX := 10
 
 func _ready() -> void:
-                process_mode = Node.PROCESS_MODE_WHEN_PAUSED
-                visible = false
-                btn_cancel.pressed.connect(_on_cancel)
-                btn_back.pressed.connect(_on_back)
-                btn_start.pressed.connect(_on_start)
-                btn_totem_confirm.pressed.connect(_on_totem_confirm)
-                btn_sprout_clear.pressed.connect(_on_sprout_clear)
-                btn_sprout_confirm.pressed.connect(_on_sprout_confirm)
-                core_filter.item_selected.connect(_on_core_filter)
-                core_search.text_changed.connect(_on_core_search_changed)
-                core_clear.pressed.connect(_on_core_clear)
-                core_confirm.pressed.connect(_on_core_confirm)
-                _totem_card_scene = _load_scene(TOTEM_CARD_SCENE_PATH)
-                _sprout_card_scene = _load_scene(SPROUT_CARD_SCENE_PATH)
-                _core_tile_card_scene = _load_scene(CORE_TILE_CARD_SCENE_PATH)
-                _load_data()
-                _load_all_tiles()
-                _apply_existing_choices()
-                _build_totem_grid()
-                _build_sprout_grid()
-		_build_core_filters()
-		_rebuild_core_grid()
-		_refresh_all()
-		if Engine.has_singleton("MetaManager"):
-				if not MetaManager.library_changed.is_connected(_on_sprout_library_changed):
-						MetaManager.library_changed.connect(_on_sprout_library_changed)
+	process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+	visible = false
+	btn_cancel.pressed.connect(_on_cancel)
+	btn_back.pressed.connect(_on_back)
+	btn_start.pressed.connect(_on_start)
+	btn_totem_confirm.pressed.connect(_on_totem_confirm)
+	btn_sprout_clear.pressed.connect(_on_sprout_clear)
+	btn_sprout_confirm.pressed.connect(_on_sprout_confirm)
+	core_filter.item_selected.connect(_on_core_filter)
+	core_search.text_changed.connect(_on_core_search_changed)
+	core_clear.pressed.connect(_on_core_clear)
+	core_confirm.pressed.connect(_on_core_confirm)
+	_totem_card_scene = _load_scene(TOTEM_CARD_SCENE_PATH)
+	_sprout_card_scene = _load_scene(SPROUT_CARD_SCENE_PATH)
+	_core_tile_card_scene = _load_scene(CORE_TILE_CARD_SCENE_PATH)
+	_load_data()
+	_load_all_tiles()
+	_apply_existing_choices()
+	_build_totem_grid()
+	_build_sprout_grid()
+	_build_core_filters()
+	_rebuild_core_grid()
+	_refresh_all()
+	if Engine.has_singleton("MetaManager"):
+		if not MetaManager.library_changed.is_connected(_on_sprout_library_changed):
+			MetaManager.library_changed.connect(_on_sprout_library_changed)
 
 func open() -> void:
 		_apply_existing_choices()
@@ -130,95 +130,123 @@ func _apply_existing_choices() -> void:
 				_core_selected.append(cid)
 
 func _build_totem_grid() -> void:
-                _clear_children(totem_grid)
-                if _totem_card_scene == null:
-                                _update_totem_badges()
-                                return
-                for entry_variant in _totems:
-                                if not (entry_variant is Dictionary):
-                                                continue
-                                var entry: Dictionary = entry_variant
-                                var tid := String(entry.get("id", ""))
-                                if tid.is_empty():
-                                                continue
-                                var button := _totem_card_scene.instantiate() as Button
-                                if button == null:
-                                                continue
-				button.set_meta("id", tid)
-				var display_name := String(entry.get("name", tid))
-				var desc := String(entry.get("desc", ""))
-				var name_label := button.get_node_or_null("Name") as Label
-				if name_label != null:
-						name_label.text = display_name
-				var desc_label := button.get_node_or_null("Desc") as RichTextLabel
-				if desc_label != null:
-						if desc.is_empty():
-								desc_label.text = "—"
-						else:
-								desc_label.text = desc
-				var icon_path := String(entry.get("icon", ""))
-				var icon_rect := button.get_node_or_null("Icon") as TextureRect
-				if icon_rect != null:
-						icon_rect.texture = null
-						if not icon_path.is_empty() and ResourceLoader.exists(icon_path):
-								var tex := ResourceLoader.load(icon_path)
-								if tex is Texture2D:
-										icon_rect.texture = tex
-				button.pressed.connect(func():
-						_chosen_totem = tid
-						_update_totem_badges()
-						_refresh_all()
-				)
-				totem_grid.add_child(button)
+	_clear_children(totem_grid)
+
+	if _totem_card_scene == null:
 		_update_totem_badges()
+		return
+
+	for entry_variant in _totems:
+		if not (entry_variant is Dictionary):
+			continue
+
+		var entry: Dictionary = entry_variant
+		var tid := String(entry.get("id", ""))
+		if tid.is_empty():
+			continue
+
+		var button := _totem_card_scene.instantiate() as Button
+		if button == null:
+			continue
+
+		button.set_meta("id", tid)
+
+		var display_name := String(entry.get("name", tid))
+		var desc := String(entry.get("desc", ""))
+
+		var name_label := button.get_node_or_null("Name") as Label
+		if name_label != null:
+			name_label.text = display_name
+
+		var desc_label := button.get_node_or_null("Desc") as RichTextLabel
+		if desc_label != null:
+			if desc.is_empty():
+				desc_label.text = "—"
+			else:
+				desc_label.text = desc
+
+		var icon_path := String(entry.get("icon", ""))
+		var icon_rect := button.get_node_or_null("Icon") as TextureRect
+		if icon_rect != null:
+			icon_rect.texture = null
+			if not icon_path.is_empty() and ResourceLoader.exists(icon_path):
+				var tex := ResourceLoader.load(icon_path)
+				if tex is Texture2D:
+					icon_rect.texture = tex
+
+		button.pressed.connect(func():
+			_chosen_totem = tid
+			_update_totem_badges()
+			_refresh_all()
+		)
+
+		totem_grid.add_child(button)
+
+	_update_totem_badges()
+
 
 func _build_sprout_grid() -> void:
-                _clear_children(sprout_grid)
-                if _sprout_card_scene == null:
-                                _update_sprout_badges()
-                                return
-                var removed_locked := false
-                for sprout_variant in _sprouts:
-                                if not (sprout_variant is Dictionary):
-                                                continue
-                                var sprout: Dictionary = sprout_variant
-                                var sid := String(sprout.get("id", ""))
-                                if sid.is_empty():
-                                                continue
-                                var button := _sprout_card_scene.instantiate() as Button
-                                if button == null:
-                                                continue
-				button.set_meta("id", sid)
-				var display_name := String(sprout.get("name", sid))
-				var name_label := button.get_node_or_null("Name") as Label
-				if name_label != null:
-						name_label.text = display_name
-				var icon_rect := button.get_node_or_null("Icon") as TextureRect
-				if icon_rect != null:
-						icon_rect.texture = null
-						var icon_path := String(sprout.get("icon", ""))
-						if not icon_path.is_empty() and ResourceLoader.exists(icon_path):
-								var tex := ResourceLoader.load(icon_path)
-								if tex is Texture2D:
-										icon_rect.texture = tex
-				var locked := _is_locked_sprout(sprout)
-				if locked and _chosen_sprouts.has(sid):
-						_chosen_sprouts.erase(sid)
-						removed_locked = true
-				button.disabled = locked
-				if locked:
-						button.modulate = Color(1, 1, 1, 0.5)
-						button.hint_tooltip = "Locked — discover an Artefact to unlock."
-				else:
-						button.modulate = Color(1, 1, 1, 1)
-						button.hint_tooltip = ""
-				button.pressed.connect(func():
-						_toggle_sprout(sid)
-				)
-				sprout_grid.add_child(button)
+	_clear_children(sprout_grid)
+
+	if _sprout_card_scene == null:
 		_update_sprout_badges()
-		if removed_locked:
-				_refresh_all()
+		return
+
+	var removed_locked := false
+
+	for sprout_variant in _sprouts:
+		if not (sprout_variant is Dictionary):
+			continue
+
+		var sprout: Dictionary = sprout_variant
+		var sid := String(sprout.get("id", ""))
+		if sid.is_empty():
+			continue
+
+		var button := _sprout_card_scene.instantiate() as Button
+		if button == null:
+			continue
+
+		button.set_meta("id", sid)
+
+		var display_name := String(sprout.get("name", sid))
+		var name_label := button.get_node_or_null("Name") as Label
+		if name_label != null:
+			name_label.text = display_name
+
+		var icon_rect := button.get_node_or_null("Icon") as TextureRect
+		if icon_rect != null:
+			icon_rect.texture = null
+			var icon_path := String(sprout.get("icon", ""))
+			if not icon_path.is_empty() and ResourceLoader.exists(icon_path):
+				var tex := ResourceLoader.load(icon_path)
+				if tex is Texture2D:
+					icon_rect.texture = tex
+
+		var locked := _is_locked_sprout(sprout)
+		if locked and _chosen_sprouts.has(sid):
+			_chosen_sprouts.erase(sid)
+			removed_locked = true
+
+		button.disabled = locked
+		if locked:
+			button.modulate = Color(1, 1, 1, 0.5)
+			button.hint_tooltip = "Locked — discover an Artefact to unlock."
+		else:
+			button.modulate = Color(1, 1, 1, 1)
+			button.hint_tooltip = ""
+
+		button.pressed.connect(func():
+			_toggle_sprout(sid)
+		)
+
+		sprout_grid.add_child(button)
+
+	_update_sprout_badges()
+
+	if removed_locked:
+		_refresh_all()
+
 
 func _on_sprout_library_changed() -> void:
 		_build_sprout_grid()
@@ -264,13 +292,14 @@ func _build_core_filters() -> void:
 				core_filter.select(0)
 
 func _rebuild_core_grid() -> void:
-        if core_grid == null:
-                return
-        _clear_children(core_grid)
+	if core_grid == null:
+		return
 
-        if _core_tile_card_scene == null:
-                _refresh_core_ui()
-                return
+	_clear_children(core_grid)
+
+	if _core_tile_card_scene == null:
+		_refresh_core_ui()
+		return
 
 	var sel_cat := ""
 	var idx := core_filter.selected if core_filter != null else -1
@@ -286,6 +315,7 @@ func _rebuild_core_grid() -> void:
 	for entry_variant in _all_tiles:
 		if not (entry_variant is Dictionary):
 			continue
+
 		var entry: Dictionary = entry_variant
 		var id := String(entry.get("id", ""))
 		if id.is_empty():
@@ -308,9 +338,10 @@ func _rebuild_core_grid() -> void:
 			if not hay.contains(query):
 				continue
 
-                var button := _core_tile_card_scene.instantiate() as Button
-                if button == null:
-                        continue
+		var button := _core_tile_card_scene.instantiate() as Button
+		if button == null:
+			continue
+
 		button.set_meta("id", id)
 
 		var name_label := button.get_node_or_null("Content/Header/Name") as Label
@@ -332,21 +363,23 @@ func _rebuild_core_grid() -> void:
 		button.pressed.connect(func():
 			_toggle_core(id)
 		)
+
 		core_grid.add_child(button)
 
-        _refresh_core_ui()
+	_refresh_core_ui()
+
 
 func _load_scene(path: String) -> PackedScene:
-        if path.is_empty():
-                return null
-        if not ResourceLoader.exists(path):
-                push_warning("PreRunSetup: missing scene at %s" % path)
-                return null
-        var resource := ResourceLoader.load(path)
-        if resource is PackedScene:
-                return resource
-        push_warning("PreRunSetup: resource at %s is not a PackedScene" % path)
-        return null
+		if path.is_empty():
+				return null
+		if not ResourceLoader.exists(path):
+				push_warning("PreRunSetup: missing scene at %s" % path)
+				return null
+		var resource := ResourceLoader.load(path)
+		if resource is PackedScene:
+				return resource
+		push_warning("PreRunSetup: resource at %s is not a PackedScene" % path)
+		return null
 
 func _summarize_tile(def: Dictionary) -> String:
 		var lines: Array[String] = []
