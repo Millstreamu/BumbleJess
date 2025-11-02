@@ -123,50 +123,50 @@ text = "Clear"
 text = "Confirm Sprouts"
 disabled = true
 
-[node name="Core Tiles" type="VBoxContainer" parent="Panel/Root/Tabs"]
+[node name="CoreTiles" type="VBoxContainer" parent="Panel/Root/Tabs"]
 size_flags_horizontal = Control.SIZE_EXPAND_FILL
 size_flags_vertical = Control.SIZE_EXPAND_FILL
 
-[node name="Heading" type="Label" parent="Panel/Root/Tabs/Core Tiles"]
+[node name="Heading" type="Label" parent="Panel/Root/Tabs/CoreTiles"]
 text = "Choose up to 10 Core Tiles (biases Commune offers)"
 horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
-[node name="FilterRow" type="HBoxContainer" parent="Panel/Root/Tabs/Core Tiles"]
+[node name="FilterRow" type="HBoxContainer" parent="Panel/Root/Tabs/CoreTiles"]
 size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
-[node name="FilterCat" type="OptionButton" parent="Panel/Root/Tabs/Core Tiles/FilterRow"]
+[node name="FilterCat" type="OptionButton" parent="Panel/Root/Tabs/CoreTiles/FilterRow"]
 size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
-[node name="Search" type="LineEdit" parent="Panel/Root/Tabs/Core Tiles/FilterRow"]
+[node name="Search" type="LineEdit" parent="Panel/Root/Tabs/CoreTiles/FilterRow"]
 placeholder_text = "Search by name/tag"
 size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
-[node name="CountLabel" type="Label" parent="Panel/Root/Tabs/Core Tiles/FilterRow"]
+[node name="CountLabel" type="Label" parent="Panel/Root/Tabs/CoreTiles/FilterRow"]
 text = "0 / 10"
 vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 
-[node name="FilterSpacer" type="Control" parent="Panel/Root/Tabs/Core Tiles/FilterRow"]
+[node name="FilterSpacer" type="Control" parent="Panel/Root/Tabs/CoreTiles/FilterRow"]
 size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
-[node name="ClearBtn" type="Button" parent="Panel/Root/Tabs/Core Tiles/FilterRow"]
+[node name="ClearBtn" type="Button" parent="Panel/Root/Tabs/CoreTiles/FilterRow"]
 text = "Clear"
 
-[node name="ScrollContainer" type="ScrollContainer" parent="Panel/Root/Tabs/Core Tiles"]
+[node name="ScrollContainer" type="ScrollContainer" parent="Panel/Root/Tabs/CoreTiles"]
 size_flags_horizontal = Control.SIZE_EXPAND_FILL
 size_flags_vertical = Control.SIZE_EXPAND_FILL
 horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 
-[node name="TileGrid" type="HFlowContainer" parent="Panel/Root/Tabs/Core Tiles/ScrollContainer"]
+[node name="TileGrid" type="HFlowContainer" parent="Panel/Root/Tabs/CoreTiles/ScrollContainer"]
 size_flags_horizontal = Control.SIZE_EXPAND_FILL
 size_flags_vertical = Control.SIZE_EXPAND_FILL
 
-[node name="Footer" type="HBoxContainer" parent="Panel/Root/Tabs/Core Tiles"]
+[node name="Footer" type="HBoxContainer" parent="Panel/Root/Tabs/CoreTiles"]
 size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
-[node name="FooterSpacer" type="Control" parent="Panel/Root/Tabs/Core Tiles/Footer"]
+[node name="FooterSpacer" type="Control" parent="Panel/Root/Tabs/CoreTiles/Footer"]
 size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
-[node name="ConfirmCoreBtn" type="Button" parent="Panel/Root/Tabs/Core Tiles/Footer"]
+[node name="ConfirmCoreBtn" type="Button" parent="Panel/Root/Tabs/CoreTiles/Footer"]
 text = "Confirm Core"
 disabled = true
 

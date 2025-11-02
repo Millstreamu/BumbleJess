@@ -21,12 +21,12 @@ const CORE_TILE_CARD_SCENE: PackedScene = preload("res://scenes/ui/CoreTileCard.
 @onready var btn_sprout_clear: Button = $"Panel/Root/Tabs/Sprouts/ClearBtn"
 @onready var btn_sprout_confirm: Button = $"Panel/Root/Tabs/Sprouts/SproutConfirm"
 
-@onready var core_filter: OptionButton = $"Panel/Root/Tabs/Core Tiles/FilterRow/FilterCat"
-@onready var core_search: LineEdit = $"Panel/Root/Tabs/Core Tiles/FilterRow/Search"
-@onready var core_count: Label = $"Panel/Root/Tabs/Core Tiles/FilterRow/CountLabel"
-@onready var core_clear: Button = $"Panel/Root/Tabs/Core Tiles/FilterRow/ClearBtn"
-@onready var core_confirm: Button = $"Panel/Root/Tabs/Core Tiles/Footer/ConfirmCoreBtn"
-@onready var core_grid: HFlowContainer = $"Panel/Root/Tabs/Core Tiles/ScrollContainer/TileGrid"
+@onready var core_filter: OptionButton = $"Panel/Root/Tabs/CoreTiles/FilterRow/FilterCat"
+@onready var core_search: LineEdit = $"Panel/Root/Tabs/CoreTiles/FilterRow/Search"
+@onready var core_count: Label = $"Panel/Root/Tabs/CoreTiles/FilterRow/CountLabel"
+@onready var core_clear: Button = $"Panel/Root/Tabs/CoreTiles/FilterRow/ClearBtn"
+@onready var core_confirm: Button = $"Panel/Root/Tabs/CoreTiles/Footer/ConfirmCoreBtn"
+@onready var core_grid: HFlowContainer = $"Panel/Root/Tabs/CoreTiles/ScrollContainer/TileGrid"
 
 var _totems: Array = []
 var _sprouts: Array = []
