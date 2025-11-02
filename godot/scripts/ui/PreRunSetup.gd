@@ -251,61 +251,73 @@ func _build_core_filters() -> void:
 				core_filter.select(0)
 
 func _rebuild_core_grid() -> void:
-		if core_grid == null:
-				return
-		_clear_children(core_grid)
-				var sel_cat := ""
-				var idx := core_filter.selected if core_filter != null else -1
-				if idx >= 0:
-								var meta: Variant = core_filter.get_item_metadata(idx)
-								if typeof(meta) == TYPE_STRING:
-												sel_cat = String(meta)
-		var query := ""
-		if core_search != null:
-				query = core_search.text.strip_edges().to_lower()
-		for entry_variant in _all_tiles:
-				if not (entry_variant is Dictionary):
-						continue
-				var entry: Dictionary = entry_variant
-				var id := String(entry.get("id", ""))
-				if id.is_empty():
-						continue
-				var cat := CategoryMap.canonical(String(entry.get("category", "")))
-				if not sel_cat.is_empty() and cat != sel_cat:
-						continue
-								if query != "":
-												var hay := String(entry.get("name", id)) + " " + id
-												var tags_variant: Variant = entry.get("tags", [])
-												if tags_variant is PackedStringArray:
-																for tag in tags_variant:
-																				hay += " " + String(tag)
-												elif tags_variant is Array:
-																for tag in tags_variant:
-																				hay += " " + String(tag)
-						hay = hay.to_lower()
-						if not hay.contains(query):
-								continue
-				var button := CORE_TILE_CARD_SCENE.instantiate() as Button
-				if button == null:
-						continue
-				button.set_meta("id", id)
-				var name_label := button.get_node_or_null("Content/Header/Name") as Label
-				if name_label != null:
-						name_label.text = String(entry.get("name", id))
-				var cat_label := button.get_node_or_null("Content/Header/Cat") as Label
-				if cat_label != null:
-						cat_label.text = CategoryMap.display_name(cat)
-				var summary_label := button.get_node_or_null("Content/Summary") as RichTextLabel
-				if summary_label != null:
-						summary_label.bbcode_text = _summarize_tile(entry)
-				var chosen_label := button.get_node_or_null("Chosen") as Label
-				if chosen_label != null:
-						chosen_label.visible = _core_selected.has(id)
-				button.pressed.connect(func():
-						_toggle_core(id)
-				)
-				core_grid.add_child(button)
-		_refresh_core_ui()
+	if core_grid == null:
+		return
+	_clear_children(core_grid)
+
+	var sel_cat := ""
+	var idx := core_filter.selected if core_filter != null else -1
+	if idx >= 0:
+		var meta: Variant = core_filter.get_item_metadata(idx)
+		if typeof(meta) == TYPE_STRING:
+			sel_cat = String(meta)
+
+	var query := ""
+	if core_search != null:
+		query = core_search.text.strip_edges().to_lower()
+
+	for entry_variant in _all_tiles:
+		if not (entry_variant is Dictionary):
+			continue
+		var entry: Dictionary = entry_variant
+		var id := String(entry.get("id", ""))
+		if id.is_empty():
+			continue
+
+		var cat := CategoryMap.canonical(String(entry.get("category", "")))
+		if not sel_cat.is_empty() and cat != sel_cat:
+			continue
+
+		if query != "":
+			var hay := String(entry.get("name", id)) + " " + id
+			var tags_variant: Variant = entry.get("tags", [])
+			if tags_variant is PackedStringArray:
+				for tag in tags_variant:
+					hay += " " + String(tag)
+			elif tags_variant is Array:
+				for tag in tags_variant:
+					hay += " " + String(tag)
+			hay = hay.to_lower()
+			if not hay.contains(query):
+				continue
+
+		var button := CORE_TILE_CARD_SCENE.instantiate() as Button
+		if button == null:
+			continue
+		button.set_meta("id", id)
+
+		var name_label := button.get_node_or_null("Content/Header/Name") as Label
+		if name_label != null:
+			name_label.text = String(entry.get("name", id))
+
+		var cat_label := button.get_node_or_null("Content/Header/Cat") as Label
+		if cat_label != null:
+			cat_label.text = CategoryMap.display_name(cat)
+
+		var summary_label := button.get_node_or_null("Content/Summary") as RichTextLabel
+		if summary_label != null:
+			summary_label.bbcode_text = _summarize_tile(entry)
+
+		var chosen_label := button.get_node_or_null("Chosen") as Label
+		if chosen_label != null:
+			chosen_label.visible = _core_selected.has(id)
+
+		button.pressed.connect(func():
+			_toggle_core(id)
+		)
+		core_grid.add_child(button)
+
+	_refresh_core_ui()
 
 func _summarize_tile(def: Dictionary) -> String:
 		var lines: Array[String] = []

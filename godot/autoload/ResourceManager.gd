@@ -737,19 +737,15 @@ func _count_adjacent_with_tag(cell: Vector2i, tag: String) -> int:
 	for neighbor in _world.neighbors_even_q(cell):
 		var neighbor_id := ""
 		var neighbor_tags: Array = []
-				if _world.has_method("get_cell_meta"):
-						var tags_variant: Variant = _world.get_cell_meta(
-								_world.LAYER_LIFE, neighbor, "tags"
-						)
-						if tags_variant is PackedStringArray:
-								neighbor_tags = Array(tags_variant)
-						elif tags_variant is Array:
-								neighbor_tags = tags_variant
-						var id_variant: Variant = _world.get_cell_meta(
-								_world.LAYER_LIFE, neighbor, "id"
-						)
-						if typeof(id_variant) == TYPE_STRING:
-								neighbor_id = String(id_variant)
+		if _world.has_method("get_cell_meta"):
+			var tags_variant: Variant = _world.get_cell_meta(_world.LAYER_LIFE, neighbor, "tags")
+			if tags_variant is PackedStringArray:
+				neighbor_tags = Array(tags_variant)
+			elif tags_variant is Array:
+				neighbor_tags = tags_variant
+			var id_variant: Variant = _world.get_cell_meta(_world.LAYER_LIFE, neighbor, "id")
+			if typeof(id_variant) == TYPE_STRING:
+				neighbor_id = String(id_variant)
 		if neighbor_id.is_empty() and _world.has_method("get_cell_tile_id"):
 			neighbor_id = String(_world.get_cell_tile_id(_world.LAYER_LIFE, neighbor))
 		if neighbor_tags.is_empty() and not neighbor_id.is_empty():
@@ -764,12 +760,10 @@ func _count_adjacent_with_tag(cell: Vector2i, tag: String) -> int:
 				break
 		if not matched:
 			var neighbor_cat := ""
-						if _world.has_method("get_cell_meta"):
-								var meta_cat: Variant = _world.get_cell_meta(
-										_world.LAYER_LIFE, neighbor, "category"
-								)
-								if typeof(meta_cat) == TYPE_STRING:
-										neighbor_cat = String(meta_cat)
+			if _world.has_method("get_cell_meta"):
+				var meta_cat: Variant = _world.get_cell_meta(_world.LAYER_LIFE, neighbor, "category")
+				if typeof(meta_cat) == TYPE_STRING:
+					neighbor_cat = String(meta_cat)
 			if neighbor_cat.is_empty() and not neighbor_id.is_empty():
 				neighbor_cat = String(DataDB.get_category_for_id(neighbor_id))
 			var canonical_neighbor := CategoryMap.canonical(neighbor_cat)

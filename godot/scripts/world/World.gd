@@ -593,16 +593,16 @@ func id_to_name(id: String) -> String:
 
 
 func get_cell_name(layer: int, c: Vector2i) -> String:
-		if hexmap == null:
-				return ""
-		if hexmap.get_cell_tile_data(layer, c) == null:
-				return ""
+	if hexmap == null:
+		return ""
+	if hexmap.get_cell_tile_data(layer, c) == null:
+		return ""
 	var source_id: int = hexmap.get_cell_source_id(layer, c)
 	if source_id < 0:
 		return ""
 	var atlas_coords: Vector2i = hexmap.get_cell_atlas_coords(layer, c)
-		var key := TileSetBuilder.encode_tile_key(source_id, atlas_coords)
-		return String(tiles_id_to_name.get(key, ""))
+	var key := TileSetBuilder.encode_tile_key(source_id, atlas_coords)
+	return String(tiles_id_to_name.get(key, ""))
 
 
 func get_cell_tooltip(cell: Vector2i) -> String:
@@ -978,51 +978,57 @@ func _update_hud() -> void:
 
 
 func _build_hud_text() -> String:
-		var lines: Array[String] = []
-		var current_line := ""
-		var deck := DeckManager if typeof(DeckManager) != TYPE_NIL else null
-		if not _placing_special.is_empty():
-				var display_name := id_to_name(_placing_special)
-				if display_name.is_empty():
-						display_name = _placing_special
-				current_line = "Current: SPECIAL - %s" % display_name
-		elif typeof(CommuneManager) != TYPE_NIL and CommuneManager.has_current_tile():
-				var tile_id := CommuneManager.get_current_tile_id()
-				var display := id_to_name(tile_id)
-				if display.is_empty():
-						display = tile_id
-				var cat := ""
-				if deck != null:
-						cat = deck.get_tile_category(tile_id)
-				if not cat.is_empty():
-						var canon := CategoryMap.canonical(cat)
-						var cat_display := CategoryMap.display_name(canon)
-						if not cat_display.is_empty():
-								display = "%s (%s)" % [display, cat_display]
-				current_line = "Current: %s" % display
-		else:
-				current_line = "Current: Choose from the Commune"
-		lines.append(current_line)
-		var rc := RunConfig if typeof(RunConfig) != TYPE_NIL else null
-		if rc != null and not rc.last_pick_id.is_empty():
-				var last_name := id_to_name(rc.last_pick_id)
-				if last_name.is_empty():
-						last_name = rc.last_pick_id
-				lines.append("Last Pick: %s" % last_name)
-		var totem_line := _totem_status_line()
-		if not totem_line.is_empty():
-				lines.append(totem_line)
-		lines.append(
-				(
-						"Overgrowth: %d | Groves: %d"
-						% [_count_cells_named("overgrowth"), _count_cells_named("grove")]
-				)
-	)
+	var lines: Array[String] = []
+	var current_line := ""
+	var deck := DeckManager if typeof(DeckManager) != TYPE_NIL else null
+
+	if not _placing_special.is_empty():
+		var display_name := id_to_name(_placing_special)
+		if display_name.is_empty():
+			display_name = _placing_special
+		current_line = "Current: SPECIAL - %s" % display_name
+	elif typeof(CommuneManager) != TYPE_NIL and CommuneManager.has_current_tile():
+		var tile_id := CommuneManager.get_current_tile_id()
+		var display := id_to_name(tile_id)
+		if display.is_empty():
+			display = tile_id
+		var cat := ""
+		if deck != null:
+			cat = deck.get_tile_category(tile_id)
+		if not cat.is_empty():
+			var canon := CategoryMap.canonical(cat)
+			var cat_display := CategoryMap.display_name(canon)
+			if not cat_display.is_empty():
+				display = "%s (%s)" % [display, cat_display]
+		current_line = "Current: %s" % display
+	else:
+		current_line = "Current: Choose from the Commune"
+
+	lines.append(current_line)
+
+	var rc := RunConfig if typeof(RunConfig) != TYPE_NIL else null
+	if rc != null and not rc.last_pick_id.is_empty():
+		var last_name := id_to_name(rc.last_pick_id)
+		if last_name.is_empty():
+			last_name = rc.last_pick_id
+		lines.append("Last Pick: %s" % last_name)
+
+	var totem_line := _totem_status_line()
+	if not totem_line.is_empty():
+		lines.append(totem_line)
+
+	lines.append("Overgrowth: %d | Groves: %d" % [
+		_count_cells_named("overgrowth"),
+		_count_cells_named("grove")
+	])
+
 	var resource_manager: Node = _get_resource_manager()
 	if resource_manager != null:
 		var soul_variant = resource_manager.get("soul_seeds")
 		lines.append("Soul Seeds: %d" % [int(soul_variant)])
+
 	return "\n".join(lines)
+
 
 
 func _totem_status_line() -> String:
@@ -1134,22 +1140,22 @@ func _count_cells_named(tile_name: String) -> int:
 		return total
 
 func _check_artefact_reveal(cell: Vector2i) -> void:
-		var payload_variant := get_cell_meta(LAYER_OBJECTS, cell, "artefact")
-		if not (payload_variant is Dictionary):
-				if payload_variant != null:
-						set_cell_meta(LAYER_OBJECTS, cell, "artefact", null)
-				return
-		var payload: Dictionary = payload_variant
-		if payload.is_empty():
-				set_cell_meta(LAYER_OBJECTS, cell, "artefact", null)
-				return
-		_reveal_artefact(cell, payload.duplicate(true))
+	var payload_variant := get_cell_meta(LAYER_OBJECTS, cell, "artefact")
+	if not (payload_variant is Dictionary):
+		if payload_variant != null:
+			set_cell_meta(LAYER_OBJECTS, cell, "artefact", null)
+		return
+	var payload: Dictionary = payload_variant
+	if payload.is_empty():
+		set_cell_meta(LAYER_OBJECTS, cell, "artefact", null)
+		return
+	_reveal_artefact(cell, payload.duplicate(true))
 
 func _on_tile_placed(tile_id: String, cell: Vector2i) -> void:
-		_check_artefact_reveal(cell)
-		var rule_set := _rules_for_tile(tile_id)
-		if rule_set.is_empty():
-				return
+	_check_artefact_reveal(cell)
+	var rule_set := _rules_for_tile(tile_id)
+	if rule_set.is_empty():
+		return
 
 	var on_place_variant: Variant = rule_set.get("on_place", {})
 	if on_place_variant is Dictionary:

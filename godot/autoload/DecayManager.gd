@@ -859,18 +859,18 @@ func _unique_by_cell(arr: Array) -> Array:
 		var seen := {}
 		var out: Array = []
 		for entry_variant in arr:
-				if not (entry_variant is Dictionary):
-						continue
-				var entry: Dictionary = entry_variant
-				var cell_variant: Variant = entry.get("cell")
-				if not (cell_variant is Vector2i):
-						continue
-				var cell: Vector2i = cell_variant
-								var cell_hash := _cell_hash(cell)
-								if seen.has(cell_hash):
-												continue
-								seen[cell_hash] = true
-				out.append(entry)
+			if not (entry_variant is Dictionary):
+				continue
+			var entry: Dictionary = entry_variant
+			var cell_variant: Variant = entry.get("cell")
+			if not (cell_variant is Vector2i):
+				continue
+			var cell: Vector2i = cell_variant
+			var cell_hash := _cell_hash(cell)
+			if seen.has(cell_hash):
+				continue
+			seen[cell_hash] = true
+			out.append(entry)
 		return out
 
 
