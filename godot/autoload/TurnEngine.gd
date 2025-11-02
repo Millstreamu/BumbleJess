@@ -11,7 +11,18 @@ var _tile_placed_this_turn := false
 var _run_active := false
 
 func _ready() -> void:
-	begin_run(turn_index)
+        begin_run(turn_index)
+        _bind_run_config()
+
+func _bind_run_config() -> void:
+        var rc := RunConfig if typeof(RunConfig) != TYPE_NIL else null
+        if rc == null:
+                return
+        if not rc.run_ready.is_connected(_on_run_config_ready):
+                rc.run_ready.connect(_on_run_config_ready)
+
+func _on_run_config_ready() -> void:
+        begin_run(1)
 
 func begin_run(start_turn: int = 1) -> void:
 	turn_index = max(1, start_turn)
