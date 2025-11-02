@@ -13,8 +13,8 @@ var _born_turn: Dictionary = {}
 var _tile_rules_cache: Dictionary = {}
 
 func _ready() -> void:
-		_connect_turn_engine()
-		_connect_world_signal()
+        _connect_turn_engine()
+        _connect_world_signal()
 
 func bind_world(world: Node) -> void:
 	_world = world
@@ -24,67 +24,67 @@ func bind_world(world: Node) -> void:
 	_connect_world_signal()
 
 func tick_growth_phase(turn: int) -> void:
-		_turn = max(turn, 1)
-		_run_growth_cycle()
+        _turn = max(turn, 1)
+        _run_growth_cycle()
 
 func request_growth_update(current_turn: int = -1) -> void:
-		if current_turn < 0:
-				var engine := _get_turn_engine()
-				if engine != null:
-						var value: Variant = engine.get("turn_index")
-						if typeof(value) == TYPE_INT:
-								current_turn = int(value)
-		if current_turn >= 0:
-				_turn = max(current_turn, 1)
-		_run_growth_cycle()
+        if current_turn < 0:
+                var engine := _get_turn_engine()
+                if engine != null:
+                        var value: Variant = engine.get("turn_index")
+                        if typeof(value) == TYPE_INT:
+                                current_turn = int(value)
+        if current_turn >= 0:
+                _turn = max(current_turn, 1)
+        _run_growth_cycle()
 
 func apply_growth_multiplier(mult: float) -> void:
-		_growth_mult *= mult
-		print("Growth speed multiplier:", _growth_mult)
+        _growth_mult *= mult
+        print("Growth speed multiplier:", _growth_mult)
 
 func _connect_turn_engine() -> void:
-		var turn_engine: Node = _get_turn_engine()
-		if turn_engine == null:
-				return
-		if turn_engine.has_signal("run_started") and not turn_engine.is_connected(
-				"run_started", Callable(self, "_on_run_started")
-		):
-				turn_engine.connect("run_started", Callable(self, "_on_run_started"))
-		if turn_engine.has_signal("turn_changed") and not turn_engine.is_connected(
-				"turn_changed", Callable(self, "_on_turn_changed")
-		):
-				turn_engine.connect("turn_changed", Callable(self, "_on_turn_changed"))
-		_on_run_started()
+        var turn_engine: Node = _get_turn_engine()
+        if turn_engine == null:
+                return
+        if turn_engine.has_signal("run_started") and not turn_engine.is_connected(
+                "run_started", Callable(self, "_on_run_started")
+        ):
+                turn_engine.connect("run_started", Callable(self, "_on_run_started"))
+        if turn_engine.has_signal("turn_changed") and not turn_engine.is_connected(
+                "turn_changed", Callable(self, "_on_turn_changed")
+        ):
+                turn_engine.connect("turn_changed", Callable(self, "_on_turn_changed"))
+        _on_run_started()
 
 func _on_run_started() -> void:
-		var engine := _get_turn_engine()
-		if engine == null:
-				_turn = 1
-				return
-		var value: Variant = engine.get("turn_index")
-		if typeof(value) == TYPE_INT:
-				_turn = max(int(value), 1)
-		else:
-				_turn = 1
+        var engine := _get_turn_engine()
+        if engine == null:
+                _turn = 1
+                return
+        var value: Variant = engine.get("turn_index")
+        if typeof(value) == TYPE_INT:
+                _turn = max(int(value), 1)
+        else:
+                _turn = 1
 
 func _on_turn_changed(turn: int) -> void:
-		_turn = max(turn, 1)
+        _turn = max(turn, 1)
 
 func _get_turn_engine() -> Node:
-		var turn_engine: Node = null
-		if Engine.has_singleton("TurnEngine"):
-				var singleton := Engine.get_singleton("TurnEngine")
-				if singleton is Node:
-						turn_engine = singleton
-		if turn_engine == null:
-				turn_engine = get_node_or_null("/root/TurnEngine")
-		if turn_engine == null and Engine.has_singleton("Game"):
-				var game_singleton := Engine.get_singleton("Game")
-				if game_singleton is Node:
-						turn_engine = game_singleton
-		if turn_engine == null:
-				turn_engine = get_node_or_null("/root/Game")
-		return turn_engine
+        var turn_engine: Node = null
+        if Engine.has_singleton("TurnEngine"):
+                var singleton := Engine.get_singleton("TurnEngine")
+                if singleton is Node:
+                        turn_engine = singleton
+        if turn_engine == null:
+                turn_engine = get_node_or_null("/root/TurnEngine")
+        if turn_engine == null and Engine.has_singleton("Game"):
+                var game_singleton := Engine.get_singleton("Game")
+                if game_singleton is Node:
+                        turn_engine = game_singleton
+        if turn_engine == null:
+                turn_engine = get_node_or_null("/root/Game")
+        return turn_engine
 
 func _run_growth_cycle() -> void:
 	_recompute_overgrowth()
@@ -149,11 +149,11 @@ func _recompute_overgrowth() -> void:
 			var life_name: String = _world.get_cell_name(_world.LAYER_LIFE, cell)
 			if not reachable:
 				if life_name == "" or life_name == "empty":
-										_world.set_cell_named(_world.LAYER_LIFE, cell, "overgrowth")
-										if _world.has_method("set_fx"):
-												_world.set_fx(cell, "fx_bloom_hint")
-										if not _overgrowth_born.has(cell_hash):
-												_overgrowth_born[cell_hash] = _turn
+                                        _world.set_cell_named(_world.LAYER_LIFE, cell, "overgrowth")
+                                        if _world.has_method("set_fx"):
+                                                _world.set_fx(cell, "fx_bloom_hint")
+                                        if not _overgrowth_born.has(cell_hash):
+                                                _overgrowth_born[cell_hash] = _turn
 			else:
 				if _overgrowth_born.has(cell_hash):
 					_overgrowth_born.erase(cell_hash)
@@ -197,19 +197,19 @@ func _bloom_groves() -> void:
 		if _world.get_cell_name(_world.LAYER_LIFE, cell) == "overgrowth":
 			to_bloom.append(cell)
 
-		var any_bloomed := false
-		for cell in to_bloom:
-				_world.set_cell_named(_world.LAYER_LIFE, cell, "grove")
-				if _world.has_method("clear_fx"):
-						_world.clear_fx(cell)
-				if _world.has_method("set_fx"):
-						_world.set_fx(cell, "fx_grove_glow")
-				var cell_hash := _hash_cell(cell, width)
-				_overgrowth_born.erase(cell_hash)
-				emit_signal("grove_spawned", cell)
-				any_bloomed = true
-		if any_bloomed and Engine.has_singleton("AudioBus"):
-				AudioBus.play("res://assets/sfx/growth.wav")
+        var any_bloomed := false
+        for cell in to_bloom:
+                _world.set_cell_named(_world.LAYER_LIFE, cell, "grove")
+                if _world.has_method("clear_fx"):
+                        _world.clear_fx(cell)
+                if _world.has_method("set_fx"):
+                        _world.set_fx(cell, "fx_grove_glow")
+                var cell_hash := _hash_cell(cell, width)
+                _overgrowth_born.erase(cell_hash)
+                emit_signal("grove_spawned", cell)
+                any_bloomed = true
+        if any_bloomed and Engine.has_singleton("AudioBus"):
+                AudioBus.play("res://assets/sfx/growth.wav")
 
 func _handle_special_growth() -> void:
 	if _world == null:
@@ -244,14 +244,14 @@ func _handle_special_growth() -> void:
 						var neighbor_name: String = _world.get_cell_name(_world.LAYER_LIFE, neighbor)
 						if not (neighbor_name.is_empty() or neighbor_name == "empty"):
 							continue
-												_world.set_cell_named(_world.LAYER_LIFE, neighbor, "overgrowth")
-												if _world.has_method("set_fx"):
-														_world.set_fx(neighbor, "fx_bloom_hint")
-												if _world.has_method("set_cell_tile_id"):
-														_world.set_cell_tile_id(
-																_world.LAYER_LIFE,
-																neighbor,
-																"tile.overgrowth.default",
+                                                _world.set_cell_named(_world.LAYER_LIFE, neighbor, "overgrowth")
+                                                if _world.has_method("set_fx"):
+                                                        _world.set_fx(neighbor, "fx_bloom_hint")
+                                                if _world.has_method("set_cell_tile_id"):
+                                                        _world.set_cell_tile_id(
+                                                                _world.LAYER_LIFE,
+                                                                neighbor,
+                                                                "tile.overgrowth.default",
 							)
 						var neighbor_hash := _hash_cell(neighbor, width)
 						_overgrowth_born[neighbor_hash] = _turn
@@ -268,21 +268,21 @@ func _handle_special_growth() -> void:
 					var into := String(rules.get("decay_into", "overgrowth"))
 					if into.is_empty():
 						into = "overgrowth"
-										_world.set_cell_named(_world.LAYER_LIFE, cell, into)
-										if _world.has_method("set_fx"):
-												if into == "overgrowth":
-														_world.set_fx(cell, "fx_bloom_hint")
-												elif into == "grove":
-														if _world.has_method("clear_fx"):
-																_world.clear_fx(cell)
-														_world.set_fx(cell, "fx_grove_glow")
-														if Engine.has_singleton("AudioBus"):
-																AudioBus.play("res://assets/sfx/growth.wav")
-										if _world.has_method("set_cell_tile_id"):
-												_world.set_cell_tile_id(
-														_world.LAYER_LIFE,
-														cell,
-														"tile.%s.default" % into,
+                                        _world.set_cell_named(_world.LAYER_LIFE, cell, into)
+                                        if _world.has_method("set_fx"):
+                                                if into == "overgrowth":
+                                                        _world.set_fx(cell, "fx_bloom_hint")
+                                                elif into == "grove":
+                                                        if _world.has_method("clear_fx"):
+                                                                _world.clear_fx(cell)
+                                                        _world.set_fx(cell, "fx_grove_glow")
+                                                        if Engine.has_singleton("AudioBus"):
+                                                                AudioBus.play("res://assets/sfx/growth.wav")
+                                        if _world.has_method("set_cell_tile_id"):
+                                                _world.set_cell_tile_id(
+                                                        _world.LAYER_LIFE,
+                                                        cell,
+                                                        "tile.%s.default" % into,
 						)
 					if into == "overgrowth":
 						var overgrowth_hash := _hash_cell(cell, width)

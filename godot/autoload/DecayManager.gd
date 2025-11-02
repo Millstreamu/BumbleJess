@@ -26,9 +26,9 @@ class Cluster:
 
 
 var cfg := {
-		"max_attacks_per_turn": 3,
-		"totem_spread_interval_turns": 3,
-		"attack_countdown_turns": 3,
+        "max_attacks_per_turn": 3,
+        "totem_spread_interval_turns": 3,
+        "attack_countdown_turns": 3,
 }
 
 var debug_show_clusters := false
@@ -49,28 +49,28 @@ var _phase_running: bool = false
 
 
 func _max_battles_this_turn() -> int:
-		var config_max := int(cfg.get("max_attacks_per_turn", MAX_BATTLES_PER_TURN))
-		if config_max <= 0:
-				config_max = MAX_BATTLES_PER_TURN
-		return min(MAX_BATTLES_PER_TURN, config_max)
+        var config_max := int(cfg.get("max_attacks_per_turn", MAX_BATTLES_PER_TURN))
+        if config_max <= 0:
+                config_max = MAX_BATTLES_PER_TURN
+        return min(MAX_BATTLES_PER_TURN, config_max)
 
 
 func _emit_queue_update() -> void:
-		var max_per := _max_battles_this_turn()
-		var remaining_capacity := max(0, max_per - _processed_this_phase)
-		var pending := min(_threat_queue.size(), remaining_capacity)
-		emit_signal("battle_queue_updated", pending, _processed_this_phase, max_per)
+        var max_per := _max_battles_this_turn()
+        var remaining_capacity := max(0, max_per - _processed_this_phase)
+        var pending := min(_threat_queue.size(), remaining_capacity)
+        emit_signal("battle_queue_updated", pending, _processed_this_phase, max_per)
 
 
 const CAT_AGGRESSION := "Aggression"
 
 func _is_guard(c: Vector2i) -> bool:
-		if _world == null:
-				return false
-		var life_name := String(_world.get_cell_name(_world.LAYER_LIFE, c))
-		if life_name.is_empty():
-				return false
-		return CategoryMap.canonical(life_name) == CAT_AGGRESSION
+        if _world == null:
+                return false
+        var life_name := String(_world.get_cell_name(_world.LAYER_LIFE, c))
+        if life_name.is_empty():
+                return false
+        return CategoryMap.canonical(life_name) == CAT_AGGRESSION
 
 
 func _threat_color(turns: int) -> Color:
@@ -424,192 +424,192 @@ func _scan_clusters() -> void:
 
 
 func _ready() -> void:
-		var data := DataLite.load_json_dict("res://data/decay.json")
-		if data is Dictionary and not data.is_empty():
-				for key in data.keys():
-						cfg[key] = data[key]
-		_connect_turn_engine()
+        var data := DataLite.load_json_dict("res://data/decay.json")
+        if data is Dictionary and not data.is_empty():
+                for key in data.keys():
+                        cfg[key] = data[key]
+        _connect_turn_engine()
 
 
 func bind_world(world: Node) -> void:
-		if _world != null and _world != world:
-				_clear_all_threats()
-		_world = world
-		_refresh_threat_list()
-		rescan_clusters()
-		_recompute_mirror_pool_protection()
-		if _world != null and _world.has_signal("tile_placed"):
-				if not _world.is_connected("tile_placed", Callable(self, "_on_world_tile_placed")):
-						_world.connect("tile_placed", Callable(self, "_on_world_tile_placed"))
+        if _world != null and _world != world:
+                _clear_all_threats()
+        _world = world
+        _refresh_threat_list()
+        rescan_clusters()
+        _recompute_mirror_pool_protection()
+        if _world != null and _world.has_signal("tile_placed"):
+                if not _world.is_connected("tile_placed", Callable(self, "_on_world_tile_placed")):
+                        _world.connect("tile_placed", Callable(self, "_on_world_tile_placed"))
 
 func _connect_turn_engine() -> void:
-		var turn_engine: Node = _get_turn_engine()
-		if turn_engine == null:
-				return
-		if turn_engine.has_signal("run_started") and not turn_engine.is_connected(
-				"run_started", Callable(self, "_on_run_started")
-		):
-				turn_engine.connect("run_started", Callable(self, "_on_run_started"))
-		if turn_engine.has_signal("turn_changed") and not turn_engine.is_connected(
-				"turn_changed", Callable(self, "_on_turn_changed")
-		):
-				turn_engine.connect("turn_changed", Callable(self, "_on_turn_changed"))
-		_on_run_started()
+        var turn_engine: Node = _get_turn_engine()
+        if turn_engine == null:
+                return
+        if turn_engine.has_signal("run_started") and not turn_engine.is_connected(
+                "run_started", Callable(self, "_on_run_started")
+        ):
+                turn_engine.connect("run_started", Callable(self, "_on_run_started"))
+        if turn_engine.has_signal("turn_changed") and not turn_engine.is_connected(
+                "turn_changed", Callable(self, "_on_turn_changed")
+        ):
+                turn_engine.connect("turn_changed", Callable(self, "_on_turn_changed"))
+        _on_run_started()
 
 func _on_run_started() -> void:
-		var engine := _get_turn_engine()
-		if engine == null:
-				_turn = 1
-				return
-		var value: Variant = engine.get("turn_index")
-		if typeof(value) == TYPE_INT:
-				_turn = max(int(value), 1)
-		else:
-				_turn = 1
+        var engine := _get_turn_engine()
+        if engine == null:
+                _turn = 1
+                return
+        var value: Variant = engine.get("turn_index")
+        if typeof(value) == TYPE_INT:
+                _turn = max(int(value), 1)
+        else:
+                _turn = 1
 
 func _on_turn_changed(turn: int) -> void:
-		_turn = max(turn, 1)
+        _turn = max(turn, 1)
 
 func _get_turn_engine() -> Node:
-		var turn_engine: Node = null
-		if Engine.has_singleton("TurnEngine"):
-				var singleton := Engine.get_singleton("TurnEngine")
-				if singleton is Node:
-						turn_engine = singleton
-		if turn_engine == null:
-				turn_engine = get_node_or_null("/root/TurnEngine")
-		if turn_engine == null and Engine.has_singleton("Game"):
-				var game_singleton := Engine.get_singleton("Game")
-				if game_singleton is Node:
-						turn_engine = game_singleton
-		if turn_engine == null:
-				turn_engine = get_node_or_null("/root/Game")
-		return turn_engine
+        var turn_engine: Node = null
+        if Engine.has_singleton("TurnEngine"):
+                var singleton := Engine.get_singleton("TurnEngine")
+                if singleton is Node:
+                        turn_engine = singleton
+        if turn_engine == null:
+                turn_engine = get_node_or_null("/root/TurnEngine")
+        if turn_engine == null and Engine.has_singleton("Game"):
+                var game_singleton := Engine.get_singleton("Game")
+                if game_singleton is Node:
+                        turn_engine = game_singleton
+        if turn_engine == null:
+                turn_engine = get_node_or_null("/root/Game")
+        return turn_engine
 
 
 func _get_battle_manager() -> Node:
-		if Engine.has_singleton("BattleManager"):
-				var singleton := Engine.get_singleton("BattleManager")
-				if singleton is Node:
-						return singleton
-		return get_node_or_null("/root/BattleManager")
+        if Engine.has_singleton("BattleManager"):
+                var singleton := Engine.get_singleton("BattleManager")
+                if singleton is Node:
+                        return singleton
+        return get_node_or_null("/root/BattleManager")
 
 
 func begin_decay_phase_async(turn: int) -> void:
-		if _phase_running:
-				return
-		_turn = max(turn, 1)
-		_phase_running = true
-		_processed_this_phase = 0
-		emit_signal("decay_phase_started", _turn)
-		if _world == null:
-				_finish_phase(_turn)
-				return
-		_spread_clusters_if_due()
-		_tick_threats_and_collect_ready()
-		_rebuild_threat_queue(_turn)
-		await _process_threat_queue_async(_turn)
+        if _phase_running:
+                return
+        _turn = max(turn, 1)
+        _phase_running = true
+        _processed_this_phase = 0
+        emit_signal("decay_phase_started", _turn)
+        if _world == null:
+                _finish_phase(_turn)
+                return
+        _spread_clusters_if_due()
+        _tick_threats_and_collect_ready()
+        _rebuild_threat_queue(_turn)
+        await _process_threat_queue_async(_turn)
 
 
 func tick_decay_phase(turn: int) -> void:
-		_turn = max(turn, 1)
-		if _world == null:
-				return
-		_spread_clusters_if_due()
-		_tick_threats_and_collect_ready()
-		_rebuild_threat_queue(_turn)
-		if not _threat_queue.is_empty():
-				var item_variant: Variant = _threat_queue.pop_front()
-				_emit_queue_update()
-				if item_variant is Dictionary:
-						var item: Dictionary = item_variant
-						var cell_variant: Variant = item.get("cell")
-						if cell_variant is Vector2i:
-								_trigger_battle(cell_variant)
-		_threat_queue.clear()
-		_processed_this_phase = 0
-		_emit_queue_update()
-		_start_new_threats_up_to_limit()
+        _turn = max(turn, 1)
+        if _world == null:
+                return
+        _spread_clusters_if_due()
+        _tick_threats_and_collect_ready()
+        _rebuild_threat_queue(_turn)
+        if not _threat_queue.is_empty():
+                var item_variant: Variant = _threat_queue.pop_front()
+                _emit_queue_update()
+                if item_variant is Dictionary:
+                        var item: Dictionary = item_variant
+                        var cell_variant: Variant = item.get("cell")
+                        if cell_variant is Vector2i:
+                                _trigger_battle(cell_variant)
+        _threat_queue.clear()
+        _processed_this_phase = 0
+        _emit_queue_update()
+        _start_new_threats_up_to_limit()
 
 
 func _process_threat_queue_async(turn: int) -> void:
-		var max_per := _max_battles_this_turn()
-		if max_per <= 0 or _threat_queue.is_empty():
-				_finish_phase(turn)
-				return
-		while _processed_this_phase < max_per and not _threat_queue.is_empty():
-				var item_variant: Variant = _threat_queue.pop_front()
-				_emit_queue_update()
-				if not (item_variant is Dictionary):
-						continue
-				var item: Dictionary = item_variant
-				var cell_variant: Variant = item.get("cell")
-				if not (cell_variant is Vector2i):
-						continue
-				var target: Vector2i = cell_variant
-				if not _is_valid_threat_target(target):
-						continue
-				await _open_battle_and_await(target)
-		_finish_phase(turn)
+        var max_per := _max_battles_this_turn()
+        if max_per <= 0 or _threat_queue.is_empty():
+                _finish_phase(turn)
+                return
+        while _processed_this_phase < max_per and not _threat_queue.is_empty():
+                var item_variant: Variant = _threat_queue.pop_front()
+                _emit_queue_update()
+                if not (item_variant is Dictionary):
+                        continue
+                var item: Dictionary = item_variant
+                var cell_variant: Variant = item.get("cell")
+                if not (cell_variant is Vector2i):
+                        continue
+                var target: Vector2i = cell_variant
+                if not _is_valid_threat_target(target):
+                        continue
+                await _open_battle_and_await(target)
+        _finish_phase(turn)
 
 
 func _open_battle_and_await(target: Vector2i) -> void:
-		var battle_manager := _get_battle_manager()
-		if battle_manager == null:
-				_processed_this_phase += 1
-				_emit_queue_update()
-				return
-		var attacker_cell := Vector2i.ZERO
-		var key := _threat_key(target)
-		if _threats.has(key):
-				var record_variant: Variant = _threats[key]
-				if record_variant is Dictionary:
-						var record: Dictionary = record_variant
-						var attacker_variant: Variant = record.get("attacker")
-						if attacker_variant is Vector2i:
-								attacker_cell = attacker_variant
-		_clear_threat(target)
-		var options := {
-				"attacker": attacker_cell,
-				"callback": Callable(self, "_on_battle_finished"),
-		}
-		if battle_manager.has_method("open_battle_for_cell"):
-				battle_manager.call("open_battle_for_cell", target, options)
-		else:
-				var encounter := {
-						"target": target,
-						"attacker": attacker_cell,
-				}
-				battle_manager.call("open_battle", encounter, Callable(self, "_on_battle_finished"))
-		if battle_manager.has_signal("battle_finished"):
-				while true:
-						var args: Array = await battle_manager.battle_finished
-						if args.size() >= 1:
-								var finished_variant: Variant = args[0]
-								if finished_variant is Vector2i and finished_variant != target:
-										continue
-						break
-		elif battle_manager.has_signal("battle_result"):
-				await battle_manager.battle_result
-		_processed_this_phase += 1
-		_emit_queue_update()
+        var battle_manager := _get_battle_manager()
+        if battle_manager == null:
+                _processed_this_phase += 1
+                _emit_queue_update()
+                return
+        var attacker_cell := Vector2i.ZERO
+        var key := _threat_key(target)
+        if _threats.has(key):
+                var record_variant: Variant = _threats[key]
+                if record_variant is Dictionary:
+                        var record: Dictionary = record_variant
+                        var attacker_variant: Variant = record.get("attacker")
+                        if attacker_variant is Vector2i:
+                                attacker_cell = attacker_variant
+        _clear_threat(target)
+        var options := {
+                "attacker": attacker_cell,
+                "callback": Callable(self, "_on_battle_finished"),
+        }
+        if battle_manager.has_method("open_battle_for_cell"):
+                battle_manager.call("open_battle_for_cell", target, options)
+        else:
+                var encounter := {
+                        "target": target,
+                        "attacker": attacker_cell,
+                }
+                battle_manager.call("open_battle", encounter, Callable(self, "_on_battle_finished"))
+        if battle_manager.has_signal("battle_finished"):
+                while true:
+                        var args: Array = await battle_manager.battle_finished
+                        if args.size() >= 1:
+                                var finished_variant: Variant = args[0]
+                                if finished_variant is Vector2i and finished_variant != target:
+                                        continue
+                        break
+        elif battle_manager.has_signal("battle_result"):
+                await battle_manager.battle_result
+        _processed_this_phase += 1
+        _emit_queue_update()
 
 
 func _finish_phase(turn: int) -> void:
-		if _world != null:
-				_start_new_threats_up_to_limit()
-		_threat_queue.clear()
-		_emit_queue_update()
-		_phase_running = false
-		emit_signal("decay_phase_complete", turn)
+        if _world != null:
+                _start_new_threats_up_to_limit()
+        _threat_queue.clear()
+        _emit_queue_update()
+        _phase_running = false
+        emit_signal("decay_phase_complete", turn)
 
 func regen_percent_hostiles(percent: float) -> void:
-		percent = clamp(percent, 0.0, 100.0)
-		if percent <= 0.0:
-				return
-		# Placeholder: apply when persistent hostile HP model is implemented.
-		# Keeping stub to satisfy TurnEngine regen hook.
-		pass
+        percent = clamp(percent, 0.0, 100.0)
+        if percent <= 0.0:
+                return
+        # Placeholder: apply when persistent hostile HP model is implemented.
+        # Keeping stub to satisfy TurnEngine regen hook.
+        pass
 
 
 func _spread_decay_if_due() -> void:
@@ -622,59 +622,59 @@ func _spread_clusters_if_due() -> void:
                 interval = 3
         if (_turn - _last_spread_turn) % interval != 0:
                 return
-        _last_spread_turn = _turn
+	_last_spread_turn = _turn
 
-        _ensure_clusters_scanned()
-        if _clusters.is_empty():
-                return
+	_ensure_clusters_scanned()
+	if _clusters.is_empty():
+		return
 
-        var rng := RandomNumberGenerator.new()
-        rng.randomize()
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
 
-        for cluster in _clusters:
-                if cluster == null:
-                        continue
-                _prune_cluster_frontier(cluster)
-                if cluster.frontier.is_empty():
-                        _rebuild_cluster_frontier(cluster)
-                if cluster.frontier.is_empty():
-                        continue
+	for cluster in _clusters:
+		if cluster == null:
+			continue
+		_prune_cluster_frontier(cluster)
+		if cluster.frontier.is_empty():
+			_rebuild_cluster_frontier(cluster)
+		if cluster.frontier.is_empty():
+			continue
 
-                var origin := _origin_cell()
-                var best_k := -1
-                var best_c := Vector2i(-1, -1)
-                var best_score := 1_000_000
-                for k in cluster.frontier.keys():
-                        var cell_variant: Variant = cluster.frontier[k]
-                        if not (cell_variant is Vector2i):
-                                continue
-                        var c: Vector2i = cell_variant
-                        var score := _axial_like_distance(c, origin)
-                        score += int(rng.randi_range(0, 2))
-                        if score < best_score:
-                                best_score = score
-                                best_k = k
-                                best_c = c
+		var origin := _origin_cell()
+		var best_k := -1
+		var best_c := Vector2i(-1, -1)
+		var best_score := 1_000_000
+		for k in cluster.frontier.keys():
+			var cell_variant: Variant = cluster.frontier[k]
+			if not (cell_variant is Vector2i):
+				continue
+			var c: Vector2i = cell_variant
+			var score := _axial_like_distance(c, origin)
+			score += int(rng.randi_range(0, 2))
+			if score < best_score:
+				best_score = score
+				best_k = k
+				best_c = c
 
-                if best_k == -1:
-                        continue
+		if best_k == -1:
+			continue
 
-                _world.set_cell_named(_world.LAYER_OBJECTS, best_c, "decay")
-                _set_cluster_metadata(best_c, cluster.id)
-                cluster.tiles[_cell_hash(best_c)] = true
-                cluster.frontier.erase(best_k)
+		_world.set_cell_named(_world.LAYER_OBJECTS, best_c, "decay")
+		_set_cluster_metadata(best_c, cluster.id)
+		cluster.tiles[_cell_hash(best_c)] = true
+		cluster.frontier.erase(best_k)
 
-                for neighbor in _world.neighbors_even_q(best_c):
-                        if _is_blocked_for_decay(neighbor):
-                                continue
-                        if _is_decay(neighbor):
-                                continue
-                        cluster.frontier[_cell_hash(neighbor)] = neighbor
+		for neighbor in _world.neighbors_even_q(best_c):
+			if _is_blocked_for_decay(neighbor):
+				continue
+			if _is_decay(neighbor):
+				continue
+			cluster.frontier[_cell_hash(neighbor)] = neighbor
 
-                cluster.last_spread_turn = _turn
+		cluster.last_spread_turn = _turn
 
-        _recompute_mirror_pool_protection()
-        _refresh_cluster_fx_overlay()
+	_recompute_mirror_pool_protection()
+	_refresh_cluster_fx_overlay()
 
 
 func _threat_key(c: Vector2i) -> int:
@@ -759,153 +759,153 @@ func _clear_threat(c: Vector2i) -> void:
 
 
 func _tick_and_trigger_battles() -> void:
-		var ready := _tick_threats_and_collect_ready()
-		for cell in ready:
-				_trigger_battle(cell)
+        var ready := _tick_threats_and_collect_ready()
+        for cell in ready:
+                _trigger_battle(cell)
 
 
 func _tick_threats_and_collect_ready() -> Array[Vector2i]:
-		var ready: Array[Vector2i] = []
-		var to_clear: Array[Vector2i] = []
-		for key in _threats.keys():
-				var record_variant: Variant = _threats[key]
-				if not (record_variant is Dictionary):
-						continue
-				var record: Dictionary = record_variant
-				var cell_variant: Variant = record.get("cell", Vector2i.ZERO)
-				if not (cell_variant is Vector2i):
-						continue
-				var cell: Vector2i = cell_variant
-				if _world == null:
-						to_clear.append(cell)
-						continue
-				if _protected_cells.has(_cell_hash(cell)) or _is_guard(cell):
-						to_clear.append(cell)
-						continue
-				var attacker_variant: Variant = record.get("attacker")
-				var attacker_cell := Vector2i.ZERO
-				if attacker_variant is Vector2i:
-						attacker_cell = attacker_variant
-				var target_life_name: String = _world.get_cell_name(_world.LAYER_LIFE, cell)
-				var attacker_name := ""
-				if attacker_cell != Vector2i.ZERO:
-						attacker_name = _world.get_cell_name(_world.LAYER_OBJECTS, attacker_cell)
-				var target_canonical := CategoryMap.canonical(target_life_name)
-				var target_defended: bool = target_canonical == "" or target_canonical == CAT_AGGRESSION
-				var attacker_gone := attacker_cell != Vector2i.ZERO and attacker_name != "decay"
-				if target_defended or attacker_gone:
-						to_clear.append(cell)
-						continue
-				var current_turns := int(record.get("turns", 0))
-				if current_turns > 0:
-						var next_turns := current_turns - 1
-						if next_turns <= 0:
-								_update_threat(cell, 0)
-								ready.append(cell)
-						else:
-								_update_threat(cell, next_turns)
-						continue
-				_update_threat(cell, 0)
-				ready.append(cell)
-		for cell in to_clear:
-				_clear_threat(cell)
-		return ready
+        var ready: Array[Vector2i] = []
+        var to_clear: Array[Vector2i] = []
+        for key in _threats.keys():
+                var record_variant: Variant = _threats[key]
+                if not (record_variant is Dictionary):
+                        continue
+                var record: Dictionary = record_variant
+                var cell_variant: Variant = record.get("cell", Vector2i.ZERO)
+                if not (cell_variant is Vector2i):
+                        continue
+                var cell: Vector2i = cell_variant
+                if _world == null:
+                        to_clear.append(cell)
+                        continue
+                if _protected_cells.has(_cell_hash(cell)) or _is_guard(cell):
+                        to_clear.append(cell)
+                        continue
+                var attacker_variant: Variant = record.get("attacker")
+                var attacker_cell := Vector2i.ZERO
+                if attacker_variant is Vector2i:
+                        attacker_cell = attacker_variant
+                var target_life_name: String = _world.get_cell_name(_world.LAYER_LIFE, cell)
+                var attacker_name := ""
+                if attacker_cell != Vector2i.ZERO:
+                        attacker_name = _world.get_cell_name(_world.LAYER_OBJECTS, attacker_cell)
+                var target_canonical := CategoryMap.canonical(target_life_name)
+                var target_defended: bool = target_canonical == "" or target_canonical == CAT_AGGRESSION
+                var attacker_gone := attacker_cell != Vector2i.ZERO and attacker_name != "decay"
+                if target_defended or attacker_gone:
+                        to_clear.append(cell)
+                        continue
+                var current_turns := int(record.get("turns", 0))
+                if current_turns > 0:
+                        var next_turns := current_turns - 1
+                        if next_turns <= 0:
+                                _update_threat(cell, 0)
+                                ready.append(cell)
+                        else:
+                                _update_threat(cell, next_turns)
+                        continue
+                _update_threat(cell, 0)
+                ready.append(cell)
+        for cell in to_clear:
+                _clear_threat(cell)
+        return ready
 
 
 func _is_threat_ready(cell: Vector2i) -> bool:
-		if not _has_threat(cell):
-				return false
-		return _threat_turns_left(cell) <= 0
+        if not _has_threat(cell):
+                return false
+        return _threat_turns_left(cell) <= 0
 
 
 func _threat_turns_left(cell: Vector2i) -> int:
-		var key := _threat_key(cell)
-		if _threats.has(key):
-				var record_variant: Variant = _threats[key]
-				if record_variant is Dictionary:
-						var record: Dictionary = record_variant
-						return int(record.get("turns", 0))
-		return -1
+        var key := _threat_key(cell)
+        if _threats.has(key):
+                var record_variant: Variant = _threats[key]
+                if record_variant is Dictionary:
+                        var record: Dictionary = record_variant
+                        return int(record.get("turns", 0))
+        return -1
 
 
 func get_threat_turns_left(cell: Vector2i) -> int:
-		return _threat_turns_left(cell)
+        return _threat_turns_left(cell)
 
 
 func _is_valid_threat_target(cell: Vector2i) -> bool:
-		if _world == null:
-				return false
-		if not _has_threat(cell):
-				return false
-		var life_name := String(_world.get_cell_name(_world.LAYER_LIFE, cell))
-		if life_name.is_empty():
-				return false
-		if _is_guard(cell):
-				return false
-		if _protected_cells.has(_cell_hash(cell)):
-				return false
-		if not _is_threat_ready(cell):
-				return false
-		return true
+        if _world == null:
+                return false
+        if not _has_threat(cell):
+                return false
+        var life_name := String(_world.get_cell_name(_world.LAYER_LIFE, cell))
+        if life_name.is_empty():
+                return false
+        if _is_guard(cell):
+                return false
+        if _protected_cells.has(_cell_hash(cell)):
+                return false
+        if not _is_threat_ready(cell):
+                return false
+        return true
 
 
 func _priority_for_target(cell: Vector2i, totem: Vector2i, turn: int) -> int:
-		var distance := _axial_like_distance(cell, totem)
-		var urgency := max(0, _threat_turns_left(cell))
-		return distance * 10 + urgency
+        var distance := _axial_like_distance(cell, totem)
+        var urgency := max(0, _threat_turns_left(cell))
+        return distance * 10 + urgency
 
 
 func _unique_by_cell(arr: Array) -> Array:
-		var seen := {}
-		var out: Array = []
-		for entry_variant in arr:
-				if not (entry_variant is Dictionary):
-						continue
-				var entry: Dictionary = entry_variant
-				var cell_variant: Variant = entry.get("cell")
-				if not (cell_variant is Vector2i):
-						continue
-				var cell: Vector2i = cell_variant
-				var hash := _cell_hash(cell)
-				if seen.has(hash):
-						continue
-				seen[hash] = true
-				out.append(entry)
-		return out
+        var seen := {}
+        var out: Array = []
+        for entry_variant in arr:
+                if not (entry_variant is Dictionary):
+                        continue
+                var entry: Dictionary = entry_variant
+                var cell_variant: Variant = entry.get("cell")
+                if not (cell_variant is Vector2i):
+                        continue
+                var cell: Vector2i = cell_variant
+                var hash := _cell_hash(cell)
+                if seen.has(hash):
+                        continue
+                seen[hash] = true
+                out.append(entry)
+        return out
 
 
 func _cmp_threat(a: Dictionary, b: Dictionary) -> bool:
-		return int(a.get("priority", 0)) < int(b.get("priority", 0))
+        return int(a.get("priority", 0)) < int(b.get("priority", 0))
 
 
 func _rebuild_threat_queue(turn: int) -> void:
-		_threat_queue.clear()
-		if _world == null:
-				_emit_queue_update()
-				return
-		var totem := _origin_cell()
-		for y in range(_world.height):
-				for x in range(_world.width):
-						var dc := Vector2i(x, y)
-						if _world.get_cell_name(_world.LAYER_OBJECTS, dc) != "decay":
-								continue
-						for neighbor in _world.neighbors_even_q(dc):
-								if not _is_valid_threat_target(neighbor):
-										continue
-								var priority := _priority_for_target(neighbor, totem, turn)
-								_threat_queue.append({
-										"cell": neighbor,
-										"priority": priority,
-								})
-		_threat_queue = _unique_by_cell(_threat_queue)
-		_threat_queue.sort_custom(Callable(self, "_cmp_threat"))
-		_emit_queue_update()
+        _threat_queue.clear()
+        if _world == null:
+                _emit_queue_update()
+                return
+        var totem := _origin_cell()
+        for y in range(_world.height):
+                for x in range(_world.width):
+                        var dc := Vector2i(x, y)
+                        if _world.get_cell_name(_world.LAYER_OBJECTS, dc) != "decay":
+                                continue
+                        for neighbor in _world.neighbors_even_q(dc):
+                                if not _is_valid_threat_target(neighbor):
+                                        continue
+                                var priority := _priority_for_target(neighbor, totem, turn)
+                                _threat_queue.append({
+                                        "cell": neighbor,
+                                        "priority": priority,
+                                })
+        _threat_queue = _unique_by_cell(_threat_queue)
+        _threat_queue.sort_custom(Callable(self, "_cmp_threat"))
+        _emit_queue_update()
 
 
 func _start_new_threats_up_to_limit() -> void:
-		var max_per_turn := int(cfg.get("max_attacks_per_turn", 3))
-		if max_per_turn <= 0:
-				return
+        var max_per_turn := int(cfg.get("max_attacks_per_turn", 3))
+        if max_per_turn <= 0:
+                return
 		var started := 0
 		var seen: Dictionary = {}
 		var countdown := int(cfg.get("attack_countdown_turns", 3))
@@ -934,31 +934,31 @@ func _start_new_threats_up_to_limit() -> void:
 
 
 func _trigger_battle(target_cell: Vector2i) -> void:
-		var attacker_cell := Vector2i.ZERO
-		var key := _threat_key(target_cell)
-		if _threats.has(key):
-				var record_variant: Variant = _threats[key]
-				if record_variant is Dictionary:
-						var record: Dictionary = record_variant
-						var attacker_variant: Variant = record.get("attacker")
-						if attacker_variant is Vector2i:
-								attacker_cell = attacker_variant
-		_clear_threat(target_cell)
-		var battle_manager := _get_battle_manager()
-		if battle_manager == null:
-				return
-		var options := {
-				"attacker": attacker_cell,
-				"callback": Callable(self, "_on_battle_finished"),
-		}
-		if battle_manager.has_method("open_battle_for_cell"):
-				battle_manager.call("open_battle_for_cell", target_cell, options)
-		else:
-				var encounter := {
-						"target": target_cell,
-						"attacker": attacker_cell,
-				}
-				battle_manager.call("open_battle", encounter, Callable(self, "_on_battle_finished"))
+        var attacker_cell := Vector2i.ZERO
+        var key := _threat_key(target_cell)
+        if _threats.has(key):
+                var record_variant: Variant = _threats[key]
+                if record_variant is Dictionary:
+                        var record: Dictionary = record_variant
+                        var attacker_variant: Variant = record.get("attacker")
+                        if attacker_variant is Vector2i:
+                                attacker_cell = attacker_variant
+        _clear_threat(target_cell)
+        var battle_manager := _get_battle_manager()
+        if battle_manager == null:
+                return
+        var options := {
+                "attacker": attacker_cell,
+                "callback": Callable(self, "_on_battle_finished"),
+        }
+        if battle_manager.has_method("open_battle_for_cell"):
+                battle_manager.call("open_battle_for_cell", target_cell, options)
+        else:
+                var encounter := {
+                        "target": target_cell,
+                        "attacker": attacker_cell,
+                }
+                battle_manager.call("open_battle", encounter, Callable(self, "_on_battle_finished"))
 
 
 func _on_battle_finished(result: Dictionary) -> void:
@@ -984,20 +984,20 @@ func _apply_battle_outcome(cell: Vector2i, victory: bool, attacker_cell: Vector2
 	else:
 		if _protected_cells.has(_cell_hash(cell)):
 			return
-				var defender_name := CategoryMap.canonical(
-						String(_world.get_cell_name(_world.LAYER_LIFE, cell))
-				)
-				if defender_name != CAT_AGGRESSION:
-						_world.set_cell_named(_world.LAYER_LIFE, cell, "empty")
+                var defender_name := CategoryMap.canonical(
+                        String(_world.get_cell_name(_world.LAYER_LIFE, cell))
+                )
+                if defender_name != CAT_AGGRESSION:
+                        _world.set_cell_named(_world.LAYER_LIFE, cell, "empty")
 		_world.set_cell_named(_world.LAYER_OBJECTS, cell, "decay")
 		for neighbor in _world.neighbors_even_q(cell):
 			if _protected_cells.has(_cell_hash(neighbor)):
 				continue
-						var life_name: String = _world.get_cell_name(_world.LAYER_LIFE, neighbor)
-						var canonical_life := CategoryMap.canonical(life_name)
-						if canonical_life != "" and canonical_life != CAT_AGGRESSION:
-								_world.set_cell_named(_world.LAYER_LIFE, neighbor, "empty")
-								_world.set_cell_named(_world.LAYER_OBJECTS, neighbor, "decay")
+                        var life_name: String = _world.get_cell_name(_world.LAYER_LIFE, neighbor)
+                        var canonical_life := CategoryMap.canonical(life_name)
+                        if canonical_life != "" and canonical_life != CAT_AGGRESSION:
+                                _world.set_cell_named(_world.LAYER_LIFE, neighbor, "empty")
+                                _world.set_cell_named(_world.LAYER_OBJECTS, neighbor, "decay")
 	emit_signal("threat_resolved", cell, victory)
 	rescan_clusters()
 

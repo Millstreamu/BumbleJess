@@ -43,24 +43,24 @@ func load_map(map_id: String, world: Node) -> void:
 
 	_origin_cell = totem_cell
 
-		var decay_totems_variant: Variant = map.get("decay_totems", [])
-		var decay_totems: Array = decay_totems_variant if decay_totems_variant is Array else []
-		for raw_decay_data in decay_totems:
-				var decay_data: Dictionary = raw_decay_data if raw_decay_data is Dictionary else {}
-				var decay_cell := Vector2i(int(decay_data.get("x", 0)), int(decay_data.get("y", 0)))
-				if world.has_method("set_cell_named"):
-						world.call("set_cell_named", world.LAYER_OBJECTS, decay_cell, "decay")
+        var decay_totems_variant: Variant = map.get("decay_totems", [])
+        var decay_totems: Array = decay_totems_variant if decay_totems_variant is Array else []
+        for raw_decay_data in decay_totems:
+                var decay_data: Dictionary = raw_decay_data if raw_decay_data is Dictionary else {}
+                var decay_cell := Vector2i(int(decay_data.get("x", 0)), int(decay_data.get("y", 0)))
+                if world.has_method("set_cell_named"):
+                        world.call("set_cell_named", world.LAYER_OBJECTS, decay_cell, "decay")
 
-		var artefacts_variant: Variant = map.get("artefacts", [])
-		if artefacts_variant is Array:
-				_seed_artefacts(world, artefacts_variant)
+        var artefacts_variant: Variant = map.get("artefacts", [])
+        if artefacts_variant is Array:
+                _seed_artefacts(world, artefacts_variant)
 
 	var decay_manager: Node = get_node_or_null("/root/DecayManager")
 	if decay_manager != null and decay_manager.has_method("rescan_clusters"):
 		decay_manager.call_deferred("rescan_clusters")
 
 func get_origin_cell() -> Vector2i:
-		return _origin_cell
+        return _origin_cell
 
 func _show_missing_map_label(world: Node, map_id: String) -> void:
 	var label := Label.new()
@@ -80,18 +80,18 @@ func _show_missing_map_label(world: Node, map_id: String) -> void:
 
 	var layer := CanvasLayer.new()
 	layer.add_child(label)
-		world.add_child(layer)
+        world.add_child(layer)
 
 func _seed_artefacts(world: Node, artefacts: Array) -> void:
-		if artefacts.is_empty():
-				return
-		for raw_entry in artefacts:
-				if not (raw_entry is Dictionary):
-						continue
-				var entry: Dictionary = raw_entry
-				var cell := Vector2i(int(entry.get("x", 0)), int(entry.get("y", 0)))
-				if world.has_method("set_cell_named"):
-						world.call("set_cell_named", world.LAYER_OBJECTS, cell, "empty")
-				if world.has_method("set_cell_meta"):
-						var payload := entry.duplicate(true)
-						world.call("set_cell_meta", world.LAYER_OBJECTS, cell, "artefact", payload)
+        if artefacts.is_empty():
+                return
+        for raw_entry in artefacts:
+                if not (raw_entry is Dictionary):
+                        continue
+                var entry: Dictionary = raw_entry
+                var cell := Vector2i(int(entry.get("x", 0)), int(entry.get("y", 0)))
+                if world.has_method("set_cell_named"):
+                        world.call("set_cell_named", world.LAYER_OBJECTS, cell, "empty")
+                if world.has_method("set_cell_meta"):
+                        var payload := entry.duplicate(true)
+                        world.call("set_cell_meta", world.LAYER_OBJECTS, cell, "artefact", payload)
