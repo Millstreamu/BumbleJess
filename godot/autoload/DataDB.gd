@@ -76,46 +76,55 @@ func _reload_tiles() -> void:
 	_id_to_def.clear()
 	id_to_tags.clear()
 	id_to_category.clear()
+
 	var raw_tiles: Array = DataLite.load_json_array("res://data/tiles.json")
 	for entry_variant in raw_tiles:
 		if not (entry_variant is Dictionary):
 			continue
-		var entry: Dictionary = (entry_variant as Dictionary)
+		var entry: Dictionary = entry_variant
 		var tile_id := String(entry.get("id", ""))
 		if tile_id.is_empty():
 			continue
-		var sanitized := _sanitize_tile(entry)
+
+		var sanitized: Dictionary = _sanitize_tile(entry)  # <-- explicit type
 		_tiles.append(sanitized)
 		_id_to_def[tile_id] = sanitized.duplicate(true)
 		id_to_tags[tile_id] = _normalize_tags(sanitized.get("tags", []))
 		id_to_category[tile_id] = _canonicalize_category(String(sanitized.get("category", "")))
 
 func _sanitize_tile(source: Dictionary) -> Dictionary:
-	var sanitized := source.duplicate(true)
+	var sanitized: Dictionary = source.duplicate(true)  # <-- explicit type
+
 	var effects_variant: Variant = sanitized.get("effects", [])
 	var effects_array: Array = []
 	if effects_variant is Array:
 		effects_array = effects_variant
+
 	var tile_id := String(sanitized.get("id", ""))
 	var sanitized_effects: Array = []
+
 	for effect_variant in effects_array:
 		if not (effect_variant is Dictionary):
 			_warn(tile_id, "effect entry is not a dictionary; skipping")
 			continue
 		var effect_dict: Dictionary = effect_variant
-		var sanitized_effect := _sanitize_effect(tile_id, sanitized_effects.size(), effect_dict)
+		var sanitized_effect: Dictionary = _sanitize_effect(tile_id, sanitized_effects.size(), effect_dict)  # <-- explicit
 		if sanitized_effect.is_empty():
 			continue
 		sanitized_effects.append(sanitized_effect)
+
 	sanitized["effects"] = sanitized_effects
 	return sanitized
+
 
 func _sanitize_effect(tile_id: String, index: int, effect: Dictionary) -> Dictionary:
 	var when := String(effect.get("when", "start_of_turn"))
 	if not EFFECT_WHEN.has(when):
 		_warn(tile_id, "effect %d has invalid 'when' value '%s'; defaulting to start_of_turn" % [index, when])
 		when = "start_of_turn"
+
 	var interval := max(1, int(effect.get("interval_turns", 1)))
+
 	var duration_variant: Variant = effect.get("duration_turns", null)
 	var duration: Variant = null
 	if duration_variant is int or duration_variant is float:
@@ -126,17 +135,21 @@ func _sanitize_effect(tile_id: String, index: int, effect: Dictionary) -> Dictio
 		duration = null
 	else:
 		_warn(tile_id, "effect %d has invalid duration; ignoring" % index)
-	var target := _sanitize_target(tile_id, index, effect.get("target", {}))
-	var condition := _sanitize_condition(tile_id, index, effect.get("condition", {}))
+
+	var target: Dictionary = _sanitize_target(tile_id, index, effect.get("target", {}))         # <-- explicit
+	var condition: Dictionary = _sanitize_condition(tile_id, index, effect.get("condition", {})) # <-- explicit
+
 	var op := String(effect.get("op", "add"))
 	if not EFFECT_OPS.has(op):
 		_warn(tile_id, "effect %d has unsupported op '%s'; skipping" % [index, op])
 		return {}
+
 	var stacking := String(effect.get("stacking", "sum"))
 	if not STACKING_MODES.has(stacking):
 		_warn(tile_id, "effect %d has invalid stacking '%s'; defaulting to sum" % [index, stacking])
 		stacking = "sum"
-	var sanitized := {
+
+	var sanitized: Dictionary = {
 		"when": when,
 		"interval_turns": interval,
 		"duration_turns": duration,
@@ -145,6 +158,7 @@ func _sanitize_effect(tile_id: String, index: int, effect: Dictionary) -> Dictio
 		"op": op,
 		"stacking": stacking,
 	}
+
 	match op:
 		"add", "mul", "set":
 			var stat_path := String(effect.get("stat", ""))
@@ -152,20 +166,26 @@ func _sanitize_effect(tile_id: String, index: int, effect: Dictionary) -> Dictio
 				_warn(tile_id, "effect %d missing stat path; skipping" % index)
 				return {}
 			sanitized["stat"] = stat_path
-			var amount_val := effect.get("amount", 0)
-			sanitized["amount"] = _coerce_number(amount_val)
+			sanitized["amount"] = _coerce_number(effect.get("amount", 0))  # <-- avoid Variant temp
+
 		"convert":
 			sanitized["amount"] = _sanitize_convert(tile_id, index, effect.get("amount", {}))
+
 		"spawn":
 			sanitized["amount"] = _sanitize_spawn(tile_id, index, effect.get("amount", {}))
+
 		"transform":
 			sanitized["amount"] = _sanitize_transform(tile_id, index, effect.get("amount", {}))
+
 		"cleanse_decay":
 			sanitized["amount"] = _sanitize_decay_amount(tile_id, index, effect.get("amount", {}))
+
 		"damage_decay":
 			sanitized["amount"] = _sanitize_damage_amount(tile_id, index, effect.get("amount", {}))
+
 		"aura_sprout":
 			sanitized["amount"] = _sanitize_aura_amount(tile_id, index, effect.get("amount", {}))
+
 	return sanitized
 
 func _sanitize_target(tile_id: String, index: int, target_variant: Variant) -> Dictionary:

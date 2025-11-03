@@ -16,10 +16,10 @@ config/features=PackedStringArray("4.4")
 config/starting_map_id="map.demo_001"
 
 [autoload]
+
 Game="*res://autoload/Game.gd"
 TileManager="*res://autoload/TileManager.gd"
 EffectsEngine="*res://autoload/EffectsEngine.gd"
-
 RunConfig="*res://autoload/RunConfig.gd"
 MetaManager="*res://autoload/MetaManager.gd"
 DataLite="*res://autoload/DataLite.gd"
@@ -97,7 +97,8 @@ ui_down={
 }
 turn_end={
 "deadzone": 0.5,
-"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":78,"physical_keycode":78,"key_label":0,"unicode":110,"location":0,"echo":false,"script":null)]
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":78,"physical_keycode":78,"key_label":0,"unicode":110,"location":0,"echo":false,"script":null)
+]
 }
 debug_unlock_all={
 "deadzone": 0.5,

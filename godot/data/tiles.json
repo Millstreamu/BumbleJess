@@ -537,111 +537,111 @@
   }
 ,
   {
-        "id": "tile.rocky_outcrop",
-        "category": "Water",
-        "tags": [
-          "rocky"
-        ],
-        "effects": [
-          {
-                "when": "start_of_turn",
-                "target": { "scope": "self" },
-                "condition": {
-                  "adjacent_count": { "tag": "river", "op": ">=", "value": 1 }
-                },
-                "op": "add",
-                "stat": "output.water",
-                "amount": 1
-          }
-        ]
+		"id": "tile.rocky_outcrop",
+		"category": "Water",
+		"tags": [
+		  "rocky"
+		],
+		"effects": [
+		  {
+				"when": "start_of_turn",
+				"target": { "scope": "self" },
+				"condition": {
+				  "adjacent_count": { "tag": "river", "op": ">=", "value": 1 }
+				},
+				"op": "add",
+				"stat": "output.water",
+				"amount": 1
+		  }
+		]
   },
   {
-        "id": "tile.wind_swept_meadow",
-        "category": "Nature",
-        "tags": [
-          "plains"
-        ],
-        "effects": [
-          {
-                "when": "start_of_turn",
-                "target": { "scope": "adjacent", "has_tags_any": ["forest"] },
-                "op": "add",
-                "stat": "output.nature",
-                "amount": 1
-          }
-        ]
+		"id": "tile.wind_swept_meadow",
+		"category": "Nature",
+		"tags": [
+		  "plains"
+		],
+		"effects": [
+		  {
+				"when": "start_of_turn",
+				"target": { "scope": "adjacent", "has_tags_any": ["forest"] },
+				"op": "add",
+				"stat": "output.nature",
+				"amount": 1
+		  }
+		]
   },
   {
-        "id": "tile.moss_terrace",
-        "category": "Nature",
-        "tags": [
-          "wet",
-          "moss"
-        ],
-        "effects": [
-          {
-                "when": "start_of_turn",
-                "interval_turns": 2,
-                "target": { "scope": "adjacent" },
-                "op": "spawn",
-                "amount": { "tile_id": "tile.overgrowth", "count": 1, "empty_only": true }
-          }
-        ]
+		"id": "tile.moss_terrace",
+		"category": "Nature",
+		"tags": [
+		  "wet",
+		  "moss"
+		],
+		"effects": [
+		  {
+				"when": "start_of_turn",
+				"interval_turns": 2,
+				"target": { "scope": "adjacent" },
+				"op": "spawn",
+				"amount": { "tile_id": "tile.overgrowth", "count": 1, "empty_only": true }
+		  }
+		]
   },
   {
-        "id": "tile.strangle_thorn_thicket",
-        "category": "Nature",
-        "tags": [
-          "forest",
-          "thorn"
-        ],
-        "effects": [
-          {
-                "when": "start_of_turn",
-                "target": { "scope": "self" },
-                "op": "add",
-                "stat": "output.nature",
-                "amount": 10
-          },
-          {
-                "when": "start_of_turn",
-                "interval_turns": 5,
-                "target": { "scope": "self" },
-                "op": "transform",
-                "amount": { "to": "tile.overgrowth" }
-          }
-        ]
+		"id": "tile.strangle_thorn_thicket",
+		"category": "Nature",
+		"tags": [
+		  "forest",
+		  "thorn"
+		],
+		"effects": [
+		  {
+				"when": "start_of_turn",
+				"target": { "scope": "self" },
+				"op": "add",
+				"stat": "output.nature",
+				"amount": 10
+		  },
+		  {
+				"when": "start_of_turn",
+				"interval_turns": 5,
+				"target": { "scope": "self" },
+				"op": "transform",
+				"amount": { "to": "tile.overgrowth" }
+		  }
+		]
   },
   {
-        "id": "tile.thorn_watch",
-        "category": "Aggression",
-        "tags": [
-          "ward"
-        ],
-        "effects": [
-          {
-                "when": "start_of_turn",
-                "interval_turns": 4,
-                "target": { "scope": "radius", "radius": 1 },
-                "condition": { "touching_decay": true },
-                "op": "cleanse_decay",
-                "amount": { "radius": 1, "max_tiles": 1 }
-          }
-        ]
+		"id": "tile.thorn_watch",
+		"category": "Aggression",
+		"tags": [
+		  "ward"
+		],
+		"effects": [
+		  {
+				"when": "start_of_turn",
+				"interval_turns": 4,
+				"target": { "scope": "radius", "radius": 1 },
+				"condition": { "touching_decay": true },
+				"op": "cleanse_decay",
+				"amount": { "radius": 1, "max_tiles": 1 }
+		  }
+		]
   },
   {
-        "id": "tile.ironbark_front",
-        "category": "Aggression",
-        "tags": [
-          "bastion"
-        ],
-        "effects": [
-          {
-                "when": "start_of_turn",
-                "target": { "scope": "radius", "radius": 2 },
-                "op": "aura_sprout",
-                "amount": { "stat": "hp_pct", "op": "add", "amount": 0.05 }
-          }
-        ]
+		"id": "tile.ironbark_front",
+		"category": "Aggression",
+		"tags": [
+		  "bastion"
+		],
+		"effects": [
+		  {
+				"when": "start_of_turn",
+				"target": { "scope": "radius", "radius": 2 },
+				"op": "aura_sprout",
+				"amount": { "stat": "hp_pct", "op": "add", "amount": 0.05 }
+		  }
+		]
   }
 ]

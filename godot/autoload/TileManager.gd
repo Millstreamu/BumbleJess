@@ -1,6 +1,6 @@
 ## Maintains placed tiles, adjacency data, and decay helper state for effects.
 extends Node
-class_name TileManager
+class_name TileManagerClass
 
 signal tile_placed(tile)
 signal tile_removed(tile)
@@ -241,12 +241,13 @@ func remove_decay_cell(position: Vector2i) -> void:
 func damage_decay_cell(position: Vector2i, amount: float) -> bool:
 	if not _decay_cells.has(position):
 		return false
-	var remaining := float(_decay_cells[position]) - max(0.0, amount)
+	var remaining: float = float(_decay_cells[position]) - max(0.0, amount)
 	if remaining <= 0.0:
 		_decay_cells.erase(position)
 		return true
 	_decay_cells[position] = remaining
 	return false
+
 
 static func _build_default_stats() -> Dictionary:
 	return {
@@ -263,7 +264,7 @@ static func _build_default_stats() -> Dictionary:
 
 static func _extract_tags(source: Variant) -> Array[String]:
 	var tags: Array[String] = []
-	var working := source
+	var working: Variant = source
 	if working is PackedStringArray:
 		working = Array(working)
 	if working is Array:
@@ -281,10 +282,10 @@ static func _extract_tags(source: Variant) -> Array[String]:
 
 static func _deep_copy_dict(data: Dictionary) -> Dictionary:
 	return data.duplicate(true)
-
+	
 static func _string_array(source: Variant) -> Array:
 	var result: Array = []
-	var working := source
+	var working: Variant = source
 	if working is PackedStringArray:
 		working = Array(working)
 	if working is Array:
@@ -307,11 +308,12 @@ func _generate_uid() -> int:
 func _compute_adjacent_tiles(position: Vector2i) -> Array:
 	var result: Array = []
 	for offset in HEX_DIRECTIONS:
-		var neighbor := position + offset
+		var neighbor: Vector2i = position + offset
 		var neighbor_tile := get_tile(neighbor)
 		if neighbor_tile != null:
 			result.append(neighbor_tile)
 	return result
+
 
 func _update_adjacency_around(position: Vector2i) -> void:
 	_update_adjacency_for(position)
