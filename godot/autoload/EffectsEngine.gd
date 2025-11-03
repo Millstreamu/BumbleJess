@@ -1,11 +1,10 @@
 ## Evaluates JSON-driven tile effects for all placements and turn phases.
 extends Node
-class_name EffectsEngine
 
 var _tile_manager: TileManager = null
 var _effect_state: Dictionary = {}
 var _pending_events: Array[String] = []
-var _processing := false
+var _processing: bool = false
 var _aura_cache: Dictionary = {}
 
 func _ready() -> void:
@@ -30,7 +29,7 @@ func apply_when(when: String) -> void:
 		return
 	_processing = true
 	while not _pending_events.is_empty():
-		var current := _pending_events[0]
+		var current: String = _pending_events[0]
 		_pending_events.remove_at(0)
 		_process_event(current)
 	_processing = false
@@ -38,9 +37,9 @@ func apply_when(when: String) -> void:
 func get_aura_cache() -> Dictionary:
 	var copy: Dictionary = {}
 	for key in _aura_cache.keys():
-		var entry := _aura_cache[key]
-		if entry is Dictionary:
-			copy[key] = (entry as Dictionary).duplicate(true)
+		var entry_variant: Variant = _aura_cache[key]
+		if entry_variant is Dictionary:
+			copy[key] = (entry_variant as Dictionary).duplicate(true)
 	return copy
 
 func _process_event(when: String) -> void:
@@ -50,10 +49,10 @@ func _process_event(when: String) -> void:
 		return
 	if when == "start_of_turn":
 		_aura_cache.clear()
-	var tiles := _tile_manager.get_all_tiles()
+	var tiles: Array = _tile_manager.get_all_tiles()
 	if tiles.is_empty():
 		return
-	var turn_idx := _get_turn_index()
+	var turn_idx: int = _get_turn_index()
 	for tile_variant in tiles:
 		if not (tile_variant is TileManager.TileRef):
 			continue
@@ -70,13 +69,13 @@ func _process_event(when: String) -> void:
 			var effect: Dictionary = effect_variant
 			if String(effect.get("when", "")) != when:
 				continue
-			var state := _prepare_state(tile, effect_index, effect, turn_idx)
-			if state == null:
+			var state: Dictionary = _prepare_state(tile, effect_index, effect, turn_idx)
+			if state.is_empty():
 				continue
 			if not _conditions_met(tile, effect, turn_idx):
 				continue
 			_mark_triggered(tile.uid, effect_index, effect, state, turn_idx)
-			var targets := _resolve_targets(tile, effect)
+			var targets: Dictionary = _resolve_targets(tile, effect)
 			_apply_effect(tile, effect, targets, state)
 
 func _prepare_state(tile: TileManager.TileRef, effect_index: int, effect: Dictionary, turn_idx: int) -> Dictionary:
@@ -87,7 +86,7 @@ func _prepare_state(tile: TileManager.TileRef, effect_index: int, effect: Dictio
 	var state_variant: Variant = tile_states.get(effect_index, null)
 	var state: Dictionary = state_variant if state_variant is Dictionary else {}
 	if state.is_empty():
-		var interval := max(1, int(effect.get("interval_turns", 1)))
+		var interval: int = max(1, int(effect.get("interval_turns", 1)))
 		state = {
 			"next_due": turn_idx + interval - 1,
 			"started_turn": turn_idx,
@@ -96,18 +95,18 @@ func _prepare_state(tile: TileManager.TileRef, effect_index: int, effect: Dictio
 		tile_states[effect_index] = state
 	var duration_variant: Variant = effect.get("duration_turns", null)
 	if duration_variant is int or duration_variant is float:
-		var duration := int(duration_variant)
+		var duration: int = int(duration_variant)
 		if duration > 0:
-			var expires := int(state.get("started_turn", turn_idx)) + duration
+			var expires: int = int(state.get("started_turn", turn_idx)) + duration
 			if turn_idx >= expires:
-				return null
-	var next_due := int(state.get("next_due", turn_idx))
+				return {}
+	var next_due: int = int(state.get("next_due", turn_idx))
 	if turn_idx < next_due:
-		return null
+		return {}
 	return state
 
 func _mark_triggered(tile_uid: int, effect_index: int, effect: Dictionary, state: Dictionary, turn_idx: int) -> void:
-	var interval := max(1, int(effect.get("interval_turns", 1)))
+	var interval: int = max(1, int(effect.get("interval_turns", 1)))
 	state["next_due"] = turn_idx + interval
 	state["trigger_count"] = int(state.get("trigger_count", 0)) + 1
 	state["last_turn"] = turn_idx
@@ -126,18 +125,17 @@ func _conditions_met(tile: TileManager.TileRef, effect: Dictionary, turn_idx: in
 				if not _compare_numbers(count, value, op):
 					return false
 		if cond.has("touching_decay"):
-			var expect := bool(cond.get("touching_decay", false))
-			var touching := _tile_manager.is_touching_decay(tile.position)
+			var expect: bool = bool(cond.get("touching_decay", false))
+			var touching: bool = _tile_manager.is_touching_decay(tile.position)
 			if touching != expect:
 				return false
 		if cond.has("turn_mod"):
 			var tm_variant: Variant = cond.get("turn_mod")
 			if tm_variant is Dictionary:
-				var mod_value := max(1, int(tm_variant.get("mod", 1)))
-				var eq_value := int(tm_variant.get("eq", 0))
+				var mod_value: int = max(1, int(tm_variant.get("mod", 1)))
+				var eq_value: int = int(tm_variant.get("eq", 0))
 				if turn_idx % mod_value != eq_value:
 					return false
-	return true
 	return true
 
 func _resolve_targets(source_tile: TileManager.TileRef, effect: Dictionary) -> Dictionary:
@@ -157,9 +155,9 @@ func _resolve_targets(source_tile: TileManager.TileRef, effect: Dictionary) -> D
 				if neighbor_tile != null:
 					tiles.append(neighbor_tile)
 		"radius":
-			var radius := max(0, int(target.get("radius", 1)))
+			var radius: int = max(0, int(target.get("radius", 1)))
 			positions = _positions_in_radius(source_tile.position, radius)
-			var radius_tiles := _tile_manager.get_tiles_in_radius(source_tile.position, radius)
+			var radius_tiles: Array = _tile_manager.get_tiles_in_radius(source_tile.position, radius)
 			for radius_tile in radius_tiles:
 				tiles.append(radius_tile)
 		"global":
@@ -168,8 +166,8 @@ func _resolve_targets(source_tile: TileManager.TileRef, effect: Dictionary) -> D
 		_:
 			positions.append(source_tile.position)
 			tiles.append(source_tile)
-	var include_overgrowth := bool(target.get("include_overgrowth", false))
-	var include_grove := bool(target.get("include_grove", false))
+	var include_overgrowth: bool = bool(target.get("include_overgrowth", false))
+	var include_grove: bool = bool(target.get("include_grove", false))
 	var filtered_tiles: Array = []
 	for tile_variant in tiles:
 		if not (tile_variant is TileManager.TileRef):
@@ -230,7 +228,7 @@ func _apply_stat_effect(op: String, effect: Dictionary, targets: Dictionary) -> 
 		if tile == null:
 			continue
 		var values: Array = map[uid]
-		var combined := _combine_values(values, stacking)
+		var combined: float = _combine_values(values, stacking)
 		_apply_stat_to_tile(tile, op, stat_path, combined)
 
 func _apply_convert_effect(effect: Dictionary, targets: Dictionary, state: Dictionary) -> void:
@@ -238,8 +236,8 @@ func _apply_convert_effect(effect: Dictionary, targets: Dictionary, state: Dicti
 	if not (amount_variant is Dictionary):
 		return
 	var amount: Dictionary = amount_variant
-	var period := max(1, int(amount.get("period", 1)))
-	var counter := int(state.get("convert_counter", 0)) + 1
+	var period: int = max(1, int(amount.get("period", 1)))
+	var counter: int = int(state.get("convert_counter", 0)) + 1
 	if counter < period:
 		state["convert_counter"] = counter
 		return
@@ -268,8 +266,8 @@ func _apply_spawn_effect(effect: Dictionary, targets: Dictionary) -> void:
 	var tile_id := String(amount.get("tile_id", ""))
 	if tile_id.is_empty():
 		return
-	var count := max(1, int(amount.get("count", 1)))
-	var empty_only := bool(amount.get("empty_only", false))
+	var count: int = max(1, int(amount.get("count", 1)))
+	var empty_only: bool = bool(amount.get("empty_only", false))
 	var positions: Array = targets.get("positions", [])
 	for pos_variant in positions:
 		if count <= 0:
@@ -304,9 +302,9 @@ func _apply_cleanse_decay(effect: Dictionary, targets: Dictionary) -> void:
 	if not (amount_variant is Dictionary):
 		return
 	var amount: Dictionary = amount_variant
-	var radius := max(0, int(amount.get("radius", 0)))
-	var max_tiles := max(0, int(amount.get("max_tiles", 0)))
-	var remaining := max_tiles
+	var radius: int = max(0, int(amount.get("radius", 0)))
+	var max_tiles: int = max(0, int(amount.get("max_tiles", 0)))
+	var remaining: int = max_tiles
 	var visited: Dictionary = {}
 	var centers: Array = targets.get("positions", [])
 	if centers.is_empty():
@@ -333,8 +331,8 @@ func _apply_damage_decay(effect: Dictionary, targets: Dictionary) -> void:
 	if not (amount_variant is Dictionary):
 		return
 	var amount: Dictionary = amount_variant
-	var radius := max(0, int(amount.get("radius", 0)))
-	var damage := float(amount.get("amount", 0.0))
+	var radius: int = max(0, int(amount.get("radius", 0)))
+	var damage: float = float(amount.get("amount", 0.0))
 	if damage <= 0.0:
 		return
 	var centers: Array = targets.get("positions", [])
@@ -369,13 +367,14 @@ func _apply_aura_effect(source_tile: TileManager.TileRef, effect: Dictionary, ta
 		return
 	var key_suffix := "|" + op_kind + "|" + stat
 	var target_cfg: Dictionary = effect.get("target", {}) if effect.get("target", {}) is Dictionary else {}
-	var radius := int(target_cfg.get("radius", 0))
+	var radius: int = int(target_cfg.get("radius", 0))
 	for tile_variant in target_tiles:
 		if not (tile_variant is TileManager.TileRef):
 			continue
 		var tile: TileManager.TileRef = tile_variant
-		var tile_key := String(tile.uid)
-		var aura_entry: Dictionary = _aura_cache.get(tile_key, {})
+		var tile_key := str(tile.uid)
+		var aura_entry_variant: Variant = _aura_cache.get(tile_key, {})
+		var aura_entry: Dictionary = aura_entry_variant if aura_entry_variant is Dictionary else {}
 		var aura_key := key_suffix
 		var current_variant: Variant = aura_entry.get(aura_key, {})
 		var current: Dictionary = current_variant if current_variant is Dictionary else {
@@ -385,7 +384,9 @@ func _apply_aura_effect(source_tile: TileManager.TileRef, effect: Dictionary, ta
 			"amount": 0.0,
 			"sources": [],
 		}
-		var combined := _combine_values([float(current.get("amount", 0.0)), value], stacking) if current.has("amount") else value
+		var combined: float = value
+		if current.has("amount"):
+			combined = _combine_values([float(current.get("amount", 0.0)), value], stacking)
 		if stacking == "sum":
 			combined = float(current.get("amount", 0.0)) + value
 		elif stacking == "max":
@@ -417,13 +418,13 @@ func _combine_values(values: Array, stacking: String) -> float:
 				total += num
 			return total
 		"max":
-			var max_val := numbers[0]
+			var max_val: float = numbers[0]
 			for num in numbers:
 				if num > max_val:
 					max_val = num
 			return max_val
 		"min":
-			var min_val := numbers[0]
+			var min_val: float = numbers[0]
 			for num in numbers:
 				if num < min_val:
 					min_val = num
@@ -525,10 +526,10 @@ func _on_tile_removed(tile: TileManager.TileRef) -> void:
 	if tile == null:
 		return
 	_effect_state.erase(tile.uid)
-	_aura_cache.erase(String(tile.uid))
+	_aura_cache.erase(str(tile.uid))
 
 func _on_tile_transformed(tile: TileManager.TileRef, _previous_id: String) -> void:
 	if tile == null:
 		return
 	_effect_state.erase(tile.uid)
-	_aura_cache.erase(String(tile.uid))
+	_aura_cache.erase(str(tile.uid))
