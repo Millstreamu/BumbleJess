@@ -16,6 +16,9 @@ config/features=PackedStringArray("4.4")
 config/starting_map_id="map.demo_001"
 
 [autoload]
+Game="*res://autoload/Game.gd"
+TileManager="*res://autoload/TileManager.gd"
+EffectsEngine="*res://autoload/EffectsEngine.gd"
 
 RunConfig="*res://autoload/RunConfig.gd"
 MetaManager="*res://autoload/MetaManager.gd"

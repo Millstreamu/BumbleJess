@@ -265,3 +265,15 @@ Each Totem defines run theme, commune weighting, and passives. Upgraded via Life
 ---
 
 *(End of v3.1 — expanded and annotated for implementation.)*
+
+### Universal Tile Effects Schema
+
+Designers author behaviour entirely through `effects` arrays in `res://data/tiles.json`. Each entry follows four consistent fields:
+
+* **when** – Trigger window. Supported values: `start_of_turn`, `end_of_turn`, `on_place`, `on_transform`, `on_adjacency_change`.
+* **target** – Selection block describing scope (`self`, `adjacent`, `radius`, `global`) plus optional filters (`has_tags_any`, `has_tags_all`, `category_any`). Radius targets use `radius`. Flags `include_overgrowth` and `include_grove` opt into those categories.
+* **condition** – Optional gating checks (`adjacent_count`, `touching_decay`, `turn_mod`). Missing conditions default to always true.
+* **op** – Effect action. Supported operations: `add`, `mul`, `set`, `convert`, `spawn`, `transform`, `cleanse_decay`, `damage_decay`, `aura_sprout`. Combine with `stat`, `amount`, and optional `stacking` (`sum`, `max`, `min`).
+
+`interval_turns` defaults to 1 and spaces repeated triggers; `duration_turns` limits lifetime. Stat paths accept `output.*`, `cap.*`, `purity`, and `battle.*`. Structured payloads drive conversion, spawning, decay manipulation, and aura definitions.
+
