@@ -895,50 +895,61 @@ func _on_commune_cleared() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-                if event.is_action_pressed("turn_end"):
-                                on_end_turn_pressed()
-                                var viewport := get_viewport()
-                                if viewport != null:
-                                                viewport.set_input_as_handled()
-                                return
-                if event.is_action_pressed("ui_toggle_sprout_register"):
-                                _toggle_sprout_register()
-                                var sr_viewport := get_viewport()
-                                if sr_viewport != null:
-                                                sr_viewport.set_input_as_handled()
-				return
-		if event.is_action_pressed("ui_toggle_threats"):
-				var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
-				if threat_list != null:
-						threat_list.visible = not threat_list.visible
-						var threat_viewport := get_viewport()
-						if threat_viewport != null:
-								threat_viewport.set_input_as_handled()
-		if event.is_action_pressed("ui_toggle_cluster_fx"):
-				var decay_manager: Node = get_node_or_null("/root/DecayManager")
-				if decay_manager != null:
-						var current_state := bool(decay_manager.get("debug_show_clusters"))
-						decay_manager.set("debug_show_clusters", not current_state)
-						if decay_manager.has_method("_refresh_cluster_fx_overlay"):
-								decay_manager.call("_refresh_cluster_fx_overlay")
-				var fx_viewport := get_viewport()
-				if fx_viewport != null:
-						fx_viewport.set_input_as_handled()
-		if event.is_action_pressed("debug_meta_list"):
-				_handle_meta_debug_list()
-				return
-		if event.is_action_pressed("debug_meta_unlock_clipboard"):
-				_handle_meta_debug_unlock_from_clipboard()
-				return
-		if event.is_action_pressed("debug_meta_lock_clipboard"):
-				_handle_meta_debug_lock_from_clipboard()
-				return
-		if event.is_action_pressed("debug_meta_wipe"):
-				_handle_meta_debug_wipe()
-				return
-		if event.is_action_pressed("debug_meta_unlock_all"):
-				_handle_meta_debug_unlock_all()
-				return
+	if event.is_action_pressed("turn_end"):
+		on_end_turn_pressed()
+		var viewport := get_viewport()
+		if viewport != null:
+			viewport.set_input_as_handled()
+		return
+
+	if event.is_action_pressed("ui_toggle_sprout_register"):
+		_toggle_sprout_register()
+		var sr_viewport := get_viewport()
+		if sr_viewport != null:
+			sr_viewport.set_input_as_handled()
+		return
+
+	if event.is_action_pressed("ui_toggle_threats"):
+		var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
+		if threat_list != null:
+			threat_list.visible = not threat_list.visible
+			var threat_viewport := get_viewport()
+			if threat_viewport != null:
+				threat_viewport.set_input_as_handled()
+		return
+
+	if event.is_action_pressed("ui_toggle_cluster_fx"):
+		var decay_manager: Node = get_node_or_null("/root/DecayManager")
+		if decay_manager != null:
+			var current_state := bool(decay_manager.get("debug_show_clusters"))
+			decay_manager.set("debug_show_clusters", not current_state)
+			if decay_manager.has_method("_refresh_cluster_fx_overlay"):
+				decay_manager.call("_refresh_cluster_fx_overlay")
+		var fx_viewport := get_viewport()
+		if fx_viewport != null:
+			fx_viewport.set_input_as_handled()
+		return
+
+	if event.is_action_pressed("debug_meta_list"):
+		_handle_meta_debug_list()
+		return
+
+	if event.is_action_pressed("debug_meta_unlock_clipboard"):
+		_handle_meta_debug_unlock_from_clipboard()
+		return
+
+	if event.is_action_pressed("debug_meta_lock_clipboard"):
+		_handle_meta_debug_lock_from_clipboard()
+		return
+
+	if event.is_action_pressed("debug_meta_wipe"):
+		_handle_meta_debug_wipe()
+		return
+
+	if event.is_action_pressed("debug_meta_unlock_all"):
+		_handle_meta_debug_unlock_all()
+		return
+
 
 
 func _handle_meta_debug_list() -> void:

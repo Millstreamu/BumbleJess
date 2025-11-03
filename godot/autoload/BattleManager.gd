@@ -11,13 +11,13 @@ var _tree_was_paused := false
 var _ui_open := false
 
 func open_battle(encounter: Dictionary, callback: Callable) -> void:
-        if _window == null:
-                _create_window()
-        _pending_callback = callback
-        _tree_was_paused = get_tree().paused
-        get_tree().paused = true
-        _window.open(encounter, callback)
-        _ui_open = true
+		if _window == null:
+				_create_window()
+		_pending_callback = callback
+		_tree_was_paused = get_tree().paused
+		get_tree().paused = true
+		_window.open(encounter, callback)
+		_ui_open = true
 
 func open_battle_for_cell(target_cell: Vector2i, opts: Dictionary = {}) -> void:
 		var encounter: Dictionary = {
@@ -38,10 +38,10 @@ func open_battle_for_cell(target_cell: Vector2i, opts: Dictionary = {}) -> void:
 		var audio_bus := get_node_or_null("/root/AudioBus")
 		if audio_bus != null and audio_bus.has_method("play"):
 				audio_bus.play("res://assets/sfx/battle_start.wav")
-                open_battle(encounter, callback)
+				open_battle(encounter, callback)
 
 func is_battle_ui_open() -> bool:
-        return _ui_open
+		return _ui_open
 
 func _create_window() -> void:
 	var scene := load("res://scenes/battle/BattleWindow.tscn") as PackedScene
@@ -66,7 +66,7 @@ func _on_window_finished(result: Dictionary) -> void:
 		_window.on_finish = Callable()
 
 func _on_window_closed() -> void:
-        get_tree().paused = _tree_was_paused
-        _pending_callback = Callable()
-        _ui_open = false
-        emit_signal("battle_ui_closed")
+		get_tree().paused = _tree_was_paused
+		_pending_callback = Callable()
+		_ui_open = false
+		emit_signal("battle_ui_closed")
