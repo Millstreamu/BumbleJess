@@ -123,7 +123,7 @@ func _sanitize_effect(tile_id: String, index: int, effect: Dictionary) -> Dictio
 		_warn(tile_id, "effect %d has invalid 'when' value '%s'; defaulting to start_of_turn" % [index, when])
 		when = "start_of_turn"
 
-	var interval := max(1, int(effect.get("interval_turns", 1)))
+	var interval: int = max(1, int(effect.get("interval_turns", 1)))
 
 	var duration_variant: Variant = effect.get("duration_turns", null)
 	var duration: Variant = null
@@ -232,7 +232,7 @@ func _sanitize_condition(tile_id: String, index: int, cond_variant: Variant) -> 
 	if cond.has("turn_mod"):
 		var tm_variant: Variant = cond.get("turn_mod")
 		if tm_variant is Dictionary:
-			var mod_value := max(1, int(tm_variant.get("mod", 1)))
+			var mod_value: int = max(1, int(tm_variant.get("mod", 1)))
 			var eq_value := int(tm_variant.get("eq", 0))
 			result["turn_mod"] = {
 				"mod": mod_value,
