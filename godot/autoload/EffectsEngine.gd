@@ -105,7 +105,7 @@ func _prepare_state(tile: TileManager.TileRef, effect_index: int, effect: Dictio
 		return {}
 	return state
 
-func _mark_triggered(tile_uid: int, effect_index: int, effect: Dictionary, state: Dictionary, turn_idx: int) -> void:
+func _mark_triggered(_tile_uid: int, _effect_index: int, effect: Dictionary, state: Dictionary, turn_idx: int) -> void:
 	var interval: int = max(1, int(effect.get("interval_turns", 1)))
 	state["next_due"] = turn_idx + interval
 	state["trigger_count"] = int(state.get("trigger_count", 0)) + 1

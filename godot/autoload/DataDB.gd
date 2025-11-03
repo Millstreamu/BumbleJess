@@ -240,7 +240,7 @@ func _sanitize_condition(tile_id: String, index: int, cond_variant: Variant) -> 
 			}
 	return result
 
-func _sanitize_convert(tile_id: String, index: int, amount_variant: Variant) -> Dictionary:
+func _sanitize_convert(_tile_id: String, _index: int, amount_variant: Variant) -> Dictionary:
 	var amount: Dictionary = amount_variant if amount_variant is Dictionary else {}
 	var from_variant: Variant = amount.get("from", {})
 	var to_variant: Variant = amount.get("to", {})
@@ -258,7 +258,7 @@ func _sanitize_convert(tile_id: String, index: int, amount_variant: Variant) -> 
 		"period": max(1, int(amount.get("period", 1))),
 	}
 
-func _sanitize_spawn(tile_id: String, index: int, amount_variant: Variant) -> Dictionary:
+func _sanitize_spawn(_tile_id: String, _index: int, amount_variant: Variant) -> Dictionary:
 	var amount: Dictionary = amount_variant if amount_variant is Dictionary else {}
 	return {
 		"tile_id": String(amount.get("tile_id", "")),
@@ -266,27 +266,27 @@ func _sanitize_spawn(tile_id: String, index: int, amount_variant: Variant) -> Di
 		"empty_only": bool(amount.get("empty_only", false)),
 	}
 
-func _sanitize_transform(tile_id: String, index: int, amount_variant: Variant) -> Dictionary:
+func _sanitize_transform(_tile_id: String, _index: int, amount_variant: Variant) -> Dictionary:
 	var amount: Dictionary = amount_variant if amount_variant is Dictionary else {}
 	return {
 		"to": String(amount.get("to", "")),
 	}
 
-func _sanitize_decay_amount(tile_id: String, index: int, amount_variant: Variant) -> Dictionary:
+func _sanitize_decay_amount(_tile_id: String, _index: int, amount_variant: Variant) -> Dictionary:
 	var amount: Dictionary = amount_variant if amount_variant is Dictionary else {}
 	return {
 		"radius": max(0, int(amount.get("radius", 0))),
 		"max_tiles": max(0, int(amount.get("max_tiles", 0))),
 	}
 
-func _sanitize_damage_amount(tile_id: String, index: int, amount_variant: Variant) -> Dictionary:
+func _sanitize_damage_amount(_tile_id: String, _index: int, amount_variant: Variant) -> Dictionary:
 	var amount: Dictionary = amount_variant if amount_variant is Dictionary else {}
 	return {
 		"radius": max(0, int(amount.get("radius", 0))),
 		"amount": _coerce_number(amount.get("amount", 0)),
 	}
 
-func _sanitize_aura_amount(tile_id: String, index: int, amount_variant: Variant) -> Dictionary:
+func _sanitize_aura_amount(_tile_id: String, _index: int, amount_variant: Variant) -> Dictionary:
 	var amount: Dictionary = amount_variant if amount_variant is Dictionary else {}
 	return {
 		"stat": String(amount.get("stat", "")),
