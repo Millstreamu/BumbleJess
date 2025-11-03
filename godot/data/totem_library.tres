@@ -1,71 +1,96 @@
-[gd_resource type="TotemLibrary" load_steps=14 format=3]
+[gd_resource type="TotemLibrary" script_class="TotemLibrary" load_steps=14 format=3 uid="uid://baxe1rl3wjfb1"]
 
-[ext_resource type="Script" path="res://scripts/tools/totems/TotemLibrary.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/tools/totems/TilePackDefinition.gd" id="2"]
-[ext_resource type="Script" path="res://scripts/tools/totems/TotemTilePackChoice.gd" id="3"]
-[ext_resource type="Script" path="res://scripts/tools/totems/TotemDefinition.gd" id="4"]
+[ext_resource type="Script" uid="uid://bvkwowp2mr2o2" path="res://scripts/tools/totems/TotemLibrary.gd" id="1"]
+[ext_resource type="Script" uid="uid://b3vb64fd2njrh" path="res://scripts/tools/totems/TilePackDefinition.gd" id="2"]
+[ext_resource type="Script" uid="uid://4kdegsqamovv" path="res://scripts/tools/totems/TotemTilePackChoice.gd" id="3"]
+[ext_resource type="Script" uid="uid://cvwld6k41km0v" path="res://scripts/tools/totems/TotemDefinition.gd" id="4"]
 
 [sub_resource type="TilePackDefinition" id="TilePackDefinition_harvest"]
+resource_local_to_scene = false
 resource_name = "HarvestGrowth"
 script = ExtResource("2")
 id = "pack.harvest_growth"
-tiles = ["tile.harvest.default", "tile.harvest.default", "tile.build.default"]
+tiles = Array[String](["tile.harvest.default", "tile.harvest.default", "tile.build.default"])
+special = Array[String]([])
 
 [sub_resource type="TilePackDefinition" id="TilePackDefinition_refine"]
+resource_local_to_scene = false
 resource_name = "RefineChannel"
 script = ExtResource("2")
 id = "pack.refine_channel"
-tiles = ["tile.refine.default", "tile.harvest.default"]
-special = ["tile.totem.echo_pillar"]
+tiles = Array[String](["tile.refine.default", "tile.harvest.default"])
+special = Array[String](["tile.totem.echo_pillar"])
 
 [sub_resource type="TilePackDefinition" id="TilePackDefinition_build"]
+resource_local_to_scene = false
 resource_name = "BuildGuard"
 script = ExtResource("2")
 id = "pack.build_guard"
-tiles = ["tile.build.default", "tile.guard.default"]
+tiles = Array[String](["tile.build.default", "tile.guard.default"])
+special = Array[String]([])
 
 [sub_resource type="TilePackDefinition" id="TilePackDefinition_special"]
+resource_local_to_scene = false
 resource_name = "SpecialSingle"
 script = ExtResource("2")
 id = "pack.special.single"
-special = ["tile.upgrade.default", "tile.chanting.default"]
+tiles = Array[String]([])
+special = Array[String](["tile.upgrade.default", "tile.chanting.default"])
 
 [sub_resource type="TotemTilePackChoice" id="TotemChoice_harvest"]
+resource_local_to_scene = false
+resource_name = ""
 script = ExtResource("3")
 pack = SubResource("TilePackDefinition_harvest")
+pack_id_override = ""
 weight = 5
 min_tier = 1
 
 [sub_resource type="TotemTilePackChoice" id="TotemChoice_refine"]
+resource_local_to_scene = false
+resource_name = ""
 script = ExtResource("3")
 pack = SubResource("TilePackDefinition_refine")
+pack_id_override = ""
 weight = 3
 min_tier = 1
 
 [sub_resource type="TotemTilePackChoice" id="TotemChoice_build"]
+resource_local_to_scene = false
+resource_name = ""
 script = ExtResource("3")
 pack = SubResource("TilePackDefinition_build")
+pack_id_override = ""
 weight = 3
 min_tier = 1
 
 [sub_resource type="TotemTilePackChoice" id="TotemChoice_special"]
+resource_local_to_scene = false
+resource_name = ""
 script = ExtResource("3")
 pack = SubResource("TilePackDefinition_special")
+pack_id_override = ""
 weight = 1
 min_tier = 2
 
 [sub_resource type="TotemDefinition" id="TotemDefinition_heartwood"]
+resource_local_to_scene = false
 resource_name = "Heartwood"
 script = ExtResource("4")
 id = "totem.heartwood"
 display_name = "Heartwood"
 tile_generation_interval_turns = 3
 tile_generation_special_forced_place = true
-tile_pack_choices = [SubResource("TotemChoice_harvest"), SubResource("TotemChoice_refine"), SubResource("TotemChoice_build"), SubResource("TotemChoice_special")]
+tile_pack_choices = Array[ExtResource("3")]([SubResource("TotemChoice_harvest"), SubResource("TotemChoice_refine"), SubResource("TotemChoice_build"), SubResource("TotemChoice_special")])
 tier_max = 5
 life_essence_costs = PackedInt32Array(0, 5, 10, 15, 20)
 
 [resource]
+resource_local_to_scene = false
+resource_name = ""
 script = ExtResource("1")
-tile_packs = [SubResource("TilePackDefinition_harvest"), SubResource("TilePackDefinition_refine"), SubResource("TilePackDefinition_build"), SubResource("TilePackDefinition_special")]
-totems = [SubResource("TotemDefinition_heartwood")]
+tile_pack_output_path = "res://data/packs.json"
+totem_output_path = "res://data/totems.json"
+tile_packs = Array[ExtResource("2")]([SubResource("TilePackDefinition_harvest"), SubResource("TilePackDefinition_refine"), SubResource("TilePackDefinition_build"), SubResource("TilePackDefinition_special")])
+totems = Array[ExtResource("4")]([SubResource("TotemDefinition_heartwood")])
+regenerate_json = false
