@@ -36,10 +36,11 @@ func _setup_decay_hooks() -> void:
 				DecayManager.battle_queue_updated.connect(_on_decay_queue_updated)
 
 func _setup_world_hooks() -> void:
-		if end_btn != null:
-				end_btn.pressed.connect(_on_end_turn_pressed)
-		if _world != null and _world.has_signal("tile_placed"):
-				_world.connect("tile_placed", Callable(self, "_on_tile_placed"))
+                if end_btn != null:
+                                end_btn.focus_mode = Control.FOCUS_NONE
+                                end_btn.pressed.connect(_on_end_turn_pressed)
+                if _world != null and _world.has_signal("tile_placed"):
+                                _world.connect("tile_placed", Callable(self, "_on_tile_placed"))
 
 func _setup_sprout_hooks() -> void:
 		if not Engine.has_singleton("SproutRegistry"):
