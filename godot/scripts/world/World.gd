@@ -895,11 +895,17 @@ func _on_commune_cleared() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-		if event.is_action_pressed("ui_toggle_sprout_register"):
-				_toggle_sprout_register()
-				var sr_viewport := get_viewport()
-				if sr_viewport != null:
-						sr_viewport.set_input_as_handled()
+                if event.is_action_pressed("turn_end"):
+                                on_end_turn_pressed()
+                                var viewport := get_viewport()
+                                if viewport != null:
+                                                viewport.set_input_as_handled()
+                                return
+                if event.is_action_pressed("ui_toggle_sprout_register"):
+                                _toggle_sprout_register()
+                                var sr_viewport := get_viewport()
+                                if sr_viewport != null:
+                                                sr_viewport.set_input_as_handled()
 				return
 		if event.is_action_pressed("ui_toggle_threats"):
 				var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
