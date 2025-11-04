@@ -1,162 +1,162 @@
 {
-    "debuffs": {
-        "wither": {
-            "type": "debuff",
-            "stat_changes": {
-                "max_hp_mult": 0.9
-            },
-            "duration": -1,
-            "stackable": false,
-            "visual": "gray_desaturation",
-            "color": "#9c8b7a",
-            "description": "Reduces target's maximum HP by 10% until cleansed."
-        },
-        "slow": {
-            "type": "debuff",
-            "stat_changes": {
-                "speed_mult": 0.75
-            },
-            "duration": 2,
-            "stackable": false,
-            "visual": "root_bind",
-            "color": "#8cbdb1",
-            "description": "Reduces speed by 25%, delaying next action."
-        },
-        "weaken": {
-            "type": "debuff",
-            "stat_changes": {
-                "attack_mult": 0.8
-            },
-            "duration": 2,
-            "stackable": false,
-            "visual": "dim_aura",
-            "color": "#c5a18d",
-            "description": "Lowers attack power by 20%."
-        },
-        "sunder": {
-            "type": "debuff",
-            "stat_changes": {
-                "defense_mult": 0.8
-            },
-            "duration": 2,
-            "stackable": false,
-            "visual": "cracked_bark",
-            "color": "#d9b46f",
-            "description": "Defense reduced by 20%, making the target more vulnerable."
-        },
-        "poison": {
-            "type": "debuff",
-            "damage_over_time": {
-                "flat": 5
-            },
-            "duration": 3,
-            "stackable": true,
-            "max_stacks": 3,
-            "visual": "green_spores",
-            "color": "#8ec46c",
-            "description": "Deals 5 flat damage per turn. Stacks up to 3 times."
-        },
-        "stagger": {
-            "type": "debuff",
-            "instant_effect": {
-                "turn_meter_mult": 0.9
-            },
-            "stat_changes": {
-                "speed_mult": 0.9
-            },
-            "duration": 1,
-            "stackable": false,
-            "visual": "shockwave",
-            "color": "#b3b3b3",
-            "description": "Target loses 10% of turn meter and moves slower briefly."
-        },
-        "haze": {
-            "type": "debuff",
-            "stat_changes": {
-                "accuracy_mult": 0.8
-            },
-            "duration": 2,
-            "stackable": false,
-            "visual": "mist_head",
-            "color": "#a5c6d0",
-            "description": "Reduces accuracy by 20%; attacks may miss."
-        },
-        "cripple": {
-            "type": "debuff",
-            "stat_changes": {
-                "front_damage_mult": 0.75
-            },
-            "duration": 2,
-            "stackable": false,
-            "visual": "root_snare",
-            "color": "#9a7d65",
-            "description": "Reduces damage dealt to front-row enemies by 25%."
-        }
-    },
-    "buffs": {
-        "guard": {
-            "type": "buff",
-            "stat_changes": {
-                "defense_mult": 1.2
-            },
-            "duration": 2,
-            "stackable": false,
-            "visual": "root_shield",
-            "color": "#cbb17d",
-            "description": "Increases defense by 20%."
-        },
-        "haste": {
-            "type": "buff",
-            "stat_changes": {
-                "speed_mult": 1.25
-            },
-            "duration": 1,
-            "stackable": false,
-            "visual": "leaf_swirl",
-            "color": "#7ebc9c",
-            "description": "Increases speed by 25% for the next turn."
-        },
-        "bloom": {
-            "type": "buff",
-            "regen": {
-                "percent_hp_per_turn": 0.07
-            },
-            "duration": 2,
-            "stackable": false,
-            "visual": "flower_regen",
-            "color": "#90c970",
-            "description": "Regenerates about 7% HP each turn."
-        },
-        "focus": {
-            "type": "buff",
-            "stat_changes": {
-                "accuracy_mult": 1.2,
-                "crit_chance_mult": 1.2
-            },
-            "duration": 2,
-            "stackable": false,
-            "visual": "eye_glow",
-            "color": "#b6e0e8",
-            "description": "Improves accuracy and crit chance by 20%."
-        },
-        "fortify": {
-            "type": "buff",
-            "stat_changes": {
-                "attack_mult": 1.2,
-                "damage_taken_mult": 0.9
-            },
-            "duration": 2,
-            "stackable": false,
-            "visual": "amber_glow",
-            "color": "#ddb36b",
-            "description": "Increases attack by 20% and reduces incoming damage by 10%."
-        }
-    },
-    "rules": {
-        "max_buffs_per_unit": 3,
-        "max_debuffs_per_unit": 3,
-        "reapply_refreshes": true,
-        "stacking_policy": "refresh_duration",
-        "notes": "Only poison stacks. Wither lasts until cleansed."
-    }
+	"debuffs": {
+		"wither": {
+			"type": "debuff",
+			"stat_changes": {
+				"max_hp_mult": 0.9
+			},
+			"duration": -1,
+			"stackable": false,
+			"visual": "gray_desaturation",
+			"color": "#9c8b7a",
+			"description": "Reduces target's maximum HP by 10% until cleansed."
+		},
+		"slow": {
+			"type": "debuff",
+			"stat_changes": {
+				"speed_mult": 0.75
+			},
+			"duration": 2,
+			"stackable": false,
+			"visual": "root_bind",
+			"color": "#8cbdb1",
+			"description": "Reduces speed by 25%, delaying next action."
+		},
+		"weaken": {
+			"type": "debuff",
+			"stat_changes": {
+				"attack_mult": 0.8
+			},
+			"duration": 2,
+			"stackable": false,
+			"visual": "dim_aura",
+			"color": "#c5a18d",
+			"description": "Lowers attack power by 20%."
+		},
+		"sunder": {
+			"type": "debuff",
+			"stat_changes": {
+				"defense_mult": 0.8
+			},
+			"duration": 2,
+			"stackable": false,
+			"visual": "cracked_bark",
+			"color": "#d9b46f",
+			"description": "Defense reduced by 20%, making the target more vulnerable."
+		},
+		"poison": {
+			"type": "debuff",
+			"damage_over_time": {
+				"flat": 5
+			},
+			"duration": 3,
+			"stackable": true,
+			"max_stacks": 3,
+			"visual": "green_spores",
+			"color": "#8ec46c",
+			"description": "Deals 5 flat damage per turn. Stacks up to 3 times."
+		},
+		"stagger": {
+			"type": "debuff",
+			"instant_effect": {
+				"turn_meter_mult": 0.9
+			},
+			"stat_changes": {
+				"speed_mult": 0.9
+			},
+			"duration": 1,
+			"stackable": false,
+			"visual": "shockwave",
+			"color": "#b3b3b3",
+			"description": "Target loses 10% of turn meter and moves slower briefly."
+		},
+		"haze": {
+			"type": "debuff",
+			"stat_changes": {
+				"accuracy_mult": 0.8
+			},
+			"duration": 2,
+			"stackable": false,
+			"visual": "mist_head",
+			"color": "#a5c6d0",
+			"description": "Reduces accuracy by 20%; attacks may miss."
+		},
+		"cripple": {
+			"type": "debuff",
+			"stat_changes": {
+				"front_damage_mult": 0.75
+			},
+			"duration": 2,
+			"stackable": false,
+			"visual": "root_snare",
+			"color": "#9a7d65",
+			"description": "Reduces damage dealt to front-row enemies by 25%."
+		}
+	},
+	"buffs": {
+		"guard": {
+			"type": "buff",
+			"stat_changes": {
+				"defense_mult": 1.2
+			},
+			"duration": 2,
+			"stackable": false,
+			"visual": "root_shield",
+			"color": "#cbb17d",
+			"description": "Increases defense by 20%."
+		},
+		"haste": {
+			"type": "buff",
+			"stat_changes": {
+				"speed_mult": 1.25
+			},
+			"duration": 1,
+			"stackable": false,
+			"visual": "leaf_swirl",
+			"color": "#7ebc9c",
+			"description": "Increases speed by 25% for the next turn."
+		},
+		"bloom": {
+			"type": "buff",
+			"regen": {
+				"percent_hp_per_turn": 0.07
+			},
+			"duration": 2,
+			"stackable": false,
+			"visual": "flower_regen",
+			"color": "#90c970",
+			"description": "Regenerates about 7% HP each turn."
+		},
+		"focus": {
+			"type": "buff",
+			"stat_changes": {
+				"accuracy_mult": 1.2,
+				"crit_chance_mult": 1.2
+			},
+			"duration": 2,
+			"stackable": false,
+			"visual": "eye_glow",
+			"color": "#b6e0e8",
+			"description": "Improves accuracy and crit chance by 20%."
+		},
+		"fortify": {
+			"type": "buff",
+			"stat_changes": {
+				"attack_mult": 1.2,
+				"damage_taken_mult": 0.9
+			},
+			"duration": 2,
+			"stackable": false,
+			"visual": "amber_glow",
+			"color": "#ddb36b",
+			"description": "Increases attack by 20% and reduces incoming damage by 10%."
+		}
+	},
+	"rules": {
+		"max_buffs_per_unit": 3,
+		"max_debuffs_per_unit": 3,
+		"reapply_refreshes": true,
+		"stacking_policy": "refresh_duration",
+		"notes": "Only poison stacks. Wither lasts until cleansed."
+	}
 }

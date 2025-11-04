@@ -33,15 +33,15 @@ class TileRef extends RefCounted:
 		self.position = tile_pos
 		self.definition = def.duplicate(true)
 		self.category = String(def.get("category", ""))
-                self.tags = TileManagerClass._extract_tags(def.get("tags", []))
+		self.tags = TileManagerClass._extract_tags(def.get("tags", []))
 		reset_stats()
 
 	func reset_stats() -> void:
-                self.stats = TileManagerClass._build_default_stats()
+				self.stats = TileManagerClass._build_default_stats()
 
 	func duplicate() -> TileRef:
 		var copy := TileRef.new(uid, id, position, definition)
-                copy.stats = TileManagerClass._deep_copy_dict(stats)
+		copy.stats = TileManagerClass._deep_copy_dict(stats)
 		copy.tags = tags.duplicate()
 		copy.category = category
 		return copy
