@@ -1,647 +1,257 @@
 [
   {
-	"id": "tile.harvest.default",
-	"category": "Nature",
-	"name": "Harvest",
-	"tags": [
-	  "nature",
-	  "harvest"
-	],
-	"outputs": {},
-	"synergies": [],
-	"can_generate_overgrowth": false,
-	"unique": false,
-	"rules": {
-	  "capacity_base": {
-		"nature": 5
-	  },
-	  "nature_per_adjacent": {
-		"grove": 1
-	  }
-	}
-  },
-  {
-	"id": "tile.build.default",
-	"category": "Earth",
-	"name": "Build",
-	"tags": [
-	  "earth",
-	  "build"
-	],
-	"outputs": {},
-	"synergies": [],
-	"can_generate_overgrowth": false,
-	"unique": false,
-	"rules": {
-	  "capacity_base": {
-		"earth": 5
-	  },
-	  "earth_per_turn": 1,
-	  "slow_if_adjacent_any": [
-		"harvest"
-	  ],
-	  "slow_multiplier": 2
-	}
-  },
-  {
-	"id": "tile.refine.default",
-	"category": "Water",
-	"name": "Refine",
-	"tags": [
-	  "water",
-	  "refine"
-	],
-	"outputs": {},
-	"synergies": [],
-	"can_generate_overgrowth": false,
-	"unique": false,
-	"rules": {
-	  "capacity_base": {
-		"water": 5
-	  },
-	  "refine_every_turns": 2,
-	  "consume": {
-		"nature": 1,
-		"earth": 1
-	  },
-	  "produce": {
-		"water": 1
-	  }
-	}
-  },
-  {
-	"id": "tile.storage.default",
-	"category": "Nest",
-	"name": "Storage",
-	"tags": [
-	  "nest",
-	  "storage"
-	],
-	"outputs": {},
-	"synergies": [],
-	"can_generate_overgrowth": false,
-	"unique": false,
-	"rules": {
-	  "capacity_aura_adjacent": {
-		"harvest": {
-		  "nature": 5
-		},
-		"build": {
-		  "earth": 5
-		},
-		"refine": {
-		  "water": 5
-		}
-	  }
-	}
-  },
-  {
-	"id": "tile.guard.default",
-	"category": "Aggression",
-	"name": "Guard",
-	"tags": [
-	  "aggression",
-	  "guard"
-	],
-	"outputs": {},
-	"synergies": [],
-	"can_generate_overgrowth": false,
-	"unique": false
-  },
-  {
-	"id": "tile.upgrade.default",
-	"category": "Mystic",
-	"name": "Upgrade",
-	"tags": [
-	  "mystic",
-	  "upgrade"
-	],
-	"outputs": {},
-	"synergies": [],
-	"can_generate_overgrowth": false,
-	"unique": false,
-	"rules": {
-	  "soul_seed_every_turns": 3
-	}
-  },
-  {
-	"id": "tile.chanting.default",
-	"category": "Mystic",
-	"name": "Chanting",
-	"tags": [
-	  "mystic",
-	  "chanting"
-	],
-	"outputs": {},
-	"synergies": [],
-	"can_generate_overgrowth": false,
-	"unique": false
-  },
-  {
-	"id": "tile.grove.default",
-	"category": "grove",
-	"name": "Grove",
-	"tags": [
-	  "grove",
-	  "nature"
-	],
-	"outputs": {},
-	"synergies": [],
-	"can_generate_overgrowth": false,
-	"unique": false
-  },
-  {
-	"id": "tile.overgrowth.default",
-	"category": "overgrowth",
-	"name": "Overgrowth",
-	"tags": [
-	  "overgrowth",
-	  "nature"
-	],
-	"outputs": {},
-	"synergies": [],
-	"can_generate_overgrowth": true,
-	"unique": false
-  },
-  {
-	"id": "tile.nest.twin",
-	"category": "Nest",
-	"name": "Twin Nest",
-	"tags": [
-	  "nest",
-	  "twin"
-	],
-	"outputs": {},
-	"synergies": [],
-	"can_generate_overgrowth": false,
-	"unique": true,
-	"rules": {
-	  "on_place": {
-		"spawn_sprouts": 2,
-		"bonus_if_adjacent_at_least": {
-		  "grove": 3,
-		  "extra": 1
-		}
-	  }
-	}
-  },
-  {
-	"id": "tile.root.stone_vein",
-	"category": "Earth",
-	"name": "Stone Vein",
-	"tags": [
-	  "earth",
-	  "build",
-	  "root"
-	],
-	"outputs": {},
-	"synergies": [],
-	"can_generate_overgrowth": false,
-	"unique": false,
-	"rules": {
-	  "earth_every_turns": 3,
-	  "requires_adjacent_any": [
-		"guard",
-		"root"
-	  ]
-	}
-  },
-  {
-	"id": "tile.hollow.cleansing",
-	"category": "hollow",
-	"name": "Cleansing Hollow",
-	"tags": [
-	  "hollow"
-	],
-	"outputs": {},
-	"synergies": [],
-	"can_generate_overgrowth": false,
-	"unique": false,
-	"rules": {
-	  "on_place": {
-		"cleanse_adjacent_decay": true
-	  }
-	}
-  },
-  {
-	"id": "tile.bloom.lone",
-	"category": "Nature",
-	"name": "Lone Bloom",
-	"tags": [
-	  "nature",
-	  "harvest",
-	  "bloom"
-	],
-	"outputs": {},
-	"synergies": [
-	  {
-		"tag": "grove",
-		"bonus": {
-		  "nature": 1
-		},
-		"adjacent": true
-	  }
-	],
-	"can_generate_overgrowth": false,
-	"unique": false,
-	"rules": {
-	  "nature_per_turn": 2,
-	  "blocked_if_adjacent_any": [
-		"harvest",
-		"bloom"
-	  ]
-	}
-  },
-  {
-	"id": "tile.veil.mirror_pool",
-	"category": "Water",
-	"name": "Mirror Pool",
-	"tags": [
-	  "water",
-	  "refine",
-	  "pool"
-	],
-	"outputs": {
-	  "water": 0
-	},
-	"synergies": [
-	  {
-		"tag": "nature",
-		"bonus": {
-		  "water": 1
-		},
-		"adjacent": true
-	  }
-	],
-	"can_generate_overgrowth": false,
-	"unique": false,
-	"rules": {
-	  "cluster_tag": "mirror_pool",
-	  "cluster_invulnerable_if_size_at_least": 5
-	}
-  },
-  {
-	"id": "tile.totem.echo_pillar",
-	"category": "Mystic",
-	"name": "Echo Pillar",
-	"tags": [
-	  "mystic",
-	  "upgrade",
-	  "totem"
-	],
-	"outputs": {},
-	"synergies": [],
-	"can_generate_overgrowth": false,
-	"unique": false,
-	"rules": {
-	  "capacity_global_bonus_if_adjacent_to_totem": {
-		"nature": 5,
-		"earth": 5,
-		"water": 5
-	  }
-	}
-  },
-  {
-	"id": "tile.build.moss_terrace",
-	"category": "Earth",
-	"name": "Moss Terrace",
-	"tags": [
-	  "earth",
-	  "build",
-	  "moss",
-	  "terrace"
-	],
-	"outputs": {
-	  "earth": 1
-	},
-	"synergies": [],
-	"can_generate_overgrowth": true,
-	"unique": false,
-	"rules": {
-	  "overgrowth_every_turns": 3,
-	  "overgrowth_targets": "adjacent_empty",
-	  "overgrowth_count": 1
-	}
-  },
-  {
-	"id": "tile.refine.fungal_span",
-	"category": "Water",
-	"name": "Fungal Span",
-	"tags": [
-	  "water",
-	  "refine",
-	  "fungal"
-	],
-	"outputs": {},
-	"synergies": [],
-	"can_generate_overgrowth": false,
-	"unique": false,
-	"rules": {
-	  "water_every_turns": 2,
-	  "per_unique_adjacent_categories": true,
-	  "max_per_tick": 3
-	}
-  },
-  {
-	"id": "tile.storage.seed_cache",
-	"category": "Nest",
-	"name": "Seed Cache",
-	"tags": [
-	  "nest",
-	  "storage"
-	],
-	"outputs": {},
-	"synergies": [],
-	"can_generate_overgrowth": true,
-	"unique": false,
-	"rules": {
-	  "capacity_global_bonus": {
-		"nature": 15,
-		"earth": 15,
-		"water": 15
-	  },
-	  "decay_after_turns": 10,
-	  "decay_into": "overgrowth"
-	}
-  },
-  {
-	"id": "tile.harvest.rich_soil",
-	"category": "Nature",
-	"name": "Rich Soil",
-	"tags": [
-	  "nature",
-	  "harvest",
-	  "soil"
-	],
-	"outputs": {},
-	"synergies": [],
-	"can_generate_overgrowth": false,
-	"unique": false,
-	"rules": {
-	  "nature_per_adjacent": {
-		"grove": 2,
-		"harvest": 1
-	  },
-	  "capacity_base": {
-		"nature": 4
-	  }
-	}
-  },
-  {
-	"id": "tile.guard.bulwark",
-	"category": "Aggression",
-	"name": "Bulwark",
-	"tags": [
-	  "aggression",
-	  "guard",
-	  "bulwark"
-	],
-	"outputs": {},
-	"synergies": [],
-	"can_generate_overgrowth": false,
-	"unique": false,
-	"rules": {
-	  "block_damage_per_turn": 2,
-	  "requires_adjacent_any": [
-		"build",
-		"upgrade"
-	  ]
-	}
-  },
-  {
-	"id": "tile.guard.sporewall",
-	"category": "Aggression",
-	"name": "Sporewall",
-	"tags": [
-	  "aggression",
-	  "guard",
-	  "spore"
-	],
-	"outputs": {},
-	"synergies": [],
-	"can_generate_overgrowth": false,
-	"unique": false,
-	"rules": {
-	  "on_place": {
-		"spawn_sprouts": 1
-	  },
-	  "capacity_base": {
-		"earth": 6
-	  }
-	}
-  },
-  {
-	"id": "tile.storage.root_cellar",
-	"category": "Nest",
-	"name": "Root Cellar",
-	"tags": [
-	  "nest",
-	  "storage",
-	  "root"
-	],
-	"outputs": {},
-	"synergies": [],
-	"can_generate_overgrowth": true,
-	"unique": false,
-	"rules": {
-	  "capacity_global_bonus": {
-		"nature": 10,
-		"earth": 10
-	  },
-	  "decay_after_turns": 12,
-	  "decay_into": "overgrowth"
-	}
-  },
-  {
-	"id": "tile.upgrade.mindspire",
-	"category": "Mystic",
-	"name": "Mindspire",
-	"tags": [
-	  "mystic",
-	  "upgrade",
-	  "mindspire"
-	],
-	"outputs": {},
-	"synergies": [],
-	"can_generate_overgrowth": false,
-	"unique": false,
-	"rules": {
-	  "soul_seed_every_turns": 2,
-	  "requires_adjacent_any": [
-		"upgrade",
-		"chanting"
-	  ]
-	}
-  },
-  {
-	"id": "tile.chanting.harmonic_echo",
-	"category": "Mystic",
-	"name": "Harmonic Echo",
-	"tags": [
-	  "mystic",
-	  "chanting",
-	  "echo"
-	],
-	"outputs": {},
-	"synergies": [],
-	"can_generate_overgrowth": false,
-	"unique": false,
-	"rules": {
-	  "chanting_bonus_if_adjacent": {
-		"upgrade": 1,
-		"storage": 1
-	  }
-	}
-  },
-  {
-	"id": "tile.chanting.star_choir",
-	"category": "Mystic",
-	"name": "Star Choir",
-	"tags": [
-	  "mystic",
-	  "chanting",
-	  "choir"
-	],
-	"outputs": {},
-	"synergies": [],
-	"can_generate_overgrowth": false,
-	"unique": false,
-	"rules": {
-	  "chant_per_turn": 1,
-	  "nature_global_bonus": 1
-	}
-  },
-  {
-	"id": "tile.whispering_pine_forest",
+	"id": "tile.nature.whispering_pine_forest",
 	"category": "Nature",
 	"name": "Whispering Pine Forest",
-	"tags": [
-	  "nature",
-	  "forest"
+	"tags": ["forest", "nature"],
+	"effects": [
+	  { "when": "start_of_turn", "target": { "scope": "self" }, "op": "add", "stat": "output.nature", "amount": 2 },
+	  { "when": "start_of_turn", "target": { "scope": "self" }, "condition": { "adjacent_count": { "tag": "forest", "op": ">=", "value": 1 } }, "op": "add", "stat": "output.nature", "amount": 1 }
+	]
+  },
+  {
+	"id": "tile.nature.lone_bloom",
+	"category": "Nature",
+	"name": "Lone Bloom",
+	"tags": ["wildflower", "nature"],
+	"effects": [
+	  { "when": "start_of_turn", "target": { "scope": "self" }, "op": "add", "stat": "output.nature", "amount": 1 },
+	  { "when": "start_of_turn", "target": { "scope": "self" }, "condition": { "adjacent_count": { "tag": "grove", "op": ">=", "value": 1 } }, "op": "add", "stat": "output.nature", "amount": 1 }
+	]
+  },
+  {
+	"id": "tile.nature.moss_terrace",
+	"category": "Nature",
+	"name": "Moss Terrace",
+	"tags": ["moss", "wet", "nature"],
+	"effects": [
+	  { "when": "start_of_turn", "interval_turns": 2, "target": { "scope": "adjacent" }, "op": "spawn", "amount": { "tile_id": "tile.special.overgrowth", "count": 1, "empty_only": true } }
+	]
+  },
+  {
+	"id": "tile.nature.heartroot_grove",
+	"category": "Nature",
+	"name": "Heartroot Grove",
+	"tags": ["forest", "unique", "nature"],
+	"effects": [
+	  { "when": "on_place", "target": { "scope": "adjacent" }, "op": "spawn", "amount": { "tile_id": "tile.special.grove", "count": 3, "empty_only": true } }
 	],
-	"outputs": {
-	  "nature": 2
-	},
-	"synergies": [
-	  {
-		"tag": "forest",
-		"bonus": {
-		  "nature": 1
-		},
-		"adjacent": true
-	  }
+	"unique": { "uses": 1, "forced_place": true }
+  },
+
+  {
+	"id": "tile.earth.stone_vein",
+	"category": "Earth",
+	"name": "Stone Vein",
+	"tags": ["rocky", "earth"],
+	"effects": [
+	  { "when": "start_of_turn", "target": { "scope": "self" }, "op": "add", "stat": "output.earth", "amount": 1 },
+	  { "when": "start_of_turn", "target": { "scope": "self" }, "condition": { "adjacent_count": { "tag": "rocky", "op": ">=", "value": 1 } }, "op": "add", "stat": "output.earth", "amount": 1 }
+	]
+  },
+  {
+	"id": "tile.earth.root_bastion",
+	"category": "Earth",
+	"name": "Root Bastion",
+	"tags": ["bastion", "earth"],
+	"effects": [
+	  { "when": "start_of_turn", "target": { "scope": "radius", "radius": 2 }, "op": "aura_sprout", "amount": { "stat": "hp_pct", "op": "add", "amount": 0.05 } },
+	  { "when": "start_of_turn", "interval_turns": 2, "target": { "scope": "self" }, "condition": { "adjacent_count": { "tag": "nest", "op": ">=", "value": 1 } }, "op": "add", "stat": "output.earth", "amount": 1 }
+	]
+  },
+  {
+	"id": "tile.earth.mud_hollow",
+	"category": "Earth",
+	"name": "Mud Hollow",
+	"tags": ["mud", "earth"],
+	"effects": [
+	  { "when": "start_of_turn", "target": { "scope": "self" }, "op": "add", "stat": "output.earth", "amount": 1 },
+	  { "when": "start_of_turn", "target": { "scope": "self" }, "condition": { "adjacent_count": { "tag": "water", "op": ">=", "value": 1 } }, "op": "mul", "stat": "output.earth", "amount": 2 }
+	]
+  },
+  {
+	"id": "tile.earth.earthen_core",
+	"category": "Earth",
+	"name": "Earthen Core",
+	"tags": ["unique", "earth"],
+	"effects": [
+	  { "when": "start_of_turn", "target": { "scope": "global", "category_any": ["Earth"] }, "op": "mul", "stat": "output.earth", "amount": 1.25 }
 	],
-	"can_generate_overgrowth": false,
-	"unique": false,
-	"rules": {}
-  }
-,
+	"unique": { "uses": 1, "forced_place": false }
+  },
+
   {
-		"id": "tile.rocky_outcrop",
-		"category": "Water",
-		"tags": [
-		  "rocky"
-		],
-		"effects": [
-		  {
-				"when": "start_of_turn",
-				"target": { "scope": "self" },
-				"condition": {
-				  "adjacent_count": { "tag": "river", "op": ">=", "value": 1 }
-				},
-				"op": "add",
-				"stat": "output.water",
-				"amount": 1
-		  }
-		]
+	"id": "tile.water.mirror_pool",
+	"category": "Water",
+	"name": "Mirror Pool",
+	"tags": ["pool", "water", "wet"],
+	"effects": [
+	  { "when": "start_of_turn", "interval_turns": 2, "target": { "scope": "self" }, "op": "add", "stat": "output.water", "amount": 1 },
+	  { "when": "start_of_turn", "target": { "scope": "self" }, "condition": { "adjacent_count": { "tag": "nature", "op": ">=", "value": 1 } }, "op": "mul", "stat": "output.water", "amount": 2 }
+	]
   },
   {
-		"id": "tile.wind_swept_meadow",
-		"category": "Nature",
-		"tags": [
-		  "plains"
-		],
-		"effects": [
-		  {
-				"when": "start_of_turn",
-				"target": { "scope": "adjacent", "has_tags_any": ["forest"] },
-				"op": "add",
-				"stat": "output.nature",
-				"amount": 1
-		  }
-		]
+	"id": "tile.water.rocky_outcrop",
+	"category": "Water",
+	"name": "Rocky Outcrop",
+	"tags": ["rocky", "water"],
+	"effects": [
+	  { "when": "start_of_turn", "target": { "scope": "self" }, "condition": { "adjacent_count": { "tag": "river", "op": ">=", "value": 1 } }, "op": "add", "stat": "output.water", "amount": 1 }
+	]
   },
   {
-		"id": "tile.moss_terrace",
-		"category": "Nature",
-		"tags": [
-		  "wet",
-		  "moss"
-		],
-		"effects": [
-		  {
-				"when": "start_of_turn",
-				"interval_turns": 2,
-				"target": { "scope": "adjacent" },
-				"op": "spawn",
-				"amount": { "tile_id": "tile.overgrowth", "count": 1, "empty_only": true }
-		  }
-		]
+	"id": "tile.water.spring_nexus",
+	"category": "Water",
+	"name": "Spring Nexus",
+	"tags": ["spring", "water"],
+	"effects": [
+	  { "when": "start_of_turn", "interval_turns": 3, "target": { "scope": "self" }, "op": "add", "stat": "output.water", "amount": 1 },
+	  { "when": "start_of_turn", "interval_turns": 3, "target": { "scope": "self" }, "op": "add", "stat": "output.nature", "amount": 1 }
+	]
   },
   {
-		"id": "tile.strangle_thorn_thicket",
-		"category": "Nature",
-		"tags": [
-		  "forest",
-		  "thorn"
-		],
-		"effects": [
-		  {
-				"when": "start_of_turn",
-				"target": { "scope": "self" },
-				"op": "add",
-				"stat": "output.nature",
-				"amount": 10
-		  },
-		  {
-				"when": "start_of_turn",
-				"interval_turns": 5,
-				"target": { "scope": "self" },
-				"op": "transform",
-				"amount": { "to": "tile.overgrowth" }
-		  }
-		]
+	"id": "tile.water.tidal_heart",
+	"category": "Water",
+	"name": "Tidal Heart",
+	"tags": ["unique", "water"],
+	"effects": [
+	  { "when": "start_of_turn", "target": { "scope": "self" }, "op": "convert", "amount": { "from": { "nature": 1, "earth": 1 }, "to": { "water": 2 }, "period": 1 } }
+	],
+	"unique": { "uses": 1, "forced_place": false }
+  },
+
+  {
+	"id": "tile.nest.treasure_nest",
+	"category": "Nest",
+	"name": "Treasure Nest",
+	"tags": ["nest", "storage"],
+	"effects": [
+	  { "when": "start_of_turn", "target": { "scope": "adjacent", "category_any": ["Nature", "Earth", "Water"] }, "op": "add", "stat": "cap.local", "amount": 5 }
+	]
   },
   {
-		"id": "tile.thorn_watch",
-		"category": "Aggression",
-		"tags": [
-		  "ward"
-		],
-		"effects": [
-		  {
-				"when": "start_of_turn",
-				"interval_turns": 4,
-				"target": { "scope": "radius", "radius": 1 },
-				"condition": { "touching_decay": true },
-				"op": "cleanse_decay",
-				"amount": { "radius": 1, "max_tiles": 1 }
-		  }
-		]
+	"id": "tile.nest.hollow_burrow",
+	"category": "Nest",
+	"name": "Hollow Burrow",
+	"tags": ["nest", "burrow"],
+	"effects": [
+	  { "when": "start_of_turn", "target": { "scope": "radius", "radius": 1 }, "op": "aura_sprout", "amount": { "stat": "regen_pct", "op": "add", "amount": 0.10 } }
+	]
   },
   {
-		"id": "tile.ironbark_front",
-		"category": "Aggression",
-		"tags": [
-		  "bastion"
-		],
-		"effects": [
-		  {
-				"when": "start_of_turn",
-				"target": { "scope": "radius", "radius": 2 },
-				"op": "aura_sprout",
-				"amount": { "stat": "hp_pct", "op": "add", "amount": 0.05 }
-		  }
-		]
+	"id": "tile.nest.mycelium_bed",
+	"category": "Nest",
+	"name": "Mycelium Bed",
+	"tags": ["nest", "fungal"],
+	"effects": [
+	  { "when": "start_of_turn", "interval_turns": 2, "target": { "scope": "self" }, "op": "convert", "amount": { "from": { "nature": 1 }, "to": { "earth": 1 }, "period": 2 } }
+	]
+  },
+  {
+	"id": "tile.nest.wardens_cradle",
+	"category": "Nest",
+	"name": "Warden's Cradle",
+	"tags": ["unique", "nest", "storage"],
+	"effects": [
+	  { "when": "start_of_turn", "target": { "scope": "adjacent" }, "op": "mul", "stat": "cap.local", "amount": 2 }
+	],
+	"unique": { "uses": 1, "forced_place": false }
+  },
+
+  {
+	"id": "tile.mystic.chanting_circle",
+	"category": "Mystic",
+	"name": "Chanting Circle",
+	"tags": ["mystic", "ritual"],
+	"effects": [
+	  { "when": "start_of_turn", "interval_turns": 5, "target": { "scope": "self" }, "op": "add", "stat": "output.item_rolls", "amount": 1 }
+	]
+  },
+  {
+	"id": "tile.mystic.soul_bloom",
+	"category": "Mystic",
+	"name": "Soul Bloom",
+	"tags": ["mystic", "seed"],
+	"effects": [
+	  { "when": "start_of_turn", "interval_turns": 8, "target": { "scope": "self" }, "op": "add", "stat": "output.soul_seed", "amount": 1 }
+	]
+  },
+  {
+	"id": "tile.mystic.glowing_spire",
+	"category": "Mystic",
+	"name": "Glowing Spire",
+	"tags": ["mystic", "spire"],
+	"effects": [
+	  { "when": "start_of_turn", "target": { "scope": "global" }, "op": "aura_sprout", "amount": { "stat": "item_power_mult", "op": "mul", "amount": 1.10 } }
+	]
+  },
+  {
+	"id": "tile.mystic.elder_shrine",
+	"category": "Mystic",
+	"name": "Elder Shrine",
+	"tags": ["unique", "mystic", "shrine"],
+	"effects": [
+	  { "when": "start_of_turn", "interval_turns": 5, "target": { "scope": "self" }, "op": "add", "stat": "output.soul_seed", "amount": 1 },
+	  { "when": "start_of_turn", "interval_turns": 5, "target": { "scope": "self" }, "op": "add", "stat": "output.item_rolls", "amount": 1 }
+	],
+	"unique": { "uses": 1, "forced_place": false }
+  },
+
+  {
+	"id": "tile.aggression.thorn_watch",
+	"category": "Aggression",
+	"name": "Thorn Watch",
+	"tags": ["ward", "aggression"],
+	"effects": [
+	  { "when": "start_of_turn", "interval_turns": 4, "target": { "scope": "radius", "radius": 1 }, "condition": { "touching_decay": true }, "op": "cleanse_decay", "amount": { "radius": 1, "max_tiles": 1 } }
+	]
+  },
+  {
+	"id": "tile.aggression.ironbark_front",
+	"category": "Aggression",
+	"name": "Ironbark Front",
+	"tags": ["bastion", "aggression"],
+	"effects": [
+	  { "when": "start_of_turn", "target": { "scope": "radius", "radius": 2 }, "op": "aura_sprout", "amount": { "stat": "hp_pct", "op": "add", "amount": 0.05 } }
+	]
+  },
+  {
+	"id": "tile.aggression.fungal_barricade",
+	"category": "Aggression",
+	"name": "Fungal Barricade",
+	"tags": ["fungal", "aggression"],
+	"effects": [
+	  { "when": "start_of_turn", "target": { "scope": "radius", "radius": 1 }, "op": "damage_decay", "amount": { "radius": 1, "amount": 1 } }
+	]
+  },
+  {
+	"id": "tile.aggression.wrath_grove",
+	"category": "Aggression",
+	"name": "Wrath Grove",
+	"tags": ["unique", "aggression", "grove"],
+	"effects": [
+	  { "when": "on_place", "target": { "scope": "radius", "radius": 2 }, "op": "cleanse_decay", "amount": { "radius": 2, "max_tiles": 2 } },
+	  { "when": "start_of_turn", "target": { "scope": "radius", "radius": 2 }, "op": "aura_sprout", "amount": { "stat": "attack_pct", "op": "add", "amount": 0.05 } }
+	],
+	"unique": { "uses": 1, "forced_place": false }
+  },
+
+  {
+	"id": "tile.special.overgrowth",
+	"category": "Nature",
+	"name": "Overgrowth",
+	"tags": ["overgrowth", "nature"],
+	"effects": [
+	  { "when": "start_of_turn", "interval_turns": 3, "target": { "scope": "self" }, "op": "transform", "amount": { "to": "tile.special.grove" } }
+	]
+  },
+  {
+	"id": "tile.special.grove",
+	"category": "Nature",
+	"name": "Grove",
+	"tags": ["grove", "nature"],
+	"effects": [
+	  { "when": "on_transform", "target": { "scope": "self" }, "op": "add", "stat": "output.spawn_sprout", "amount": 1 }
+	]
   }
 ]

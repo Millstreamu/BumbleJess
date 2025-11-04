@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://commune_card"]
+[gd_scene format=3 uid="uid://dvb2ursy3kifg"]
 
 [node name="CommuneCard" type="Button"]
 custom_minimum_size = Vector2(260, 200)
@@ -7,29 +7,35 @@ size_flags_vertical = 3
 focus_mode = 0
 
 [node name="Name" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 10
 anchor_right = 1.0
 offset_left = 12.0
 offset_top = 8.0
 offset_right = -12.0
 offset_bottom = 40.0
+theme_override_font_sizes/font_size = 24
+text = "Tile"
 horizontal_alignment = 1
 vertical_alignment = 1
-text = "Tile"
-theme_override_font_sizes/font_size = 24
 
 [node name="CategoryTopRight" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -156.0
 offset_top = 12.0
 offset_right = -12.0
-offset_bottom = 36.0
+offset_bottom = 38.0
+theme_override_font_sizes/font_size = 18
+text = "Category"
 horizontal_alignment = 2
 vertical_alignment = 1
-text = "Category"
-theme_override_font_sizes/font_size = 18
 
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 12.0
@@ -38,5 +44,5 @@ offset_right = -12.0
 offset_bottom = -12.0
 bbcode_enabled = true
 fit_content = true
-autowrap_mode = 2
 scroll_active = false
+autowrap_mode = 2

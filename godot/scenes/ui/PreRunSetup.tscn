@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://pre_run_setup"]
+[gd_scene load_steps=2 format=3 uid="uid://cvpx75vrayan"]
 
-[ext_resource type="Script" path="res://scripts/ui/PreRunSetup.gd" id="1"]
+[ext_resource type="Script" uid="uid://cchb6lehn5msu" path="res://scripts/ui/PreRunSetup.gd" id="1"]
 
 [node name="PreRunSetup" type="CanvasLayer"]
 layer = 10
@@ -13,7 +13,7 @@ anchor_bottom = 1.0
 color = Color(0, 0, 0, 0.4)
 
 [node name="Panel" type="Panel" parent="."]
-anchors_preset = 4
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -26,7 +26,7 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 
 [node name="Root" type="VBoxContainer" parent="Panel"]
-anchors_preset = 15
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 16.0
@@ -37,149 +37,192 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="Header" type="HBoxContainer" parent="Panel/Root"]
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="Title" type="Label" parent="Panel/Root/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "New Run — Choose Totem & Sprouts"
 vertical_alignment = 1
-size_flags_horizontal = 3
 
 [node name="Spacer" type="Control" parent="Panel/Root/Header"]
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="CloseBtn" type="Button" parent="Panel/Root/Header"]
+layout_mode = 2
 text = "Cancel"
 
 [node name="Tabs" type="TabContainer" parent="Panel/Root"]
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+current_tab = 0
 clip_tabs = false
 
 [node name="Totem" type="VBoxContainer" parent="Panel/Root/Tabs"]
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-alignment = 0
+metadata/_tab_index = 0
 
 [node name="Heading" type="Label" parent="Panel/Root/Tabs/Totem"]
+layout_mode = 2
 text = "Choose a Totem"
 horizontal_alignment = 1
 
 [node name="ScrollContainer" type="ScrollContainer" parent="Panel/Root/Tabs/Totem"]
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
 [node name="TotemGrid" type="HFlowContainer" parent="Panel/Root/Tabs/Totem/ScrollContainer"]
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="TotemFooter" type="HBoxContainer" parent="Panel/Root/Tabs/Totem"]
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="TotemInfo" type="Label" parent="Panel/Root/Tabs/Totem/TotemFooter"]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "—"
 vertical_alignment = 1
-size_flags_horizontal = 3
 
 [node name="TotemSpacer" type="Control" parent="Panel/Root/Tabs/Totem/TotemFooter"]
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="TotemConfirm" type="Button" parent="Panel/Root/Tabs/Totem/TotemFooter"]
-text = "Confirm Totem"
+layout_mode = 2
 disabled = true
+text = "Confirm Totem"
 
 [node name="Sprouts" type="VBoxContainer" parent="Panel/Root/Tabs"]
+visible = false
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+metadata/_tab_index = 1
 
 [node name="Heading" type="Label" parent="Panel/Root/Tabs/Sprouts"]
+layout_mode = 2
 text = "Choose 4 Sprouts"
 horizontal_alignment = 1
 
 [node name="ScrollContainer" type="ScrollContainer" parent="Panel/Root/Tabs/Sprouts"]
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
 [node name="SproutGrid" type="HFlowContainer" parent="Panel/Root/Tabs/Sprouts/ScrollContainer"]
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="SproutFooter" type="HBoxContainer" parent="Panel/Root/Tabs/Sprouts"]
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="SproutInfo" type="Label" parent="Panel/Root/Tabs/Sprouts/SproutFooter"]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "Selected: 0 / 4"
 vertical_alignment = 1
-size_flags_horizontal = 3
 
 [node name="SproutSpacer" type="Control" parent="Panel/Root/Tabs/Sprouts/SproutFooter"]
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="ClearBtn" type="Button" parent="Panel/Root/Tabs/Sprouts/SproutFooter"]
+layout_mode = 2
 text = "Clear"
 
 [node name="SproutConfirm" type="Button" parent="Panel/Root/Tabs/Sprouts/SproutFooter"]
-text = "Confirm Sprouts"
+layout_mode = 2
 disabled = true
+text = "Confirm Sprouts"
 
 [node name="CoreTiles" type="VBoxContainer" parent="Panel/Root/Tabs"]
+visible = false
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+metadata/_tab_index = 2
 
 [node name="Heading" type="Label" parent="Panel/Root/Tabs/CoreTiles"]
+layout_mode = 2
 text = "Choose up to 10 Core Tiles (biases Commune offers)"
 horizontal_alignment = 1
 
 [node name="FilterRow" type="HBoxContainer" parent="Panel/Root/Tabs/CoreTiles"]
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="FilterCat" type="OptionButton" parent="Panel/Root/Tabs/CoreTiles/FilterRow"]
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="Search" type="LineEdit" parent="Panel/Root/Tabs/CoreTiles/FilterRow"]
-placeholder_text = "Search by name/tag"
+layout_mode = 2
 size_flags_horizontal = 3
+placeholder_text = "Search by name/tag"
 
 [node name="CountLabel" type="Label" parent="Panel/Root/Tabs/CoreTiles/FilterRow"]
+layout_mode = 2
 text = "0 / 10"
 vertical_alignment = 1
 
 [node name="FilterSpacer" type="Control" parent="Panel/Root/Tabs/CoreTiles/FilterRow"]
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="ClearBtn" type="Button" parent="Panel/Root/Tabs/CoreTiles/FilterRow"]
+layout_mode = 2
 text = "Clear"
 
 [node name="ScrollContainer" type="ScrollContainer" parent="Panel/Root/Tabs/CoreTiles"]
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
 [node name="TileGrid" type="HFlowContainer" parent="Panel/Root/Tabs/CoreTiles/ScrollContainer"]
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="Footer" type="HBoxContainer" parent="Panel/Root/Tabs/CoreTiles"]
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="FooterSpacer" type="Control" parent="Panel/Root/Tabs/CoreTiles/Footer"]
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="ConfirmCoreBtn" type="Button" parent="Panel/Root/Tabs/CoreTiles/Footer"]
-text = "Confirm Core"
+layout_mode = 2
 disabled = true
+text = "Confirm Core"
 
 [node name="Footer" type="HBoxContainer" parent="Panel/Root"]
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="BackBtn" type="Button" parent="Panel/Root/Footer"]
+layout_mode = 2
 text = "Back"
 
 [node name="FooterSpacer" type="Control" parent="Panel/Root/Footer"]
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="StartRunBtn" type="Button" parent="Panel/Root/Footer"]
-text = "Start Run"
+layout_mode = 2
 disabled = true
-
+text = "Start Run"
