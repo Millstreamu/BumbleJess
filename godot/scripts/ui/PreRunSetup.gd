@@ -194,72 +194,72 @@ func _build_sprout_grid() -> void:
 
 	var removed_locked := false
 
-        for sprout_variant in _sprouts:
-                if not (sprout_variant is Dictionary):
-                        continue
+	for sprout_variant in _sprouts:
+		if not (sprout_variant is Dictionary):
+			continue
 
-                var sprout: Dictionary = sprout_variant
-                var sid := String(sprout.get("id", ""))
-                if sid.is_empty():
-                        continue
+		var sprout: Dictionary = sprout_variant
+		var sid := String(sprout.get("id", ""))
+		if sid.is_empty():
+			continue
 
-                var button := _sprout_card_scene.instantiate() as Button
-                if button == null:
-                        continue
+		var button := _sprout_card_scene.instantiate() as Button
+		if button == null:
+			continue
 
-                button.set_meta("id", sid)
+		button.set_meta("id", sid)
 
-                var display_name := String(sprout.get("name", sid))
-                if Engine.has_singleton("SproutRegistry") and SproutRegistry.has_method("get_sprout_name"):
-                        var registry_name := SproutRegistry.get_sprout_name(sid)
-                        if not registry_name.is_empty():
-                                display_name = registry_name
+		var display_name := String(sprout.get("name", sid))
+		if Engine.has_singleton("SproutRegistry") and SproutRegistry.has_method("get_sprout_name"):
+			var registry_name := SproutRegistry.get_sprout_name(sid)
+			if not registry_name.is_empty():
+				display_name = registry_name
 
-                var stats_text := ""
-                if Engine.has_singleton("SproutRegistry") and SproutRegistry.has_method("short_stats_label"):
-                        stats_text = SproutRegistry.short_stats_label(sid, 1)
-                else:
-                        var base_stats_variant := sprout.get("base_stats", {})
-                        if base_stats_variant is Dictionary:
-                                var base_dict: Dictionary = base_stats_variant
-                                var hp := int(base_dict.get("hp", 0))
-                                var atk := int(base_dict.get("attack", 0))
-                                var aspeed := float(base_dict.get("attack_speed", 0.0))
-                                stats_text = "Lv1 • HP %d • ATK %d • AS %.2f" % [hp, atk, aspeed]
+		var stats_text := ""
+		if Engine.has_singleton("SproutRegistry") and SproutRegistry.has_method("short_stats_label"):
+			stats_text = SproutRegistry.short_stats_label(sid, 1)
+		else:
+			var base_stats := sprout.get("base_stats", {})
+			if base_stats is Dictionary:
+				var base_dict := base_stats as Dictionary
+				var hp := int(base_dict.get("hp", 0))
+				var atk := int(base_dict.get("attack", 0))
+				var aspeed := float(base_dict.get("attack_speed", 0.0))
+				stats_text = "Lv1 • HP %d • ATK %d • AS %.2f" % [hp, atk, aspeed]
 
-                var card_ui := button as SproutCardUI
-                if card_ui != null:
-                        card_ui.set_display_name(display_name)
-                        card_ui.set_stats(stats_text)
-                else:
-                        var name_label := button.get_node_or_null("Name") as Label
-                        if name_label != null:
-                                name_label.text = display_name
-                        var stats_label := button.get_node_or_null("Stats") as Label
-                        if stats_label != null:
-                                stats_label.text = stats_text
+		var card_ui := button as SproutCardUI
+		if card_ui != null:
+			card_ui.set_display_name(display_name)
+			card_ui.set_stats(stats_text)
+		else:
+			var name_label := button.get_node_or_null("Name") as Label
+			if name_label != null:
+				name_label.text = display_name
+			var stats_label := button.get_node_or_null("Stats") as Label
+			if stats_label != null:
+				stats_label.text = stats_text
 
-                if button.get_node_or_null("Chosen") == null:
-                        var badge := Label.new()
-                        badge.name = "Chosen"
-                        badge.text = "✓"
-                        badge.horizontal_alignment = 2
-                        badge.vertical_alignment = 0
-                        badge.anchor_left = 1.0
-                        badge.anchor_right = 1.0
-                        badge.anchor_top = 0.0
-                        badge.anchor_bottom = 0.0
-                        badge.offset_left = -32.0
-                        badge.offset_right = -8.0
-                        badge.offset_top = 8.0
-                        badge.offset_bottom = 32.0
-                        badge.visible = false
-                        button.add_child(badge)
+		if button.get_node_or_null("Chosen") == null:
+			var badge := Label.new()
+			badge.name = "Chosen"
+			badge.text = "✓"
+			badge.horizontal_alignment = 2
+			badge.vertical_alignment = 0
+			badge.anchor_left = 1.0
+			badge.anchor_right = 1.0
+			badge.anchor_top = 0.0
+			badge.anchor_bottom = 0.0
+			badge.offset_left = -32.0
+			badge.offset_right = -8.0
+			badge.offset_top = 8.0
+			badge.offset_bottom = 32.0
+			badge.visible = false
+			button.add_child(badge)
 
-                var locked := _is_locked_sprout(sprout)
-                if locked and _chosen_sprouts.has(sid):
-                        _chosen_sprouts.erase(sid)
-                        removed_locked = true
+		var locked := _is_locked_sprout(sprout)
+		if locked and _chosen_sprouts.has(sid):
+			_chosen_sprouts.erase(sid)
+			removed_locked = true
 
 		button.disabled = locked
 		if locked:
