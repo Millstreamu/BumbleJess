@@ -219,9 +219,9 @@ func _build_sprout_grid() -> void:
                 if Engine.has_singleton("SproutRegistry") and SproutRegistry.has_method("short_stats_label"):
                         stats_text = SproutRegistry.short_stats_label(sid, 1)
                 else:
-                        var base_stats := sprout.get("base_stats", {})
-                        if base_stats is Dictionary:
-                                var base_dict := base_stats as Dictionary
+                        var base_stats_variant := sprout.get("base_stats", {})
+                        if base_stats_variant is Dictionary:
+                                var base_dict: Dictionary = base_stats_variant
                                 var hp := int(base_dict.get("hp", 0))
                                 var atk := int(base_dict.get("attack", 0))
                                 var aspeed := float(base_dict.get("attack_speed", 0.0))
