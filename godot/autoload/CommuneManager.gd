@@ -154,7 +154,7 @@ func _build_weighted_pool() -> Array:
 								if tag_share > soft_cap:
 										var tag_over: float = clamp(tag_share - soft_cap, 0.0, 0.9)
 										base *= max(0.1, 1.0 - tag_over)
-				if bool(entry.get("unique", false)):
+				if entry.get("unique", false):
 						if unique_chance < 1.0 and unique_chance > 0.0:
 								if _rng.randf() > unique_chance:
 										base *= max(unique_chance, 0.05)

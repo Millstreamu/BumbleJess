@@ -3,6 +3,7 @@
 	"id": "tile.nature.whispering_pine_forest",
 	"category": "Nature",
 	"name": "Whispering Pine Forest",
+	"description": "Generates +2 Nature per turn. If adjacent to any FOREST tile, generate +1 additional Nature.",
 	"tags": ["forest", "nature"],
 	"effects": [
 	  { "when": "start_of_turn", "target": { "scope": "self" }, "op": "add", "stat": "output.nature", "amount": 2 },
@@ -13,6 +14,7 @@
 	"id": "tile.nature.lone_bloom",
 	"category": "Nature",
 	"name": "Lone Bloom",
+	"description": "Generates +1 Nature per turn, plus +1 Nature if adjacent to any GROVE tile.",
 	"tags": ["wildflower", "nature"],
 	"effects": [
 	  { "when": "start_of_turn", "target": { "scope": "self" }, "op": "add", "stat": "output.nature", "amount": 1 },
@@ -23,15 +25,17 @@
 	"id": "tile.nature.moss_terrace",
 	"category": "Nature",
 	"name": "Moss Terrace",
+	"description": "Every 2 turns, spawns 1 OVERGROWTH into an adjacent empty hex.",
 	"tags": ["moss", "wet", "nature"],
 	"effects": [
-	  { "when": "start_of_turn", "interval_turns": 2, "target": { "scope": "adjacent" }, "op": "spawn", "amount": { "tile_id": "tile.special.overgrowth", "count": 1, "empty_only": true } }
+		{ "when": "start_of_turn", "interval_turns": 2, "target": { "scope": "adjacent" }, "op": "spawn", "amount": { "tile_id": "tile.special.overgrowth", "count": 1, "empty_only": true } }
 	]
   },
   {
 	"id": "tile.nature.heartroot_grove",
 	"category": "Nature",
 	"name": "Heartroot Grove",
+	"description": "On placement, creates 3 GROVES in adjacent empty hexes (one-time).",
 	"tags": ["forest", "unique", "nature"],
 	"effects": [
 	  { "when": "on_place", "target": { "scope": "adjacent" }, "op": "spawn", "amount": { "tile_id": "tile.special.grove", "count": 3, "empty_only": true } }
@@ -39,10 +43,12 @@
 	"unique": { "uses": 1, "forced_place": true }
   },
 
+
   {
 	"id": "tile.earth.stone_vein",
 	"category": "Earth",
 	"name": "Stone Vein",
+	"description": "Generates +1 Earth per turn, plus +1 Earth if adjacent to any ROCKY tile.",
 	"tags": ["rocky", "earth"],
 	"effects": [
 	  { "when": "start_of_turn", "target": { "scope": "self" }, "op": "add", "stat": "output.earth", "amount": 1 },
@@ -53,6 +59,7 @@
 	"id": "tile.earth.root_bastion",
 	"category": "Earth",
 	"name": "Root Bastion",
+	"description": "Sprouts within 2 tiles gain +5% HP in battles. If adjacent to any NEST tile, generates +1 Earth every 2 turns.",
 	"tags": ["bastion", "earth"],
 	"effects": [
 	  { "when": "start_of_turn", "target": { "scope": "radius", "radius": 2 }, "op": "aura_sprout", "amount": { "stat": "hp_pct", "op": "add", "amount": 0.05 } },
@@ -63,6 +70,7 @@
 	"id": "tile.earth.mud_hollow",
 	"category": "Earth",
 	"name": "Mud Hollow",
+	"description": "Generates +1 Earth per turn. If adjacent to any WATER tile, doubles its Earth output.",
 	"tags": ["mud", "earth"],
 	"effects": [
 	  { "when": "start_of_turn", "target": { "scope": "self" }, "op": "add", "stat": "output.earth", "amount": 1 },
@@ -73,17 +81,20 @@
 	"id": "tile.earth.earthen_core",
 	"category": "Earth",
 	"name": "Earthen Core",
+	"description": "Globally multiplies Earth output of all EARTH tiles by ×1.25 (one-time unique).",
 	"tags": ["unique", "earth"],
 	"effects": [
-	  { "when": "start_of_turn", "target": { "scope": "global", "category_any": ["Earth"] }, "op": "mul", "stat": "output.earth", "amount": 1.25 }
+	  	  { "when": "start_of_turn", "target": { "scope": "global", "category_any": ["Earth"] }, "op": "mul", "stat": "output.earth", "amount": 1.25 }
 	],
 	"unique": { "uses": 1, "forced_place": false }
   },
+
 
   {
 	"id": "tile.water.mirror_pool",
 	"category": "Water",
 	"name": "Mirror Pool",
+	"description": "Generates +1 Water every 2 turns. If adjacent to any NATURE tile, doubles Water output.",
 	"tags": ["pool", "water", "wet"],
 	"effects": [
 	  { "when": "start_of_turn", "interval_turns": 2, "target": { "scope": "self" }, "op": "add", "stat": "output.water", "amount": 1 },
@@ -94,6 +105,7 @@
 	"id": "tile.water.rocky_outcrop",
 	"category": "Water",
 	"name": "Rocky Outcrop",
+	"description": "Generates +1 Water per turn if adjacent to any RIVER tile.",
 	"tags": ["rocky", "water"],
 	"effects": [
 	  { "when": "start_of_turn", "target": { "scope": "self" }, "condition": { "adjacent_count": { "tag": "river", "op": ">=", "value": 1 } }, "op": "add", "stat": "output.water", "amount": 1 }
@@ -103,6 +115,7 @@
 	"id": "tile.water.spring_nexus",
 	"category": "Water",
 	"name": "Spring Nexus",
+	"description": "Every 3 turns, generates +1 Water and +1 Nature.",
 	"tags": ["spring", "water"],
 	"effects": [
 	  { "when": "start_of_turn", "interval_turns": 3, "target": { "scope": "self" }, "op": "add", "stat": "output.water", "amount": 1 },
@@ -113,6 +126,7 @@
 	"id": "tile.water.tidal_heart",
 	"category": "Water",
 	"name": "Tidal Heart",
+	"description": "Each turn converts 1 Nature and 1 Earth into 2 Water (unique).",
 	"tags": ["unique", "water"],
 	"effects": [
 	  { "when": "start_of_turn", "target": { "scope": "self" }, "op": "convert", "amount": { "from": { "nature": 1, "earth": 1 }, "to": { "water": 2 }, "period": 1 } }
@@ -120,10 +134,12 @@
 	"unique": { "uses": 1, "forced_place": false }
   },
 
+
   {
 	"id": "tile.nest.treasure_nest",
 	"category": "Nest",
 	"name": "Treasure Nest",
+	"description": "Adjacent resource-producing tiles gain +5 local capacity.",
 	"tags": ["nest", "storage"],
 	"effects": [
 	  { "when": "start_of_turn", "target": { "scope": "adjacent", "category_any": ["Nature", "Earth", "Water"] }, "op": "add", "stat": "cap.local", "amount": 5 }
@@ -133,6 +149,7 @@
 	"id": "tile.nest.hollow_burrow",
 	"category": "Nest",
 	"name": "Hollow Burrow",
+	"description": "Sprouts within 1 tile heal +10% faster outside of battle.",
 	"tags": ["nest", "burrow"],
 	"effects": [
 	  { "when": "start_of_turn", "target": { "scope": "radius", "radius": 1 }, "op": "aura_sprout", "amount": { "stat": "regen_pct", "op": "add", "amount": 0.10 } }
@@ -142,6 +159,7 @@
 	"id": "tile.nest.mycelium_bed",
 	"category": "Nest",
 	"name": "Mycelium Bed",
+	"description": "Every 2 turns, converts 1 Nature into 1 Earth.",
 	"tags": ["nest", "fungal"],
 	"effects": [
 	  { "when": "start_of_turn", "interval_turns": 2, "target": { "scope": "self" }, "op": "convert", "amount": { "from": { "nature": 1 }, "to": { "earth": 1 }, "period": 2 } }
@@ -151,6 +169,7 @@
 	"id": "tile.nest.wardens_cradle",
 	"category": "Nest",
 	"name": "Warden's Cradle",
+	"description": "Doubles local capacity of all adjacent tiles (unique).",
 	"tags": ["unique", "nest", "storage"],
 	"effects": [
 	  { "when": "start_of_turn", "target": { "scope": "adjacent" }, "op": "mul", "stat": "cap.local", "amount": 2 }
@@ -158,10 +177,12 @@
 	"unique": { "uses": 1, "forced_place": false }
   },
 
+
   {
 	"id": "tile.mystic.chanting_circle",
 	"category": "Mystic",
 	"name": "Chanting Circle",
+	"description": "Every 5 turns, produces 1 random item.",
 	"tags": ["mystic", "ritual"],
 	"effects": [
 	  { "when": "start_of_turn", "interval_turns": 5, "target": { "scope": "self" }, "op": "add", "stat": "output.item_rolls", "amount": 1 }
@@ -171,6 +192,7 @@
 	"id": "tile.mystic.soul_bloom",
 	"category": "Mystic",
 	"name": "Soul Bloom",
+	"description": "Every 8 turns, produces 1 Soul Seed.",
 	"tags": ["mystic", "seed"],
 	"effects": [
 	  { "when": "start_of_turn", "interval_turns": 8, "target": { "scope": "self" }, "op": "add", "stat": "output.soul_seed", "amount": 1 }
@@ -180,6 +202,7 @@
 	"id": "tile.mystic.glowing_spire",
 	"category": "Mystic",
 	"name": "Glowing Spire",
+	"description": "Globally increases the power of equipped items by ×1.10.",
 	"tags": ["mystic", "spire"],
 	"effects": [
 	  { "when": "start_of_turn", "target": { "scope": "global" }, "op": "aura_sprout", "amount": { "stat": "item_power_mult", "op": "mul", "amount": 1.10 } }
@@ -189,6 +212,7 @@
 	"id": "tile.mystic.elder_shrine",
 	"category": "Mystic",
 	"name": "Elder Shrine",
+	"description": "Every 5 turns, produces 1 Soul Seed and 1 random item (unique).",
 	"tags": ["unique", "mystic", "shrine"],
 	"effects": [
 	  { "when": "start_of_turn", "interval_turns": 5, "target": { "scope": "self" }, "op": "add", "stat": "output.soul_seed", "amount": 1 },
@@ -197,10 +221,12 @@
 	"unique": { "uses": 1, "forced_place": false }
   },
 
+
   {
 	"id": "tile.aggression.thorn_watch",
 	"category": "Aggression",
 	"name": "Thorn Watch",
+	"description": "If touching Decay, every 4 turns cleanse up to 1 adjacent Decay tile.",
 	"tags": ["ward", "aggression"],
 	"effects": [
 	  { "when": "start_of_turn", "interval_turns": 4, "target": { "scope": "radius", "radius": 1 }, "condition": { "touching_decay": true }, "op": "cleanse_decay", "amount": { "radius": 1, "max_tiles": 1 } }
@@ -210,6 +236,7 @@
 	"id": "tile.aggression.ironbark_front",
 	"category": "Aggression",
 	"name": "Ironbark Front",
+	"description": "Sprouts within 2 tiles gain +5% HP in battles.",
 	"tags": ["bastion", "aggression"],
 	"effects": [
 	  { "when": "start_of_turn", "target": { "scope": "radius", "radius": 2 }, "op": "aura_sprout", "amount": { "stat": "hp_pct", "op": "add", "amount": 0.05 } }
@@ -219,6 +246,7 @@
 	"id": "tile.aggression.fungal_barricade",
 	"category": "Aggression",
 	"name": "Fungal Barricade",
+	"description": "Deals 1 Decay damage each turn to Decay within 1 tile.",
 	"tags": ["fungal", "aggression"],
 	"effects": [
 	  { "when": "start_of_turn", "target": { "scope": "radius", "radius": 1 }, "op": "damage_decay", "amount": { "radius": 1, "amount": 1 } }
@@ -228,6 +256,7 @@
 	"id": "tile.aggression.wrath_grove",
 	"category": "Aggression",
 	"name": "Wrath Grove",
+	"description": "On placement, cleanses up to 2 Decay tiles in radius 2. Sprouts within 2 tiles gain +5% attack (unique).",
 	"tags": ["unique", "aggression", "grove"],
 	"effects": [
 	  { "when": "on_place", "target": { "scope": "radius", "radius": 2 }, "op": "cleanse_decay", "amount": { "radius": 2, "max_tiles": 2 } },
@@ -236,10 +265,12 @@
 	"unique": { "uses": 1, "forced_place": false }
   },
 
+
   {
 	"id": "tile.special.overgrowth",
 	"category": "Nature",
 	"name": "Overgrowth",
+	"description": "After 3 turns, transforms into a GROVE.",
 	"tags": ["overgrowth", "nature"],
 	"effects": [
 	  { "when": "start_of_turn", "interval_turns": 3, "target": { "scope": "self" }, "op": "transform", "amount": { "to": "tile.special.grove" } }
@@ -249,6 +280,7 @@
 	"id": "tile.special.grove",
 	"category": "Nature",
 	"name": "Grove",
+	"description": "On bloom, spawns 1 Sprout of your selected run types.",
 	"tags": ["grove", "nature"],
 	"effects": [
 	  { "when": "on_transform", "target": { "scope": "self" }, "op": "add", "stat": "output.spawn_sprout", "amount": 1 }
