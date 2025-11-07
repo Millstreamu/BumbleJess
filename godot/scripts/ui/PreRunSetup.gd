@@ -243,8 +243,8 @@ func _build_sprout_grid() -> void:
 			var badge := Label.new()
 			badge.name = "Chosen"
 			badge.text = "✓"
-			badge.horizontal_alignment = 2
-			badge.vertical_alignment = 0
+                        badge.horizontal_alignment = HorizontalAlignment.RIGHT
+                        badge.vertical_alignment = VerticalAlignment.TOP
 			badge.anchor_left = 1.0
 			badge.anchor_right = 1.0
 			badge.anchor_top = 0.0
