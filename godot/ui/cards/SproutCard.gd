@@ -113,8 +113,8 @@ func _update_body_fit() -> void:
 	_body_adjust_queued = false
 	if not is_inside_tree():
 		return
-	var available_height := _compute_body_available_height()
-	var sizes: Array = [
+	var available_height: float = _compute_body_available_height()
+	var sizes: Array[int] = [
 		_text_target_font,
 		max(_text_target_font - 2, 11),
 		max(_text_target_font - 4, 11)
@@ -123,15 +123,15 @@ func _update_body_fit() -> void:
 		var font_size: int = sizes[size_idx]
 		_desc.add_theme_font_size_override("normal_font_size", font_size)
 		_desc.reset_size()
-		var content_height := _desc.get_content_height()
+		var content_height: float = float(_desc.get_content_height())
 		if content_height <= available_height or size_idx == sizes.size() - 1:
 			_set_desc_line_limit(available_height)
 			break
 
 func _compute_body_available_height() -> float:
-	var inner_h := max(size.y - 32.0, 0.0)
-	var spacing := float(_text_box.separation)
-	var used := _name.get_combined_minimum_size().y
+	var inner_h: float = max(size.y - 32.0, 0.0)
+	var spacing: float = float(_text_box.separation)
+	var used: float = _name.get_combined_minimum_size().y
 	used += spacing + _stats_row.get_combined_minimum_size().y
 	used += spacing + _atk_name.get_combined_minimum_size().y
 	used += spacing + _pas_name.get_combined_minimum_size().y
@@ -142,11 +142,11 @@ func _set_desc_line_limit(available_height: float) -> void:
 	if available_height <= 0.0:
 		_desc.max_lines_visible = 0
 		return
-	var line_height := _desc.get_line_height()
+	var line_height: float = float(_desc.get_line_height())
 	if line_height <= 0.0:
 		_desc.max_lines_visible = -1
 		return
-	var max_lines := int(floor(available_height / line_height))
+	var max_lines: int = int(floor(available_height / line_height))
 	if max_lines <= 0:
 		_desc.max_lines_visible = 1
 	else:
