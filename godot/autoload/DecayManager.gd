@@ -718,7 +718,12 @@ func _add_threat(c: Vector2i, turns: int, attacker_cell: Vector2i = Vector2i.ZER
 		"marker": null,
 	}
 	if is_instance_valid(_hud) and _world != null:
-		var viewport_pos := _world.world_pos_of_cell(c)
+		var viewport_pos: Vector2 = Vector2.ZERO
+		var world_pos_variant: Variant = _world.world_pos_of_cell(c)
+		if world_pos_variant is Vector2:
+			viewport_pos = world_pos_variant
+		elif world_pos_variant is Vector2i:
+			viewport_pos = Vector2(world_pos_variant)
 		if _world.has_method("cell_to_viewport_position"):
 			var pos_variant: Variant = _world.call("cell_to_viewport_position", c)
 			if pos_variant is Vector2:

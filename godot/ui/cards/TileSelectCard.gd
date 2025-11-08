@@ -1,4 +1,4 @@
-extends BaseCard
+extends "res://ui/cards/BaseCard.gd"
 class_name TileSelectCard
 
 func set_tile(name: String, effects_text: String, desc_text: String, tex: Texture2D, id: String) -> void:
