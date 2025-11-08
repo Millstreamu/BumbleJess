@@ -97,16 +97,16 @@ func clear_threat_markers() -> void:
 		child.queue_free()
 
 func _ensure_input_actions() -> void:
-	_add_action_if_missing("toggle_info", KEY_M)
-	_add_action_if_missing("end_turn", KEY_N)
+	_add_action_if_missing("toggle_info", Key.KEY_M)
+	_add_action_if_missing("end_turn", Key.KEY_N)
 
-func _add_action_if_missing(name: String, keycode: int) -> void:
-	if not InputMap.has_action(name):
-		InputMap.add_action(name)
-	var existing := InputMap.action_get_events(name)
+func _add_action_if_missing(action_name: String, keycode: Key) -> void:
+	if not InputMap.has_action(action_name):
+		InputMap.add_action(action_name)
+	var existing := InputMap.action_get_events(action_name)
 	for ev in existing:
 		if ev is InputEventKey and ev.physical_keycode == keycode:
 			return
 	var event := InputEventKey.new()
 	event.physical_keycode = keycode
-	InputMap.action_add_event(name, event)
+	InputMap.action_add_event(action_name, event)
