@@ -23,16 +23,19 @@ const RESOURCE_ORDER := ["nature", "earth", "water"]
 var _roster: Array = []
 var _selected: Array = []
 var _resource_manager: Node = null
+var _attack_by_id: Dictionary = {}
+var _passive_by_id: Dictionary = {}
 
 func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_ALWAYS
-	visible = false
-	if confirm_btn:
-		confirm_btn.pressed.connect(_on_confirm)
-	if cancel_btn:
-		cancel_btn.pressed.connect(_on_cancel)
-	_bind_sprout_registry()
-	_bind_resource_manager()
+        process_mode = Node.PROCESS_MODE_ALWAYS
+        visible = false
+        if confirm_btn:
+                confirm_btn.pressed.connect(_on_confirm)
+        if cancel_btn:
+                cancel_btn.pressed.connect(_on_cancel)
+        _bind_sprout_registry()
+        _bind_resource_manager()
+        _load_support_data()
 
 func open() -> void:
 	visible = true
@@ -132,37 +135,127 @@ func _build_roster() -> void:
 			roster_grid.add_child(card)
 
 func _make_card(entry: Dictionary, idx: int) -> Button:
-	var card: Button
-	if sprout_card_scene:
-		card = sprout_card_scene.instantiate() as Button
-	if card == null:
-		card = Button.new()
-	var id := String(entry.get("id", "sprout.woodling"))
-	var level := int(entry.get("level", 1))
-	var uid := String(entry.get("uid", ""))
-	var display_name: String = SproutRegistry.get_sprout_name(id)
-	if not uid.is_empty():
-		display_name = "%s [%s]" % [display_name, uid]
-	var stats_text: String = SproutRegistry.short_stats_label(id, level)
-	var card_ui := card as SproutCardUI
-	if card_ui:
-		card_ui.set_display_name(display_name)
-		card_ui.set_stats(stats_text)
-	else:
-		var name_label: Label = card.get_node_or_null("Name")
-		if name_label:
-			name_label.text = display_name
-		var stats_label: Label = card.get_node_or_null("Stats")
-		if stats_label:
-			stats_label.text = stats_text
-	card.pressed.connect(func() -> void:
-		_try_add(idx)
-	)
-	return card
+        var card: Button
+        if sprout_card_scene:
+                card = sprout_card_scene.instantiate() as Button
+        if card == null:
+                card = Button.new()
+        var id := String(entry.get("id", "sprout.woodling"))
+        var level := int(entry.get("level", 1))
+        var uid := String(entry.get("uid", ""))
+        var display_name: String = SproutRegistry.get_sprout_name(id)
+        if not uid.is_empty():
+                display_name = "%s [%s]" % [display_name, uid]
+        var stats_text: String = SproutRegistry.short_stats_label(id, level)
+        var sprout_def: Dictionary = SproutRegistry.get_by_id(id)
+        var attack_text := _format_attack_label(String(sprout_def.get("attack_id", "")))
+        var passive_ids: Array = []
+        var passive_variant: Variant = sprout_def.get("passive_ids", [])
+        if passive_variant is Array:
+                passive_ids = passive_variant
+        var passive_text := _format_passive_label(passive_ids)
+        var desc_text := String(sprout_def.get("description", ""))
+        var portrait_texture: Texture2D = _load_texture(String(sprout_def.get("icon", "")))
+        var card_ui := card as SproutCardUI
+        if card_ui:
+                card_ui.set_display_name(display_name)
+                card_ui.set_stats(stats_text)
+                card_ui.set_attack_name(attack_text)
+                card_ui.set_passive_names(passive_text)
+                card_ui.set_description(desc_text)
+                card_ui.set_portrait_texture(portrait_texture)
+        else:
+                var name_label: Label = card.get_node_or_null("Content/Details/NameRow/Name")
+                if name_label:
+                        name_label.text = display_name
+                var stats_label: Label = card.get_node_or_null("Content/Details/Stats")
+                if stats_label:
+                        stats_label.text = stats_text
+                var attack_label: Label = card.get_node_or_null("Content/Details/Attack")
+                if attack_label:
+                        attack_label.text = attack_text
+                var passive_label: Label = card.get_node_or_null("Content/Details/Passive")
+                if passive_label:
+                        passive_label.text = passive_text
+                var desc_label: RichTextLabel = card.get_node_or_null("Content/Details/Description")
+                if desc_label:
+                        var trimmed := desc_text.strip_edges()
+                        desc_label.text = trimmed if not trimmed.is_empty() else "—"
+                var portrait_rect: TextureRect = card.get_node_or_null("Content/Portrait/Icon")
+                if portrait_rect:
+                        portrait_rect.texture = portrait_texture
+        card.pressed.connect(func() -> void:
+                _try_add(idx)
+        )
+        return card
+
+func _load_support_data() -> void:
+        _attack_by_id.clear()
+        var attack_defs: Array = DataLite.load_json_array("res://data/attacks.json")
+        for entry_variant in attack_defs:
+                if entry_variant is Dictionary:
+                        var entry_dict: Dictionary = entry_variant
+                        var aid := String(entry_dict.get("id", ""))
+                        if aid.is_empty():
+                                continue
+                        _attack_by_id[aid] = entry_dict.duplicate(true)
+        _passive_by_id.clear()
+        var passive_defs: Array = DataLite.load_json_array("res://data/passives.json")
+        for entry_variant in passive_defs:
+                if entry_variant is Dictionary:
+                        var entry_dict: Dictionary = entry_variant
+                        var pid := String(entry_dict.get("id", ""))
+                        if pid.is_empty():
+                                continue
+                        _passive_by_id[pid] = entry_dict.duplicate(true)
+
+func _format_attack_label(attack_id: String) -> String:
+        if attack_id.is_empty():
+                return "Attack: —"
+        if _attack_by_id.has(attack_id):
+                var entry_variant: Variant = _attack_by_id[attack_id]
+                if entry_variant is Dictionary:
+                        var entry_dict: Dictionary = entry_variant
+                        var display_name := String(entry_dict.get("display_name", attack_id))
+                        if display_name.is_empty():
+                                display_name = attack_id
+                        return "Attack: %s" % display_name
+        return "Attack: %s" % attack_id
+
+func _format_passive_label(passive_ids: Array) -> String:
+        if passive_ids.is_empty():
+                return "Passive: —"
+        var names: Array[String] = []
+        for id_variant in passive_ids:
+                var pid := String(id_variant)
+                if pid.is_empty():
+                        continue
+                if _passive_by_id.has(pid):
+                        var entry_variant: Variant = _passive_by_id[pid]
+                        if entry_variant is Dictionary:
+                                var entry_dict: Dictionary = entry_variant
+                                var display_name := String(entry_dict.get("name", pid))
+                                if not display_name.is_empty():
+                                        names.append(display_name)
+                                        continue
+                names.append(pid)
+        if names.is_empty():
+                return "Passive: —"
+        return "Passive: %s" % ", ".join(names)
+
+func _load_texture(path: String) -> Texture2D:
+        if path.is_empty():
+                return null
+        if not ResourceLoader.exists(path):
+                return null
+        var res := ResourceLoader.load(path)
+        if res is Texture2D:
+                return res
+        return null
 
 func _build_selected() -> void:
-	if selected_grid == null:
-		return
+        if selected_grid == null:
+                return
 	_clear_children(selected_grid)
 	for i in range(MAX_SELECTION):
 		var slot := Button.new()
