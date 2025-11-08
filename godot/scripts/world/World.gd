@@ -1220,7 +1220,8 @@ func world_point_to_viewport(point: Vector2) -> Vector2:
 		return point
 
 	var global_point := to_global(point)
-	return viewport.get_canvas_transform().xform(global_point)
+	var canvas_transform: Transform2D = viewport.get_canvas_transform()
+	return canvas_transform * global_point
 
 func _on_hud_end_turn() -> void:
 	on_end_turn_pressed()

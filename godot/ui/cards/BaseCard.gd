@@ -74,11 +74,11 @@ func _apply_content() -> void:
 func _apply_layout() -> void:
 	if not is_inside_tree():
 		return
-	var w := max(size.x, base_size.x)
-	var h := max(size.y, base_size.y)
-	var img_h := min(w, h * 0.55)
+	var w: float = max(size.x, base_size.x)
+	var h: float = max(size.y, base_size.y)
+	var img_h: float = min(w, h * 0.55)
 	_art_wrap.custom_minimum_size = Vector2(0, img_h)
-	var scale := clamp(w / max(base_size.x, 1.0), 0.6, 1.8)
+	var scale: float = clamp(w / max(base_size.x, 1.0), 0.6, 1.8)
 	_title_target_font = clamp(roundi(18.0 * scale), 14, 24)
 	_body_target_font = clamp(roundi(14.0 * scale), 11, 18)
 	_title.add_theme_font_size_override("font_size", _title_target_font)
@@ -92,8 +92,8 @@ func _update_body_fit() -> void:
 	_body_adjust_queued = false
 	if not is_inside_tree():
 		return
-	var available_height := _compute_body_available_height()
-	var target_sizes: Array = [
+	var available_height: float = _compute_body_available_height()
+	var target_sizes: Array[int] = [
 		_body_target_font,
 		max(_body_target_font - 2, 11),
 		max(_body_target_font - 4, 11)
@@ -102,27 +102,27 @@ func _update_body_fit() -> void:
 		var font_size: int = target_sizes[size_idx]
 		_body.add_theme_font_size_override("normal_font_size", font_size)
 		_body.reset_size()
-		var content_height := _body.get_content_height()
+		var content_height: float = _body.get_content_height()
 		if content_height <= available_height or size_idx == target_sizes.size() - 1:
 			_set_body_line_limit(available_height)
 			break
 
 func _compute_body_available_height() -> float:
-	var h := max(size.y, 0.0)
-	var spacing := float(_root.separation)
-	var title_h := _title.get_combined_minimum_size().y
-	var available := h - _art_wrap.custom_minimum_size.y - title_h - spacing * 2.0
+	var h: float = max(size.y, 0.0)
+	var spacing: float = float(_root.separation)
+	var title_h: float = _title.get_combined_minimum_size().y
+	var available: float = h - _art_wrap.custom_minimum_size.y - title_h - spacing * 2.0
 	return max(available, 0.0)
 
 func _set_body_line_limit(available_height: float) -> void:
 	if available_height <= 0.0:
 		_body.max_lines_visible = 0
 		return
-	var line_height := _body.get_line_height()
+	var line_height: float = _body.get_line_height()
 	if line_height <= 0.0:
 		_body.max_lines_visible = -1
 		return
-	var max_lines := int(floor(available_height / line_height))
+	var max_lines: int = int(floor(available_height / line_height))
 	if max_lines <= 0:
 		_body.max_lines_visible = 1
 	else:
