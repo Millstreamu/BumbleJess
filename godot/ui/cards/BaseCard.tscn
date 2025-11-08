@@ -27,19 +27,6 @@ focus_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_0i3bq")
 script = ExtResource("1_b6l45")
 
-[node name="Chosen" type="Label" parent="."]
-visible = false
-layout_mode = 0
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -32.0
-offset_top = 8.0
-offset_right = -8.0
-offset_bottom = 32.0
-text = "✓"
-horizontal_alignment = 2
-vertical_alignment = 1
-
 [node name="Root" type="VBoxContainer" parent="."]
 layout_mode = 2
 anchors_preset = 15

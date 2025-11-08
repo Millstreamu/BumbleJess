@@ -25,19 +25,16 @@ signal pressed(card_id: String)
 @onready var _pas_name: Label = $HBoxContainer/Text/PassiveName
 @onready var _desc: RichTextLabel = $HBoxContainer/Text/Desc
 @onready var _text_box: VBoxContainer = $HBoxContainer/Text
-@onready var _chosen: Control = $Chosen
 
 var _name_target_font: int = 20
 var _text_target_font: int = 14
 var _body_adjust_queued: bool = false
-var _disabled: bool = false
 
 func _ready() -> void:
 	focus_mode = Control.FOCUS_ALL
 	custom_minimum_size = base_size
 	_desc.scroll_active = false
 	_desc.fit_content = false
-	set_selected(false)
 	_apply()
 	connect("gui_input", _on_gui_input)
 	connect("focus_entered", _on_focus_entered)
@@ -45,8 +42,6 @@ func _ready() -> void:
 	connect("mouse_entered", Callable(self, "_on_mouse_entered"))
 
 func _on_mouse_entered() -> void:
-	if _disabled:
-		return
 	grab_focus()
 
 func set_data(p: Dictionary) -> void:
@@ -61,31 +56,14 @@ func set_data(p: Dictionary) -> void:
 	portrait = p.get("portrait", portrait)
 	_apply()
 
-func set_selected(selected: bool) -> void:
-	if _chosen != null:
-		_chosen.visible = selected
-
-func set_disabled(value: bool) -> void:
-	_disabled = value
-	focus_mode = Control.FOCUS_ALL if not value else Control.FOCUS_NONE
-	mouse_filter = Control.MOUSE_FILTER_IGNORE if value else Control.MOUSE_FILTER_STOP
-	if value and has_focus():
-		release_focus()
-
 func _apply() -> void:
 	_name.text = name_text
 	_name.tooltip_text = name_text
 	_stats_hp.text = "HP: %d" % hp
 	_stats_atk.text = "ATK: %d" % atk
 	_stats_spd.text = "SPD: %.2f" % spd
-	var atk_label := attack_name.strip_edges()
-	if atk_label.is_empty():
-		atk_label = "Attack: —"
-	_atk_name.text = atk_label
-	var passive_label := passive_name.strip_edges()
-	if passive_label.is_empty():
-		passive_label = "Passive: —"
-	_pas_name.text = passive_label
+	_atk_name.text = "Attack: %s" % attack_name
+	_pas_name.text = "Passive: %s" % passive_name
 	if _desc.bbcode_enabled:
 		_desc.bbcode_text = desc
 	else:
@@ -97,15 +75,8 @@ func _apply() -> void:
 	_refresh_layout()
 
 func _on_gui_input(event: InputEvent) -> void:
-	if _disabled:
-		return
 	if event.is_action_pressed("ui_accept"):
 		emit_signal("pressed", card_id)
-		return
-	if event is InputEventMouseButton:
-		var mb := event as InputEventMouseButton
-		if mb.button_index == MouseButton.LEFT and mb.pressed:
-			emit_signal("pressed", card_id)
 
 func _on_focus_entered() -> void:
 	add_theme_color_override("panel", Color(0.85, 0.9, 1, 0.15))

@@ -14,19 +14,16 @@ signal pressed(card_id: String)
 @onready var _text_box: VBoxContainer = $HBoxContainer/Text
 @onready var _title: Label = $HBoxContainer/Text/Title
 @onready var _body: RichTextLabel = $HBoxContainer/Text/Body
-@onready var _chosen: Control = $Chosen
 
 var _title_target_font: int = 18
 var _body_target_font: int = 14
 var _body_adjust_queued: bool = false
-var _disabled: bool = false
 
 func _ready() -> void:
 	focus_mode = Control.FOCUS_ALL
 	custom_minimum_size = base_size
 	_body.scroll_active = false
 	_body.fit_content = false
-	set_selected(false)
 	_apply()
 	connect("gui_input", _on_gui_input)
 	connect("focus_entered", _on_focus_entered)
@@ -34,8 +31,6 @@ func _ready() -> void:
 	connect("mouse_entered", Callable(self, "_on_mouse_entered"))
 
 func _on_mouse_entered() -> void:
-	if _disabled:
-		return
 	grab_focus()
 
 func set_data(p: Dictionary) -> void:
@@ -44,17 +39,6 @@ func set_data(p: Dictionary) -> void:
 	body = str(p.get("body", body))
 	art = p.get("art", art)
 	_apply()
-
-func set_selected(selected: bool) -> void:
-	if _chosen != null:
-		_chosen.visible = selected
-
-func set_disabled(value: bool) -> void:
-	_disabled = value
-	focus_mode = Control.FOCUS_ALL if not value else Control.FOCUS_NONE
-	mouse_filter = Control.MOUSE_FILTER_IGNORE if value else Control.MOUSE_FILTER_STOP
-	if value and has_focus():
-		release_focus()
 
 func _apply() -> void:
 	_title.text = title
@@ -70,15 +54,8 @@ func _apply() -> void:
 	_refresh_layout()
 
 func _on_gui_input(event: InputEvent) -> void:
-	if _disabled:
-		return
 	if event.is_action_pressed("ui_accept"):
 		emit_signal("pressed", card_id)
-		return
-	if event is InputEventMouseButton:
-		var mb := event as InputEventMouseButton
-		if mb.button_index == MouseButton.LEFT and mb.pressed:
-			emit_signal("pressed", card_id)
 
 func _on_focus_entered() -> void:
 	add_theme_color_override("panel", Color(0.85, 0.9, 1, 0.15))

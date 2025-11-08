@@ -14,12 +14,10 @@ signal pressed(card_id: String)
 @onready var _art: TextureRect = $Root/ArtWrap/Art
 @onready var _title: Label = $Root/Title
 @onready var _body: RichTextLabel = $Root/Body
-@onready var _chosen: Control = $Chosen
 
 var _body_target_font: int = 14
 var _title_target_font: int = 18
 var _body_adjust_queued: bool = false
-var _disabled: bool = false
 
 func _ready() -> void:
 	focus_mode = Control.FOCUS_ALL
@@ -29,7 +27,6 @@ func _ready() -> void:
 	_body.fit_content = false
 	_root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_root.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	set_selected(false)
 	_apply_content()
 	_apply_layout()
 	connect("gui_input", _on_gui_input)
@@ -38,20 +35,11 @@ func _ready() -> void:
 	connect("mouse_entered", Callable(self, "_on_mouse_entered"))
 
 func _on_mouse_entered() -> void:
-	if _disabled:
-		return
 	grab_focus()
 
 func _on_gui_input(event: InputEvent) -> void:
-	if _disabled:
-		return
 	if event.is_action_pressed("ui_accept"):
 		emit_signal("pressed", card_id)
-		return
-	if event is InputEventMouseButton:
-		var mb := event as InputEventMouseButton
-		if mb.button_index == MouseButton.LEFT and mb.pressed:
-			emit_signal("pressed", card_id)
 
 func _on_focus_entered() -> void:
 	add_theme_color_override("panel", Color(0.85, 0.9, 1, 0.15))
@@ -70,17 +58,6 @@ func set_data(p: Dictionary) -> void:
 	art = p.get("art", art)
 	_apply_content()
 	_apply_layout()
-
-func set_selected(selected: bool) -> void:
-	if _chosen != null:
-		_chosen.visible = selected
-
-func set_disabled(value: bool) -> void:
-	_disabled = value
-	focus_mode = Control.FOCUS_ALL if not value else Control.FOCUS_NONE
-	mouse_filter = Control.MOUSE_FILTER_IGNORE if value else Control.MOUSE_FILTER_STOP
-	if value and has_focus():
-		release_focus()
 
 func _apply_content() -> void:
 	_title.text = title
