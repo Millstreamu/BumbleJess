@@ -1,0 +1,68 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://ui/LibraryPanel.gd" id="1_eqhtt"]
+[ext_resource type="PackedScene" path="res://ui/shared/FocusButton.tscn" id="2_1q2ub"]
+
+[node name="LibraryPanel" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_eqhtt")
+mouse_filter = 2
+
+[node name="Background" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.7)
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 80
+theme_override_constants/margin_top = 60
+theme_override_constants/margin_right = 80
+theme_override_constants/margin_bottom = 60
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+separation = 16
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 48)
+separation = 12
+
+[node name="Totems" parent="MarginContainer/VBoxContainer/HBoxContainer" instance=ExtResource("2_1q2ub")]
+text = "Totems"
+size_flags_horizontal = 3
+
+[node name="Sprouts" parent="MarginContainer/VBoxContainer/HBoxContainer" instance=ExtResource("2_1q2ub")]
+text = "Sprouts"
+size_flags_horizontal = 3
+
+[node name="Tiles" parent="MarginContainer/VBoxContainer/HBoxContainer" instance=ExtResource("2_1q2ub")]
+text = "Tiles"
+size_flags_horizontal = 3
+
+[node name="Back" parent="MarginContainer/VBoxContainer/HBoxContainer" instance=ExtResource("2_1q2ub")]
+text = "Back"
+size_flags_horizontal = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer"]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+vertical_scroll_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="GridContainer" type="GridContainer" parent="MarginContainer/VBoxContainer/ScrollContainer"]
+columns = 4
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 0)
+

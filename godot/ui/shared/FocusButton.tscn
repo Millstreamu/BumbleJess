@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://ui/shared/FocusButton.gd" id="1_3re6d"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_focus"]
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.8, 1, 0.4, 1)
+background_color = Color(0, 0, 0, 0)
+
+[node name="FocusButton" type="Button"]
+script = ExtResource("1_3re6d")
+focus_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/focus = SubResource("StyleBoxFlat_focus")
