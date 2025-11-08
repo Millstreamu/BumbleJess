@@ -7,25 +7,33 @@ signal window_closed
 @export var sprout_grid_path: NodePath
 @export var decay_grid_path: NodePath
 @export var status_label_path: NodePath
-@export var select_btn_path: NodePath
 @export var start_btn_path: NodePath
-@export var close_btn_path: NodePath
+@export var edit_btn_path: NodePath
+@export var continue_btn_path: NodePath
+@export var result_banner_path: NodePath
+@export var result_label_path: NodePath
 @export var time_bar_path: NodePath
+@export var pre_modal_path: NodePath
 @export var unit_slot_scene: PackedScene = preload("res://scenes/battle/UnitSlot.tscn")
 
 @onready var sprout_grid: GridContainer = _resolve_node(sprout_grid_path) as GridContainer
 @onready var decay_grid: GridContainer = _resolve_node(decay_grid_path) as GridContainer
 @onready var status_label: Label = _resolve_node(status_label_path) as Label
-@onready var select_btn: Button = _resolve_node(select_btn_path) as Button
 @onready var start_btn: Button = _resolve_node(start_btn_path) as Button
-@onready var close_btn: Button = _resolve_node(close_btn_path) as Button
+@onready var edit_btn: Button = _resolve_node(edit_btn_path) as Button
+@onready var continue_btn: Button = _resolve_node(continue_btn_path) as Button
+@onready var result_banner: Control = _resolve_node(result_banner_path) as Control
+@onready var result_label: Label = _resolve_node(result_label_path) as Label
 @onready var time_bar: ProgressBar = _resolve_node(time_bar_path) as ProgressBar
+@onready var pre_modal: Control = _resolve_node(pre_modal_path) as Control
 
 var encounter: Dictionary = {}
 var on_finish: Callable = Callable()
 var running: bool = false
 var time_limit: float = 30.0
 var elapsed: float = 0.0
+var state: String = "hidden"
+var last_result: Dictionary = {}
 
 var left_units: Array[Dictionary] = []
 var right_units: Array[Dictionary] = []
@@ -37,40 +45,40 @@ const FRONT_INDICES: Array[int] = [0, 1, 2]
 const LIFE_REWARD := 3
 
 func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_WHEN_PAUSED
-	set_process(true)
-	if start_btn:
-		start_btn.pressed.connect(_on_start_pressed)
-	if close_btn:
-		close_btn.pressed.connect(_on_close_pressed)
-	if select_btn:
-		select_btn.pressed.connect(_on_select_pressed)
-	hide()
+        process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+        set_process(true)
+        set_process_unhandled_input(true)
+        if start_btn:
+                start_btn.pressed.connect(_on_start_pressed)
+        if edit_btn:
+                edit_btn.pressed.connect(_on_edit_pressed)
+        if continue_btn:
+                continue_btn.pressed.connect(_on_continue_pressed)
+        hide()
 
 func open(enc: Dictionary, finish_cb: Callable) -> void:
-	encounter = enc
-	on_finish = finish_cb
-	running = false
-	elapsed = 0.0
-	if time_bar:
-		time_bar.min_value = 0
-		time_bar.max_value = 100
-		time_bar.value = 0
-	if status_label:
-		status_label.text = "Ready"
-	selected_team = _clamp_selection(SproutRegistry.get_last_selection())
-	_update_team_ready_ui()
-	if close_btn:
-		close_btn.disabled = true
-	_build_teams()
-	_populate_ui()
-	_refresh_ui()
-	show()
+        encounter = enc
+        on_finish = finish_cb
+        running = false
+        elapsed = 0.0
+        last_result = {}
+        if time_bar:
+                time_bar.visible = false
+                time_bar.min_value = 0
+                time_bar.max_value = 100
+                time_bar.value = 0
+        selected_team = _clamp_selection(SproutRegistry.get_last_selection())
+        _update_team_ready_ui()
+        _build_teams()
+        _populate_ui()
+        _refresh_ui()
+        show()
+        _set_state("pre_modal")
 
 func _process(delta: float) -> void:
-	if not visible:
-		return
-	if not running:
+        if not visible:
+                return
+        if not running:
 		return
 	elapsed += delta
 	if time_bar:
@@ -80,38 +88,38 @@ func _process(delta: float) -> void:
 	_refresh_ui()
 	var state: String = _check_end()
 	if state != "":
-		_finish(state)
-	elif elapsed >= time_limit:
-		_finish("timeout")
+                _finish(state)
+        elif elapsed >= time_limit:
+                _finish("timeout")
 
 func _on_start_pressed() -> void:
-	running = true
-	if start_btn:
-		start_btn.disabled = true
-	if status_label:
-		status_label.text = "Battle…"
-
-func _on_close_pressed() -> void:
-	hide()
-	emit_signal("window_closed")
+        if _should_disable_start():
+                return
+        running = true
+        elapsed = 0.0
+        if time_bar:
+                time_bar.value = 0
+        _set_state("battling")
 
 func _update_team_ready_ui() -> void:
-	if running:
-		return
-	if selected_team.is_empty():
-		if status_label:
-			status_label.text = "Select a team"
-	else:
-		if status_label:
-			status_label.text = "Team ready (%d)" % selected_team.size()
-	if start_btn:
-		start_btn.disabled = _should_disable_start()
+        if running:
+                return
+        if selected_team.is_empty():
+                if status_label:
+                        status_label.text = "Select a team"
+        else:
+                if status_label:
+                        status_label.text = "Team ready (%d)" % selected_team.size()
+        if start_btn:
+                start_btn.disabled = _should_disable_start()
+        if edit_btn:
+                edit_btn.disabled = false
 
 func _should_disable_start() -> bool:
-	if selected_team.size() > 0:
-		return false
-	var roster: Array = SproutRegistry.get_roster()
-	return roster.is_empty()
+        if selected_team.size() > 0:
+                return false
+        var roster: Array = SproutRegistry.get_roster()
+        return roster.is_empty()
 
 func _clamp_selection(sel: Array) -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
@@ -126,57 +134,59 @@ func _clamp_selection(sel: Array) -> Array[Dictionary]:
 				if not roster_entry.is_empty():
 					result.append(roster_entry)
 					continue
-			result.append(Dictionary(entry_dict).duplicate(true))
-	return result
+                        result.append(Dictionary(entry_dict).duplicate(true))
+        return result
 
-func _on_select_pressed() -> void:
-	if _picker == null:
-		var scene: PackedScene = load("res://scenes/battle/BattlePicker.tscn") as PackedScene
-		_picker = scene.instantiate()
-		var parent: Node = get_tree().current_scene
-		if parent == null:
-			parent = get_tree().root
-		parent.add_child(_picker)
-		_picker.selection_done.connect(_on_picker_done)
-		_picker.cancelled.connect(_on_picker_cancel)
-	_picker.open()
+func _on_edit_pressed() -> void:
+        if _picker == null:
+                var scene: PackedScene = load("res://scenes/battle/BattlePicker.tscn") as PackedScene
+                _picker = scene.instantiate()
+                var parent: Node = get_tree().current_scene
+                if parent == null:
+                        parent = get_tree().root
+                parent.add_child(_picker)
+                _picker.selection_done.connect(_on_picker_done)
+                _picker.cancelled.connect(_on_picker_cancel)
+        _set_state("editing_team")
+        _picker.open()
 
 func _on_picker_done(sel: Array) -> void:
-	selected_team = _clamp_selection(sel)
-	_update_team_ready_ui()
-	_build_teams()
-	_populate_ui()
-	_refresh_ui()
+        selected_team = _clamp_selection(sel)
+        _update_team_ready_ui()
+        _build_teams()
+        _populate_ui()
+        _refresh_ui()
+        _set_state("pre_modal")
 
 func _on_picker_cancel() -> void:
-	pass
+        _set_state("pre_modal")
 
 func _build_teams() -> void:
-		left_units.clear()
-		right_units.clear()
-		var attack_defs: Array = DataLite.load_json_array("res://data/attacks.json")
-		var sprouts: Array = []
-		if selected_team.size() > 0:
-				selected_team = _clamp_selection(selected_team)
-				sprouts = selected_team.duplicate(true)
-		else:
-				sprouts = SproutRegistry.pick_for_battle(SLOT_COUNT)
-				if sprouts.is_empty():
-						for filler_index in range(3):
-								sprouts.append({"id": "sprout.woodling", "level": 1})
-		for slot_index in range(SLOT_COUNT):
-				var entry: Dictionary = {}
-				if slot_index < sprouts.size() and typeof(sprouts[slot_index]) == TYPE_DICTIONARY:
-						entry = sprouts[slot_index]
-				left_units.append(_make_unit_from_sprout(entry, true, attack_defs))
-		var turn_engine: Node = get_tree().root.get_node_or_null("TurnEngine")
-		var difficulty_scale: float = 1.0
-		if turn_engine:
-				var turn_value: Variant = turn_engine.get("turn_index")
-				if typeof(turn_value) == TYPE_INT:
-						difficulty_scale += 0.03 * max(0, int(turn_value))
-		for enemy_index in range(SLOT_COUNT):
-				right_units.append(_make_decay_unit(difficulty_scale, attack_defs))
+        left_units.clear()
+        right_units.clear()
+        var attack_defs: Array = DataLite.load_json_array("res://data/attacks.json")
+        var sprouts: Array = []
+        if selected_team.size() > 0:
+                selected_team = _clamp_selection(selected_team)
+                sprouts = selected_team.duplicate(true)
+        else:
+                sprouts = SproutRegistry.pick_for_battle(SLOT_COUNT)
+                if sprouts.is_empty():
+                        for filler_index in range(3):
+                                sprouts.append({"id": "sprout.woodling", "level": 1})
+        for slot_index in range(SLOT_COUNT):
+                var entry: Dictionary = {}
+                if slot_index < sprouts.size() and typeof(sprouts[slot_index]) == TYPE_DICTIONARY:
+                        entry = sprouts[slot_index]
+                left_units.append(_make_unit_from_sprout(entry, true, attack_defs))
+        var turn_engine: Node = get_tree().root.get_node_or_null("TurnEngine")
+        var difficulty_scale: float = 1.0
+        if turn_engine:
+                var turn_value: Variant = turn_engine.get("turn_index")
+                if typeof(turn_value) == TYPE_INT:
+                        difficulty_scale += 0.03 * max(0, int(turn_value))
+        for enemy_index in range(SLOT_COUNT):
+                right_units.append(_make_decay_unit(difficulty_scale, attack_defs))
 
 func _populate_ui() -> void:
 	if sprout_grid == null or decay_grid == null:
@@ -330,26 +340,26 @@ func _tick_cooldowns(delta: float) -> void:
 			unit["cd_curr"] = max(0.0, float(unit.get("cd_curr", 0.0)) - delta)
 
 func _auto_attacks() -> void:
-		for left_index in range(SLOT_COUNT):
-				var attacker: Dictionary = left_units[left_index]
-				if not attacker.get("alive", false):
-						continue
-				if attacker.get("cd_curr", 0.0) > 0.0:
-						continue
-				var target_idx: int = _pick_target(right_units)
-				if target_idx >= 0:
-						_apply_attack(attacker, right_units[target_idx], decay_grid.get_child(target_idx))
-						attacker["cd_curr"] = float(attacker.get("cd", 1.0))
-		for right_index in range(SLOT_COUNT):
-				var attacker: Dictionary = right_units[right_index]
-				if not attacker.get("alive", false):
-						continue
-				if attacker.get("cd_curr", 0.0) > 0.0:
-						continue
-				var target_idx: int = _pick_target(left_units)
-				if target_idx >= 0:
-						_apply_attack(attacker, left_units[target_idx], sprout_grid.get_child(target_idx))
-						attacker["cd_curr"] = float(attacker.get("cd", 1.0))
+        for left_index in range(SLOT_COUNT):
+                var attacker: Dictionary = left_units[left_index]
+                if not attacker.get("alive", false):
+                        continue
+                if attacker.get("cd_curr", 0.0) > 0.0:
+                        continue
+                var target_idx: int = _pick_target(right_units)
+                if target_idx >= 0:
+                        _apply_attack(attacker, right_units[target_idx], decay_grid.get_child(target_idx))
+                        attacker["cd_curr"] = float(attacker.get("cd", 1.0))
+        for right_index in range(SLOT_COUNT):
+                var attacker: Dictionary = right_units[right_index]
+                if not attacker.get("alive", false):
+                        continue
+                if attacker.get("cd_curr", 0.0) > 0.0:
+                        continue
+                var target_idx: int = _pick_target(left_units)
+                if target_idx >= 0:
+                        _apply_attack(attacker, left_units[target_idx], sprout_grid.get_child(target_idx))
+                        attacker["cd_curr"] = float(attacker.get("cd", 1.0))
 
 func _pick_target(team: Array) -> int:
 	for idx in FRONT_INDICES:
@@ -383,8 +393,8 @@ func _pop_text(slot_ui: Node, text: String) -> void:
 		return
 	label.text = text
 	label.modulate.a = 1.0
-	var tween: Tween = slot_ui.create_tween()
-	tween.tween_property(label, "modulate:a", 0.0, 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+        var tween: Tween = slot_ui.create_tween()
+        tween.tween_property(label, "modulate:a", 0.0, 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 func _refresh_ui() -> void:
 	if sprout_grid == null or decay_grid == null:
@@ -438,26 +448,102 @@ func _check_end() -> String:
 	return ""
 
 func _finish(state: String) -> void:
-	running = false
-	if start_btn:
-		start_btn.disabled = true
-	if close_btn:
-		close_btn.disabled = false
-	if status_label:
-		status_label.text = state.capitalize()
-	_refresh_ui()
-	var victory: bool = state == "victory"
-	var rewards: Dictionary = {"life": LIFE_REWARD if victory else 0}
-	var result: Dictionary = {
-		"victory": victory,
-		"outcome": state,
-		"rewards": rewards,
-		"target_cell": encounter.get("target", Vector2i.ZERO),
-		"attacker_cell": encounter.get("attacker", Vector2i.ZERO),
-	}
-	emit_signal("battle_finished", result)
+        running = false
+        _refresh_ui()
+        var victory: bool = state == "victory"
+        var rewards: Dictionary = {"life": LIFE_REWARD if victory else 0}
+        var result: Dictionary = {
+                "victory": victory,
+                "outcome": state,
+                "rewards": rewards,
+                "target_cell": encounter.get("target", Vector2i.ZERO),
+                "attacker_cell": encounter.get("attacker", Vector2i.ZERO),
+        }
+        last_result = result
+        if result_label:
+                result_label.text = state.capitalize()
+        _set_state("result_banner")
+        emit_signal("battle_finished", result)
 
 func _resolve_node(path: NodePath) -> Node:
-	if path.is_empty():
-		return null
-	return get_node_or_null(path)
+        if path.is_empty():
+                return null
+        return get_node_or_null(path)
+
+func _set_state(new_state: String) -> void:
+        state = new_state
+        match state:
+                "pre_modal":
+                        running = false
+                        if pre_modal:
+                                pre_modal.visible = true
+                        if result_banner:
+                                result_banner.visible = false
+                        if continue_btn:
+                                continue_btn.visible = false
+                        if time_bar:
+                                time_bar.visible = false
+                                time_bar.value = 0
+                        _update_team_ready_ui()
+                        _focus_modal_default()
+                "editing_team":
+                        if pre_modal:
+                                pre_modal.visible = false
+                        if result_banner:
+                                result_banner.visible = false
+                        if continue_btn:
+                                continue_btn.visible = false
+                        if time_bar:
+                                time_bar.visible = false
+                "battling":
+                        if pre_modal:
+                                pre_modal.visible = false
+                        if result_banner:
+                                result_banner.visible = false
+                        if continue_btn:
+                                continue_btn.visible = false
+                        if time_bar:
+                                time_bar.visible = true
+                                time_bar.value = 0
+                "result_banner":
+                        if pre_modal:
+                                pre_modal.visible = false
+                        if result_banner:
+                                result_banner.visible = true
+                        if continue_btn:
+                                continue_btn.visible = true
+                                continue_btn.disabled = false
+                                continue_btn.grab_focus()
+                        if time_bar:
+                                time_bar.visible = false
+
+func _focus_modal_default() -> void:
+        if start_btn and not start_btn.disabled:
+                start_btn.grab_focus()
+        elif edit_btn:
+                edit_btn.grab_focus()
+
+func _on_continue_pressed() -> void:
+        hide()
+        running = false
+        state = "hidden"
+        emit_signal("window_closed")
+
+func _cancel_battle() -> void:
+        hide()
+        running = false
+        last_result = {}
+        state = "hidden"
+        emit_signal("window_closed")
+
+func _unhandled_input(event: InputEvent) -> void:
+        if not visible:
+                return
+        if event.is_action_pressed("ui_cancel"):
+                if state == "pre_modal":
+                        _cancel_battle()
+                        get_viewport().set_input_as_handled()
+        elif event.is_action_pressed("ui_accept"):
+                if state == "result_banner" and continue_btn and continue_btn.visible:
+                        _on_continue_pressed()
+                        get_viewport().set_input_as_handled()
