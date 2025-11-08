@@ -98,10 +98,10 @@ func _ensure_turn_engine_run_started() -> void:
 				if turn_engine.has_method("is_run_active") and bool(turn_engine.call("is_run_active")):
 								return
 				if typeof(RunConfig) != TYPE_NIL:
-								var ready := true
+								var run_ready := true
 								if RunConfig.has_method("is_run_ready"):
-												ready = bool(RunConfig.is_run_ready())
-								if not ready:
+												run_ready = bool(RunConfig.is_run_ready())
+								if not run_ready:
 												return
 				if turn_engine.has_method("begin_run"):
 								turn_engine.call("begin_run")
@@ -1020,10 +1020,10 @@ func _update_turn_phase_label() -> void:
 	hud.set_turn_phase(_current_turn_index(), phase_display)
 
 func _format_phase_name(raw: String) -> String:
-	var name := String(raw)
-	if name.is_empty():
+	var phase_name := String(raw)
+	if phase_name.is_empty():
 		return ""
-	var parts := name.split("_", false)
+	var parts := phase_name.split("_", false)
 	for i in range(parts.size()):
 		var part := String(parts[i])
 		if part.is_empty():

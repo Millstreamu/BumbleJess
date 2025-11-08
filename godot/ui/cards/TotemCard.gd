@@ -73,10 +73,11 @@ func _refresh_layout() -> void:
 	var inner_w: float = max(size.x - 32.0, 1.0)
 	var inner_h: float = max(size.y - 32.0, 1.0)
 	var art_side: float = min(inner_h, inner_w * 0.4)
-	_art_wrap.custom_minimum_size = Vector2(art_side, art_side)
-	var scale: float = clamp(inner_w / max(base_size.x - 32.0, 1.0), 0.6, 1.8)
-	_title_target_font = clamp(roundi(18.0 * scale), 14, 24)
-	_body_target_font = clamp(roundi(14.0 * scale), 11, 18)
+	if is_instance_valid(_art_wrap):
+		_art_wrap.custom_minimum_size = Vector2(art_side, art_side)
+	var width_scale: float = clamp(inner_w / max(base_size.x - 32.0, 1.0), 0.6, 1.8)
+	_title_target_font = clamp(roundi(18.0 * width_scale), 14, 24)
+	_body_target_font = clamp(roundi(14.0 * width_scale), 11, 18)
 	_title.add_theme_font_size_override("font_size", _title_target_font)
 	_body.add_theme_font_size_override("normal_font_size", _body_target_font)
 	_title.clip_text = true
