@@ -16,6 +16,7 @@ const THREAT_SCENE := preload("res://ui/hud/ThreatMarker.tscn")
 @onready var _btn_resources: Button = $TopRight/HBoxContainer/BtnResources
 @onready var _floaters: Node2D = $WorldFX/Floaters
 @onready var _threats: Node2D = $WorldFX/Threats
+@onready var _tile_info: Node2D = $WorldFX/TileInfo
 
 func _ready() -> void:
 	_ensure_input_actions()
@@ -63,6 +64,16 @@ func set_current_tile_card(data: Dictionary) -> void:
 
 func toggle_tile_info_popups() -> void:
 	emit_signal("toggle_info_pressed")
+
+func get_tile_info_container() -> Node2D:
+	if _tile_info != null:
+		return _tile_info
+	var fx := get_node_or_null("WorldFX")
+	if fx is Node2D:
+		var fallback := Node2D.new()
+		fx.add_child(fallback)
+		_tile_info = fallback
+	return _tile_info
 
 func spawn_floater(world_pos: Vector2, text: String, color: Color) -> void:
 	if _floaters == null:

@@ -84,3 +84,5 @@ size_flags_horizontal = 3
 [node name="Floaters" type="Node2D" parent="WorldFX"]
 
 [node name="Threats" type="Node2D" parent="WorldFX"]
+
+[node name="TileInfo" type="Node2D" parent="WorldFX"]
