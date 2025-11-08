@@ -30,26 +30,28 @@ var _placing_special: String = ""
 var _extra_tile_colors: Dictionary[String, Color] = {}
 var _tile_rules_cache: Dictionary = {}
 var _fx_color_for_cat := {
-		"Nature": Color(0.25, 0.6, 0.25, 0.22),
-		"Earth": Color(0.55, 0.35, 0.2, 0.22),
-		"Water": Color(0.2, 0.4, 0.8, 0.22),
-		"Nest": Color(0.7, 0.6, 0.2, 0.22),
-		"Mystic": Color(0.6, 0.4, 0.7, 0.22),
-		"Aggression": Color(0.7, 0.2, 0.2, 0.22),
+"Nature": Color(0.25, 0.6, 0.25, 0.22),
+"Earth": Color(0.55, 0.35, 0.2, 0.22),
+"Water": Color(0.2, 0.4, 0.8, 0.22),
+"Nest": Color(0.7, 0.6, 0.2, 0.22),
+"Mystic": Color(0.6, 0.4, 0.7, 0.22),
+"Aggression": Color(0.7, 0.2, 0.2, 0.22),
 }
+
+const FLOATER_COLOR_BY_KEY := {
+"fx_nature": Color("#6BCB77"),
+"fx_earth": Color("#A67C52"),
+"fx_water": Color("#4DB4FF"),
+}
+
+var _current_phase: String = ""
+var _tile_info_visible := false
 
 @onready var hexmap: TileMap = $HexMap
 @onready var cursor: Node = $Cursor
-@onready var hud: Label = $HUD/DeckLabel
-@onready var resources_panel: Control = $HUD.get_node_or_null("ResourcesPanel")
-@onready var resource_labels: Dictionary[String, Label] = {
-	"nature": $HUD.get_node_or_null("ResourcesPanel/Content/Rows/NatureValue") as Label,
-	"earth": $HUD.get_node_or_null("ResourcesPanel/Content/Rows/EarthValue") as Label,
-	"water": $HUD.get_node_or_null("ResourcesPanel/Content/Rows/WaterValue") as Label,
-	"life": $HUD.get_node_or_null("ResourcesPanel/Content/Rows/LifeValue") as Label,
-}
-@onready var soul_seeds_label: Label = (
-	$HUD.get_node_or_null("ResourcesPanel/Content/Rows/SoulSeedsValue") as Label
+@onready var hud: WorldHUD = $WorldHUD
+@onready var _tile_info_layer: Node2D = (
+hud.get_tile_info_container() if is_instance_valid(hud) else null
 )
 
 
@@ -71,18 +73,23 @@ func _get_turn_engine() -> Node:
 						return game_singleton
 		return get_node_or_null("/root/Game")
 
+
 func _connect_turn_engine_signals() -> void:
-		var turn_engine: Node = _get_turn_engine()
-		if turn_engine == null:
-				return
-		if turn_engine.has_signal("run_started") and not turn_engine.is_connected(
-				"run_started", Callable(self, "_on_turn_engine_run_started")
-		):
-				turn_engine.connect("run_started", Callable(self, "_on_turn_engine_run_started"))
-		if turn_engine.has_signal("turn_changed") and not turn_engine.is_connected(
-				"turn_changed", Callable(self, "_on_turn_engine_turn_changed")
-		):
-				turn_engine.connect("turn_changed", Callable(self, "_on_turn_engine_turn_changed"))
+	var turn_engine: Node = _get_turn_engine()
+	if turn_engine == null:
+		return
+	if turn_engine.has_signal("run_started") and not turn_engine.is_connected(
+			"run_started", Callable(self, "_on_turn_engine_run_started")
+	):
+		turn_engine.connect("run_started", Callable(self, "_on_turn_engine_run_started"))
+	if turn_engine.has_signal("turn_changed") and not turn_engine.is_connected(
+			"turn_changed", Callable(self, "_on_turn_engine_turn_changed")
+	):
+		turn_engine.connect("turn_changed", Callable(self, "_on_turn_engine_turn_changed"))
+	if turn_engine.has_signal("phase_started") and not turn_engine.is_connected(
+			"phase_started", Callable(self, "_on_turn_engine_phase_started")
+	):
+		turn_engine.connect("phase_started", Callable(self, "_on_turn_engine_phase_started"))
 
 func _ensure_turn_engine_run_started() -> void:
 				var turn_engine: Node = _get_turn_engine()
@@ -115,11 +122,15 @@ func _sync_turn_with_engine(should_update_hud: bool = false) -> void:
 
 
 func _on_turn_engine_run_started() -> void:
-		_sync_turn_with_engine(true)
+_sync_turn_with_engine(true)
 
 func _on_turn_engine_turn_changed(turn_index: int) -> void:
-		turn = max(turn_index, 1)
-		_update_hud()
+turn = max(turn_index, 1)
+_update_hud()
+
+func _on_turn_engine_phase_started(phase_name: String) -> void:
+_current_phase = String(phase_name)
+_update_turn_phase_label()
 
 func _current_turn_index() -> int:
 		var turn_engine: Node = _get_turn_engine()
@@ -168,15 +179,18 @@ func _ready() -> void:
 	_connect_turn_engine_signals()
 	_ensure_turn_engine_run_started()
 	var decay_manager: Node = get_node_or_null("/root/DecayManager")
+
 	if decay_manager != null and decay_manager.has_method("bind_world"):
 		decay_manager.call("bind_world", self)
-	_ensure_toggle_threats_action()
 	_ensure_toggle_sprout_register_action()
 	_ensure_toggle_cluster_fx_action()
 	_ensure_meta_debug_actions()
-	var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
-	if threat_list != null:
-		threat_list.visible = false
+	if is_instance_valid(hud):
+		hud.end_turn_pressed.connect(_on_hud_end_turn)
+		hud.toggle_info_pressed.connect(_on_hud_toggle_info)
+		hud.open_registry_pressed.connect(_on_hud_open_registry)
+		hud.open_resource_list_pressed.connect(_on_hud_open_resource_list)
+		_tile_info_layer = hud.get_tile_info_container()
 	_is_ready = true
 	draw_debug_grid()
 	_sync_turn_with_engine()
@@ -185,21 +199,6 @@ func _ready() -> void:
 	if not is_connected("tile_placed", Callable(self, "_on_tile_placed")):
 		connect("tile_placed", Callable(self, "_on_tile_placed"))
 
-
-func _ensure_toggle_threats_action() -> void:
-	var action := "ui_toggle_threats"
-	if not InputMap.has_action(action):
-		InputMap.add_action(action)
-	var has_event := false
-	for existing_event in InputMap.action_get_events(action):
-		if existing_event is InputEventKey and existing_event.physical_keycode == Key.KEY_T:
-			has_event = true
-			break
-	if not has_event:
-		var event := InputEventKey.new()
-		event.physical_keycode = Key.KEY_T
-		event.keycode = Key.KEY_T
-		InputMap.action_add_event(action, event)
 
 
 func _ensure_toggle_sprout_register_action() -> void:
@@ -840,9 +839,11 @@ func world_to_map(p: Vector2) -> Vector2i:
 
 
 func _setup_hud() -> void:
-		if is_instance_valid(hud):
-				hud.text = _build_hud_text()
-		_update_resource_panel()
+if not is_instance_valid(hud):
+return
+_update_turn_phase_label()
+_update_resource_panel()
+_update_tile_card()
 
 
 func _bind_sprout_registry() -> void:
@@ -1002,135 +1003,229 @@ func update_hud(_next_name: String = "", _remaining: int = 0) -> void:
 
 
 func _update_hud() -> void:
-		if not is_instance_valid(hud):
-				return
-		hud.text = _build_hud_text()
-		_update_resource_panel()
+	if not is_instance_valid(hud):
+		return
+	_update_turn_phase_label()
+	_update_resource_panel()
+	_update_tile_card()
+	if _tile_info_visible:
+		_refresh_tile_info_markers()
 
+func _update_turn_phase_label() -> void:
+	if not is_instance_valid(hud):
+		return
+	var phase_display := _format_phase_name(_current_phase)
+	if phase_display.is_empty():
+		phase_display = "—"
+	hud.set_turn_phase(_current_turn_index(), phase_display)
 
-func _build_hud_text() -> String:
-	var lines: Array[String] = []
-	var current_line := ""
-	var deck := DeckManager if typeof(DeckManager) != TYPE_NIL else null
+func _format_phase_name(raw: String) -> String:
+	var name := String(raw)
+	if name.is_empty():
+		return ""
+	var parts := name.split("_", false)
+	for i in range(parts.size()):
+		var part := String(parts[i])
+		if part.is_empty():
+			continue
+		parts[i] = part.to_lower().capitalize()
+	return " ".join(parts)
 
-	if not _placing_special.is_empty():
-		var display_name := id_to_name(_placing_special)
-		if display_name.is_empty():
-			display_name = _placing_special
-		current_line = "Current: SPECIAL - %s" % display_name
-	elif typeof(CommuneManager) != TYPE_NIL and CommuneManager.has_current_tile():
-		var tile_id := CommuneManager.get_current_tile_id()
-		var display := id_to_name(tile_id)
-		if display.is_empty():
-			display = tile_id
-		var cat := ""
-		if deck != null:
-			cat = deck.get_tile_category(tile_id)
-		if not cat.is_empty():
-			var canon := CategoryMap.canonical(cat)
-			var cat_display := CategoryMap.display_name(canon)
-			if not cat_display.is_empty():
-				display = "%s (%s)" % [display, cat_display]
-		current_line = "Current: %s" % display
-	else:
-		current_line = "Current: Choose from the Commune"
-
-	lines.append(current_line)
-
-	var rc := RunConfig if typeof(RunConfig) != TYPE_NIL else null
-	if rc != null and not rc.last_pick_id.is_empty():
-		var last_name := id_to_name(rc.last_pick_id)
-		if last_name.is_empty():
-			last_name = rc.last_pick_id
-		lines.append("Last Pick: %s" % last_name)
-
-	var totem_line := _totem_status_line()
-	if not totem_line.is_empty():
-		lines.append(totem_line)
-
-	lines.append("Overgrowth: %d | Groves: %d" % [
-		_count_cells_named("overgrowth"),
-		_count_cells_named("grove")
-	])
-
-	var resource_manager: Node = _get_resource_manager()
-	if resource_manager != null:
-		var soul_variant = resource_manager.get("soul_seeds")
-		lines.append("Soul Seeds: %d" % [int(soul_variant)])
-
-	return "\n".join(lines)
-
-
-
-func _totem_status_line() -> String:
-		if TileGen == null:
-				return ""
-		return "Totem Tier: %d" % TileGen.get_tier()
-
+func _format_stat_name(stat: String) -> String:
+	var value := String(stat)
+	if value.is_empty():
+		return ""
+	var parts := value.split(".")
+	var last := String(parts[parts.size() - 1])
+	return last.replace("_", " ").capitalize()
 
 func _update_resource_panel() -> void:
-	if not is_instance_valid(resources_panel):
+	if not is_instance_valid(hud):
 		return
 	var resource_manager: Node = _get_resource_manager()
-	var has_manager := resource_manager != null
-	resources_panel.visible = true
-	var display_names := {
-		"nature": "Nature",
-		"earth": "Earth",
-		"water": "Water",
-		"life": "Life",
-	}
-	if not has_manager:
-		for key in resource_labels.keys():
-			var label: Label = resource_labels[key]
-			if label != null:
-				var display_name: String = display_names.get(key, String(key).capitalize())
-				label.text = "%s: -" % display_name
-		if is_instance_valid(soul_seeds_label):
-			soul_seeds_label.text = "Soul Seeds: -"
+	if resource_manager == null:
+		hud.set_resources(0, 0, 0, 0, 0, 0, 0, 0)
 		return
-	var nature_label: Label = resource_labels.get("nature")
-	if nature_label != null:
-		nature_label.text = (
-			"%s: %d/%d"
-			% [
-				display_names.get("nature", "Nature"),
-				resource_manager.get_amount("nature"),
-				resource_manager.get_capacity("nature"),
-			]
-		)
-	var earth_label: Label = resource_labels.get("earth")
-	if earth_label != null:
-		earth_label.text = (
-			"%s: %d/%d"
-			% [
-				display_names.get("earth", "Earth"),
-				resource_manager.get_amount("earth"),
-				resource_manager.get_capacity("earth"),
-			]
-		)
-	var water_label: Label = resource_labels.get("water")
-	if water_label != null:
-		water_label.text = (
-			"%s: %d/%d"
-			% [
-				display_names.get("water", "Water"),
-				resource_manager.get_amount("water"),
-				resource_manager.get_capacity("water"),
-			]
-		)
-	var life_label: Label = resource_labels.get("life")
-	if life_label != null:
-		life_label.text = (
-			"%s: %d"
-			% [
-				display_names.get("life", "Life"),
-				resource_manager.get_amount("life"),
-			]
-		)
-	if is_instance_valid(soul_seeds_label):
-		soul_seeds_label.text = "Soul Seeds: %d" % [resource_manager.soul_seeds]
+	var nature_curr := int(resource_manager.get_amount("nature"))
+	var nature_max := int(resource_manager.get_capacity("nature"))
+	var earth_curr := int(resource_manager.get_amount("earth"))
+	var earth_max := int(resource_manager.get_capacity("earth"))
+	var water_curr := int(resource_manager.get_amount("water"))
+	var water_max := int(resource_manager.get_capacity("water"))
+	var life_curr := int(resource_manager.get_amount("life"))
+	var life_max := int(resource_manager.get_capacity("life"))
+	hud.set_resources(
+		nature_curr,
+		max(nature_max, nature_curr),
+		earth_curr,
+		max(earth_max, earth_curr),
+		water_curr,
+		max(water_max, water_curr),
+		life_curr,
+		max(life_max, life_curr)
+	)
 
+func _update_tile_card() -> void:
+	if not is_instance_valid(hud):
+		return
+	var data: Dictionary = {}
+	if not _placing_special.is_empty():
+		data = _tile_card_data_for(_placing_special, true)
+	elif typeof(CommuneManager) != TYPE_NIL and CommuneManager.has_current_tile():
+		var tile_id := CommuneManager.get_current_tile_id()
+		if tile_id.is_empty():
+			data = _empty_tile_card_data()
+		else:
+			data = _tile_card_data_for(tile_id, false)
+	else:
+		data = _empty_tile_card_data()
+	hud.set_current_tile_card(data)
+
+func _empty_tile_card_data() -> Dictionary:
+	return {
+		"name": "Awaiting Choice",
+		"effects": "[i]Select a tile to place.[/i]",
+		"desc": "Choose a tile from the Commune to continue.",
+		"texture": null,
+	}
+
+func _tile_card_data_for(tile_id: String, is_special: bool) -> Dictionary:
+	var info_name := tile_id
+	var description := "—"
+	var effects_text := "—"
+	var def: Dictionary = {}
+	if typeof(DataDB) != TYPE_NIL and DataDB.has_method("get_tile_def"):
+		def = DataDB.get_tile_def(tile_id)
+	if def.is_empty() and typeof(DeckManager) != TYPE_NIL:
+		def = DeckManager.get_tile_info(tile_id)
+	if not def.is_empty():
+		info_name = String(def.get("name", info_name))
+		description = String(def.get("description", description))
+		if description.is_empty():
+			description = "—"
+		effects_text = _format_tile_effects(def)
+	if info_name.is_empty():
+		info_name = tile_id
+	if is_special and not info_name.begins_with("Special"):
+		info_name = "Special: %s" % info_name
+	return {
+		"name": info_name,
+		"effects": effects_text,
+		"desc": description,
+		"texture": null,
+	}
+
+func _format_tile_effects(def: Dictionary) -> String:
+	var lines: Array[String] = []
+	var effects_variant: Variant = def.get("effects", [])
+	if effects_variant is Array:
+		for entry in effects_variant:
+		if entry is Dictionary:
+		lines.append(_format_effect_line(entry))
+	var outputs_variant: Variant = def.get("outputs", {})
+	if lines.is_empty() and outputs_variant is Dictionary:
+		var outputs := outputs_variant as Dictionary
+		for key in outputs.keys():
+			var amount := int(outputs.get(key, 0))
+			var display := CategoryMap.display_name(String(key))
+			if display.is_empty():
+				display = String(key).capitalize()
+			var prefix := "+" if amount >= 0 else ""
+			lines.append("[b]Output[/b] %s%d %s" % [prefix, amount, display])
+	if lines.is_empty():
+		lines.append("—")
+	return "
+".join(lines)
+
+func _format_effect_line(effect: Dictionary) -> String:
+	var when_text := _format_phase_name(String(effect.get("when", "")))
+	if when_text.is_empty():
+		when_text = "Effect"
+	var op := String(effect.get("op", "add"))
+	var stat_name := _format_stat_name(String(effect.get("stat", "")))
+	var amount_variant: Variant = effect.get("amount", 0)
+	var amount_numeric := 0
+	var has_numeric := amount_variant is int or amount_variant is float
+	if has_numeric:
+		amount_numeric = int(round(float(amount_variant)))
+	var amount_text := ""
+	if amount_variant is Dictionary or amount_variant is Array:
+		amount_text = JSON.stringify(amount_variant)
+	else:
+		amount_text = str(amount_variant)
+	var detail := ""
+	match op:
+	"add":
+	if amount_variant is Dictionary or amount_variant is Array:
+	detail = "Add %s" % amount_text
+	else:
+	var prefix := "+" if has_numeric and amount_numeric >= 0 else ""
+	var number_text := str(amount_numeric) if has_numeric else amount_text
+	detail = "%s%s" % [prefix, number_text]
+	"mul":
+	detail = "x%s" % amount_text
+	"set":
+	detail = "Set %s" % amount_text
+	_:
+	detail = amount_text.strip_edges()
+	if detail.is_empty():
+	detail = op.capitalize()
+	else:
+	detail = "%s %s" % [op.capitalize(), detail]
+	if not stat_name.is_empty():
+	if detail.is_empty():
+	detail = stat_name
+	else:
+	detail = "%s %s" % [detail, stat_name]
+	if detail.is_empty():
+	detail = op.capitalize()
+	return "[b]%s[/b] %s" % [when_text, detail.strip_edges()]
+
+func _refresh_tile_info_markers() -> void:
+
+	if _tile_info_layer == null:
+		return
+	for child in _tile_info_layer.get_children():
+		child.queue_free()
+	if not _tile_info_visible:
+		return
+	for y in range(height):
+		for x in range(width):
+			var cell := Vector2i(x, y)
+			var tile_id := get_cell_tile_id(LAYER_LIFE, cell)
+			if tile_id.is_empty():
+				continue
+			var label := Label.new()
+			label.text = id_to_name(tile_id)
+			label.add_theme_color_override("font_color", Color.WHITE)
+			label.scale = Vector2(0.75, 0.75)
+			label.position = cell_to_viewport_position(cell) + Vector2(-56, -72)
+			label.top_level = true
+			_tile_info_layer.add_child(label)
+
+
+func cell_to_viewport_position(cell: Vector2i) -> Vector2:
+	return world_point_to_viewport(world_pos_of_cell(cell))
+
+func world_point_to_viewport(point: Vector2) -> Vector2:
+	var viewport := get_viewport()
+	if viewport == null:
+		return point
+	var global_point := to_global(point)
+	return viewport.get_canvas_transform().xform(global_point)
+
+func _on_hud_end_turn() -> void:
+	on_end_turn_pressed()
+
+func _on_hud_toggle_info() -> void:
+	_tile_info_visible = not _tile_info_visible
+	_refresh_tile_info_markers()
+
+func _on_hud_open_registry() -> void:
+	_toggle_sprout_register()
+
+func _on_hud_open_resource_list() -> void:
+	push_warning("Resource list overlay not implemented yet.")
 
 func _bind_resource_manager() -> void:
 	var resource_manager: Node = _get_resource_manager()
@@ -1159,6 +1254,19 @@ func _on_item_changed(_item: String) -> void:
 func _on_produced_cells(cells_by_fx: Dictionary) -> void:
 	if cells_by_fx.is_empty():
 		return
+	if is_instance_valid(hud):
+		for key in cells_by_fx.keys():
+			var color_variant: Variant = FLOATER_COLOR_BY_KEY.get(key, null)
+			if not (color_variant is Color):
+				continue
+			var cells_variant: Variant = cells_by_fx[key]
+			if not (cells_variant is Array):
+				continue
+			for cell_variant in cells_variant:
+				if not (cell_variant is Vector2i):
+					continue
+				var floater_pos := cell_to_viewport_position(cell_variant)
+				hud.spawn_floater(floater_pos, "+1", color_variant)
 	flash_fx(cells_by_fx, 0.35)
 
 
