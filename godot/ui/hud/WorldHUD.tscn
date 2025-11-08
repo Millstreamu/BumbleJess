@@ -1,0 +1,85 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://ui/hud/WorldHUD.gd" id="1"]
+[ext_resource type="PackedScene" path="res://ui/hud/ResourcePanel.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://ui/hud/TileCard.tscn" id="3"]
+
+[node name="WorldHUD" type="CanvasLayer"]
+script = ExtResource("1")
+layer = 10
+
+[node name="TopBar" type="Control" parent="."]
+anchors_preset = 1
+anchor_left = 0.5
+anchor_top = 0.0
+anchor_right = 0.5
+anchor_bottom = 0.0
+offset_left = -150.0
+offset_top = 12.0
+offset_right = 150.0
+custom_min_size = Vector2(300, 32)
+
+[node name="TurnPhaseLabel" type="Label" parent="TopBar"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "Turn 1 — Growth"
+
+[node name="BottomRight" type="Control" parent="."]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -260.0
+offset_top = -200.0
+offset_right = -20.0
+offset_bottom = -20.0
+
+[node name="ResourcePanel" parent="BottomRight" instance=ExtResource("2")]
+
+[node name="BottomLeft" type="Control" parent="."]
+anchors_preset = 2
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 0.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -200.0
+offset_right = 360.0
+offset_bottom = -20.0
+
+[node name="TileCard" parent="BottomLeft" instance=ExtResource("3")]
+
+[node name="TopRight" type="Control" parent="."]
+anchors_preset = 5
+anchor_left = 1.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_left = -220.0
+offset_top = 12.0
+offset_right = -20.0
+offset_bottom = 72.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TopRight"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+size_flags_horizontal = 3
+
+[node name="BtnRegistry" type="Button" parent="TopRight/HBoxContainer"]
+text = "Registry"
+size_flags_horizontal = 3
+
+[node name="BtnResources" type="Button" parent="TopRight/HBoxContainer"]
+text = "Resources"
+size_flags_horizontal = 3
+
+[node name="WorldFX" type="Node2D" parent="."]
+
+[node name="Floaters" type="Node2D" parent="WorldFX"]
+
+[node name="Threats" type="Node2D" parent="WorldFX"]
