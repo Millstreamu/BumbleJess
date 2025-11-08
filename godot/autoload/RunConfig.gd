@@ -13,9 +13,9 @@ const CANONICAL_KEYS := [
 ]
 
 var selected_variants := {
-                "Nature": "",
-                "Earth": "",
-                "Water": "",
+				"Nature": "",
+				"Earth": "",
+				"Water": "",
 		"Nest": "",
 		"Aggression": "",
 		"Mystic": "",
@@ -95,13 +95,13 @@ func clear_draft_selections() -> void:
 		emit_signal("selections_changed")
 
 func clear_for_new_run() -> void:
-                _reset_selection_tables()
-                core_tiles.clear()
-                spawn_sprout_ids.clear()
-                totem_id = ""
-                last_pick_id = ""
-                _run_ready = false
-                emit_signal("selections_changed")
+				_reset_selection_tables()
+				core_tiles.clear()
+				spawn_sprout_ids.clear()
+				totem_id = ""
+				last_pick_id = ""
+				_run_ready = false
+				emit_signal("selections_changed")
 
 func _reset_selection_tables() -> void:
 		for canonical_key in CANONICAL_KEYS:
@@ -111,11 +111,11 @@ func _reset_selection_tables() -> void:
 		selected_variants["chanting"] = ""
 
 func mark_ready() -> void:
-                _run_ready = true
-                emit_signal("run_ready")
+				_run_ready = true
+				emit_signal("run_ready")
 
 func is_run_ready() -> bool:
-                return _run_ready
+				return _run_ready
 
 func add_core_tile(id: String) -> void:
 		var tid := String(id)

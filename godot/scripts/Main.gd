@@ -26,15 +26,15 @@ func _prepare_new_game(map_id: String) -> void:
 		SproutRegistry.refresh_for_new_game(map_id)
 
 func _begin_new_run_flow() -> void:
-        if typeof(TurnEngine) != TYPE_NIL and TurnEngine.has_method("reset_for_setup"):
-                TurnEngine.reset_for_setup(1)
-        else:
-                var turn_engine_node := get_tree().root.get_node_or_null("TurnEngine")
-                if turn_engine_node != null and turn_engine_node.has_method("reset_for_setup"):
-                        turn_engine_node.call("reset_for_setup", 1)
-        RunConfig.clear_for_new_run()
-        if _setup_ui != null:
-                _setup_ui.open()
+		if typeof(TurnEngine) != TYPE_NIL and TurnEngine.has_method("reset_for_setup"):
+				TurnEngine.reset_for_setup(1)
+		else:
+				var turn_engine_node := get_tree().root.get_node_or_null("TurnEngine")
+				if turn_engine_node != null and turn_engine_node.has_method("reset_for_setup"):
+						turn_engine_node.call("reset_for_setup", 1)
+		RunConfig.clear_for_new_run()
+		if _setup_ui != null:
+				_setup_ui.open()
 
 func _ensure_pre_run_setup() -> void:
 	if is_instance_valid(_setup_ui):

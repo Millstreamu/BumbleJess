@@ -16,10 +16,10 @@ func _ready() -> void:
 		_connect_world_signal()
 
 func bind_world(world: Node) -> void:
-        _world = world
-        _overgrowth_born.clear()
-        _born_turn.clear()
-        _connect_world_signal()
+		_world = world
+		_overgrowth_born.clear()
+		_born_turn.clear()
+		_connect_world_signal()
 
 func tick_growth_phase(turn: int) -> void:
 		_turn = max(turn, 1)
@@ -93,24 +93,24 @@ func _run_growth_cycle() -> void:
 		_world._update_hud()
 
 func _recompute_overgrowth() -> void:
-        if _world == null:
-                return
-        var width: int = _world.width
-        var height: int = _world.height
-        if width <= 0 or height <= 0:
-                return
+		if _world == null:
+				return
+		var width: int = _world.width
+		var height: int = _world.height
+		if width <= 0 or height <= 0:
+				return
 
-        for y in range(height):
-                for x in range(width):
-                        var cell := Vector2i(x, y)
-                        var cell_hash := _hash_cell(cell, width)
-                        var life_name: String = _world.get_cell_name(_world.LAYER_LIFE, cell)
-                        if life_name == "overgrowth":
-                                if not _overgrowth_born.has(cell_hash):
-                                        _overgrowth_born[cell_hash] = _turn
-                        else:
-                                if _overgrowth_born.has(cell_hash):
-                                        _overgrowth_born.erase(cell_hash)
+		for y in range(height):
+				for x in range(width):
+						var cell := Vector2i(x, y)
+						var cell_hash := _hash_cell(cell, width)
+						var life_name: String = _world.get_cell_name(_world.LAYER_LIFE, cell)
+						if life_name == "overgrowth":
+								if not _overgrowth_born.has(cell_hash):
+										_overgrowth_born[cell_hash] = _turn
+						else:
+								if _overgrowth_born.has(cell_hash):
+										_overgrowth_born.erase(cell_hash)
 
 func _handle_decay_contact() -> void:
 	if _world == null:

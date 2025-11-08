@@ -11,35 +11,35 @@ var _tile_placed_this_turn := false
 var _run_active := false
 
 func _ready() -> void:
-                _bind_run_config()
-                _autostart_if_ready()
+				_bind_run_config()
+				_autostart_if_ready()
 
 func _bind_run_config() -> void:
-                var rc := RunConfig if typeof(RunConfig) != TYPE_NIL else null
-                if rc == null:
-                                return
-                if not rc.run_ready.is_connected(_on_run_config_ready):
-                                rc.run_ready.connect(_on_run_config_ready)
-                if rc.has_method("is_run_ready") and bool(rc.call("is_run_ready")):
-                                begin_run(1)
+				var rc := RunConfig if typeof(RunConfig) != TYPE_NIL else null
+				if rc == null:
+								return
+				if not rc.run_ready.is_connected(_on_run_config_ready):
+								rc.run_ready.connect(_on_run_config_ready)
+				if rc.has_method("is_run_ready") and bool(rc.call("is_run_ready")):
+								begin_run(1)
 
 func _on_run_config_ready() -> void:
-                begin_run(1)
+				begin_run(1)
 
 func reset_for_setup(start_turn: int = 1) -> void:
-                _run_active = false
-                _awaiting_commune_pick = false
-                _tile_placed_this_turn = false
-                turn_index = max(1, start_turn)
+				_run_active = false
+				_awaiting_commune_pick = false
+				_tile_placed_this_turn = false
+				turn_index = max(1, start_turn)
 
 func _autostart_if_ready() -> void:
-                if _run_active:
-                                return
-                if typeof(RunConfig) == TYPE_NIL:
-                                begin_run(turn_index)
-                                return
-                if RunConfig.has_method("is_run_ready") and RunConfig.is_run_ready():
-                                begin_run(max(1, int(turn_index)))
+				if _run_active:
+								return
+				if typeof(RunConfig) == TYPE_NIL:
+								begin_run(turn_index)
+								return
+				if RunConfig.has_method("is_run_ready") and RunConfig.is_run_ready():
+								begin_run(max(1, int(turn_index)))
 func begin_run(start_turn: int = 1) -> void:
 	turn_index = max(1, start_turn)
 	_awaiting_commune_pick = false
