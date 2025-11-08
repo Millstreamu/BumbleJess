@@ -1,8 +1,9 @@
 [
   {
 				"id": "sprout.woodling",
-				"name": "Woodling",
-				"icon": "",
+                                "name": "Woodling",
+                                "description": "Sturdy frontline sprout that shields groves while poking Decay with thorn jabs.",
+                                "icon": "",
 				"base_stats": {
 				  "hp": 35,
 		  "attack": 12,
@@ -23,8 +24,9 @@
   },
   {
 				"id": "sprout.sprite",
-				"name": "Sprite",
-				"icon": "",
+                                "name": "Sprite",
+                                "description": "Agile caster who flings amber shards from range, trading durability for speed.",
+                                "icon": "",
 				"base_stats": {
 		  "hp": 24,
 		  "attack": 8,
@@ -45,8 +47,9 @@
   },
   {
 				"id": "sprout.grumbler",
-				"name": "Grumbler",
-				"icon": "",
+                                "name": "Grumbler",
+                                "description": "Bulky guardian that shrugs off blows and batters foes with ashbloom bursts.",
+                                "icon": "",
 				"base_stats": {
 		  "hp": 42,
 		  "attack": 10,
@@ -67,8 +70,9 @@
   },
   {
 				"id": "sprout.trog",
-				"name": "Trog",
-				"icon": "",
+                                "name": "Trog",
+                                "description": "Relentless skirmisher that races ahead, pressing enemies with rapid strikes.",
+                                "icon": "",
 				"base_stats": {
 		  "hp": 30,
 		  "attack": 5,
