@@ -34,6 +34,7 @@ var cfg := {
 var debug_show_clusters := false
 
 var _world: Node = null
+var _hud: WorldHUD = null
 var _turn := 1
 var _last_spread_turn := 0
 var _threats: Dictionary = {}
@@ -64,14 +65,21 @@ func _emit_queue_update() -> void:
 
 const CAT_AGGRESSION := "Aggression"
 
-func _is_guard(c: Vector2i) -> bool:
-		if _world == null:
-				return false
-		var life_name := String(_world.get_cell_name(_world.LAYER_LIFE, c))
-		if life_name.is_empty():
-				return false
-		return CategoryMap.canonical(life_name) == CAT_AGGRESSION
 
+func _is_guard(c: Vector2i) -> bool:
+	if _world == null:
+		return false
+	var life_name := String(_world.get_cell_name(_world.LAYER_LIFE, c))
+	if life_name.is_empty():
+		return false
+	return CategoryMap.canonical(life_name) == CAT_AGGRESSION
+
+func _urgency_for_turns(turns: int) -> int:
+	if turns <= 1:
+		return 3
+	if turns == 2:
+		return 2
+	return 1
 
 func _threat_color(turns: int) -> Color:
 	var color := Color(1, 0.85, 0.2)
@@ -431,16 +439,26 @@ func _ready() -> void:
 		_connect_turn_engine()
 
 
+
 func bind_world(world: Node) -> void:
-		if _world != null and _world != world:
-				_clear_all_threats()
-		_world = world
-		_refresh_threat_list()
-		rescan_clusters()
-		_recompute_mirror_pool_protection()
-		if _world != null and _world.has_signal("tile_placed"):
-				if not _world.is_connected("tile_placed", Callable(self, "_on_world_tile_placed")):
-						_world.connect("tile_placed", Callable(self, "_on_world_tile_placed"))
+	if _world != null and _world != world:
+		_clear_all_threats()
+	_world = world
+	if is_instance_valid(_hud):
+		_hud.clear_threat_markers()
+	_hud = null
+	if _world != null:
+		var hud_candidate := _world.get_node_or_null("WorldHUD")
+		if hud_candidate is WorldHUD:
+			_hud = hud_candidate
+			_hud.clear_threat_markers()
+	_refresh_threat_list()
+	rescan_clusters()
+	_recompute_mirror_pool_protection()
+	if _world != null and _world.has_signal("tile_placed"):
+		if not _world.is_connected("tile_placed", Callable(self, "_on_world_tile_placed")):
+			_world.connect("tile_placed", Callable(self, "_on_world_tile_placed"))
+
 
 func _connect_turn_engine() -> void:
 		var turn_engine: Node = _get_turn_engine()
@@ -685,41 +703,37 @@ func _has_threat(c: Vector2i) -> bool:
 	return _threats.has(_threat_key(c))
 
 
+
 func _add_threat(c: Vector2i, turns: int, attacker_cell: Vector2i = Vector2i.ZERO) -> void:
-		var key := _threat_key(c)
-		if _is_guard(c):
-				return
-		if _threats.has(key):
-				return
-		_world.set_fx(c, "fx_threat")
-		var hud := _world.get_node_or_null("ThreatHUD")
-		var label: Label = null
-		var attacker_label: Label = null
-		if hud != null:
-				label = Label.new()
-				label.text = str(turns)
-				label.add_theme_color_override("font_color", _threat_color(turns))
-				label.add_theme_font_size_override("font_size", 16)
-				var pos: Vector2 = _world.world_pos_of_cell(c)
-				label.position = pos + Vector2(-8, -8)
-				hud.add_child(label)
-				if attacker_cell != Vector2i.ZERO and _is_decay(attacker_cell):
-						attacker_label = Label.new()
-						attacker_label.text = "!"
-						attacker_label.add_theme_font_size_override("font_size", 24)
-						attacker_label.add_theme_color_override("font_color", _attacker_indicator_color(turns))
-						attacker_label.z_index = 1
-						attacker_label.position = _world.world_pos_of_cell(attacker_cell) + Vector2(-12, -12)
-						hud.add_child(attacker_label)
-		_threats[key] = {
-				"cell": c,
-				"turns": turns,
-				"attacker": attacker_cell,
-				"label": label,
-				"attacker_label": attacker_label,
-		}
-		emit_signal("threat_started", c, turns)
-		_refresh_threat_list()
+	var key := _threat_key(c)
+	if _is_guard(c):
+		return
+	if _threats.has(key):
+		return
+	_world.set_fx(c, "fx_threat")
+	var record := {
+		"cell": c,
+		"turns": turns,
+		"attacker": attacker_cell,
+		"marker": null,
+	}
+	if is_instance_valid(_hud) and _world != null:
+		var viewport_pos := _world.world_pos_of_cell(c)
+		if _world.has_method("cell_to_viewport_position"):
+			var pos_variant: Variant = _world.call("cell_to_viewport_position", c)
+			if pos_variant is Vector2:
+				viewport_pos = pos_variant
+		elif _world.has_method("world_point_to_viewport"):
+			var vp_variant: Variant = _world.call("world_point_to_viewport", viewport_pos)
+			if vp_variant is Vector2:
+				viewport_pos = vp_variant
+		var marker := _hud.show_threat_marker(viewport_pos, _urgency_for_turns(turns))
+		record["marker"] = marker
+	_threats[key] = record
+	emit_signal("threat_started", c, turns)
+	_refresh_threat_list()
+
+
 
 
 func _update_threat(c: Vector2i, turns: int) -> void:
@@ -729,15 +743,13 @@ func _update_threat(c: Vector2i, turns: int) -> void:
 	var record: Dictionary = _threats[key]
 	record["turns"] = turns
 	_threats[key] = record
-	var label: Label = record.get("label")
-	if is_instance_valid(label):
-		label.text = str(turns)
-		label.add_theme_color_override("font_color", _threat_color(turns))
-	var attacker_label: Label = record.get("attacker_label")
-	if is_instance_valid(attacker_label):
-		attacker_label.add_theme_color_override("font_color", _attacker_indicator_color(turns))
+	var marker_variant: Variant = record.get("marker")
+	if marker_variant is ThreatMarker:
+		(marker_variant as ThreatMarker).set_urgency(_urgency_for_turns(turns))
 	emit_signal("threat_updated", c, turns)
 	_refresh_threat_list()
+
+
 
 
 func _clear_threat(c: Vector2i) -> void:
@@ -745,17 +757,15 @@ func _clear_threat(c: Vector2i) -> void:
 	if not _threats.has(key):
 		return
 	var record: Dictionary = _threats[key]
-	var label: Label = record.get("label")
-	if is_instance_valid(label):
-		label.queue_free()
-	var attacker_label: Label = record.get("attacker_label")
-	if is_instance_valid(attacker_label):
-		attacker_label.queue_free()
+	var marker_variant: Variant = record.get("marker")
+	if marker_variant is Node and is_instance_valid(marker_variant):
+		(marker_variant as Node).queue_free()
 	if _world != null:
 		_world.clear_fx(record.get("cell", c))
 	_threats.erase(key)
 	_refresh_threat_list()
 	_refresh_cluster_fx_overlay()
+
 
 
 func _tick_and_trigger_battles() -> void:
@@ -1026,7 +1036,10 @@ func _rules_for_tile(tile_id: String) -> Dictionary:
 	return found_variant if found_variant is Dictionary else {}
 
 
+
 func _clear_all_threats() -> void:
+	if is_instance_valid(_hud):
+		_hud.clear_threat_markers()
 	var keys := _threats.keys()
 	for key in keys:
 		var record: Dictionary = _threats[key]
@@ -1035,3 +1048,4 @@ func _clear_all_threats() -> void:
 	_threats.clear()
 	_refresh_threat_list()
 	_refresh_cluster_fx_overlay()
+
