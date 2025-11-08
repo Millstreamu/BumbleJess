@@ -914,7 +914,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			sr_viewport.set_input_as_handled()
 		return
 
-	if event.is_action_pressed("ui_toggle_threats"):
+	if InputMap.has_action("ui_toggle_threats") and event.is_action_pressed("ui_toggle_threats"):
 		var threat_list: Control = get_node_or_null("ThreatHUD/ThreatList")
 		if threat_list != null:
 			threat_list.visible = not threat_list.visible
