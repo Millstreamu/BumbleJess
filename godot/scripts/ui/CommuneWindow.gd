@@ -9,9 +9,10 @@ var _pending_choices: Array = []
 var _battle_ui_active := false
 
 func _ready() -> void:
-	visible = false
+        set_process_unhandled_input(true)
+        visible = false
 
-	if typeof(CommuneManager) != TYPE_NIL:
+        if typeof(CommuneManager) != TYPE_NIL:
 		if not CommuneManager.offer_ready.is_connected(_on_offer):
 			CommuneManager.offer_ready.connect(_on_offer)
 
@@ -21,8 +22,16 @@ func _ready() -> void:
 		if not CommuneManager.cleared.is_connected(_on_cleared):
 			CommuneManager.cleared.connect(_on_cleared)
 
-	_bind_battle_manager()
+        _bind_battle_manager()
 
+
+func _unhandled_input(event: InputEvent) -> void:
+        if not visible:
+                return
+        if event.is_action_pressed("ui_cancel"):
+                var viewport := get_viewport()
+                if viewport != null:
+                        viewport.set_input_as_handled()
 
 func _bind_battle_manager() -> void:
 				if typeof(BattleManager) == TYPE_NIL:
