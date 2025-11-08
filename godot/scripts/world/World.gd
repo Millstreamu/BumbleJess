@@ -85,13 +85,19 @@ func _connect_turn_engine_signals() -> void:
 				turn_engine.connect("turn_changed", Callable(self, "_on_turn_engine_turn_changed"))
 
 func _ensure_turn_engine_run_started() -> void:
-		var turn_engine: Node = _get_turn_engine()
-		if turn_engine == null:
-				return
-		if turn_engine.has_method("is_run_active") and bool(turn_engine.call("is_run_active")):
-				return
-		if turn_engine.has_method("begin_run"):
-				turn_engine.call("begin_run")
+                var turn_engine: Node = _get_turn_engine()
+                if turn_engine == null:
+                                return
+                if turn_engine.has_method("is_run_active") and bool(turn_engine.call("is_run_active")):
+                                return
+                if typeof(RunConfig) != TYPE_NIL:
+                                var ready := true
+                                if RunConfig.has_method("is_run_ready"):
+                                                ready = bool(RunConfig.is_run_ready())
+                                if not ready:
+                                                return
+                if turn_engine.has_method("begin_run"):
+                                turn_engine.call("begin_run")
 
 func _sync_turn_with_engine(should_update_hud: bool = false) -> void:
 	var new_turn: int = max(turn, 1)
