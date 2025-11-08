@@ -3,6 +3,11 @@ class_name SproutCard
 
 signal pressed(card_id: String)
 
+const PANEL_COLOR_DEFAULT := Color(1, 1, 1, 0)
+const PANEL_COLOR_FOCUSED := Color(0.85, 0.9, 1, 0.15)
+const PANEL_COLOR_SELECTED := Color(1, 0.94, 0.6, 0.35)
+const PANEL_COLOR_SELECTED_FOCUSED := Color(0.9, 1, 0.7, 0.45)
+
 @export var card_id: String = ""
 @export var base_size: Vector2 = Vector2(640, 220)
 @export var portrait: Texture2D
@@ -29,6 +34,7 @@ signal pressed(card_id: String)
 var _name_target_font: int = 20
 var _text_target_font: int = 14
 var _body_adjust_queued: bool = false
+var _selected: bool = false
 
 func _ready() -> void:
 	focus_mode = Control.FOCUS_ALL
@@ -40,6 +46,7 @@ func _ready() -> void:
 	connect("focus_entered", _on_focus_entered)
 	connect("focus_exited", _on_focus_exited)
 	connect("mouse_entered", Callable(self, "_on_mouse_entered"))
+	_apply_selection_style()
 
 func _on_mouse_entered() -> void:
 	grab_focus()
@@ -73,16 +80,27 @@ func _apply() -> void:
 	else:
 		_portrait.texture = null
 	_refresh_layout()
+	_apply_selection_style()
+
+func set_selected(selected: bool) -> void:
+	var wanted := bool(selected)
+	if wanted == _selected:
+		return
+	_selected = wanted
+	_apply_selection_style()
+
+func is_selected() -> bool:
+	return _selected
 
 func _on_gui_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_accept"):
 		emit_signal("pressed", card_id)
 
 func _on_focus_entered() -> void:
-	add_theme_color_override("panel", Color(0.85, 0.9, 1, 0.15))
+	_apply_selection_style()
 
 func _on_focus_exited() -> void:
-	add_theme_color_override("panel", Color(1, 1, 1, 0))
+	_apply_selection_style()
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_RESIZED:
@@ -158,3 +176,13 @@ func _set_desc_line_limit(available_height: float) -> void:
 		_desc.max_lines_visible = 1
 	else:
 		_desc.max_lines_visible = max_lines
+
+func _apply_selection_style() -> void:
+	if not is_inside_tree():
+		return
+	var color := PANEL_COLOR_DEFAULT
+	if _selected:
+		color = PANEL_COLOR_SELECTED
+	if has_focus():
+		color = PANEL_COLOR_FOCUSED if not _selected else PANEL_COLOR_SELECTED_FOCUSED
+	add_theme_color_override("panel", color)
