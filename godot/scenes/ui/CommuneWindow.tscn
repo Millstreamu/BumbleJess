@@ -17,7 +17,7 @@ offset_top = -120.0
 offset_right = 440.0
 offset_bottom = 120.0
 
-[node name="Row" type="HBoxContainer" parent="Panel"]
+[node name="Row" type="GridContainer" parent="Panel"]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -27,4 +27,6 @@ offset_right = -16.0
 offset_bottom = -16.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/separation = 16
+columns = 3
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 16

@@ -1,0 +1,87 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://ui/cards/BaseCard.gd" id="1_b6l45"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0i3bq"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+bg_color = Color(0.05098, 0.062745, 0.078431, 1)
+border_width_top = 1
+border_width_bottom = 1
+border_width_left = 1
+border_width_right = 1
+border_color = Color(0.152941, 0.188235, 0.223529, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[node name="BaseCard" type="Panel"]
+custom_minimum_size = Vector2(280, 360)
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 1
+focus_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_0i3bq")
+script = ExtResource("1_b6l45")
+
+[node name="Chosen" type="Label" parent="."]
+visible = false
+layout_mode = 0
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -32.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = 32.0
+text = "✓"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Root" type="VBoxContainer" parent="."]
+layout_mode = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = -12.0
+size_flags_horizontal = 3
+size_flags_vertical = 4
+alignment = 1
+separation = 6
+
+[node name="ArtWrap" type="AspectRatioContainer" parent="Root"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+stretch_mode = 0
+ratio = 1.0
+
+[node name="Art" type="TextureRect" parent="Root/ArtWrap"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="Root"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+clip_text = true
+uppercase = false
+horizontal_alignment = 0
+vertical_alignment = 1
+
+[node name="Body" type="RichTextLabel" parent="Root"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+fit_content = false
+autowrap_mode = 2
+scroll_active = false
+bbcode_enabled = true

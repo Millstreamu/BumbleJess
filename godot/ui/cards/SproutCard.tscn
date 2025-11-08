@@ -1,0 +1,150 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://ui/cards/SproutCard.gd" id="1_kc5v3"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1n9h8"]
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+bg_color = Color(0.05098, 0.062745, 0.078431, 1)
+border_width_top = 1
+border_width_bottom = 1
+border_width_left = 1
+border_width_right = 1
+border_color = Color(0.152941, 0.188235, 0.223529, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2q4d0"]
+bg_color = Color(0.141176, 0.168627, 0.203922, 1)
+corner_radius_top_left = 128
+corner_radius_top_right = 128
+corner_radius_bottom_right = 128
+corner_radius_bottom_left = 128
+
+[node name="SproutCard" type="Panel"]
+custom_minimum_size = Vector2(640, 220)
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 1
+focus_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_1n9h8")
+script = ExtResource("1_kc5v3")
+
+[node name="Chosen" type="Label" parent="."]
+visible = false
+layout_mode = 0
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -32.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = 32.0
+text = "✓"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = -16.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+separation = 16
+alignment = 1
+
+[node name="PortraitWrap" type="Panel" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 1
+size_flags_vertical = 3
+clip_children = true
+custom_minimum_size = Vector2(180, 180)
+theme_override_styles/panel = SubResource("StyleBoxFlat_2q4d0")
+
+[node name="Portrait" type="TextureRect" parent="HBoxContainer/PortraitWrap"]
+layout_mode = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 1
+
+[node name="Text" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+separation = 6
+alignment = 1
+
+[node name="Name" type="Label" parent="HBoxContainer/Text"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+clip_text = true
+horizontal_alignment = 0
+vertical_alignment = 1
+
+[node name="StatsRow" type="HBoxContainer" parent="HBoxContainer/Text"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+separation = 8
+alignment = 1
+
+[node name="HP" type="Label" parent="HBoxContainer/Text/StatsRow"]
+layout_mode = 2
+size_flags_horizontal = 1
+size_flags_vertical = 1
+horizontal_alignment = 0
+
+[node name="ATK" type="Label" parent="HBoxContainer/Text/StatsRow"]
+layout_mode = 2
+size_flags_horizontal = 1
+size_flags_vertical = 1
+horizontal_alignment = 0
+
+[node name="SPD" type="Label" parent="HBoxContainer/Text/StatsRow"]
+layout_mode = 2
+size_flags_horizontal = 1
+size_flags_vertical = 1
+horizontal_alignment = 0
+
+[node name="AttackName" type="Label" parent="HBoxContainer/Text"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+clip_text = true
+horizontal_alignment = 0
+vertical_alignment = 1
+
+[node name="PassiveName" type="Label" parent="HBoxContainer/Text"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+clip_text = true
+horizontal_alignment = 0
+vertical_alignment = 1
+
+[node name="Desc" type="RichTextLabel" parent="HBoxContainer/Text"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+fit_content = false
+autowrap_mode = 2
+scroll_active = false
+bbcode_enabled = true

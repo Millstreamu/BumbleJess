@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://ui/hud/WorldHUD.gd" id="1"]
 [ext_resource type="PackedScene" path="res://ui/hud/ResourcePanel.tscn" id="2"]
-[ext_resource type="PackedScene" path="res://ui/hud/TileCard.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://ui/cards/TileSelectCard.tscn" id="3"]
 
 [node name="WorldHUD" type="CanvasLayer"]
 script = ExtResource("1")
@@ -52,6 +52,7 @@ offset_right = 360.0
 offset_bottom = -20.0
 
 [node name="TileCard" parent="BottomLeft" instance=ExtResource("3")]
+base_size = Vector2(240, 320)
 
 [node name="TopRight" type="Control" parent="."]
 anchors_preset = 5

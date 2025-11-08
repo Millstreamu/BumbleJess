@@ -7,7 +7,7 @@ signal cancelled()
 const MAX_SELECTION := 6
 const RESOURCE_ORDER := ["nature", "earth", "water"]
 
-@export var sprout_card_scene: PackedScene = preload("res://scenes/battle/SproutCard.tscn")
+@export var sprout_card_scene: PackedScene = preload("res://ui/cards/SproutCard.tscn")
 @export var roster_grid_path: NodePath
 @export var selected_grid_path: NodePath
 @export var confirm_btn_path: NodePath
@@ -134,12 +134,13 @@ func _build_roster() -> void:
 		if card:
 			roster_grid.add_child(card)
 
-func _make_card(entry: Dictionary, idx: int) -> Button:
-		var card: Button
-		if sprout_card_scene:
-				card = sprout_card_scene.instantiate() as Button
+func _make_card(entry: Dictionary, idx: int) -> Control:
+		var node := sprout_card_scene.instantiate() if sprout_card_scene else null
+		if node == null:
+				node = SproutCard.new()
+		var card := node as SproutCard
 		if card == null:
-				card = Button.new()
+				return node as Control
 		var id := String(entry.get("id", "sprout.woodling"))
 		var level := int(entry.get("level", 1))
 		var uid := String(entry.get("uid", ""))
@@ -147,6 +148,17 @@ func _make_card(entry: Dictionary, idx: int) -> Button:
 		if not uid.is_empty():
 				display_name = "%s [%s]" % [display_name, uid]
 		var stats_text: String = SproutRegistry.short_stats_label(id, level)
+		var stats := SproutRegistry.compute_stats(id, level)
+		var hp_val := int(stats.get("hp", 0))
+		var atk_val := int(stats.get("attack", 0))
+		var spd_val := float(stats.get("attack_speed", 0.0))
+		if hp_val == 0 and atk_val == 0 and spd_val == 0.0:
+				var base_stats: Variant = entry.get("base_stats", {})
+				if base_stats is Dictionary:
+						var base_dict := base_stats as Dictionary
+						hp_val = int(base_dict.get("hp", hp_val))
+						atk_val = int(base_dict.get("attack", atk_val))
+						spd_val = float(base_dict.get("attack_speed", spd_val))
 		var sprout_def: Dictionary = SproutRegistry.get_by_id(id)
 		var attack_text := _format_attack_label(String(sprout_def.get("attack_id", "")))
 		var passive_ids: Array = []
@@ -155,36 +167,23 @@ func _make_card(entry: Dictionary, idx: int) -> Button:
 				passive_ids = passive_variant
 		var passive_text := _format_passive_label(passive_ids)
 		var desc_text := String(sprout_def.get("description", ""))
+		if desc_text.strip_edges().is_empty():
+				desc_text = "—"
 		var portrait_texture: Texture2D = _load_texture(String(sprout_def.get("icon", "")))
-		var card_ui := card as SproutCardUI
-		if card_ui:
-				card_ui.set_display_name(display_name)
-				card_ui.set_stats(stats_text)
-				card_ui.set_attack_name(attack_text)
-				card_ui.set_passive_names(passive_text)
-				card_ui.set_description(desc_text)
-				card_ui.set_portrait_texture(portrait_texture)
-		else:
-				var name_label: Label = card.get_node_or_null("Content/Details/NameRow/Name")
-				if name_label:
-						name_label.text = display_name
-				var stats_label: Label = card.get_node_or_null("Content/Details/Stats")
-				if stats_label:
-						stats_label.text = stats_text
-				var attack_label: Label = card.get_node_or_null("Content/Details/Attack")
-				if attack_label:
-						attack_label.text = attack_text
-				var passive_label: Label = card.get_node_or_null("Content/Details/Passive")
-				if passive_label:
-						passive_label.text = passive_text
-				var desc_label: RichTextLabel = card.get_node_or_null("Content/Details/Description")
-				if desc_label:
-						var trimmed := desc_text.strip_edges()
-						desc_label.text = trimmed if not trimmed.is_empty() else "—"
-				var portrait_rect: TextureRect = card.get_node_or_null("Content/Portrait/Icon")
-				if portrait_rect:
-						portrait_rect.texture = portrait_texture
-		card.pressed.connect(func() -> void:
+		card.set_data({
+				"id": uid if not uid.is_empty() else id,
+				"name": display_name,
+				"hp": hp_val,
+				"atk": atk_val,
+				"spd": spd_val,
+				"attack_name": attack_text,
+				"passive_name": passive_text,
+				"desc": desc_text,
+				"portrait": portrait_texture
+		})
+		if not stats_text.is_empty():
+				card.tooltip_text = stats_text
+		card.pressed.connect(func(_card_id: String) -> void:
 				_try_add(idx)
 		)
 		return card
