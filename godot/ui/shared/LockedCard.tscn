@@ -1,0 +1,45 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://ui/shared/LockedCard.gd" id="1_q6nps"]
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_icon"]
+size = Vector2i(96, 96)
+color = Color(0.6, 0.8, 0.6, 1)
+
+[node name="LockedCard" type="Panel"]
+custom_minimum_size = Vector2(160, 180)
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_q6nps")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+alignment = 1
+size_flags_horizontal = 3
+size_flags_vertical = 3
+separation = 8
+
+[node name="TextureRect" type="TextureRect" parent="VBoxContainer"]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+stretch_mode = 5
+expand_mode = 1
+texture = SubResource("PlaceholderTexture2D_icon")
+
+[node name="Name" type="Label" parent="VBoxContainer"]
+text = "Locked"
+horizontal_alignment = 1
+vertical_alignment = 1
+size_flags_horizontal = 3
+
+[node name="Index" type="Label" parent="VBoxContainer"]
+text = "#"
+horizontal_alignment = 1
+vertical_alignment = 1
+size_flags_horizontal = 3
+

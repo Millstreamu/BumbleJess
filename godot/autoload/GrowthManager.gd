@@ -8,7 +8,6 @@ var _world: Node = null
 var _turn: int = 1
 var _growth_mult := 1.0
 var _overgrowth_born: Dictionary = {}
-var _tmp_reachable_from_edge: Dictionary = {}
 var _born_turn: Dictionary = {}
 var _tile_rules_cache: Dictionary = {}
 
@@ -17,11 +16,10 @@ func _ready() -> void:
 		_connect_world_signal()
 
 func bind_world(world: Node) -> void:
-	_world = world
-	_overgrowth_born.clear()
-	_tmp_reachable_from_edge.clear()
-	_born_turn.clear()
-	_connect_world_signal()
+        _world = world
+        _overgrowth_born.clear()
+        _born_turn.clear()
+        _connect_world_signal()
 
 func tick_growth_phase(turn: int) -> void:
 		_turn = max(turn, 1)
@@ -95,70 +93,24 @@ func _run_growth_cycle() -> void:
 		_world._update_hud()
 
 func _recompute_overgrowth() -> void:
-	if _world == null:
-		return
-	var width: int = _world.width
-	var height: int = _world.height
-	if width <= 0 or height <= 0:
-		return
+        if _world == null:
+                return
+        var width: int = _world.width
+        var height: int = _world.height
+        if width <= 0 or height <= 0:
+                return
 
-	var empty := PackedByteArray()
-	empty.resize(width * height)
-	for y in range(height):
-		for x in range(width):
-			var cell := Vector2i(x, y)
-			var object_name: String = _world.get_cell_name(_world.LAYER_OBJECTS, cell)
-			var life_name: String = _world.get_cell_name(_world.LAYER_LIFE, cell)
-			var has_object: bool = not (object_name.is_empty() or object_name == "empty")
-			var has_life: bool = not (life_name.is_empty() or life_name == "empty")
-			empty[y * width + x] = 1 if (not has_object and not has_life) else 0
-
-	_tmp_reachable_from_edge.clear()
-	var queue: Array[Vector2i] = []
-
-	for x in range(width):
-		if empty[0 * width + x] == 1:
-			queue.append(Vector2i(x, 0))
-		if empty[(height - 1) * width + x] == 1:
-			queue.append(Vector2i(x, height - 1))
-	for y in range(height):
-		if empty[y * width + 0] == 1:
-			queue.append(Vector2i(0, y))
-		if empty[y * width + (width - 1)] == 1:
-			queue.append(Vector2i(width - 1, y))
-
-	while queue.size() > 0:
-		var cell: Vector2i = queue.pop_back()
-		var cell_hash := _hash_cell(cell, width)
-		if _tmp_reachable_from_edge.has(cell_hash):
-			continue
-		_tmp_reachable_from_edge[cell_hash] = true
-		for neighbor in _world.neighbors_even_q(cell):
-			if empty[neighbor.y * width + neighbor.x] == 1:
-				var neighbor_hash := _hash_cell(neighbor, width)
-				if not _tmp_reachable_from_edge.has(neighbor_hash):
-					queue.append(neighbor)
-
-	for y in range(height):
-		for x in range(width):
-			if empty[y * width + x] != 1:
-				continue
-			var cell := Vector2i(x, y)
-			var cell_hash := _hash_cell(cell, width)
-			var reachable := _tmp_reachable_from_edge.has(cell_hash)
-			var life_name: String = _world.get_cell_name(_world.LAYER_LIFE, cell)
-			if not reachable:
-				if life_name == "" or life_name == "empty":
-										_world.set_cell_named(_world.LAYER_LIFE, cell, "overgrowth")
-										if _world.has_method("set_fx"):
-												_world.set_fx(cell, "fx_bloom_hint")
-										if not _overgrowth_born.has(cell_hash):
-												_overgrowth_born[cell_hash] = _turn
-			else:
-				if _overgrowth_born.has(cell_hash):
-					_overgrowth_born.erase(cell_hash)
-				if life_name == "overgrowth":
-					_world.set_cell_named(_world.LAYER_LIFE, cell, "empty")
+        for y in range(height):
+                for x in range(width):
+                        var cell := Vector2i(x, y)
+                        var cell_hash := _hash_cell(cell, width)
+                        var life_name: String = _world.get_cell_name(_world.LAYER_LIFE, cell)
+                        if life_name == "overgrowth":
+                                if not _overgrowth_born.has(cell_hash):
+                                        _overgrowth_born[cell_hash] = _turn
+                        else:
+                                if _overgrowth_born.has(cell_hash):
+                                        _overgrowth_born.erase(cell_hash)
 
 func _handle_decay_contact() -> void:
 	if _world == null:

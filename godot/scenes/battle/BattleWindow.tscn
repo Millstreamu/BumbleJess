@@ -6,13 +6,16 @@
 [node name="BattleWindow" type="CanvasLayer"]
 layer = 5
 script = ExtResource("1")
-sprout_grid_path = NodePath("Frame/Layout/LeftCol/SproutGrid")
-decay_grid_path = NodePath("Frame/Layout/RightCol/DecayGrid")
-status_label_path = NodePath("Frame/Layout/MidCol/StatusLabel")
-select_btn_path = NodePath("Frame/Layout/MidCol/SelectBtn")
-start_btn_path = NodePath("Frame/Layout/MidCol/StartButton")
-close_btn_path = NodePath("Frame/Layout/MidCol/CloseButton")
-time_bar_path = NodePath("Frame/Layout/MidCol/TimeBar")
+sprout_grid_path = NodePath("Frame/Layout/ContentRow/LeftCol/SproutGrid")
+decay_grid_path = NodePath("Frame/Layout/ContentRow/RightCol/DecayGrid")
+status_label_path = NodePath("Frame/PreModal/StatusLabel")
+start_btn_path = NodePath("Frame/PreModal/ButtonContainer/StartButton")
+edit_btn_path = NodePath("Frame/PreModal/ButtonContainer/EditButton")
+continue_btn_path = NodePath("Frame/ContinueButton")
+result_banner_path = NodePath("Frame/ResultBanner")
+result_label_path = NodePath("Frame/ResultBanner/ResultLabel")
+time_bar_path = NodePath("Frame/Layout/TitleRow/TimeBar")
+pre_modal_path = NodePath("Frame/PreModal")
 
 [node name="Backdrop" type="ColorRect" parent="."]
 anchors_preset = 15
@@ -29,13 +32,13 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -460.0
-offset_top = -260.0
-offset_right = 460.0
-offset_bottom = 260.0
+offset_left = -500.0
+offset_top = -280.0
+offset_right = 500.0
+offset_bottom = 280.0
 mouse_filter = 2
 
-[node name="Layout" type="HBoxContainer" parent="Frame"]
+[node name="Layout" type="VBoxContainer" parent="Frame"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -47,101 +50,188 @@ offset_bottom = -24.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="LeftCol" type="VBoxContainer" parent="Frame/Layout"]
+[node name="TitleRow" type="HBoxContainer" parent="Frame/Layout"]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 1
 
-[node name="Label" type="Label" parent="Frame/Layout/LeftCol"]
+[node name="Title" type="Label" parent="Frame/Layout/TitleRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Battle"
+vertical_alignment = 1
+
+[node name="TimeBar" type="ProgressBar" parent="Frame/Layout/TitleRow"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 100.0
+
+[node name="ContentRow" type="HBoxContainer" parent="Frame/Layout"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 480)
+separation = 32
+
+[node name="LeftCol" type="VBoxContainer" parent="Frame/Layout/ContentRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="SproutsLabel" type="Label" parent="Frame/Layout/ContentRow/LeftCol"]
 layout_mode = 2
 text = "Sprouts"
 
-[node name="SproutGrid" type="GridContainer" parent="Frame/Layout/LeftCol"]
+[node name="SproutGrid" type="GridContainer" parent="Frame/Layout/ContentRow/LeftCol"]
 custom_minimum_size = Vector2(360, 360)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 columns = 3
 
-[node name="SproutSlot1" parent="Frame/Layout/LeftCol/SproutGrid" instance=ExtResource("2")]
+[node name="SproutSlot1" parent="Frame/Layout/ContentRow/LeftCol/SproutGrid" instance=ExtResource("2")]
 custom_minimum_size = Vector2(120, 120)
 layout_mode = 2
 
-[node name="SproutSlot2" parent="Frame/Layout/LeftCol/SproutGrid" instance=ExtResource("2")]
+[node name="SproutSlot2" parent="Frame/Layout/ContentRow/LeftCol/SproutGrid" instance=ExtResource("2")]
 custom_minimum_size = Vector2(120, 120)
 layout_mode = 2
 
-[node name="SproutSlot3" parent="Frame/Layout/LeftCol/SproutGrid" instance=ExtResource("2")]
+[node name="SproutSlot3" parent="Frame/Layout/ContentRow/LeftCol/SproutGrid" instance=ExtResource("2")]
 custom_minimum_size = Vector2(120, 120)
 layout_mode = 2
 
-[node name="SproutSlot4" parent="Frame/Layout/LeftCol/SproutGrid" instance=ExtResource("2")]
+[node name="SproutSlot4" parent="Frame/Layout/ContentRow/LeftCol/SproutGrid" instance=ExtResource("2")]
 custom_minimum_size = Vector2(120, 120)
 layout_mode = 2
 
-[node name="SproutSlot5" parent="Frame/Layout/LeftCol/SproutGrid" instance=ExtResource("2")]
+[node name="SproutSlot5" parent="Frame/Layout/ContentRow/LeftCol/SproutGrid" instance=ExtResource("2")]
 custom_minimum_size = Vector2(120, 120)
 layout_mode = 2
 
-[node name="SproutSlot6" parent="Frame/Layout/LeftCol/SproutGrid" instance=ExtResource("2")]
+[node name="SproutSlot6" parent="Frame/Layout/ContentRow/LeftCol/SproutGrid" instance=ExtResource("2")]
 custom_minimum_size = Vector2(120, 120)
 layout_mode = 2
 
-[node name="MidCol" type="VBoxContainer" parent="Frame/Layout"]
-custom_minimum_size = Vector2(160, 0)
-layout_mode = 2
-alignment = 1
-
-[node name="StatusLabel" type="Label" parent="Frame/Layout/MidCol"]
-layout_mode = 2
-text = "Ready"
-horizontal_alignment = 1
-
-[node name="SelectBtn" type="Button" parent="Frame/Layout/MidCol"]
-layout_mode = 2
-text = "Select Team"
-
-[node name="StartButton" type="Button" parent="Frame/Layout/MidCol"]
-layout_mode = 2
-text = "Start"
-
-[node name="TimeBar" type="ProgressBar" parent="Frame/Layout/MidCol"]
+[node name="RightCol" type="VBoxContainer" parent="Frame/Layout/ContentRow"]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 3
 
-[node name="CloseButton" type="Button" parent="Frame/Layout/MidCol"]
-layout_mode = 2
-disabled = true
-text = "Close"
-
-[node name="RightCol" type="VBoxContainer" parent="Frame/Layout"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="Label" type="Label" parent="Frame/Layout/RightCol"]
+[node name="DecayLabel" type="Label" parent="Frame/Layout/ContentRow/RightCol"]
 layout_mode = 2
 text = "Decay"
+horizontal_alignment = 2
 
-[node name="DecayGrid" type="GridContainer" parent="Frame/Layout/RightCol"]
-custom_minimum_size = Vector2(360, 320)
+[node name="DecayGrid" type="GridContainer" parent="Frame/Layout/ContentRow/RightCol"]
+custom_minimum_size = Vector2(360, 360)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 columns = 3
 
-[node name="DecaySlot1" parent="Frame/Layout/RightCol/DecayGrid" instance=ExtResource("2")]
+[node name="DecaySlot1" parent="Frame/Layout/ContentRow/RightCol/DecayGrid" instance=ExtResource("2")]
 layout_mode = 2
 
-[node name="DecaySlot2" parent="Frame/Layout/RightCol/DecayGrid" instance=ExtResource("2")]
+[node name="DecaySlot2" parent="Frame/Layout/ContentRow/RightCol/DecayGrid" instance=ExtResource("2")]
 layout_mode = 2
 
-[node name="DecaySlot3" parent="Frame/Layout/RightCol/DecayGrid" instance=ExtResource("2")]
+[node name="DecaySlot3" parent="Frame/Layout/ContentRow/RightCol/DecayGrid" instance=ExtResource("2")]
 layout_mode = 2
 
-[node name="DecaySlot4" parent="Frame/Layout/RightCol/DecayGrid" instance=ExtResource("2")]
+[node name="DecaySlot4" parent="Frame/Layout/ContentRow/RightCol/DecayGrid" instance=ExtResource("2")]
 layout_mode = 2
 
-[node name="DecaySlot5" parent="Frame/Layout/RightCol/DecayGrid" instance=ExtResource("2")]
+[node name="DecaySlot5" parent="Frame/Layout/ContentRow/RightCol/DecayGrid" instance=ExtResource("2")]
 layout_mode = 2
 
-[node name="DecaySlot6" parent="Frame/Layout/RightCol/DecayGrid" instance=ExtResource("2")]
+[node name="DecaySlot6" parent="Frame/Layout/ContentRow/RightCol/DecayGrid" instance=ExtResource("2")]
 layout_mode = 2
+
+[node name="PreModal" type="Panel" parent="Frame"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = -120.0
+offset_right = 160.0
+offset_bottom = 120.0
+
+[node name="ModalLayout" type="VBoxContainer" parent="Frame/PreModal"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = -16.0
+custom_constants/separation = 12
+alignment = 1
+
+[node name="ModalTitle" type="Label" parent="Frame/PreModal/ModalLayout"]
+layout_mode = 2
+text = "Prepare for Battle"
+horizontal_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="Frame/PreModal/ModalLayout"]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="ButtonContainer" type="VBoxContainer" parent="Frame/PreModal/ModalLayout"]
+layout_mode = 2
+alignment = 1
+custom_constants/separation = 8
+
+[node name="StartButton" type="Button" parent="Frame/PreModal/ModalLayout/ButtonContainer"]
+layout_mode = 2
+text = "Start Battle"
+
+[node name="EditButton" type="Button" parent="Frame/PreModal/ModalLayout/ButtonContainer"]
+layout_mode = 2
+text = "Edit Team"
+
+[node name="ModalHint" type="Label" parent="Frame/PreModal/ModalLayout"]
+layout_mode = 2
+text = "Press Z to cancel"
+horizontal_alignment = 1
+
+[node name="ResultBanner" type="Panel" parent="Frame"]
+visible = false
+layout_mode = 1
+anchors_preset = 10
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -160.0
+offset_top = 16.0
+offset_right = 160.0
+offset_bottom = 72.0
+
+[node name="ResultLabel" type="Label" parent="Frame/ResultBanner"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "Victory"
+
+[node name="ContinueButton" type="Button" parent="Frame"]
+visible = false
+layout_mode = 1
+anchors_preset = 12
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -80.0
+offset_top = -64.0
+offset_right = 80.0
+offset_bottom = -16.0
+text = "Continue"
+
