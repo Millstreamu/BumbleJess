@@ -91,15 +91,17 @@ func _notification(what: int) -> void:
 func _refresh_layout() -> void:
 	if not is_inside_tree():
 		return
+	if _portrait_wrap == null:
+		return
 
 	var inner_h: float = max(size.y - 32.0, 1.0)
 	_portrait_wrap.custom_minimum_size = Vector2(inner_h, inner_h)
 
 	var inner_w: float = max(size.x - 32.0, 1.0)
-	var scale: float = clamp(inner_w / max(base_size.x - 32.0, 1.0), 0.6, 1.8)
+	var scale_factor: float = clamp(inner_w / max(base_size.x - 32.0, 1.0), 0.6, 1.8)
 
-	_name_target_font = clamp(roundi(20.0 * scale), 16, 26)
-	_text_target_font = clamp(roundi(14.0 * scale), 11, 18)
+	_name_target_font = clamp(roundi(20.0 * scale_factor), 16, 26)
+	_text_target_font = clamp(roundi(14.0 * scale_factor), 11, 18)
 
 	_name.add_theme_font_size_override("font_size", _name_target_font)
 	_atk_name.add_theme_font_size_override("font_size", _text_target_font)

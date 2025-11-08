@@ -90,9 +90,9 @@ func _process(delta: float) -> void:
 	_auto_attacks()
 	_refresh_ui()
 
-	var state: String = _check_end()
-	if state != "":
-		_finish(state)
+	var outcome: String = _check_end()
+	if outcome != "":
+		_finish(outcome)
 	elif elapsed >= time_limit:
 		_finish("timeout")
 
@@ -455,21 +455,21 @@ func _check_end() -> String:
 		return "victory"
 	return ""
 
-func _finish(state: String) -> void:
+func _finish(outcome: String) -> void:
 		running = false
 		_refresh_ui()
-		var victory: bool = state == "victory"
+		var victory: bool = outcome == "victory"
 		var rewards: Dictionary = {"life": LIFE_REWARD if victory else 0}
 		var result: Dictionary = {
 				"victory": victory,
-				"outcome": state,
+				"outcome": outcome,
 				"rewards": rewards,
 				"target_cell": encounter.get("target", Vector2i.ZERO),
 				"attacker_cell": encounter.get("attacker", Vector2i.ZERO),
 		}
 		last_result = result
 		if result_label:
-				result_label.text = state.capitalize()
+				result_label.text = outcome.capitalize()
 		_set_state("result_banner")
 		emit_signal("battle_finished", result)
 
