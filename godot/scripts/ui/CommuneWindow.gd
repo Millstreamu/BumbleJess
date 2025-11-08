@@ -1,9 +1,9 @@
 extends CanvasLayer
 class_name CommuneWindow
 
-const CARD_SCENE := preload("res://scenes/ui/CommuneCard.tscn")
+const CARD_SCENE := preload("res://ui/cards/TileSelectCard.tscn")
 
-@onready var row: HBoxContainer = $"Panel/Row"
+@onready var row: GridContainer = $"Panel/Row"
 
 var _pending_choices: Array = []
 var _battle_ui_active := false
@@ -68,42 +68,44 @@ func _on_battle_ui_closed() -> void:
 				_display_offer(choices)
 
 func _clear_cards() -> void:
-				for child in row.get_children():
-								var node := child as Node
-								if node != null:
-												node.queue_free()
+	for child in row.get_children():
+		var node := child as Node
+		if node != null:
+			node.queue_free()
 
 func _display_offer(choices: Array) -> void:
-				_clear_cards()
-				var added_any := false
-				for choice_variant in choices:
-								if not (choice_variant is Dictionary):
-												continue
-								var tile_def: Dictionary = choice_variant
-								var btn := CARD_SCENE.instantiate() as Button
-								if btn == null:
-												continue
-								var name_label := btn.get_node_or_null("Name") as Label
-								if name_label != null:
-												var display_name := String(tile_def.get("name", tile_def.get("id", "(tile)")))
-												name_label.text = display_name
-								var category_label := btn.get_node_or_null("CategoryTopRight") as Label
-								if category_label != null:
-												var cat := CategoryMap.canonical(String(tile_def.get("category", "")))
-												var display_cat := CategoryMap.display_name(cat)
-												category_label.text = display_cat
-								var summary := btn.get_node_or_null("RichTextLabel") as RichTextLabel
-								if summary != null:
-												summary.text = _summarize(tile_def)
-								var tid := String(tile_def.get("id", ""))
-								btn.disabled = tid.is_empty()
-								if not tid.is_empty():
-												btn.pressed.connect(func():
-																CommuneManager.choose(tid)
-												)
-								row.add_child(btn)
-								added_any = true
-				visible = added_any
+	_clear_cards()
+	var added_any := false
+	for choice_variant in choices:
+		if not (choice_variant is Dictionary):
+			continue
+		var tile_def: Dictionary = choice_variant
+		var node := CARD_SCENE.instantiate()
+		if node == null:
+			continue
+		var card := node as TileSelectCard
+		if card == null:
+			node.queue_free()
+			continue
+		var tid := String(tile_def.get("id", ""))
+		var display_name := String(tile_def.get("name", tid if not tid.is_empty() else "(tile)"))
+		var category := CategoryMap.canonical(String(tile_def.get("category", "")))
+		var cat_display := CategoryMap.display_name(category)
+		var effects_text := _summarize(tile_def)
+		if not cat_display.is_empty():
+			effects_text = "[i]%s[/i]\n%s" % [cat_display, effects_text]
+		var desc_text := String(tile_def.get("description", "")).strip_edges()
+		if desc_text.is_empty():
+			desc_text = "—"
+		var icon_tex := _load_texture(String(tile_def.get("icon", "")))
+		card.set_tile(display_name, effects_text, desc_text, icon_tex, tid)
+		if not tid.is_empty():
+			card.pressed.connect(func(card_id: String):
+				CommuneManager.choose(card_id)
+			)
+		row.add_child(card)
+		added_any = true
+	visible = added_any
 
 func _duplicate_choices(choices: Array) -> Array:
 				var result: Array = []
@@ -140,3 +142,13 @@ func _summarize(def: Dictionary) -> String:
 		if lines.is_empty() and def.has("rules"):
 				lines.append("(legacy rules)")
 		return "\n".join(lines)
+
+func _load_texture(path: String) -> Texture2D:
+	if path.is_empty():
+		return null
+	if not ResourceLoader.exists(path):
+		return null
+	var res := ResourceLoader.load(path)
+	if res is Texture2D:
+		return res
+	return null

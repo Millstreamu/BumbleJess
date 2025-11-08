@@ -11,7 +11,7 @@ const THREAT_SCENE := preload("res://ui/hud/ThreatMarker.tscn")
 
 @onready var _turn_phase: Label = $TopBar/TurnPhaseLabel
 @onready var _res_panel := $BottomRight/ResourcePanel
-@onready var _tile_card := $BottomLeft/TileCard
+@onready var _tile_card: TileSelectCard = $BottomLeft/TileCard
 @onready var _btn_registry: Button = $TopRight/HBoxContainer/BtnRegistry
 @onready var _btn_resources: Button = $TopRight/HBoxContainer/BtnResources
 @onready var _floaters: Node2D = $WorldFX/Floaters
@@ -46,9 +46,20 @@ func set_resources(nc: int, nm: int, ec: int, em: int, wc: int, wm: int, lc: int
 		panel.set_values(nc, nm, ec, em, wc, wm, lc, lm)
 
 func set_current_tile_card(data: Dictionary) -> void:
-	var card := _tile_card as TileCard
-	if card:
-		card.update_card(data)
+	if _tile_card == null:
+		return
+	var name_text := String(data.get("name", ""))
+	var effects_text := String(data.get("effects", ""))
+	if effects_text.strip_edges().is_empty():
+		effects_text = "—"
+	var desc_text := String(data.get("desc", ""))
+	if desc_text.strip_edges().is_empty():
+		desc_text = "—"
+	var texture_variant: Variant = data.get("texture", null)
+	var tex: Texture2D = texture_variant if texture_variant is Texture2D else null
+	var tid := String(data.get("id", ""))
+	_tile_card.set_tile(name_text, effects_text, desc_text, tex, tid)
+	_tile_card.set_selected(false)
 
 func toggle_tile_info_popups() -> void:
 	emit_signal("toggle_info_pressed")

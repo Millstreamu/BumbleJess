@@ -3,20 +3,20 @@ class_name PreRunSetup
 
 signal setup_finished(totem_id: String, sprout_ids: Array)
 
-const TOTEM_CARD_SCENE_PATH := "res://scenes/ui/TotemCard.tscn"
-const SPROUT_CARD_SCENE_PATH := "res://scenes/battle/SproutCard.tscn"
-const CORE_TILE_CARD_SCENE_PATH := "res://scenes/ui/CoreTileCard.tscn"
+const TOTEM_CARD_SCENE_PATH := "res://ui/cards/TotemCard.tscn"
+const SPROUT_CARD_SCENE_PATH := "res://ui/cards/SproutCard.tscn"
+const CORE_TILE_CARD_SCENE_PATH := "res://ui/cards/TileSelectCard.tscn"
 
 @onready var tabs: TabContainer = $"Panel/Root/Tabs"
 @onready var btn_cancel: Button = $"Panel/Root/Header/CloseBtn"
 @onready var btn_back: Button = $"Panel/Root/Footer/BackBtn"
 @onready var btn_start: Button = $"Panel/Root/Footer/StartRunBtn"
 
-@onready var totem_grid: HFlowContainer = $"Panel/Root/Tabs/Totem/ScrollContainer/TotemGrid"
+@onready var totem_grid: GridContainer = $"Panel/Root/Tabs/Totem/ScrollContainer/TotemGrid"
 @onready var totem_info: Label = $"Panel/Root/Tabs/Totem/TotemFooter/TotemInfo"
 @onready var btn_totem_confirm: Button = $"Panel/Root/Tabs/Totem/TotemFooter/TotemConfirm"
 
-@onready var sprout_grid: HFlowContainer = $"Panel/Root/Tabs/Sprouts/ScrollContainer/SproutGrid"
+@onready var sprout_grid: GridContainer = $"Panel/Root/Tabs/Sprouts/ScrollContainer/SproutGrid"
 @onready var sprout_info: Label = $"Panel/Root/Tabs/Sprouts/SproutFooter/SproutInfo"
 @onready var btn_sprout_clear: Button = $"Panel/Root/Tabs/Sprouts/SproutFooter/ClearBtn"
 @onready var btn_sprout_confirm: Button = $"Panel/Root/Tabs/Sprouts/SproutFooter/SproutConfirm"
@@ -26,7 +26,7 @@ const CORE_TILE_CARD_SCENE_PATH := "res://scenes/ui/CoreTileCard.tscn"
 @onready var core_count: Label = $"Panel/Root/Tabs/CoreTiles/FilterRow/CountLabel"
 @onready var core_clear: Button = $"Panel/Root/Tabs/CoreTiles/FilterRow/ClearBtn"
 @onready var core_confirm: Button = $"Panel/Root/Tabs/CoreTiles/Footer/ConfirmCoreBtn"
-@onready var core_grid: HFlowContainer = $"Panel/Root/Tabs/CoreTiles/ScrollContainer/TileGrid"
+@onready var core_grid: GridContainer = $"Panel/Root/Tabs/CoreTiles/ScrollContainer/TileGrid"
 
 var _totems: Array = []
 var _sprouts: Array = []
@@ -171,42 +171,32 @@ func _build_totem_grid() -> void:
 		if tid.is_empty():
 			continue
 
-		var button := _totem_card_scene.instantiate() as Button
-		if button == null:
+		var node := _totem_card_scene.instantiate()
+		if node == null:
 			continue
 
-		button.set_meta("id", tid)
+		var card := node as TotemCard
+		if card == null:
+			node.queue_free()
+			continue
+
+		card.set_meta("id", tid)
 
 		var display_name := String(entry.get("name", tid))
 		var desc := String(entry.get("desc", ""))
+		if desc.strip_edges().is_empty():
+			desc = "—"
+		var art_tex := _load_texture(String(entry.get("icon", "")))
+		card.set_data({
+			"id": tid,
+			"title": display_name,
+			"body": desc,
+			"art": art_tex
+		})
+		card.tooltip_text = desc
+		card.pressed.connect(_on_totem_card_pressed)
 
-		var name_label := button.get_node_or_null("Name") as Label
-		if name_label != null:
-			name_label.text = display_name
-
-		var desc_label := button.get_node_or_null("Desc") as RichTextLabel
-		if desc_label != null:
-			if desc.is_empty():
-				desc_label.text = "—"
-			else:
-				desc_label.text = desc
-
-		var icon_path := String(entry.get("icon", ""))
-		var icon_rect := button.get_node_or_null("Icon") as TextureRect
-		if icon_rect != null:
-			icon_rect.texture = null
-			if not icon_path.is_empty() and ResourceLoader.exists(icon_path):
-				var tex := ResourceLoader.load(icon_path)
-				if tex is Texture2D:
-					icon_rect.texture = tex
-
-		button.pressed.connect(func():
-			_chosen_totem = tid
-			_update_totem_badges()
-			_refresh_all()
-		)
-
-		totem_grid.add_child(button)
+		totem_grid.add_child(card)
 
 	_update_totem_badges()
 
@@ -229,32 +219,37 @@ func _build_sprout_grid() -> void:
 		if sid.is_empty():
 			continue
 
-		var button := _sprout_card_scene.instantiate() as Button
-		if button == null:
+		var node := _sprout_card_scene.instantiate()
+		if node == null:
 			continue
-		button.set_meta("id", sid)
 
-		# Name (allow override from registry)
+		var card := node as SproutCard
+		if card == null:
+			node.queue_free()
+			continue
+
+		card.set_meta("id", sid)
+
 		var display_name := String(sprout.get("name", sid))
 		if Engine.has_singleton("SproutRegistry") and SproutRegistry.has_method("get_sprout_name"):
 			var registry_name := SproutRegistry.get_sprout_name(sid)
 			if not registry_name.is_empty():
 				display_name = registry_name
 
-		# Stats text
 		var stats_text := ""
 		if Engine.has_singleton("SproutRegistry") and SproutRegistry.has_method("short_stats_label"):
 			stats_text = SproutRegistry.short_stats_label(sid, 1)
-		else:
-			var base_stats: Variant = sprout.get("base_stats", {})
-			if base_stats is Dictionary:
-				var base_dict := base_stats as Dictionary
-				var hp := int(base_dict.get("hp", 0))
-				var atk := int(base_dict.get("attack", 0))
-				var aspeed := float(base_dict.get("attack_speed", 0.0))
-				stats_text = "Lv1 • HP %d • ATK %d • AS %.2f" % [hp, atk, aspeed]
 
-		# Attack / passives / desc / portrait
+		var base_hp := 0
+		var base_atk := 0
+		var base_speed := 0.0
+		var base_stats: Variant = sprout.get("base_stats", {})
+		if base_stats is Dictionary:
+			var base_dict := base_stats as Dictionary
+			base_hp = int(base_dict.get("hp", base_hp))
+			base_atk = int(base_dict.get("attack", base_atk))
+			base_speed = float(base_dict.get("attack_speed", base_speed))
+
 		var attack_id := ""
 		if Engine.has_singleton("SproutRegistry") and SproutRegistry.has_method("get_attack_id"):
 			attack_id = SproutRegistry.get_attack_id(sid)
@@ -272,86 +267,66 @@ func _build_sprout_grid() -> void:
 		var passive_text := _format_passive_label(passive_ids)
 
 		var desc_text := String(sprout.get("description", ""))
+		if desc_text.strip_edges().is_empty():
+			desc_text = "—"
 		var portrait_texture: Texture2D = _load_texture(String(sprout.get("icon", "")))
 
-		# Fill card UI (custom component or fallback to nodes)
-		var card_ui := button as SproutCardUI
-		if card_ui != null:
-			card_ui.set_display_name(display_name)
-			card_ui.set_stats(stats_text)
-			card_ui.set_attack_name(attack_text)
-			card_ui.set_passive_names(passive_text)
-			card_ui.set_description(desc_text)
-			card_ui.set_portrait_texture(portrait_texture)
-		else:
-			var name_label := button.get_node_or_null("Content/Details/NameRow/Name") as Label
-			if name_label != null:
-				name_label.text = display_name
+		card.set_data({
+			"id": sid,
+			"name": display_name,
+			"hp": base_hp,
+			"atk": base_atk,
+			"spd": base_speed,
+			"attack_name": attack_text,
+			"passive_name": passive_text,
+			"desc": desc_text,
+			"portrait": portrait_texture
+		})
+		if not stats_text.is_empty():
+			card.tooltip_text = stats_text
 
-			var stats_label := button.get_node_or_null("Content/Details/Stats") as Label
-			if stats_label != null:
-				stats_label.text = stats_text
-
-			var attack_label := button.get_node_or_null("Content/Details/Attack") as Label
-			if attack_label != null:
-				attack_label.text = attack_text
-
-			var passive_label := button.get_node_or_null("Content/Details/Passive") as Label
-			if passive_label != null:
-				passive_label.text = passive_text
-
-			var desc_label := button.get_node_or_null("Content/Details/Description") as RichTextLabel
-			if desc_label != null:
-				var trimmed := desc_text.strip_edges()
-				desc_label.text = trimmed if not trimmed.is_empty() else "—"
-
-			var portrait_rect := button.get_node_or_null("Content/Portrait/Icon") as TextureRect
-			if portrait_rect != null:
-				portrait_rect.texture = portrait_texture
-
-		# Add (✓) badge if missing
-		if button.get_node_or_null("Chosen") == null:
-			var badge := Label.new()
-			badge.name = "Chosen"
-			badge.text = "✓"
-			badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-			badge.vertical_alignment = VERTICAL_ALIGNMENT_TOP
-			badge.anchor_left = 1.0
-			badge.anchor_right = 1.0
-			badge.anchor_top = 0.0
-			badge.anchor_bottom = 0.0
-			badge.offset_left = -32.0
-			badge.offset_right = -8.0
-			badge.offset_top = 8.0
-			badge.offset_bottom = 32.0
-			badge.visible = false
-			button.add_child(badge)
-
-		# Locking state
 		var locked := _is_locked_sprout(sprout)
 		if locked and _chosen_sprouts.has(sid):
 			_chosen_sprouts.erase(sid)
 			removed_locked = true
 
-		button.disabled = locked
+		card.set_disabled(locked)
 		if locked:
-			button.modulate = Color(1, 1, 1, 0.5)
-			button.tooltip_text = "Locked — discover an Artefact to unlock."
+			card.modulate = Color(1, 1, 1, 0.5)
+			card.tooltip_text = "Locked — discover an Artefact to unlock."
 		else:
-			button.modulate = Color(1, 1, 1, 1)
-			button.tooltip_text = ""
+			card.modulate = Color(1, 1, 1, 1)
 
-		# Click handler
-		button.pressed.connect(func():
-			_toggle_sprout(sid)
-		)
+		card.pressed.connect(_on_sprout_card_pressed)
 
-		sprout_grid.add_child(button)
+		sprout_grid.add_child(card)
 
 	_update_sprout_badges()
 
 	if removed_locked:
 		_refresh_all()
+
+
+func _on_totem_card_pressed(card_id: String) -> void:
+	var tid := String(card_id)
+	if tid.is_empty():
+		return
+	_chosen_totem = tid
+	_update_totem_badges()
+	_refresh_all()
+
+func _on_core_card_pressed(card_id: String) -> void:
+	var cid := String(card_id)
+	if cid.is_empty():
+		return
+	_toggle_core(cid)
+
+
+func _on_sprout_card_pressed(card_id: String) -> void:
+	var sid := String(card_id)
+	if sid.is_empty():
+		return
+	_toggle_sprout(sid)
 
 
 func _on_sprout_library_changed() -> void:
@@ -444,50 +419,30 @@ func _rebuild_core_grid() -> void:
 			if not hay.contains(query):
 				continue
 
-		var button := _core_tile_card_scene.instantiate() as Button
-		if button == null:
+		var node := _core_tile_card_scene.instantiate()
+		if node == null:
 			continue
 
-		button.set_meta("id", id)
+		var card := node as TileSelectCard
+		if card == null:
+			node.queue_free()
+			continue
 
-		var name_label := button.get_node_or_null("Content/Details/Header/Name") as Label
-		if name_label != null:
-			name_label.text = String(entry.get("name", id))
+		card.set_meta("id", id)
+		var display_name := String(entry.get("name", id))
+		var cat_display := CategoryMap.display_name(cat)
+		var effects_text := _summarize_tile(entry)
+		if not cat_display.is_empty():
+			effects_text = "[i]%s[/i]\n%s" % [cat_display, effects_text]
+		var desc_text := String(entry.get("description", "")).strip_edges()
+		if desc_text.is_empty():
+			desc_text = "—"
+		var icon_tex := _load_texture(String(entry.get("icon", "")))
+		card.set_tile(display_name, effects_text, desc_text, icon_tex, id)
+		card.set_selected(_core_selected.has(id))
+		card.pressed.connect(_on_core_card_pressed)
 
-		var cat_label := button.get_node_or_null("Content/Details/Header/Cat") as Label
-		if cat_label != null:
-			cat_label.text = CategoryMap.display_name(cat)
-
-		var summary_label := button.get_node_or_null("Content/Details/Effects") as RichTextLabel
-		if summary_label != null:
-			summary_label.bbcode_text = _summarize_tile(entry)
-
-		var desc_label := button.get_node_or_null("Content/Details/Description") as RichTextLabel
-		if desc_label != null:
-			var desc_text := String(entry.get("description", "")).strip_edges()
-			if desc_text.is_empty():
-				desc_label.text = "—"
-			else:
-				desc_label.text = desc_text
-
-		var icon_rect := button.get_node_or_null("Content/ArtFrame/Icon") as TextureRect
-		if icon_rect != null:
-			icon_rect.texture = null
-			var icon_path := String(entry.get("icon", ""))
-			if not icon_path.is_empty() and ResourceLoader.exists(icon_path):
-				var tex := ResourceLoader.load(icon_path)
-				if tex is Texture2D:
-					icon_rect.texture = tex
-
-		var chosen_label := button.get_node_or_null("Chosen") as Label
-		if chosen_label != null:
-			chosen_label.visible = _core_selected.has(id)
-
-		button.pressed.connect(func():
-			_toggle_core(id)
-		)
-
-		core_grid.add_child(button)
+		core_grid.add_child(card)
 
 	_refresh_core_ui()
 
@@ -604,34 +559,32 @@ func _on_core_confirm() -> void:
 		_refresh_core_ui()
 
 func _update_totem_badges() -> void:
-		for child in totem_grid.get_children():
-				if not (child is Button):
-						continue
-				var button := child as Button
-				var id := String(button.get_meta("id", "")) if button.has_meta("id") else ""
-				var badge := button.get_node_or_null("Chosen") as Label
-				if badge != null:
-						badge.visible = (id == _chosen_totem)
-		var label_text := "—"
-		if not _chosen_totem.is_empty():
-				var entry_variant: Variant = _totem_by_id.get(_chosen_totem, {})
-				if entry_variant is Dictionary:
-						label_text = String((entry_variant as Dictionary).get("name", _chosen_totem))
-				else:
-						label_text = _chosen_totem
-				label_text = "Selected: %s" % label_text
-		totem_info.text = label_text
+	for child in totem_grid.get_children():
+		var card := child as TotemCard
+		if card != null:
+			card.set_selected(card.card_id == _chosen_totem)
+			continue
+		if child.has_method("set_selected"):
+			child.call("set_selected", String(child.get_meta("id", "")) == _chosen_totem)
+	var label_text := "—"
+	if not _chosen_totem.is_empty():
+		var entry_variant: Variant = _totem_by_id.get(_chosen_totem, {})
+		if entry_variant is Dictionary:
+			label_text = String((entry_variant as Dictionary).get("name", _chosen_totem))
+		else:
+			label_text = _chosen_totem
+		label_text = "Selected: %s" % label_text
+	totem_info.text = label_text
 
 func _update_sprout_badges() -> void:
-		for child in sprout_grid.get_children():
-				if not (child is Button):
-						continue
-				var button := child as Button
-				var id := String(button.get_meta("id", "")) if button.has_meta("id") else ""
-				var badge := button.get_node_or_null("Chosen") as Label
-				if badge != null:
-						badge.visible = _chosen_sprouts.has(id)
-		sprout_info.text = "Selected: %d / 4" % _chosen_sprouts.size()
+	for child in sprout_grid.get_children():
+		var card := child as SproutCard
+		if card != null:
+			card.set_selected(_chosen_sprouts.has(card.card_id))
+			continue
+		if child.has_method("set_selected"):
+			child.call("set_selected", _chosen_sprouts.has(String(child.get_meta("id", ""))))
+	sprout_info.text = "Selected: %d / 4" % _chosen_sprouts.size()
 
 func _on_totem_confirm() -> void:
 		if _chosen_totem.is_empty():

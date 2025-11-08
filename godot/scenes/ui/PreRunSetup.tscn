@@ -78,10 +78,13 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="TotemGrid" type="HFlowContainer" parent="Panel/Root/Tabs/Totem/ScrollContainer"]
+[node name="TotemGrid" type="GridContainer" parent="Panel/Root/Tabs/Totem/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+columns = 4
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 16
 
 [node name="TotemFooter" type="HBoxContainer" parent="Panel/Root/Tabs/Totem"]
 layout_mode = 2
@@ -120,10 +123,13 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="SproutGrid" type="HFlowContainer" parent="Panel/Root/Tabs/Sprouts/ScrollContainer"]
+[node name="SproutGrid" type="GridContainer" parent="Panel/Root/Tabs/Sprouts/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+columns = 4
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 16
 
 [node name="SproutFooter" type="HBoxContainer" parent="Panel/Root/Tabs/Sprouts"]
 layout_mode = 2
@@ -192,10 +198,13 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="TileGrid" type="HFlowContainer" parent="Panel/Root/Tabs/CoreTiles/ScrollContainer"]
+[node name="TileGrid" type="GridContainer" parent="Panel/Root/Tabs/CoreTiles/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+columns = 3
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 16
 
 [node name="Footer" type="HBoxContainer" parent="Panel/Root/Tabs/CoreTiles"]
 layout_mode = 2
