@@ -78,9 +78,9 @@ func _apply_layout() -> void:
 	var h: float = max(size.y, base_size.y)
 	var img_h: float = min(w, h * 0.55)
 	_art_wrap.custom_minimum_size = Vector2(0, img_h)
-	var scale: float = clamp(w / max(base_size.x, 1.0), 0.6, 1.8)
-	_title_target_font = clamp(roundi(18.0 * scale), 14, 24)
-	_body_target_font = clamp(roundi(14.0 * scale), 11, 18)
+	var scale_factor: float = clamp(w / max(base_size.x, 1.0), 0.6, 1.8)
+	_title_target_font = clamp(roundi(18.0 * scale_factor), 14, 24)
+	_body_target_font = clamp(roundi(14.0 * scale_factor), 11, 18)
 	_title.add_theme_font_size_override("font_size", _title_target_font)
 	_body.add_theme_font_size_override("normal_font_size", _body_target_font)
 	_title.clip_text = true
