@@ -60,33 +60,52 @@ func set_data(p: Dictionary) -> void:
 	_apply_layout()
 
 func _apply_content() -> void:
-	_title.text = title
-	_title.tooltip_text = title
-	if _body.bbcode_enabled:
-		_body.bbcode_text = body
-	else:
-		_body.text = body
-	if art and art is Texture2D:
-		_art.texture = art
-	else:
-		_art.texture = null
+	if is_instance_valid(_title):
+		_title.text = title
+		_title.tooltip_text = title
+
+	if is_instance_valid(_body):
+		if _body.bbcode_enabled:
+			_body.clear()
+			_body.parse_bbcode(body) # <- use this in Godot 4
+		else:
+			_body.text = body
+
+	if is_instance_valid(_art):
+		if art is Texture2D and art != null:
+			_art.texture = art
+		else:
+			_art.texture = null
 
 func _apply_layout() -> void:
 	if not is_inside_tree():
 		return
+
 	var w: float = max(size.x, base_size.x)
 	var h: float = max(size.y, base_size.y)
 	var img_h: float = min(w, h * 0.55)
-	_art_wrap.custom_minimum_size = Vector2(0, img_h)
+
+	# Guard: _art_wrap can be null if the node path is wrong or not ready yet
+	if is_instance_valid(_art_wrap):
+		_art_wrap.custom_minimum_size = Vector2(0.0, img_h)
+
 	var scale_factor: float = clamp(w / max(base_size.x, 1.0), 0.6, 1.8)
 	_title_target_font = clamp(roundi(18.0 * scale_factor), 14, 24)
-	_body_target_font = clamp(roundi(14.0 * scale_factor), 11, 18)
-	_title.add_theme_font_size_override("font_size", _title_target_font)
-	_body.add_theme_font_size_override("normal_font_size", _body_target_font)
-	_title.clip_text = true
+	_body_target_font  = clamp(roundi(14.0 * scale_factor), 11, 18)
+
+	# Guard title/body too
+	if is_instance_valid(_title):
+		_title.add_theme_font_size_override("font_size", _title_target_font)
+		_title.clip_text = true
+
+	if is_instance_valid(_body):
+		_body.add_theme_font_size_override("normal_font_size", _body_target_font)
+
+	# Defer body sizing to next frame once only
 	if not _body_adjust_queued:
 		_body_adjust_queued = true
 		call_deferred("_update_body_fit")
+
 
 func _update_body_fit() -> void:
 	_body_adjust_queued = false

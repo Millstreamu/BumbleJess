@@ -50,9 +50,7 @@ var _tile_info_visible := false
 @onready var hexmap: TileMap = $HexMap
 @onready var cursor: Node = $Cursor
 @onready var hud: WorldHUD = $WorldHUD
-@onready var _tile_info_layer: Node2D = (
-hud.get_tile_info_container() if is_instance_valid(hud) else null
-)
+@onready var _tile_info_layer: Node2D = (hud.get_tile_info_container() if is_instance_valid(hud) else null)
 
 
 func _get_resource_manager() -> Node:
