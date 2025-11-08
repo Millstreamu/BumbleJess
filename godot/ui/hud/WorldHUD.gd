@@ -16,17 +16,18 @@ const THREAT_SCENE := preload("res://ui/hud/ThreatMarker.tscn")
 @onready var _btn_resources: Button = $TopRight/HBoxContainer/BtnResources
 @onready var _floaters: Node2D = $WorldFX/Floaters
 @onready var _threats: Node2D = $WorldFX/Threats
-@onready var _tile_info: Node2D = $WorldFX/TileInfo
 
 func _ready() -> void:
 	_ensure_input_actions()
 	if _btn_registry:
-		_btn_registry.pressed.connect(func() -> void:
-			emit_signal("open_registry_pressed")
+		_btn_registry.pressed.connect(
+			func() -> void:
+				emit_signal("open_registry_pressed")
 		)
 	if _btn_resources:
-		_btn_resources.pressed.connect(func() -> void:
-			emit_signal("open_resource_list_pressed")
+		_btn_resources.pressed.connect(
+			func() -> void:
+				emit_signal("open_resource_list_pressed")
 		)
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -52,27 +53,27 @@ func set_current_tile_card(data: Dictionary) -> void:
 func toggle_tile_info_popups() -> void:
 	emit_signal("toggle_info_pressed")
 
-func spawn_floater(screen_pos: Vector2, text: String, color: Color) -> void:
+func spawn_floater(world_pos: Vector2, text: String, color: Color) -> void:
 	if _floaters == null:
 		return
 	var node := FLOAT_TEXT_SCENE.instantiate() as Node2D
 	if node == null:
 		return
 	_floaters.add_child(node)
-	node.position = screen_pos
+	node.global_position = world_pos
 	var floater := node as FloatText
 	if floater:
 		floater.set_text(text, color)
 		floater.play_and_free()
 
-func show_threat_marker(screen_pos: Vector2, urgency: int) -> Node:
+func show_threat_marker(world_pos: Vector2, urgency: int) -> Node:
 	if _threats == null:
 		return null
 	var node := THREAT_SCENE.instantiate() as Node2D
 	if node == null:
 		return null
 	_threats.add_child(node)
-	node.position = screen_pos
+	node.global_position = world_pos
 	var marker := node as ThreatMarker
 	if marker:
 		marker.set_urgency(urgency)
@@ -84,9 +85,6 @@ func clear_threat_markers() -> void:
 	for child in _threats.get_children():
 		child.queue_free()
 
-func get_tile_info_container() -> Node2D:
-	return _tile_info
-
 func _ensure_input_actions() -> void:
 	_add_action_if_missing("toggle_info", KEY_M)
 	_add_action_if_missing("end_turn", KEY_N)
@@ -94,7 +92,8 @@ func _ensure_input_actions() -> void:
 func _add_action_if_missing(name: String, keycode: int) -> void:
 	if not InputMap.has_action(name):
 		InputMap.add_action(name)
-	for ev in InputMap.action_get_events(name):
+	var existing := InputMap.action_get_events(name)
+	for ev in existing:
 		if ev is InputEventKey and ev.physical_keycode == keycode:
 			return
 	var event := InputEventKey.new()
