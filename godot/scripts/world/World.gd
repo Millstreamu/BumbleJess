@@ -122,15 +122,15 @@ func _sync_turn_with_engine(should_update_hud: bool = false) -> void:
 
 
 func _on_turn_engine_run_started() -> void:
-_sync_turn_with_engine(true)
+	_sync_turn_with_engine(true)
 
 func _on_turn_engine_turn_changed(turn_index: int) -> void:
-turn = max(turn_index, 1)
-_update_hud()
+	turn = max(turn_index, 1)
+	_update_hud()
 
 func _on_turn_engine_phase_started(phase_name: String) -> void:
-_current_phase = String(phase_name)
-_update_turn_phase_label()
+	_current_phase = String(phase_name)
+	_update_turn_phase_label()
 
 func _current_turn_index() -> int:
 		var turn_engine: Node = _get_turn_engine()
@@ -839,11 +839,11 @@ func world_to_map(p: Vector2) -> Vector2i:
 
 
 func _setup_hud() -> void:
-if not is_instance_valid(hud):
-return
-_update_turn_phase_label()
-_update_resource_panel()
-_update_tile_card()
+	if not is_instance_valid(hud):
+		return
+	_update_turn_phase_label()
+	_update_resource_panel()
+	_update_tile_card()
 
 
 func _bind_sprout_registry() -> void:
@@ -1120,8 +1120,8 @@ func _format_tile_effects(def: Dictionary) -> String:
 	var effects_variant: Variant = def.get("effects", [])
 	if effects_variant is Array:
 		for entry in effects_variant:
-		if entry is Dictionary:
-		lines.append(_format_effect_line(entry))
+			if entry is Dictionary:
+				lines.append(_format_effect_line(entry))
 	var outputs_variant: Variant = def.get("outputs", {})
 	if lines.is_empty() and outputs_variant is Dictionary:
 		var outputs := outputs_variant as Dictionary
@@ -1141,6 +1141,7 @@ func _format_effect_line(effect: Dictionary) -> String:
 	var when_text := _format_phase_name(String(effect.get("when", "")))
 	if when_text.is_empty():
 		when_text = "Effect"
+
 	var op := String(effect.get("op", "add"))
 	var stat_name := _format_stat_name(String(effect.get("stat", "")))
 	var amount_variant: Variant = effect.get("amount", 0)
@@ -1148,37 +1149,43 @@ func _format_effect_line(effect: Dictionary) -> String:
 	var has_numeric := amount_variant is int or amount_variant is float
 	if has_numeric:
 		amount_numeric = int(round(float(amount_variant)))
+
 	var amount_text := ""
 	if amount_variant is Dictionary or amount_variant is Array:
 		amount_text = JSON.stringify(amount_variant)
 	else:
 		amount_text = str(amount_variant)
+
 	var detail := ""
 	match op:
-	"add":
-	if amount_variant is Dictionary or amount_variant is Array:
-	detail = "Add %s" % amount_text
-	else:
-	var prefix := "+" if has_numeric and amount_numeric >= 0 else ""
-	var number_text := str(amount_numeric) if has_numeric else amount_text
-	detail = "%s%s" % [prefix, number_text]
-	"mul":
-	detail = "x%s" % amount_text
-	"set":
-	detail = "Set %s" % amount_text
-	_:
-	detail = amount_text.strip_edges()
+		"add":
+			if amount_variant is Dictionary or amount_variant is Array:
+				detail = "Add %s" % amount_text
+			else:
+				var prefix := "+" if has_numeric and amount_numeric >= 0 else ""
+				var number_text := str(amount_numeric) if has_numeric else amount_text
+				detail = "%s%s" % [prefix, number_text]
+		"mul":
+			detail = "x%s" % amount_text
+		"set":
+			detail = "Set %s" % amount_text
+		_:
+			detail = amount_text.strip_edges()
+
 	if detail.is_empty():
-	detail = op.capitalize()
+		detail = op.capitalize()
 	else:
-	detail = "%s %s" % [op.capitalize(), detail]
+		detail = "%s %s" % [op.capitalize(), detail]
+
 	if not stat_name.is_empty():
+		if detail.is_empty():
+			detail = stat_name
+		else:
+			detail = "%s %s" % [detail, stat_name]
+
 	if detail.is_empty():
-	detail = stat_name
-	else:
-	detail = "%s %s" % [detail, stat_name]
-	if detail.is_empty():
-	detail = op.capitalize()
+		detail = op.capitalize()
+
 	return "[b]%s[/b] %s" % [when_text, detail.strip_edges()]
 
 func _refresh_tile_info_markers() -> void:
@@ -1211,6 +1218,7 @@ func world_point_to_viewport(point: Vector2) -> Vector2:
 	var viewport := get_viewport()
 	if viewport == null:
 		return point
+
 	var global_point := to_global(point)
 	return viewport.get_canvas_transform().xform(global_point)
 

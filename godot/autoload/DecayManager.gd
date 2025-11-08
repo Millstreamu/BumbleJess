@@ -1048,4 +1048,3 @@ func _clear_all_threats() -> void:
 	_threats.clear()
 	_refresh_threat_list()
 	_refresh_cluster_fx_overlay()
-
