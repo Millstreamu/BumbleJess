@@ -35,9 +35,11 @@ var _name_target_font: int = 20
 var _text_target_font: int = 14
 var _body_adjust_queued: bool = false
 var _selected: bool = false
+var _disabled: bool = false
 
 func _ready() -> void:
 	focus_mode = Control.FOCUS_ALL
+	mouse_filter = Control.MOUSE_FILTER_STOP
 	custom_minimum_size = base_size
 	_desc.scroll_active = false
 	_desc.fit_content = false
@@ -49,6 +51,8 @@ func _ready() -> void:
 	_apply_selection_style()
 
 func _on_mouse_entered() -> void:
+	if _disabled:
+		return
 	grab_focus()
 
 func set_data(p: Dictionary) -> void:
@@ -105,10 +109,30 @@ func set_selected(selected: bool) -> void:
 	_selected = wanted
 	_apply_selection_style()
 
+func set_disabled(disabled: bool) -> void:
+	var wanted := bool(disabled)
+	if wanted == _disabled:
+		return
+	_disabled = wanted
+	if _disabled:
+		release_focus()
+		focus_mode = Control.FOCUS_NONE
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+	else:
+		focus_mode = Control.FOCUS_ALL
+		mouse_filter = Control.MOUSE_FILTER_STOP
+	_apply_selection_style()
+
+func is_disabled() -> bool:
+	return _disabled
+
 func is_selected() -> bool:
 	return _selected
 
+
 func _on_gui_input(event: InputEvent) -> void:
+	if _disabled:
+		return
 	if event.is_action_pressed("ui_accept"):
 		emit_signal("pressed", card_id)
 
@@ -197,8 +221,11 @@ func _apply_selection_style() -> void:
 	if not is_inside_tree():
 		return
 	var color := PANEL_COLOR_DEFAULT
-	if _selected:
-		color = PANEL_COLOR_SELECTED
-	if has_focus():
-		color = PANEL_COLOR_FOCUSED if not _selected else PANEL_COLOR_SELECTED_FOCUSED
+	if _disabled:
+		color = PANEL_COLOR_DEFAULT
+	else:
+		if _selected:
+			color = PANEL_COLOR_SELECTED
+		if has_focus():
+			color = PANEL_COLOR_FOCUSED if not _selected else PANEL_COLOR_SELECTED_FOCUSED
 	add_theme_color_override("panel", color)
