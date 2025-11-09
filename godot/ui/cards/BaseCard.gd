@@ -8,6 +8,8 @@ const PANEL_COLOR_FOCUSED := Color(0.85, 0.9, 1, 0.15)
 const PANEL_COLOR_SELECTED := Color(1, 0.94, 0.6, 0.35)
 const PANEL_COLOR_SELECTED_FOCUSED := Color(0.9, 1, 0.7, 0.45)
 
+const VISIBLE_LINE_PROPERTY_META := &"_visible_line_property"
+
 @export var card_id: String = ""
 @export var base_size: Vector2 = Vector2(280, 360)
 @export var art: Texture2D
@@ -162,18 +164,20 @@ func _compute_body_available_height() -> float:
 	return max(available, 0.0)
 
 func _set_body_line_limit(available_height: float) -> void:
+	if not is_instance_valid(_body):
+		return
 	if available_height <= 0.0:
-		_body.max_lines_visible = 0
+		_set_rich_text_visible_lines(_body, 0)
 		return
 	var line_height: float = _get_rich_text_line_height(_body)
 	if line_height <= 0.0:
-		_body.max_lines_visible = -1
+		_set_rich_text_visible_lines(_body, -1)
 		return
 	var max_lines: int = int(floor(available_height / line_height))
 	if max_lines <= 0:
-		_body.max_lines_visible = 1
+		_set_rich_text_visible_lines(_body, 1)
 	else:
-		_body.max_lines_visible = max_lines
+		_set_rich_text_visible_lines(_body, max_lines)
 
 func _get_rich_text_line_height(label: RichTextLabel) -> float:
 	if not is_instance_valid(label):
@@ -192,6 +196,41 @@ func _get_rich_text_line_height(label: RichTextLabel) -> float:
 	else:
 		separation = float(label.get_theme_constant("line_separation", "RichTextLabel"))
 	return max(font.get_height(font_size) + separation, 0.0)
+
+func _set_rich_text_visible_lines(label: RichTextLabel, line_count: int) -> void:
+	if not is_instance_valid(label):
+		return
+	var limit: int = line_count
+	if limit < -1:
+		limit = -1
+	var property_name: StringName = _find_visible_line_property(label)
+	if property_name != StringName():
+		label.set(property_name, limit)
+	label.clip_contents = limit >= 0
+
+func _find_visible_line_property(label: RichTextLabel) -> StringName:
+	if not is_instance_valid(label):
+		return StringName()
+	if label.has_meta(VISIBLE_LINE_PROPERTY_META):
+		var cached_property: Variant = label.get_meta(VISIBLE_LINE_PROPERTY_META)
+		if cached_property is StringName and _object_has_property(label, cached_property):
+			return cached_property
+	var property_names: Array[StringName] = [&"visible_line_count", &"max_lines_visible"]
+	for property_name in property_names:
+		if _object_has_property(label, property_name):
+			label.set_meta(VISIBLE_LINE_PROPERTY_META, property_name)
+			return property_name
+	if label.has_meta(VISIBLE_LINE_PROPERTY_META):
+		label.remove_meta(VISIBLE_LINE_PROPERTY_META)
+	return StringName()
+
+func _object_has_property(obj: Object, property_name: StringName) -> bool:
+	if obj == null:
+		return false
+	for property_info in obj.get_property_list():
+		if property_info.has("name") and property_info["name"] == property_name:
+			return true
+	return false
 
 func _apply_selection_style() -> void:
 	if not is_inside_tree():
