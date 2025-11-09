@@ -64,6 +64,23 @@ func set_data(p: Dictionary) -> void:
 	_apply()
 
 func _apply() -> void:
+	var missing_stats := _name == null or _stats_hp == null or _stats_atk == null or _stats_spd == null
+	if missing_stats:
+		if not is_inside_tree():
+			return
+		push_warning("SproutCard missing stat labels; skipping apply.")
+		return
+	var missing_text := _atk_name == null or _pas_name == null or _desc == null
+	if missing_text:
+		if not is_inside_tree():
+			return
+		push_warning("SproutCard missing text labels; skipping apply.")
+		return
+	if _portrait == null:
+		if not is_inside_tree():
+			return
+		push_warning("SproutCard missing portrait; skipping apply.")
+		return
 	_name.text = name_text
 	_name.tooltip_text = name_text
 	_stats_hp.text = "HP: %d" % hp
@@ -81,7 +98,6 @@ func _apply() -> void:
 		_portrait.texture = null
 	_refresh_layout()
 	_apply_selection_style()
-
 func set_selected(selected: bool) -> void:
 	var wanted := bool(selected)
 	if wanted == _selected:
