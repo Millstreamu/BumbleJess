@@ -48,6 +48,8 @@ func set_data(p: Dictionary) -> void:
 	_apply()
 
 func _apply() -> void:
+	if not is_instance_valid(_title) or not is_instance_valid(_body) or not is_instance_valid(_art):
+		return
 	_title.text = title
 	_title.tooltip_text = title
 	if _body.bbcode_enabled:
