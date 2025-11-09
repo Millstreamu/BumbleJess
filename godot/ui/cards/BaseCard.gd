@@ -195,7 +195,8 @@ func _get_rich_text_line_height(label: RichTextLabel) -> float:
 		separation = float(label.get_theme_constant("line_separation"))
 	else:
 		separation = float(label.get_theme_constant("line_separation", "RichTextLabel"))
-	return max(font.get_height(font_size) + separation, 0.0)
+	var font_height_size: int = max(roundi(font_size), 0)
+	return max(float(font.get_height(font_height_size)) + separation, 0.0)
 
 func _set_rich_text_visible_lines(label: RichTextLabel, line_count: int) -> void:
 	if not is_instance_valid(label):
