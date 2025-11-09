@@ -146,9 +146,19 @@ func _update_body_fit() -> void:
 
 func _compute_body_available_height() -> float:
 	var h: float = max(size.y, 0.0)
-	var spacing: float = float(_root.separation)
-	var title_h: float = _title.get_combined_minimum_size().y
-	var available: float = h - _art_wrap.custom_minimum_size.y - title_h - spacing * 2.0
+	var spacing: float = 0.0
+	if is_instance_valid(_root):
+		if _root.has_theme_constant_override("separation"):
+			spacing = float(_root.get_theme_constant("separation"))
+		else:
+			spacing = float(_root.get_theme_constant("separation", "VBoxContainer"))
+	var title_h: float = 0.0
+	if is_instance_valid(_title):
+		title_h = _title.get_combined_minimum_size().y
+	var art_h: float = 0.0
+	if is_instance_valid(_art_wrap):
+		art_h = _art_wrap.custom_minimum_size.y
+	var available: float = h - art_h - title_h - spacing * 2.0
 	return max(available, 0.0)
 
 func _set_body_line_limit(available_height: float) -> void:
