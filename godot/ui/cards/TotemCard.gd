@@ -88,28 +88,34 @@ func _notification(what: int) -> void:
 		_refresh_layout()
 
 func _refresh_layout() -> void:
-        if not is_inside_tree() or not is_instance_valid(_title) or not is_instance_valid(_body):
-                return
-        var inner_w: float = max(size.x - 32.0, 1.0)
-        var inner_h: float = max(size.y - 32.0, 1.0)
-        var art_side: float = min(inner_h, inner_w * 0.4)
+	if not is_inside_tree() or not is_instance_valid(_title) or not is_instance_valid(_body):
+		return
+
+	var inner_w: float = max(size.x - 32.0, 1.0)
+	var inner_h: float = max(size.y - 32.0, 1.0)
+	var art_side: float = min(inner_h, inner_w * 0.4)
+
 	if is_instance_valid(_art_wrap):
 		_art_wrap.custom_minimum_size = Vector2(art_side, art_side)
+
 	var width_scale: float = clamp(inner_w / max(base_size.x - 32.0, 1.0), 0.6, 1.8)
 	_title_target_font = clamp(roundi(18.0 * width_scale), 14, 24)
 	_body_target_font = clamp(roundi(14.0 * width_scale), 11, 18)
+
 	_title.add_theme_font_size_override("font_size", _title_target_font)
 	_body.add_theme_font_size_override("normal_font_size", _body_target_font)
+
 	_title.clip_text = true
+
 	if not _body_adjust_queued:
 		_body_adjust_queued = true
 		call_deferred("_update_body_fit")
 
 func _update_body_fit() -> void:
-        _body_adjust_queued = false
-        if not is_inside_tree() or not is_instance_valid(_body):
-                return
-        var available_height: float = _compute_body_available_height()
+	_body_adjust_queued = false
+	if not is_inside_tree() or not is_instance_valid(_body):
+			return
+	var available_height: float = _compute_body_available_height()
 	var target_sizes: Array[int] = [
 		_body_target_font,
 		max(_body_target_font - 2, 11),
@@ -125,29 +131,33 @@ func _update_body_fit() -> void:
 			break
 
 func _compute_body_available_height() -> float:
-        if not is_instance_valid(_text_box) or not is_instance_valid(_title):
-                return 0.0
-        var inner_h: float = max(size.y - 32.0, 0.0)
-        var spacing: float = float(_text_box.separation)
-        var title_h: float = _title.get_combined_minimum_size().y
+	if not is_instance_valid(_text_box) or not is_instance_valid(_title):
+			return 0.0
+	var inner_h: float = max(size.y - 32.0, 0.0)
+	var spacing: float = float(_text_box.separation)
+	var title_h: float = _title.get_combined_minimum_size().y
 	var available: float = inner_h - title_h - spacing
 	return max(available, 0.0)
 
 func _set_body_line_limit(available_height: float) -> void:
-        if not is_instance_valid(_body):
-                return
-        if available_height <= 0.0:
-                _body.max_lines_visible = 0
+	if not is_instance_valid(_body):
 		return
+
+	if available_height <= 0.0:
+		_body.max_lines_visible = 0
+		return  # this must be indented inside the if-block
+
 	var line_height: float = _body.get_line_height()
 	if line_height <= 0.0:
 		_body.max_lines_visible = -1
 		return
+
 	var max_lines: int = int(floor(available_height / line_height))
 	if max_lines <= 0:
 		_body.max_lines_visible = 1
 	else:
 		_body.max_lines_visible = max_lines
+
 
 func _apply_selection_style() -> void:
 	if not is_inside_tree():
