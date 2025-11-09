@@ -197,7 +197,11 @@ func _update_body_fit() -> void:
 
 func _compute_body_available_height() -> float:
 	var inner_h: float = max(size.y - 32.0, 0.0)
-	var spacing: float = float(_text_box.separation)
+	var spacing: float = 0.0
+	if _text_box.has_theme_constant_override("separation"):
+		spacing = float(_text_box.get_theme_constant("separation"))
+	else:
+		spacing = float(_text_box.get_theme_constant("separation", "VBoxContainer"))
 	var used: float = _name.get_combined_minimum_size().y
 	used += spacing + _stats_row.get_combined_minimum_size().y
 	used += spacing + _atk_name.get_combined_minimum_size().y
@@ -237,7 +241,8 @@ func _get_rich_text_line_height(label: RichTextLabel) -> float:
 		separation = float(label.get_theme_constant("line_separation"))
 	else:
 		separation = float(label.get_theme_constant("line_separation", "RichTextLabel"))
-	return max(font.get_height(font_size) + separation, 0.0)
+	var font_height_size: int = max(roundi(font_size), 0)
+	return max(float(font.get_height(font_height_size)) + separation, 0.0)
 
 func _set_rich_text_visible_lines(label: RichTextLabel, line_count: int) -> void:
 	if not is_instance_valid(label):
