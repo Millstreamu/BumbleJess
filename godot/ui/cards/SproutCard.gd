@@ -207,7 +207,7 @@ func _set_desc_line_limit(available_height: float) -> void:
 	if available_height <= 0.0:
 		_desc.max_lines_visible = 0
 		return
-	var line_height: float = float(_desc.get_line_height())
+	var line_height: float = _get_rich_text_line_height(_desc)
 	if line_height <= 0.0:
 		_desc.max_lines_visible = -1
 		return
@@ -216,6 +216,24 @@ func _set_desc_line_limit(available_height: float) -> void:
 		_desc.max_lines_visible = 1
 	else:
 		_desc.max_lines_visible = max_lines
+
+func _get_rich_text_line_height(label: RichTextLabel) -> float:
+	if not is_instance_valid(label):
+		return 0.0
+	var font: Font = label.get_theme_font("normal_font", "RichTextLabel")
+	if font == null:
+		font = label.get_theme_default_font()
+	if font == null:
+		return 0.0
+	var font_size: float = float(label.get_theme_font_size("normal_font_size", "RichTextLabel"))
+	if font_size <= 0.0:
+		font_size = 14.0
+	var separation: float = 0.0
+	if label.has_theme_constant_override("line_separation"):
+		separation = float(label.get_theme_constant("line_separation"))
+	else:
+		separation = float(label.get_theme_constant("line_separation", "RichTextLabel"))
+	return max(font.get_height(font_size) + separation, 0.0)
 
 func _apply_selection_style() -> void:
 	if not is_inside_tree():
